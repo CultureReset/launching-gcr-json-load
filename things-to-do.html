@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Things To Do — Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header"><div class="container header-inner">
+    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+    <nav class="main-nav">
+      <a href="restaurants.html">Restaurants</a>
+      <a href="things-to-do.html" class="active">Things To Do</a>
+      <a href="events.html">Events</a><a href="happy-hours.html">Happy Hours</a>
+      <a href="specials.html">Specials</a><a href="feed.html">Feed</a>
+    </nav>
+    <div class="header-actions">
+      <a href="trip.html" class="btn-trip">My Trip Link</a>
+      <a href="claim.html" class="btn-claim">+ Claim Business</a>
+      <button class="hamburger" id="hamburger">☰</button>
+    </div>
+  </div></header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
+    <a href="shopping.html">🛍️ Shopping</a><a href="services.html">💼 Services</a><a href="other.html">✨ Other</a>
+    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+  </div>
+  <div class="page-header"><div class="container"><div class="page-header-inner">
+    <div>
+      <div class="eyebrow">🎯 Things To Do</div>
+      <h1>Things To Do</h1>
+      <p>Water sports, fishing charters, boat rentals, tours, family fun & more</p>
+    </div>
+    <div class="page-search">
+      <input type="text" id="mainSearch" placeholder="Search activities...">
+      <button id="searchBtn">Go</button>
+    </div>
+  </div></div></div>
+  <div class="filters-bar"><div class="container"><div class="filters-inner">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="water-sports">🌊 Water Sports</button>
+    <button class="filter-chip" data-filter="fishing">🎣 Fishing</button>
+    <button class="filter-chip" data-filter="boat-rentals">🚤 Boat Rentals</button>
+    <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family</button>
+    <button class="filter-chip" data-filter="outdoor">🌿 Outdoor</button>
+    <button class="filter-chip" data-filter="golf">⛳ Golf</button>
+    <button class="filter-chip" data-filter="tours">🗺️ Tours</button>
+    <button class="filter-chip" data-filter="free">🆓 Free</button>
+    <button class="filter-chip" data-filter="bikes">🚴 Bikes</button>
+    <button class="filter-chip" data-filter="animals">🦁 Animals</button>
+    <button class="filter-chip" data-filter="the-wharf">⚓ At The Wharf</button>
+    <button class="filter-chip" data-filter="owa">🎢 At OWA</button>
+  </div></div></div>
+  <section class="section"><div class="container">
+    <div class="listings-grid" id="listingsGrid" data-category="things-to-do"></div>
+  </div></section>
+  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
+    <div class="claim-cta"><h4>Offer Tours, Rentals or Activities?</h4>
+    <p>Get your activity listed and connect with tourists looking for adventure.</p>
+    <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
+  </div></section>
+  <footer class="site-footer"><div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+      <p>Powered by <span class="powered">CyberCheck</span></p>
+    </div>
+  </div></footer>
+  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
+</body></html>

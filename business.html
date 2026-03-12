@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Profile — Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Menu Sections — horizontal scroll tabs ── */
+    .menu-section-nav {
+      display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+      border-bottom: 2px solid var(--gray-200); margin-bottom: 24px;
+    }
+    .menu-section-nav::-webkit-scrollbar { display: none; }
+    .menu-sec-tab {
+      padding: 10px 20px; white-space: nowrap;
+      font-size: .83rem; font-weight: 600; color: var(--text-muted);
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      cursor: pointer; transition: all .15s;
+    }
+    .menu-sec-tab:hover  { color: var(--teal); }
+    .menu-sec-tab.active { color: var(--teal); border-color: var(--teal); }
+
+    .menu-panel { display: none; }
+    .menu-panel.active { display: block; }
+
+    /* ── Menu sub-category filter ── */
+    .menu-subcats {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .menu-subcat {
+      padding: 5px 14px; border-radius: 20px; font-size: .78rem; font-weight: 600;
+      border: 1.5px solid var(--gray-200); background: #fff; cursor: pointer;
+      color: var(--text-muted); transition: all .15s;
+    }
+    .menu-subcat:hover  { border-color: var(--teal); color: var(--teal); }
+    .menu-subcat.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+
+    /* ── Menu items ── */
+    .menu-category-title {
+      font-size: .8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); padding: 12px 0 8px;
+      border-bottom: 1px solid var(--gray-200); margin-bottom: 4px;
+    }
+    .menu-item-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--gray-100); gap: 12px;
+    }
+    .menu-item-name { font-weight: 600; font-size: .9rem; }
+    .menu-item-desc { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
+    .menu-item-price {
+      font-size: .88rem; font-weight: 700; color: var(--teal);
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ── Reviews ── */
+    .review-card {
+      background: var(--gray-100); border-radius: var(--radius-sm);
+      padding: 16px; margin-bottom: 12px;
+    }
+    .review-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .review-avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--teal);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .9rem; flex-shrink: 0;
+    }
+    .review-meta-name { font-weight: 600; font-size: .88rem; }
+    .review-meta-date { font-size: .72rem; color: var(--text-muted); }
+    .review-stars { color: #f59e0b; font-size: .9rem; margin-bottom: 4px; }
+    .review-text { font-size: .85rem; color: var(--text); }
+
+    /* ── Booking panel ── */
+    .booking-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 20px; box-shadow: var(--shadow);
+      border: 2px solid var(--teal); position: sticky; top: calc(var(--header-h) + 16px);
+    }
+    @media (max-width: 800px) {
+      .booking-card { position: static; }
+    }
+    .booking-card h4 { margin-bottom: 16px; color: var(--teal); font-size: 1rem; }
+    .booking-field { margin-bottom: 12px; }
+    .booking-field label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
+    .booking-field input,
+    .booking-field select {
+      width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-sm); font-family: var(--font); font-size: .88rem;
+      color: var(--text); outline: none; transition: border .15s;
+    }
+    .booking-field input:focus,
+    .booking-field select:focus { border-color: var(--teal); }
+    .pricing-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; }
+    .pricing-row .price { font-weight: 700; color: var(--teal); }
+
+    /* ── Gallery ── */
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px;
+    }
+    .gallery-item {
+      aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--gray-100); display: flex; align-items: center;
+      justify-content: center; font-size: 2rem; cursor: pointer;
+      transition: opacity .15s;
+    }
+    .gallery-item:hover { opacity: .85; }
+
+    /* Claim bar */
+    .claim-bar {
+      background: var(--gray-100); border-top: 1px solid var(--gray-200);
+      padding: 10px 0; text-align: center;
+    }
+    .claim-bar p { font-size: .82rem; color: var(--text-muted); }
+    .claim-bar a { color: var(--teal); font-weight: 600; }
+
+    /* ── Business profile mobile ── */
+    @media (max-width: 768px) {
+      /* Hero stacks emoji above info */
+      .profile-hero-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
+      #profileEmoji { width: 100px !important; height: 100px !important; font-size: 3.2rem !important; }
+      /* Rating/price inline with name on mobile */
+      .profile-hero-inner > div:last-child { display: none; }
+      /* Actions wrap */
+      .profile-actions { flex-wrap: wrap; gap: 8px; }
+      .profile-actions .btn { font-size: .8rem; padding: 8px 12px; }
+    }
+
+    @media (max-width: 480px) {
+      #profileEmoji { width: 80px !important; height: 80px !important; font-size: 2.6rem !important; }
+      /* Tabs full-width scroll */
+      .profile-tabs { gap: 0; }
+      .profile-tab { padding: 10px 12px; font-size: .78rem; }
+      /* Tab panel content */
+      #tab-overview > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr 1fr !important;
+      }
+      /* Menu section nav tighter */
+      .menu-sec-tab { padding: 8px 14px; font-size: .78rem; }
+      /* Menu items */
+      .menu-item-row { flex-direction: column; gap: 4px; }
+      .menu-item-price { align-self: flex-start; }
+      /* Review cards */
+      .review-card { padding: 12px; }
+      /* Booking card full width, no sticky */
+      .booking-card { padding: 16px; }
+      .booking-field input, .booking-field select { font-size: .85rem; padding: 8px 10px; }
+      /* Gallery 2 col */
+      .gallery-grid { grid-template-columns: repeat(2,1fr) !important; gap: 6px; }
+      /* Pricing packages stack */
+      .pricing-package { flex-direction: column !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+      <nav class="main-nav">
+        <a href="restaurants.html">Restaurants</a>
+        <a href="things-to-do.html">Things To Do</a>
+        <a href="events.html">Events</a>
+        <a href="happy-hours.html">Happy Hours</a>
+        <a href="specials.html">Specials</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="header-actions">
+        <a href="trip.html" class="btn-trip">My Trip Link</a>
+        <a href="claim.html" class="btn-claim">+ Claim Business</a>
+        <button class="hamburger" id="hamburger">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="specials.html">🏷️ Specials</a><a href="events.html">🎉 Events</a>
+    <a href="things-to-do.html">🎯 Things To Do</a><a href="shopping.html">🛍️ Shopping</a>
+    <a href="other.html">✨ Other</a><a href="feed.html">📡 Live Feed</a>
+    <div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+    <a href="claim.html">+ Claim / Submit Your Page</a>
+  </div>
+
+  <!-- BACK BAR -->
+  <div style="background:var(--navy);padding:8px 0;">
+    <div class="container" style="display:flex;align-items:center;gap:8px;">
+      <a href="javascript:history.back()" style="color:rgba(255,255,255,.6);font-size:.8rem;">← Back</a>
+      <span style="color:rgba(255,255,255,.3);font-size:.8rem;">/</span>
+      <span id="breadcrumbCat" style="color:rgba(255,255,255,.6);font-size:.8rem;">Restaurants</span>
+      <span style="color:rgba(255,255,255,.3);font-size:.8rem;">/</span>
+      <span id="breadcrumbName" style="color:#fff;font-size:.8rem;">Business Name</span>
+    </div>
+  </div>
+
+  <!-- PROFILE HERO -->
+  <div class="profile-hero">
+    <div class="container">
+      <div class="profile-hero-inner">
+        <div class="profile-logo" id="profileEmoji" style="width:140px;height:140px;font-size:4.5rem;">🍽️</div>
+        <div class="profile-info" style="flex:1;">
+          <h1 id="profileName">Business Name</h1>
+          <p id="profileTagline" style="margin-top:4px;">Tagline goes here</p>
+          <div id="profileAddress" style="font-size:.88rem;color:rgba(255,255,255,.75);margin-top:6px;display:flex;align-items:center;gap:6px;">📍 Orange Beach, AL</div>
+          <div id="profileBadges" class="profile-badges" style="margin-top:10px;"></div>
+          <div class="profile-actions" style="margin-top:14px;">
+            <a id="profileDirections" href="#" class="btn btn-ghost btn-sm">📍 Get Directions</a>
+            <a id="profilePhone"      href="#" class="btn btn-ghost btn-sm">📞 Call</a>
+            <a id="profileWebsite"    href="#" class="btn btn-ghost btn-sm" target="_blank">🌐 Website</a>
+            <button class="btn btn-secondary btn-sm" id="profileBookBtn" style="display:none" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div id="profileRating" style="font-size:1.1rem;font-weight:700;color:#f59e0b;">★ 4.7 (312)</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:4px;" id="profilePriceRange">$$</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLAIM BAR (shown for unclaimed) -->
+  <div class="claim-bar" id="claimBar">
+    <p>Is this your business? <a href="claim.html">Claim this listing</a> to update info, add photos, and respond to reviews.</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="container" style="padding-top:32px;padding-bottom:32px;">
+    <div class="profile-body">
+
+      <!-- LEFT: tabs content -->
+      <div>
+        <div class="profile-tabs" id="profileTabs">
+          <div class="profile-tab active" data-panel="tab-overview">Overview</div>
+          <div class="profile-tab" data-panel="tab-menu" id="tabMenu">Menu</div>
+          <div class="profile-tab" data-panel="tab-pricing" id="tabPricing" style="display:none">Pricing</div>
+          <div class="profile-tab" data-panel="tab-specials">Specials</div>
+          <div class="profile-tab" data-panel="tab-gallery">Photos</div>
+          <div class="profile-tab" data-panel="tab-reviews">Reviews</div>
+          <div class="profile-tab" data-panel="tab-events">Events</div>
+          <div class="profile-tab" data-panel="tab-inside" id="tabInside" style="display:none">Inside →</div>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div class="tab-panel" id="tab-overview" style="display:block;">
+          <p id="profileDesc" style="font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:24px;"></p>
+
+          <!-- Quick info grid -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
+            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
+              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Happy Hour</div>
+              <div id="profileHHour" style="font-size:.9rem;font-weight:600;">—</div>
+            </div>
+            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
+              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Price Range</div>
+              <div id="profilePrice" style="font-size:.9rem;font-weight:600;">—</div>
+            </div>
+            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
+              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Kids Friendly</div>
+              <div id="profileKids" style="font-size:.9rem;font-weight:600;">—</div>
+            </div>
+            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
+              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Outdoor Seating</div>
+              <div id="profileOutdoor" style="font-size:.9rem;font-weight:600;">—</div>
+            </div>
+          </div>
+
+          <!-- Menu highlights -->
+          <div style="margin-bottom:24px;">
+            <h3 style="margin-bottom:12px;">Menu Highlights</h3>
+            <div id="profileMenuHighlights" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+        </div>
+
+        <!-- MENU TAB — rendered dynamically by renderMenuTabs() -->
+        <div class="tab-panel" id="tab-menu">
+          <div id="menuContent"></div>
+        </div>
+
+        <!-- INSIDE TAB (venues/complexes — sub-businesses) -->
+        <div class="tab-panel" id="tab-inside">
+          <div id="venueHighlights" style="margin-bottom:24px;"></div>
+          <div id="venueSubListings"></div>
+        </div>
+
+        <!-- PRICING TAB (activities, tours, amenities) -->
+        <div class="tab-panel" id="tab-pricing">
+          <div id="pricingPackages"></div>
+          <div id="pricingAddons" style="margin-top:24px;"></div>
+          <div id="pricingIncluded" style="margin-top:24px;"></div>
+        </div>
+
+        <!-- SPECIALS TAB -->
+        <div class="tab-panel" id="tab-specials">
+          <div id="profileSpecials"></div>
+        </div>
+
+        <!-- GALLERY TAB -->
+        <div class="tab-panel" id="tab-gallery">
+          <div class="gallery-grid">
+            <div class="gallery-item">🦞</div>
+            <div class="gallery-item">🍹</div>
+            <div class="gallery-item">🌊</div>
+            <div class="gallery-item">🍤</div>
+            <div class="gallery-item">🎸</div>
+            <div class="gallery-item">🦀</div>
+          </div>
+          <p class="text-muted text-center" style="font-size:.82rem;">Claim this listing to upload real photos</p>
+        </div>
+
+        <!-- REVIEWS TAB -->
+        <div class="tab-panel" id="tab-reviews">
+          <div id="profileRatingDisplay" style="margin-bottom:20px;"></div>
+          <div id="profileReviewsList"></div>
+          <div style="text-align:center;margin-top:16px;">
+            <a href="#" class="btn btn-outline btn-sm">Write a Review</a>
+          </div>
+        </div>
+
+        <!-- EVENTS TAB -->
+        <div class="tab-panel" id="tab-events">
+          <div id="profileEvents"></div>
+        </div>
+
+      </div><!-- end left -->
+
+      <!-- RIGHT: sidebar -->
+      <div class="profile-sidebar">
+
+        <!-- Booking card — rendered dynamically by renderBookingPanel() -->
+        <div id="bookingPanel"></div>
+
+        <!-- Hours -->
+        <div class="sidebar-card">
+          <h4>🕐 Hours</h4>
+          <div class="hours-list" id="profileHours"></div>
+        </div>
+
+        <!-- Location -->
+        <div class="sidebar-card">
+          <h4>📍 Location</h4>
+          <p id="profileAddressFull" style="font-size:.85rem;margin-bottom:12px;"></p>
+          <!-- Map placeholder -->
+          <div style="background:var(--sky);border-radius:var(--radius-sm);height:140px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--teal);font-weight:600;">
+            📍 Map View
+          </div>
+          <a id="profileDirectionsLink" href="#" class="btn btn-outline btn-sm" style="display:block;text-align:center;margin-top:10px;">Get Directions</a>
+        </div>
+
+        <!-- Tags -->
+        <div class="sidebar-card">
+          <h4>🏷️ Also Found In</h4>
+          <div id="profileTagLinks" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
+        </div>
+
+      </div><!-- end sidebar -->
+    </div><!-- end profile-body -->
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top:none;padding-top:0">
+        <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    /* ══════════════════════════════════════════════
+       renderBookingPanel(biz)
+       Generates the correct booking/reservation form
+       based on profileType + bookingType
+    ══════════════════════════════════════════════ */
+    function renderBookingPanel(biz) {
+      const panel = document.getElementById('bookingPanel');
+      if (!panel || !biz) return;
+
+      const pt    = biz.profileType || 'restaurant';
+      const cat   = biz.category || '';
+      const phone = biz.phone || '';
+
+      // ── Bookable: show "Book Now" button → popup modal ──
+      if (biz.bookingRequired) {
+        const heroBtn = document.getElementById('profileBookBtn');
+        if (heroBtn) heroBtn.style.display = '';
+        panel.innerHTML = `<div class="booking-card">
+          <h4>📅 Book Now</h4>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">${biz.tagline || 'Check availability and reserve your spot.'}</p>
+          <button onclick="openBookingModal('${biz.slug||biz.id}')" class="btn btn-primary" style="width:100%;justify-content:center;background:linear-gradient(135deg,#FFD700,#FFC200);color:#1a1a1a;border:none;font-weight:700;">📅 Book Now</button>
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;margin-top:8px;">📞 ${phone}</a>` : ''}
+        </div>`;
+        return;
+      }
+
+      // ── Amenity: no panel ──
+      if (pt === 'amenity') { panel.innerHTML = ''; return; }
+
+      // ── Walk-in only ──
+      if ((cat === 'coffee-sweets' || cat === 'shopping') && !biz.bookingType) {
+        panel.innerHTML = `<div class="booking-card">
+          <h4>ℹ️ Visit Info</h4>
+          <p style="font-size:.85rem;margin-bottom:12px;">Walk-ins welcome — no reservation needed.</p>
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">📞 ${phone}</a>` : ''}
+        </div>`;
+        return;
+      }
+
+      // ── Venue: plan your visit ──
+      if (pt === 'venue') {
+        panel.innerHTML = `<div class="booking-card">
+          <h4>📍 Plan Your Visit</h4>
+          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">${biz.priceRange === 'Free to visit' ? 'Free to visit — open daily. Parking is free.' : 'Admission required for some attractions.'}</p>
+          ${biz.website ? `<a href="${biz.website}" target="_blank" class="btn btn-primary" style="width:100%;text-align:center;justify-content:center;display:flex;margin-bottom:8px;">🌐 Visit Website</a>` : ''}
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">📞 ${phone}</a>` : ''}
+        </div>`;
+        return;
+      }
+
+      // ── Default: contact info ──
+      panel.innerHTML = `<div class="booking-card">
+        <h4>📞 Contact</h4>
+        ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;margin-bottom:8px;">📞 ${phone}</a>` : ''}
+        ${biz.website ? `<a href="${biz.website}" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">🌐 Website</a>` : ''}
+      </div>`;
+    }
+    /* ══════════════════════════════════════════════
+       renderMenuTabs(biz)
+       Renders the full menu from biz.menu data,
+       or shows a "claim to add menu" CTA if no data
+    ══════════════════════════════════════════════ */
+    function renderMenuTabs(biz) {
+      const container = document.getElementById('menuContent');
+      if (!container) return;
+
+      if (!biz.menu) {
+        // No menu data — show claim CTA
+        container.innerHTML = `
+          <div style="text-align:center;padding:48px 24px;color:#666;">
+            <div style="font-size:3rem;margin-bottom:16px;">🍽️</div>
+            <div style="font-size:1.1rem;font-weight:600;margin-bottom:8px;">Menu not yet added</div>
+            <div style="font-size:.9rem;color:#888;margin-bottom:20px;">Is this your business? Claim your profile to add your full menu.</div>
+            <a href="claim.html" style="display:inline-block;background:var(--teal);color:#fff;padding:12px 28px;border-radius:8px;font-weight:600;text-decoration:none;">Claim This Business</a>
+          </div>`;
+        return;
+      }
+
+      const sections = [
+        { key:'apps',     label:'Appetizers',    icon:'🍴' },
+        { key:'lunch',    label:'Lunch',         icon:'☀️' },
+        { key:'dinner',   label:'Dinner',        icon:'🌙' },
+        { key:'drinks',   label:'Drinks & Bar',  icon:'🍹' },
+        { key:'kids',     label:'Kids Menu',     icon:'👶' },
+        { key:'desserts', label:'Desserts',       icon:'🍰' },
+        { key:'specials', label:'Daily Specials', icon:'📅' }
+      ];
+
+      // Only show tabs for sections that have items
+      const available = sections.filter(s => biz.menu[s.key] && biz.menu[s.key].length > 0);
+      if (available.length === 0) {
+        container.innerHTML = `<div style="padding:24px;text-align:center;color:#888;">No menu items available.</div>`;
+        return;
+      }
+
+      // Build nav tabs
+      let navHtml = `<div class="menu-section-nav" id="menuSectionNav">`;
+      available.forEach((s, i) => {
+        navHtml += `<div class="menu-sec-tab${i===0?' active':''}" data-menu="${s.key}">${s.label}</div>`;
+      });
+      navHtml += `</div>`;
+
+      // Build panels
+      let panelsHtml = '';
+      available.forEach((s, i) => {
+        panelsHtml += `<div class="menu-panel${i===0?' active':''}" id="menu-${s.key}">`;
+        panelsHtml += `<div class="menu-category-title">${s.icon} ${s.label}</div>`;
+        biz.menu[s.key].forEach(item => {
+          panelsHtml += `<div class="menu-item-row">
+            <div>
+              <div class="menu-item-name">${item.name}</div>
+              ${item.desc ? `<div class="menu-item-desc">${item.desc}</div>` : ''}
+            </div>
+            <div class="menu-item-price">${item.price || ''}</div>
+          </div>`;
+        });
+        panelsHtml += `</div>`;
+      });
+
+      container.innerHTML = navHtml + panelsHtml;
+
+      // Wire up tab clicks
+      container.querySelectorAll('.menu-sec-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          container.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
+          container.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const panel = container.querySelector(`#menu-${tab.dataset.menu}`);
+          if (panel) panel.classList.add('active');
+        });
+      });
+    }
+    /* ═══════════════════════════════════════════ */
+
+    /* ══════════════════════════════════════════════
+       renderPricingTab(biz)
+       For things-to-do / boat-rentals / activities
+       Renders: fleet packages, addons, what's included
+       Restaurants use renderMenuTabs() instead
+    ══════════════════════════════════════════════ */
+    function renderPricingTab(biz) {
+      const cat = biz.type || biz.category || '';
+      const sub = biz.subcategory || '';
+      const isActivity = cat === 'things-to-do' || cat === 'services' ||
+                         (biz.fleet && biz.fleet.length > 0) ||
+                         (biz.pricing && biz.pricing.length > 0);
+      if (!isActivity) return;
+
+      /* Show Pricing tab, hide Menu tab */
+      const tabMenu    = document.getElementById('tabMenu');
+      const tabPricing = document.getElementById('tabPricing');
+      if (tabMenu)    tabMenu.style.display    = 'none';
+      if (tabPricing) tabPricing.style.display = '';
+
+      /* ── Fleet packages with pricing table ── */
+      const pkgEl = document.getElementById('pricingPackages');
+      if (pkgEl) {
+        const fleet   = biz.fleet   || [];
+        const pricing = biz.pricing || [];
+
+        if (fleet.length) {
+          // Build a map: fleet_type_id → { slot_label: price }
+          const priceMap = {};
+          pricing.forEach(p => {
+            if (!priceMap[p.fleet_type_id]) priceMap[p.fleet_type_id] = {};
+            priceMap[p.fleet_type_id][p.slot_label] = p.price;
+          });
+
+          pkgEl.innerHTML = `<h3 style="margin-bottom:16px;">Rentals & Pricing</h3>` +
+            fleet.map(ft => {
+              const prices = priceMap[ft.fleet_type_id || ft.id] || {};
+              const priceRows = Object.entries(prices).map(([label, price]) =>
+                `<div class="pricing-row"><span>${escGcr(label)}</span><span class="price">$${price}</span></div>`
+              ).join('');
+              return `<div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+                  <div style="flex:1;">
+                    <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${escGcr(ft.name)}</div>
+                    <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:8px;">${escGcr(ft.description || '')}</div>
+                    ${ft.specs ? `<div style="font-size:.75rem;color:var(--teal);font-weight:600;">${escGcr(ft.specs)}</div>` : ''}
+                  </div>
+                  <div style="min-width:160px;">${priceRows}</div>
+                </div>
+              </div>`;
+            }).join('');
+
+          /* Group rates */
+          const gr = biz.group_rates && biz.group_rates[0];
+          if (gr) {
+            pkgEl.innerHTML += `<div style="background:var(--sky);border-radius:var(--radius-sm);padding:16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div style="font-weight:700;font-size:.95rem;">${escGcr(gr.title || 'Group Rate')}</div>
+                <div style="font-size:.82rem;color:var(--text-muted);">${escGcr(gr.description || '')}</div>
+              </div>
+              <div style="font-size:1.1rem;font-weight:800;color:var(--teal);">$${gr.price} <span style="font-size:.72rem;font-weight:500;">${escGcr(gr.price_label || '')}</span></div>
+            </div>`;
+          }
+        } else if (biz.packages) {
+          /* Fallback: legacy packages array */
+          pkgEl.innerHTML = `<h3 style="margin-bottom:16px;">Packages & Rates</h3>` +
+            biz.packages.map(p => `
+            <div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${escGcr(p.name)}</div>
+                <div style="font-size:.85rem;color:var(--text-muted);">${escGcr(p.desc || '')}</div>
+              </div>
+              <div style="font-size:1.2rem;font-weight:800;color:var(--teal);white-space:nowrap;">${escGcr(p.price)}</div>
+            </div>`).join('');
+        }
+      }
+
+      /* ── Add-ons: docks + accessories ── */
+      const addonEl = document.getElementById('pricingAddons');
+      if (addonEl) {
+        const allAddons = biz.addons || biz.rental_addons || [];
+        if (allAddons.length) {
+          const docks = allAddons.filter(a => a.category === 'dock');
+          const accessories = allAddons.filter(a => a.category !== 'dock');
+
+          let html = '<h3 style="margin-bottom:12px;">Add-Ons</h3>';
+
+          if (docks.length) {
+            html += `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">Docks</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">` +
+              docks.map(d => `<div style="background:#fff;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow-sm);">
+                <div style="font-weight:600;font-size:.9rem;margin-bottom:4px;">${escGcr(d.name)}${d.badge ? ` <span style="background:var(--coral);color:#fff;font-size:.6rem;padding:1px 6px;border-radius:4px;font-weight:700;">${escGcr(d.badge)}</span>` : ''}</div>
+                ${d.specs ? `<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:6px;">${escGcr(d.specs)}</div>` : ''}
+                <div style="display:flex;gap:8px;">
+                  ${d.price_half ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">½ day $${d.price_half}</span>` : ''}
+                  ${d.price_full ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">all day $${d.price_full}</span>` : ''}
+                  ${(!d.price_half && !d.price_full && d.price) ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">$${d.price} ${escGcr(d.per_unit||'')}</span>` : ''}
+                </div>
+              </div>`).join('') + '</div>';
+          }
+
+          if (accessories.length) {
+            html += `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">Accessories</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">` +
+              accessories.map(a => `<div style="background:var(--sky);padding:10px 14px;border-radius:var(--radius-sm);display:flex;gap:8px;align-items:center;">
+                ${a.icon ? `<span>${a.icon}</span>` : ''}
+                <span style="font-size:.85rem;font-weight:600;">${escGcr(a.name)}</span>
+                <span style="font-size:.85rem;color:var(--teal);font-weight:700;">$${a.price}</span>
+                ${a.unit ? `<span style="font-size:.72rem;color:var(--text-muted);">${escGcr(a.unit)}</span>` : ''}
+              </div>`).join('') + '</div>';
+          }
+
+          addonEl.innerHTML = html;
+        } else if (biz.addons) {
+          /* Legacy addons array */
+          addonEl.innerHTML = `<h3 style="margin-bottom:12px;">Add-Ons</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">` +
+            biz.addons.map(a => `<div style="background:var(--sky);padding:10px 16px;border-radius:var(--radius-sm);display:flex;gap:10px;align-items:center;">
+              <span style="font-size:.88rem;font-weight:600;">${escGcr(a.name)}</span>
+              <span style="font-size:.85rem;color:var(--teal);font-weight:700;">${escGcr(a.price)}</span>
+            </div>`).join('') + '</div>';
+        }
+      }
+
+      /* ── What's Included ── */
+      const inclEl = document.getElementById('pricingIncluded');
+      if (inclEl) {
+        // From services[0].whats_included or legacy biz.included
+        const svc = biz.services && biz.services[0];
+        const included = (svc && svc.whats_included) || biz.whats_included || biz.included || [];
+        if (included.length) {
+          inclEl.innerHTML = `<h3 style="margin-bottom:12px;">What's Included</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">` +
+            included.map(item => `<div style="display:flex;align-items:center;gap:8px;font-size:.85rem;">
+              <span style="color:var(--teal);font-size:1rem;">✓</span>
+              <span>${escGcr(item)}</span>
+            </div>`).join('') + '</div>';
+        }
+      }
+    }
+
+    /* ── Init once GCR data is ready ── */
+    function initBusinessPage() {
+      loadBusinessProfile(); // async: fetches full profile, calls renderBookingPanel/renderMenuTabs/renderPricingTab
+
+      const params2 = new URLSearchParams(window.location.search);
+      const bizId2  = params2.get('id');
+      if (bizId2 && typeof GCR !== 'undefined') {
+        const biz2 = GCR.getBusiness(bizId2);
+
+        // ── VENUE (page within a page) ──
+        if (biz2 && biz2.profileType === 'venue') {
+          const tabInside = document.getElementById('tabInside');
+          const tabMenu   = document.getElementById('tabMenu');
+          if (tabInside) tabInside.style.display = '';
+          if (tabMenu)   tabMenu.style.display   = 'none';
+          document.getElementById('tab-menu').style.display = 'none';
+
+          // Highlights strip
+          const hlEl = document.getElementById('venueHighlights');
+          if (hlEl && biz2.highlights) {
+            hlEl.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">` +
+              biz2.highlights.map(h => `<span style="background:var(--sky);color:var(--teal);padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600;">✓ ${h}</span>`).join('') +
+              `</div>`;
+          }
+
+          // Sub-businesses
+          const subEl = document.getElementById('venueSubListings');
+          if (subEl && biz2.venueSubTag) {
+            const subs = GCR.getByTag(biz2.venueSubTag).filter(b => b.id !== biz2.id);
+            subEl.innerHTML = subs.length
+              ? `<h3 style="margin-bottom:16px;">What's Inside</h3><div class="listings-grid">${subs.map(b => renderBizCard(b, 'search')).join('')}</div>`
+              : `<p class="text-muted">More listings coming soon. <a href="claim.html">Claim yours.</a></p>`;
+          }
+
+          // Packages (if venue has ticket pricing like OWA)
+          const pkgEl2 = document.getElementById('pricingPackages');
+          if (pkgEl2 && biz2.packages) {
+            document.getElementById('tabPricing').style.display = '';
+            pkgEl2.innerHTML = `<h3 style="margin-bottom:16px;">Admission & Pricing</h3>` +
+              biz2.packages.map(p => `
+              <div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
+                <div>
+                  <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${p.name}</div>
+                  <div style="font-size:.85rem;color:var(--text-muted);">${p.desc}</div>
+                  ${p.note ? `<div style="font-size:.72rem;color:var(--gray-600);margin-top:4px;">* ${p.note}</div>` : ''}
+                </div>
+                <div style="font-size:1rem;font-weight:800;color:var(--teal);white-space:nowrap;flex-shrink:0;">${p.price}</div>
+              </div>`).join('');
+          }
+        }
+
+      }
+
+      /* ── Menu section tabs ── */
+      document.querySelectorAll('.menu-sec-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const panel = document.getElementById('menu-' + tab.dataset.menu);
+          if (panel) panel.classList.add('active');
+        });
+      });
+
+      /* ── Menu sub-category filter ── */
+      document.querySelectorAll('.menu-subcat').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.menu-subcat').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          // Future: filter menu items by data-sub attribute
+        });
+      });
+
+    }
+
+    /* ── Fire init when GCR is ready ── */
+    if (typeof GCR !== 'undefined' && GCR.loaded) {
+      document.addEventListener('DOMContentLoaded', initBusinessPage);
+    } else {
+      document.addEventListener('gcr:loaded', initBusinessPage, { once: true });
+    }
+  </script>
+</body>
+</html>

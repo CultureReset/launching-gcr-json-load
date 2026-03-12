@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gulf Coast Rewards — Local Co-Op Loyalty Program</title>
+  <meta name="description" content="Join the Gulf Coast Rewards co-op. Earn points at every participating restaurant, activity, and shop on the Gulf Coast. Redeem anywhere in the network.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Loyalty-specific ── */
+    .lp-hero {
+      background: linear-gradient(135deg, #0b7a75 0%, #065f5b 40%, #c9831f 100%);
+      padding: 64px 0 80px;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .lp-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .lp-hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .lp-hero h1 { font-size: 2.8rem; font-weight: 800; margin-bottom: 12px; line-height: 1.1; }
+    .lp-hero p  { font-size: 1.1rem; opacity: .85; max-width: 580px; margin: 0 auto 32px; }
+    @media(max-width:600px) { .lp-hero h1 { font-size: 2rem; } }
+
+    /* Signup form */
+    .signup-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      max-width: 480px;
+      margin: 0 auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .signup-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; color: #1a1a1a; }
+    .signup-box p  { font-size: .82rem; color: #666; margin-bottom: 16px; }
+    .signup-row { display: flex; gap: 10px; }
+    .signup-row input {
+      flex: 1; padding: 13px 16px; border: 2px solid #e5e5e5; border-radius: 10px;
+      font-size: .95rem; font-family: inherit; transition: border .2s;
+    }
+    .signup-row input:focus { outline: none; border-color: var(--teal); }
+    .signup-row button {
+      background: var(--teal); color: #fff; border: none; padding: 13px 20px;
+      border-radius: 10px; font-weight: 700; font-size: .95rem; cursor: pointer;
+      white-space: nowrap; transition: background .2s;
+    }
+    .signup-row button:hover { background: var(--teal-dark); }
+    .signup-note { font-size: .72rem; color: #999; text-align: center; margin-top: 10px; }
+    .signup-success {
+      display: none; text-align: center; padding: 16px;
+      background: #e8f7f5; border-radius: 12px; color: var(--teal);
+      font-weight: 600; font-size: .95rem;
+    }
+
+    /* How it works */
+    .steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+    @media(max-width:768px) { .steps-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:480px) { .steps-grid { grid-template-columns: 1fr 1fr; gap: 14px; } }
+    .step-card {
+      text-align: center; padding: 28px 16px;
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .step-emoji { font-size: 2.2rem; margin-bottom: 12px; }
+    .step-num   { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--teal); margin-bottom: 6px; }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .step-text  { font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Tiers */
+    .tiers-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    @media(max-width:640px) { .tiers-row { grid-template-columns: 1fr; } }
+    .tier-card {
+      border-radius: var(--radius-lg); overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .tier-head {
+      padding: 24px 20px; text-align: center; color: #fff;
+    }
+    .tier-emoji  { font-size: 2.4rem; margin-bottom: 8px; }
+    .tier-name   { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+    .tier-pts    { font-size: .82rem; opacity: .85; }
+    .tier-body   { background: #fff; padding: 20px; }
+    .tier-perk   { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; color: #444; margin-bottom: 10px; line-height: 1.4; }
+    .tier-perk::before { content: '✓'; color: var(--teal); font-weight: 700; flex-shrink: 0; }
+
+    /* Participating */
+    .biz-coop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; }
+    .biz-coop-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 16px 18px; box-shadow: var(--shadow-sm);
+      display: flex; align-items: center; gap: 14px;
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer; text-decoration: none; color: inherit;
+    }
+    .biz-coop-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .biz-coop-emoji { font-size: 2rem; flex-shrink: 0; }
+    .biz-coop-name  { font-size: .92rem; font-weight: 700; margin-bottom: 2px; }
+    .biz-coop-perk  { font-size: .78rem; color: var(--teal); font-weight: 600; }
+
+    /* Rewards catalog */
+    .catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; }
+    .catalog-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 18px 16px; box-shadow: var(--shadow-sm);
+      text-align: center; border-top: 3px solid var(--teal);
+    }
+    .catalog-emoji { font-size: 2rem; margin-bottom: 8px; }
+    .catalog-pts   { font-size: .72rem; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .catalog-title { font-size: .9rem; font-weight: 700; margin-bottom: 4px; }
+    .catalog-desc  { font-size: .75rem; color: var(--text-muted); }
+
+    /* Co-op explainer banner */
+    .coop-banner {
+      background: linear-gradient(135deg, #0b3d42, #1a2d44);
+      border-radius: var(--radius-lg);
+      padding: 36px 40px;
+      color: #fff;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: center;
+    }
+    @media(max-width:640px) { .coop-banner { grid-template-columns: 1fr; text-align:center; } }
+    .coop-banner h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; }
+    .coop-banner p  { font-size: .9rem; opacity: .8; line-height: 1.6; }
+    .coop-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+    @media(max-width:640px) { .coop-stats { justify-content: center; } }
+    .coop-stat-num { font-size: 2rem; font-weight: 800; color: #f5a623; }
+    .coop-stat-lbl { font-size: .72rem; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .8px; }
+
+    /* For businesses section */
+    .for-biz-box {
+      background: var(--sand); border-radius: var(--radius-lg);
+      padding: 36px 40px; display: grid;
+      grid-template-columns: 1fr auto; gap: 24px; align-items: center;
+    }
+    @media(max-width:640px) { .for-biz-box { grid-template-columns:1fr; text-align:center; } }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ HEADER ══════════ -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar <span class="logo-badge">Beta</span></a>
+      <nav class="main-nav">
+        <a href="restaurants.html">Restaurants</a>
+        <a href="things-to-do.html">Things To Do</a>
+        <a href="events.html">Events</a>
+        <a href="happy-hours.html">Happy Hours</a>
+        <a href="specials.html">Specials</a>
+        <a href="loyalty.html" style="color:var(--teal);font-weight:700;">Rewards</a>
+      </nav>
+      <div class="header-actions">
+        <a href="trip.html" class="btn-trip">My Trip Link</a>
+        <a href="claim.html" class="btn-claim">+ Claim Business</a>
+        <button class="hamburger" id="hamburger">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a>
+    <a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="specials.html">🏷️ Specials</a>
+    <a href="events.html">🎉 Events</a>
+    <a href="things-to-do.html">🎯 Things To Do</a>
+    <a href="shopping.html">🛍️ Shopping</a>
+    <a href="other.html">✨ Other</a>
+    <a href="feed.html">📡 Live Feed</a>
+    <div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a>
+    <a href="owa.html">🎢 OWA</a>
+    <a href="loyalty.html">🏖️ Rewards Program</a>
+    <a href="claim.html">+ Claim Your Business</a>
+  </div>
+
+  <!-- ══════════ HERO ══════════ -->
+  <section class="lp-hero">
+    <div class="container" style="position:relative;z-index:1;">
+      <div class="lp-hero-badge">🏆 Gulf Coast Co-Op Rewards Program</div>
+      <h1>One Card.<br>Every Business on the Gulf.</h1>
+      <p>Earn points at every participating restaurant, activity, and shop. Redeem at any business in the network. One shared program — built by the Gulf Coast, for the Gulf Coast.</p>
+
+      <!-- Signup form -->
+      <div class="signup-box">
+        <h3>Join Free — Takes 10 Seconds</h3>
+        <p>Enter your phone number. Get a welcome text. Start earning immediately.</p>
+        <div class="signup-row">
+          <input type="tel" id="signupPhone" placeholder="(251) 555-0000" maxlength="14">
+          <button onclick="submitSignup()">Join Now →</button>
+        </div>
+        <div class="signup-note">No app. No credit card. No spam. Reply STOP anytime.</div>
+        <div class="signup-success" id="signupSuccess">
+          🎉 Welcome to Gulf Coast Rewards! Check your texts for your member link. You start with 200 bonus points.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ CO-OP EXPLAINER ══════════ -->
+  <section class="section" style="background:var(--sand);">
+    <div class="container">
+      <div class="coop-banner">
+        <div>
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.5);margin-bottom:8px;">What Makes This Different</div>
+          <h3>This Is a Co-Op — Not a Single Business Loyalty Card</h3>
+          <p>Every participating business contributes 2% of member transactions into a shared pool. That pool funds the rewards YOU earn. The more businesses you visit, the faster you earn — and the more you help every business in the network grow together.</p>
+        </div>
+        <div class="coop-stats" id="coopStats">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ HOW IT WORKS ══════════ -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-heading mb-32" style="text-align:center;">
+        <div class="eyebrow">Simple</div>
+        <h2>How It Works</h2>
+        <p>No app. No punch card. Just your phone number.</p>
+      </div>
+      <div class="steps-grid" id="stepsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ TIERS ══════════ -->
+  <section class="section" style="background:var(--sand);">
+    <div class="container">
+      <div class="section-heading mb-32" style="text-align:center;">
+        <div class="eyebrow">Membership Levels</div>
+        <h2>The More You Explore, the More You Earn</h2>
+        <p>Every dollar spent at any participating business moves you up. Points never expire.</p>
+      </div>
+      <div class="tiers-row" id="tiersRow"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ REWARDS CATALOG ══════════ -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-heading mb-32" style="text-align:center;">
+        <div class="eyebrow">Spend Your Points</div>
+        <h2>Rewards Catalog</h2>
+        <p>Redeem at any participating business — not just where you earned them.</p>
+      </div>
+      <div class="catalog-grid" id="catalogGrid"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ PARTICIPATING BUSINESSES ══════════ -->
+  <section class="section" style="background:var(--sand);">
+    <div class="container">
+      <div class="section-heading mb-32" style="text-align:center;">
+        <div class="eyebrow">Earn Points At</div>
+        <h2>Participating Businesses</h2>
+        <p>Every visit earns. Every business in the co-op has a unique member perk.</p>
+      </div>
+      <div class="biz-coop-grid" id="bizCoopGrid"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ FOR BUSINESSES ══════════ -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="for-biz-box">
+        <div>
+          <div class="eyebrow" style="margin-bottom:8px;">For Business Owners</div>
+          <h3 style="font-size:1.4rem;font-weight:800;margin-bottom:8px;">Join the Co-Op & Keep Your Customers Coming Back</h3>
+          <p style="color:var(--text-muted);max-width:520px;line-height:1.6;">When you join Gulf Coast Rewards, your customers earn points they can spend elsewhere — and other businesses' customers come to you. The network grows together. You pay 2% of member transactions only. No upfront cost.</p>
+          <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+            <a href="claim.html" class="btn btn-primary">Claim Your Business & Join</a>
+            <a href="#howcoop" class="btn btn-outline">Learn How the Co-Op Works</a>
+          </div>
+        </div>
+        <div style="text-align:center;flex-shrink:0;">
+          <div style="font-size:3rem;margin-bottom:8px;">🤝</div>
+          <div style="font-size:.85rem;color:var(--text-muted);font-weight:600;">2% contribution<br>per member sale</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Explore</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="things-to-do.html">Things To Do</a>
+          <a href="events.html">Events</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="loyalty.html">Rewards Program</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="loyalty.html">Join the Co-Op</a>
+          <a href="trip.html">Trip Links</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar — Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof GCR === 'undefined') return;
+    const lp = GCR.loyalty;
+
+    /* ── Co-op stats ── */
+    const bizCount = lp.participating.length;
+    document.getElementById('coopStats').innerHTML = `
+      <div><div class="coop-stat-num">${bizCount}+</div><div class="coop-stat-lbl">Businesses</div></div>
+      <div><div class="coop-stat-num">2%</div><div class="coop-stat-lbl">Business Contribution</div></div>
+      <div><div class="coop-stat-num">Free</div><div class="coop-stat-lbl">To Join</div></div>`;
+
+    /* ── How it works ── */
+    document.getElementById('stepsGrid').innerHTML = lp.howItWorks.map(s => `
+      <div class="step-card">
+        <div class="step-emoji">${s.emoji}</div>
+        <div class="step-num">Step ${s.step}</div>
+        <div class="step-title">${s.title}</div>
+        <div class="step-text">${s.text}</div>
+      </div>`).join('');
+
+    /* ── Tiers ── */
+    const tierColors = lp.tiers.map(t => t.color);
+    document.getElementById('tiersRow').innerHTML = lp.tiers.map(t => `
+      <div class="tier-card">
+        <div class="tier-head" style="background:${t.color};">
+          <div class="tier-emoji">${t.emoji}</div>
+          <div class="tier-name">${t.name}</div>
+          <div class="tier-pts">${t.minPoints === 0 ? 'Start here — 0 pts' : `Unlocks at ${t.minPoints} pts`}</div>
+        </div>
+        <div class="tier-body">
+          ${t.perks.map(p => `<div class="tier-perk">${p}</div>`).join('')}
+        </div>
+      </div>`).join('');
+
+    /* ── Rewards catalog ── */
+    document.getElementById('catalogGrid').innerHTML = lp.rewardsCatalog.map(r => `
+      <div class="catalog-card">
+        <div class="catalog-emoji">${r.emoji}</div>
+        <div class="catalog-pts">${r.points.toLocaleString()} pts</div>
+        <div class="catalog-title">${r.title}</div>
+        <div class="catalog-desc">${r.desc}</div>
+      </div>`).join('');
+
+    /* ── Participating businesses ── */
+    const bizList = GCR.getLoyaltyBiz();
+    document.getElementById('bizCoopGrid').innerHTML = bizList.map(b => `
+      <a href="business.html?id=${b.slug||b.id}" class="biz-coop-card">
+        <div class="biz-coop-emoji">${b.emoji}</div>
+        <div>
+          <div class="biz-coop-name">${b.name}</div>
+          <div class="biz-coop-perk">🎁 ${b.loyaltyPerk}</div>
+        </div>
+      </a>`).join('');
+  });
+
+  /* ── Signup handler ── */
+  function submitSignup() {
+    const phone = document.getElementById('signupPhone').value.trim();
+    if (!phone || phone.replace(/\D/g,'').length < 10) {
+      alert('Please enter a valid phone number.');
+      return;
+    }
+    // TODO: hook to backend sms/loyalty API
+    document.querySelector('.signup-row').style.display = 'none';
+    document.querySelector('.signup-note').style.display = 'none';
+    document.getElementById('signupSuccess').style.display = 'block';
+    localStorage.setItem('gcr_loyalty_member', phone);
+    localStorage.setItem('gcr_loyalty_seen', '1');
+  }
+
+  // Format phone input
+  document.getElementById('signupPhone').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g,'').slice(0,10);
+    if (v.length >= 7) v = `(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6)}`;
+    else if (v.length >= 4) v = `(${v.slice(0,3)}) ${v.slice(3)}`;
+    else if (v.length > 0) v = `(${v}`;
+    this.value = v;
+  });
+  </script>
+</body>
+</html>

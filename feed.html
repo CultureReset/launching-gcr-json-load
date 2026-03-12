@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Feed — Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="site-header"><div class="container header-inner">
+    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+    <nav class="main-nav">
+      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
+      <a href="events.html">Events</a><a href="happy-hours.html">Happy Hours</a>
+      <a href="specials.html">Specials</a><a href="feed.html" class="active">Feed</a>
+    </nav>
+    <div class="header-actions">
+      <a href="trip.html" class="btn-trip">My Trip Link</a>
+      <a href="claim.html" class="btn-claim">+ Claim Business</a>
+      <button class="hamburger" id="hamburger">☰</button>
+    </div>
+  </div></header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
+    <a href="shopping.html">🛍️ Shopping</a><a href="other.html">✨ Other</a>
+    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+  </div>
+
+  <div class="page-header"><div class="container"><div class="page-header-inner">
+    <div>
+      <div class="eyebrow">📡 Live</div>
+      <h1>Live Feed</h1>
+      <p>What's happening right now — photos, reviews, deals & new openings</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="background:var(--coral);color:#fff;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;animation:pulse 2s infinite">● LIVE</span>
+    </div>
+  </div></div></div>
+
+  <div class="filters-bar"><div class="container"><div class="filters-inner">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="photos">📸 Photos</button>
+    <button class="filter-chip" data-filter="reviews">⭐ Reviews</button>
+    <button class="filter-chip" data-filter="deals">🏷️ Deals</button>
+    <button class="filter-chip" data-filter="events">🎉 Events</button>
+    <button class="filter-chip" data-filter="new">🆕 New Openings</button>
+  </div></div></div>
+
+  <section class="section"><div class="container">
+    <div class="feed-layout">
+
+      <div class="feed-list">
+        <!-- Sample feed posts -->
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar">L</div>
+            <div class="feed-post-meta">
+              <h4>Luna's Eat & Drink</h4>
+              <span>📍 Orange Beach · 2 hours ago</span>
+            </div>
+          </div>
+          <p>🦀 Friday night All You Can Eat Crab Legs is BACK! Starting at 6pm tonight. Come hungry. First come, first served. See you on the water! 🌊</p>
+          <div class="feed-post-img">🦞</div>
+        </div>
+
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar" style="background:var(--coral)">T</div>
+            <div class="feed-post-meta">
+              <h4>Tim Roberts</h4>
+              <span>🎸 Orange Beach · 4 hours ago</span>
+            </div>
+          </div>
+          <p>Playing tonight at Luna's at 7pm! Come out, it's gonna be a great night. No cover. Bring your friends 🎶</p>
+        </div>
+
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar" style="background:#7c3aed">C</div>
+            <div class="feed-post-meta">
+              <h4>Circle Boats</h4>
+              <span>🚤 Orange Beach · Yesterday</span>
+            </div>
+          </div>
+          <p>Perfect weather this weekend! All boats are available — no experience needed. Book your spot online or walk in. Best way to see the back bays 🌊</p>
+          <div class="feed-post-img">🚤</div>
+        </div>
+
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar" style="background:#d97706">S</div>
+            <div class="feed-post-meta">
+              <h4>Sugar Sands Creamery</h4>
+              <span>🍦 Orange Beach · Yesterday</span>
+            </div>
+          </div>
+          <p>New flavor alert: 🥭 Mango Habanero Sorbet. Sounds wild, tastes amazing. Come try it before it's gone!</p>
+        </div>
+
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar" style="background:#16a34a">K</div>
+            <div class="feed-post-meta">
+              <h4>Kraken Reels Fishing</h4>
+              <span>🎣 Orange Beach · 2 days ago</span>
+            </div>
+          </div>
+          <p>Caught a 42lb Amberjack yesterday offshore! Clients are having an incredible season. Spring is the best time to fish — book your charter now before we fill up 🎣🐟</p>
+          <div class="feed-post-img">🎣</div>
+        </div>
+
+        <div class="feed-post">
+          <div class="feed-post-header">
+            <div class="feed-avatar" style="background:#0b7a75">G</div>
+            <div class="feed-post-meta">
+              <h4>GCR Staff Pick</h4>
+              <span>✨ New Opening · 3 days ago</span>
+            </div>
+          </div>
+          <p>🆕 <strong>Gulf Brew Coffee House</strong> just opened in Gulf Shores! Specialty espresso, pastries, and a great workspace. Definitely worth checking out on your next visit.</p>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <div class="sidebar-card">
+          <h4>🔥 Trending Now</h4>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <a href="restaurants.html" style="display:flex;gap:10px;align-items:center;font-size:.85rem;">
+              <span style="font-size:1.2rem">🦀</span>
+              <div><div style="font-weight:600">All You Can Eat Crab</div><div style="font-size:.75rem;color:var(--text-muted)">Multiple locations</div></div>
+            </a>
+            <a href="things-to-do.html" style="display:flex;gap:10px;align-items:center;font-size:.85rem;">
+              <span style="font-size:1.2rem">🚤</span>
+              <div><div style="font-weight:600">Circle Boats</div><div style="font-size:.75rem;color:var(--text-muted)">Self-drive boat rentals</div></div>
+            </a>
+            <a href="events.html" style="display:flex;gap:10px;align-items:center;font-size:.85rem;">
+              <span style="font-size:1.2rem">🎸</span>
+              <div><div style="font-weight:600">Tim Roberts Tonight</div><div style="font-size:.75rem;color:var(--text-muted)">Luna's · 7pm</div></div>
+            </a>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:16px;">
+          <h4>📅 Events This Week</h4>
+          <div id="eventsList" style="margin-top:8px;"></div>
+          <a href="events.html" class="btn btn-outline btn-sm" style="margin-top:12px;display:block;text-align:center;">All Events</a>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <footer class="site-footer"><div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+      <p>Powered by <span class="powered">CyberCheck</span></p>
+    </div>
+  </div></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <style>
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .feed-layout { display:grid; grid-template-columns:1fr 320px; gap:24px; }
+    @media(max-width:768px){
+      .feed-layout { display:flex; flex-direction:column; }
+      .feed-layout > div:last-child { display:none; } /* hide sidebar on mobile */
+    }
+  </style>
+</body></html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Artists & Musicians — Gulf Coast Radar</title>
+  <meta name="description" content="Find local Gulf Coast musicians, artists, and performers. See upcoming shows, venues, and booking info.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Artist card ── */
+    .artist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .artist-card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .artist-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+    .artist-card-hero {
+      height: 160px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; position: relative;
+    }
+    .artist-featured-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--coral); color: #fff;
+      font-size: .65rem; font-weight: 700; letter-spacing: 1px;
+      padding: 3px 8px; border-radius: 4px; text-transform: uppercase;
+    }
+    .artist-card-body { padding: 16px; }
+    .artist-card-body h4 { font-size: 1.05rem; margin-bottom: 4px; }
+    .artist-genre {
+      background: var(--sky); color: var(--teal);
+      font-size: .72rem; font-weight: 700; padding: 2px 8px;
+      border-radius: 20px; display: inline-block; margin-bottom: 8px;
+    }
+    .artist-tagline { font-size: .82rem; color: var(--text-muted); margin-bottom: 10px; }
+    .artist-shows { font-size: .78rem; margin-bottom: 12px; }
+    .artist-shows .show-row {
+      display: flex; justify-content: space-between;
+      padding: 5px 0; border-bottom: 1px solid var(--gray-100);
+    }
+    .artist-shows .show-row:last-child { border-bottom: none; }
+    .show-date  { font-weight: 600; color: var(--teal); }
+    .show-venue { color: var(--text-muted); }
+    .artist-actions { display: flex; gap: 8px; }
+
+    /* Artist profile hero (if profile type) */
+    .artist-profile-hero {
+      background: linear-gradient(135deg, #2e1a4a, #6c3483);
+      padding: 48px 0; color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+      <nav class="main-nav">
+        <a href="restaurants.html">Restaurants</a>
+        <a href="things-to-do.html">Things To Do</a>
+        <a href="events.html">Events</a>
+        <a href="happy-hours.html">Happy Hours</a>
+        <a href="artists.html" class="active">Artists</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="header-actions">
+        <a href="trip.html" class="btn-trip">My Trip Link</a>
+        <a href="claim.html" class="btn-claim">+ Claim Business</a>
+        <button class="hamburger" id="hamburger">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="specials.html">🏷️ Specials</a><a href="events.html">🎉 Events</a>
+    <a href="things-to-do.html">🎯 Things To Do</a><a href="shopping.html">🛍️ Shopping</a>
+    <a href="other.html">✨ Other</a><a href="feed.html">📡 Live Feed</a>
+    <div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+    <a href="claim.html">+ Claim / Submit Your Page</a>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header" style="background:linear-gradient(135deg,#2e1a4a 0%,#0b7a75 100%);">
+    <div class="container">
+      <div class="page-header-inner">
+        <div>
+          <div class="eyebrow" style="color:#c4b5fd;">🎵 Local Talent</div>
+          <h1>Local Artists & Musicians</h1>
+          <p>Gulf Coast originals — find your favorite acts, see upcoming shows, and discover new talent</p>
+        </div>
+        <div class="page-search">
+          <input type="text" id="mainSearch" placeholder="Search artists...">
+          <button id="searchBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar"><div class="container"><div class="filters-inner">
+    <button class="filter-chip active" data-filter="all">All</button>
+    <button class="filter-chip" data-filter="country">🤠 Country</button>
+    <button class="filter-chip" data-filter="rock">🎸 Rock</button>
+    <button class="filter-chip" data-filter="beach-music">🌊 Beach Music</button>
+    <button class="filter-chip" data-filter="blues">🎷 Blues</button>
+    <button class="filter-chip" data-filter="cover-band">🎤 Cover Bands</button>
+    <button class="filter-chip" data-filter="solo">🎻 Solo Acts</button>
+    <button class="filter-chip" data-filter="visual-art">🎨 Visual Art</button>
+    <button class="filter-chip" data-filter="playing-tonight">⚡ Playing Tonight</button>
+  </div></div></div>
+
+  <!-- FEATURED ARTIST -->
+  <section class="section" style="background:var(--white);">
+    <div class="container">
+      <div class="section-heading mb-32">
+        <div class="eyebrow">Featured</div>
+        <h2>Spotlight This Week</h2>
+      </div>
+      <!-- Featured: Tim Roberts -->
+      <div style="background:linear-gradient(135deg,#2e1a4a,#6c3483);border-radius:var(--radius-lg);padding:36px;color:#fff;display:flex;gap:32px;align-items:center;flex-wrap:wrap;margin-bottom:40px;">
+        <div style="font-size:5rem;flex-shrink:0;">🎸</div>
+        <div style="flex:1;">
+          <div style="font-size:.72rem;font-weight:700;letter-spacing:2px;color:#c4b5fd;text-transform:uppercase;margin-bottom:8px;">Featured Artist</div>
+          <h2 style="color:#fff;margin-bottom:8px;">Tim Roberts</h2>
+          <p style="color:rgba(255,255,255,.75);max-width:500px;">Award-winning singer-songwriter from the Gulf Coast. Country, rock, and beach originals. A regular across Orange Beach and Gulf Shores — from intimate bar sets to packed venue shows.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px;">Country</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px;">Rock</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px;">Beach Originals</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:.75rem;padding:3px 10px;border-radius:20px;">Solo Act</span>
+          </div>
+          <div style="font-size:.82rem;color:rgba(255,255,255,.8);margin-bottom:16px;">
+            <div style="margin-bottom:4px;">📅 <strong>Sat Mar 8</strong> — Luna's Eat & Drink · 7pm · Free</div>
+            <div style="margin-bottom:4px;">📅 <strong>Sat Mar 14</strong> — Bahama Bob's · 6pm · Free</div>
+            <div>📅 <strong>Sat Mar 21</strong> — Flora-Bama · 8pm · $5</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="business.html?id=tim-roberts" class="btn btn-secondary btn-sm">View Full Profile</a>
+            <a href="events.html" class="btn btn-ghost btn-sm">All Shows</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARTIST GRID -->
+  <section class="section" style="background:var(--sand);">
+    <div class="container">
+      <div class="section-heading mb-32">
+        <div class="eyebrow">All Artists</div>
+        <h2>Gulf Coast Talent</h2>
+        <p>Click any artist to see their full profile, upcoming shows, and booking info</p>
+      </div>
+      <div class="artist-grid" id="artistGrid">
+
+        <!-- Tim Roberts -->
+        <div class="artist-card">
+          <div class="artist-card-hero" style="background:linear-gradient(135deg,#2e1a4a,#6c3483);">
+            <div class="artist-featured-badge">Featured</div>
+            <span>🎸</span>
+          </div>
+          <div class="artist-card-body">
+            <h4>Tim Roberts</h4>
+            <span class="artist-genre">Country / Beach</span>
+            <p class="artist-tagline">Gulf Coast originals, country & rock. Plays everywhere.</p>
+            <div class="artist-shows">
+              <div class="show-row"><span class="show-date">Mar 8</span><span class="show-venue">Luna's · 7pm</span><span>Free</span></div>
+              <div class="show-row"><span class="show-date">Mar 14</span><span class="show-venue">Bahama Bob's · 6pm</span><span>Free</span></div>
+              <div class="show-row"><span class="show-date">Mar 21</span><span class="show-venue">Flora-Bama · 8pm</span><span>$5</span></div>
+            </div>
+            <div class="artist-actions">
+              <a href="business.html?id=tim-roberts" class="btn btn-primary btn-sm" style="flex:1;text-align:center;">Profile & Shows</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Wharf Amphitheater -->
+        <div class="artist-card">
+          <div class="artist-card-hero" style="background:linear-gradient(135deg,#6c3483,#1a6496);">
+            <span>🎤</span>
+          </div>
+          <div class="artist-card-body">
+            <h4>The Wharf Amphitheater</h4>
+            <span class="artist-genre">Venue · 10,000 capacity</span>
+            <p class="artist-tagline">National touring acts all season. Waterfront outdoor stage.</p>
+            <div class="artist-shows">
+              <div class="show-row"><span class="show-date">Mar 15</span><span class="show-venue">Marcus King Band</span><span>$45+</span></div>
+              <div class="show-row"><span class="show-date">Mar 22</span><span class="show-venue">Chase Rice</span><span>$35+</span></div>
+            </div>
+            <div class="artist-actions">
+              <a href="business.html?id=wharf-amphitheater" class="btn btn-primary btn-sm" style="flex:1;text-align:center;">View Shows</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sample: More artists placeholder -->
+        <div class="artist-card">
+          <div class="artist-card-hero" style="background:linear-gradient(135deg,#1e8449,#0b7a75);">
+            <span>🎷</span>
+          </div>
+          <div class="artist-card-body">
+            <h4>Gulf Coast Blues Band</h4>
+            <span class="artist-genre">Blues / Soul</span>
+            <p class="artist-tagline">Thursday nights at The Flora-Bama. Southern blues with a Gulf Coast twist.</p>
+            <div class="artist-shows">
+              <div class="show-row"><span class="show-date">Thu</span><span class="show-venue">Flora-Bama · 8pm</span><span>Free</span></div>
+            </div>
+            <div class="artist-actions">
+              <a href="#" class="btn btn-outline btn-sm" style="flex:1;text-align:center;">Claim Profile</a>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBMIT YOUR PAGE CTA -->
+  <section class="section-sm" style="background:linear-gradient(135deg,var(--navy),#2e1a4a);">
+    <div class="container text-center" style="color:#fff;">
+      <h3 style="color:#fff;margin-bottom:8px;">Are You a Local Artist?</h3>
+      <p style="color:rgba(255,255,255,.7);margin-bottom:20px;">Get your own mini-site on Gulf Coast Radar. Show your upcoming gigs, take bookings, and reach tourists looking for local live music & art.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="claim.html" class="btn btn-secondary">Submit Your Artist Page</a>
+        <a href="events.html" class="btn btn-ghost">Browse All Events</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer"><div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a> · <a href="events.html" style="color:var(--teal-light)">Events</a></p>
+      <p>Powered by <span class="powered">CyberCheck</span></p>
+    </div>
+  </div></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

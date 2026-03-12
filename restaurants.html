@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurants — Gulf Coast Radar</title>
+  <meta name="description" content="Find the best restaurants in Orange Beach and Gulf Shores. Seafood, Southern, burgers, waterfront dining and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+      <nav class="main-nav">
+        <a href="restaurants.html" class="active">Restaurants</a>
+        <a href="things-to-do.html">Things To Do</a>
+        <a href="events.html">Events</a>
+        <a href="happy-hours.html">Happy Hours</a>
+        <a href="specials.html">Specials</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="header-actions">
+        <a href="trip.html" class="btn-trip">My Trip Link</a>
+        <a href="claim.html" class="btn-claim">+ Claim Business</a>
+        <button class="hamburger" id="hamburger">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a>
+    <a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="specials.html">🏷️ Specials</a>
+    <a href="events.html">🎉 Events</a>
+    <a href="things-to-do.html">🎯 Things To Do</a>
+    <a href="shopping.html">🛍️ Shopping</a>
+    <a href="services.html">💼 Services</a>
+    <a href="other.html">✨ Other</a>
+    <a href="feed.html">📡 Live Feed</a>
+    <div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a>
+    <a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+    <a href="claim.html">+ Claim Your Business</a>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container">
+      <div class="page-header-inner">
+        <div>
+          <div class="eyebrow">🍽️ Category</div>
+          <h1>Restaurants</h1>
+          <p>Seafood, Southern comfort, waterfront dining & everything in between</p>
+        </div>
+        <div class="page-search">
+          <input type="text" id="mainSearch" placeholder="Search restaurants...">
+          <button id="searchBtn">Go</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-CATEGORY FILTERS -->
+  <div class="filters-bar">
+    <div class="container">
+      <div class="filters-inner">
+        <button class="filter-chip active" data-filter="all">All</button>
+        <button class="filter-chip" data-filter="seafood">🐟 Seafood</button>
+        <button class="filter-chip" data-filter="waterfront">⚓ Waterfront</button>
+        <button class="filter-chip" data-filter="bar-and-grill">🍺 Bar & Grill</button>
+        <button class="filter-chip" data-filter="southern">🍗 Southern</button>
+        <button class="filter-chip" data-filter="steakhouse">🥩 Steakhouse</button>
+        <button class="filter-chip" data-filter="beach-bar">🏖️ Beach Bar</button>
+        <button class="filter-chip" data-filter="casual">😎 Casual</button>
+        <button class="filter-chip" data-filter="breakfast">🍳 Breakfast</button>
+        <button class="filter-chip" data-filter="pizza">🍕 Pizza</button>
+        <button class="filter-chip" data-filter="mexican">🌮 Mexican</button>
+        <button class="filter-chip" data-filter="happy-hour">🍻 Happy Hour</button>
+        <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
+        <button class="filter-chip" data-filter="the-wharf">⚓ At The Wharf</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTINGS -->
+  <section class="section">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <p class="text-muted" style="font-size:.85rem;">Showing all restaurants · Orange Beach & Gulf Shores</p>
+        <select style="padding:7px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:.85rem;color:var(--text);">
+          <option>Sort: Top Rated</option>
+          <option>Sort: Most Reviewed</option>
+          <option>Sort: A–Z</option>
+          <option>Sort: Open Now</option>
+        </select>
+      </div>
+      <div class="listings-grid" id="listingsGrid" data-category="restaurants"></div>
+    </div>
+  </section>
+
+  <!-- CLAIM CTA -->
+  <section class="section-sm" style="background:var(--gray-100);">
+    <div class="container">
+      <div class="claim-cta">
+        <h4>Is Your Restaurant Missing?</h4>
+        <p>Claim your free listing and reach thousands of hungry tourists every week.</p>
+        <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="specials.html">Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

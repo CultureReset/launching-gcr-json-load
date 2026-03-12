@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Gulf Coast Radar — Orange Beach &amp; Gulf Shores</title>
+  <meta name="description" content="Find restaurants, happy hours, events, boat rentals, live music and everything the Gulf Coast has to offer. Orange Beach &amp; Gulf Shores local guide.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Gulf Coast Radar — Orange Beach &amp; Gulf Shores">
+  <meta property="og:image" content="gcr-logo.png">
+  <meta name="theme-color" content="#4A90E2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #fff; color: #1a1a1a; }
+
+  /* ══ HEADER ══ */
+  .gcr-header {
+    background: linear-gradient(180deg, #87CEEB 0%, #B0E0E6 20%, #87CEFA 40%, #4A90E2 80%, #3a7bd5 100%);
+    padding: 10px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 16px rgba(0,0,0,.25);
+  }
+
+  .gcr-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px 8px;
+  }
+
+  .gcr-logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .gcr-logo-row img {
+    width: clamp(44px,11vw,58px);
+    height: clamp(44px,11vw,58px);
+    border-radius: 50%;
+    object-fit: cover;
+    filter: brightness(1.05);
+  }
+  .gcr-logo-text {
+    font-size: clamp(1.1rem,4vw,1.5rem);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -.5px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,.25);
+    line-height: 1;
+  }
+  .gcr-logo-text span { color: #5dd9d4; }
+
+  .gcr-install-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #14B8A6;
+    color: #fff;
+    border: none;
+    padding: 9px 15px;
+    border-radius: 10px;
+    font-size: .8rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 3px 10px rgba(20,184,166,.4);
+    white-space: nowrap;
+    transition: background .2s;
+  }
+  .gcr-install-btn:hover { background: #0d9488; }
+
+  /* ── Category tabs ── */
+  .gcr-cat-tabs {
+    display: flex;
+    gap: 7px;
+    padding: 0 10px 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gcr-cat-tabs::-webkit-scrollbar { display: none; }
+
+  .gcr-cat-tab {
+    flex-shrink: 0;
+    padding: 9px 18px;
+    background: rgba(255,255,255,.88);
+    border: 1.5px solid rgba(255,255,255,.5);
+    border-radius: 22px;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #2C5282;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .18s;
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
+  }
+  .gcr-cat-tab:hover, .gcr-cat-tab.active {
+    background: #fff;
+    border-color: #14B8A6;
+    color: #14B8A6;
+    transform: translateY(-1px);
+  }
+
+  /* ── Action strip (Loyalty + Calendar) ── */
+  .gcr-action-strip {
+    display: flex;
+    gap: 8px;
+    padding: 0 10px 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .gcr-strip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border: none;
+    border-radius: 22px;
+    font-size: .82rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform .18s, box-shadow .18s;
+    white-space: nowrap;
+  }
+  .gcr-strip-btn:hover { transform: translateY(-2px); }
+  .gcr-strip-gold {
+    background: linear-gradient(135deg, #FFD700, #FFC200);
+    color: #1a1a1a;
+    box-shadow: 0 3px 12px rgba(255,215,0,.45);
+  }
+  .gcr-strip-gold:hover { box-shadow: 0 6px 20px rgba(255,215,0,.6); }
+  .gcr-strip-teal {
+    background: linear-gradient(135deg, #0b7a75, #14B8A6);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(11,122,117,.35);
+  }
+  .gcr-strip-teal:hover { box-shadow: 0 6px 20px rgba(11,122,117,.5); }
+
+  /* ══ HERO ══ */
+  .gcr-hero {
+    position: relative;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 30%, #06B6D4 55%, #0b7a75 80%, #3B82F6 100%);
+    background-size: 300% 300%;
+    animation: heroShift 12s ease infinite;
+  }
+  @keyframes heroShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .gcr-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.2);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 40px 20px 60px;
+    width: 100%;
+    max-width: 660px;
+  }
+  .hero-eyebrow {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.35);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .hero-title {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 14px rgba(0,0,0,.3);
+  }
+  .hero-sub {
+    font-size: .95rem;
+    color: rgba(255,255,255,.85);
+    margin-bottom: 24px;
+  }
+  /* Single hero search bar */
+  .hero-search-box {
+    position: relative;
+    max-width: 540px;
+    margin: 0 auto;
+  }
+  .hero-search-box input {
+    width: 100%;
+    padding: 16px 56px 16px 22px;
+    font-size: 15px;
+    font-family: inherit;
+    border: none;
+    border-radius: 14px;
+    background: rgba(255,255,255,.97);
+    color: #1a1a1a;
+    outline: none;
+    box-shadow: 0 4px 24px rgba(0,0,0,.25);
+  }
+  .hero-search-box input::placeholder { color: #999; }
+  .hero-search-submit {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #0b7a75;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Search dropdown */
+  .hero-search-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    max-height: 340px;
+    overflow-y: auto;
+    z-index: 99;
+    text-align: left;
+  }
+  .hero-search-dropdown.open { display: block; }
+  .sri-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    color: #1a1a1a;
+    transition: background .12s;
+    cursor: pointer;
+  }
+  .sri-item:last-child { border-bottom: none; }
+  .sri-item:hover { background: #f5faf9; }
+  .sri-emoji { font-size: 1.4rem; flex-shrink: 0; }
+  .sri-name  { font-size: .9rem; font-weight: 700; }
+  .sri-meta  { font-size: .74rem; color: #888; }
+
+  .hero-quick-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .hero-tag {
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.35);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 600;
+    padding: 6px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+  .hero-tag:hover { background: rgba(255,255,255,.9); color: #0b4d7a; }
+  .hero-wave { position: absolute; bottom: 0; left: 0; right: 0; line-height: 0; z-index: 1; }
+  .hero-wave svg { display: block; }
+
+  /* ══ STATS BAR ══ */
+  .stats-bar {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 12px 0;
+  }
+  .stats-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 1.3rem; font-weight: 800; color: #0b7a75; }
+  .stat-lbl { font-size: .68rem; color: #888; text-transform: uppercase; letter-spacing: .8px; }
+
+  /* ══ WEATHER ══ */
+  .weather-card {
+    background: linear-gradient(135deg, #00B4DB, #0083B0);
+    border-radius: 16px;
+    padding: 20px 24px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .weather-main { display: flex; align-items: center; gap: 16px; }
+  .weather-temp-big { font-size: 2.8rem; font-weight: 800; }
+  .weather-label { font-size: .75rem; color: rgba(255,255,255,.7); margin-bottom: 2px; }
+  .weather-condition { font-size: 1rem; font-weight: 600; }
+  .weather-icon { font-size: 3.2rem; }
+  .weather-details {
+    display: flex;
+    gap: 20px;
+    font-size: .82rem;
+    color: rgba(255,255,255,.85);
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.2);
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  /* ══ SECTION COMMON ══ */
+  .home-section { padding: 48px 0; }
+  .home-section.bg-sand  { background: #fdf8f2; }
+  .home-section.bg-white { background: #fff; }
+  .home-section.bg-navy  { background: linear-gradient(135deg, #0d2137, #163352); color: #fff; }
+
+  .section-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #0b7a75; margin-bottom: 6px; }
+  .section-label.light { color: #5dd9d4; }
+  .section-title { font-size: 1.8rem; font-weight: 800; color: #0d2137; margin-bottom: 6px; line-height: 1.15; }
+  .section-title.light { color: #fff; }
+  .section-sub  { font-size: .9rem; color: #666; }
+  .section-sub.light { color: rgba(255,255,255,.7); }
+  .section-head { margin-bottom: 32px; }
+
+  /* ══ CATEGORY TILES ══ */
+  .cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  @media(max-width:640px) { .cat-grid { gap: 10px; } }
+  .cat-tile {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .cat-tile:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.13); }
+  .cat-tile-top  { height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+  .cat-tile-body { padding: 10px 12px 12px; }
+  .cat-tile-name { font-size: .85rem; font-weight: 700; color: #0d2137; margin-bottom: 2px; }
+  .cat-tile-desc { font-size: .7rem; color: #888; line-height: 1.4; }
+  .cat-tile-count { font-size: .65rem; font-weight: 700; color: #0b7a75; margin-top: 4px; display: block; }
+  .ct-restaurants { background: linear-gradient(135deg,#0b7a75,#065f5b); }
+  .ct-coffee      { background: linear-gradient(135deg,#7c4f2a,#5d3a1f); }
+  .ct-happy       { background: linear-gradient(135deg,#c9831f,#a0621a); }
+  .ct-specials    { background: linear-gradient(135deg,#c0392b,#922b21); }
+  .ct-events      { background: linear-gradient(135deg,#6c3483,#5b2c6f); }
+  .ct-thingstodo  { background: linear-gradient(135deg,#1a6496,#134f78); }
+  .ct-shopping    { background: linear-gradient(135deg,#1e8449,#186038); }
+  .ct-other       { background: linear-gradient(135deg,#2e4057,#1a2d44); }
+  .ct-feed        { background: linear-gradient(135deg,#1a7a82,#0f5560); }
+
+  /* ══ FEATURED ══ */
+  .featured-scroller-wrap { overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+  .featured-scroller-wrap::-webkit-scrollbar { display: none; }
+  .featured-scroller { display: flex; gap: 16px; }
+  .feat-card {
+    flex: 0 0 260px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.09);
+    overflow: hidden;
+    text-decoration: none;
+    color: #1a1a1a;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .feat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.15); }
+  .feat-card-top {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, #0b7a75, #065f5b);
+    position: relative;
+  }
+  .feat-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: #FFD700; color: #1a1a1a;
+    font-size: .6rem; font-weight: 800;
+    padding: 3px 8px; border-radius: 10px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .feat-card-body { padding: 12px 14px 14px; }
+  .feat-card-name { font-size: .95rem; font-weight: 700; margin-bottom: 3px; }
+  .feat-card-cat  { font-size: .72rem; color: #0b7a75; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+  .feat-card-desc { font-size: .78rem; color: #666; margin-top: 5px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .feat-card-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: .75rem; color: #888; }
+  .feat-card-rating { color: #f5b700; font-weight: 700; }
+
+  /* ══ CALENDAR ══ */
+  .calendar-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media(max-width:820px) { .calendar-wrap { grid-template-columns: 1fr; } }
+  .cal-widget { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.08); min-width: 280px; }
+  .cal-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .cal-month-lbl { font-size: 1rem; font-weight: 700; }
+  .cal-nav-btn {
+    background: none; border: 1.5px solid #e5e7eb;
+    width: 30px; height: 30px; border-radius: 8px;
+    cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    color: #0b7a75; transition: all .15s;
+  }
+  .cal-nav-btn:hover { background: #0b7a75; color: #fff; border-color: #0b7a75; }
+  .cal-dow { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; margin-bottom: 6px; }
+  .cal-dow span { font-size: .65rem; font-weight: 700; color: #aaa; text-transform: uppercase; padding: 2px 0; }
+  .cal-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border-radius: 8px; font-size: .8rem; font-weight: 500;
+    cursor: pointer; position: relative; transition: background .15s;
+  }
+  .cal-day:hover:not(.empty) { background: #f0f9f8; }
+  .cal-day.empty  { cursor: default; }
+  .cal-day.today  { background: #0b7a75; color: #fff; font-weight: 700; }
+  .cal-day.today:hover  { background: #065f5b; }
+  .cal-day.selected { background: #0d2137; color: #fff; }
+  .cal-day.has-event .cal-dot { display: block; width: 4px; height: 4px; border-radius: 50%; background: #f4623a; position: absolute; bottom: 3px; }
+  .cal-day.today .cal-dot, .cal-day.selected .cal-dot { background: #fff; }
+  .cal-dot { display: none; }
+  .events-panel { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  .events-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .events-panel-title { font-size: 1rem; font-weight: 700; }
+  .events-see-all { font-size: .8rem; font-weight: 700; color: #0b7a75; text-decoration: none; }
+  .event-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+    cursor: pointer; transition: background .12s; border-radius: 6px;
+  }
+  .event-row:last-child { border-bottom: none; }
+  .event-row:hover { background: #fafafa; }
+  .event-emoji-wrap {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #f0f9f8; display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; flex-shrink: 0;
+  }
+  .event-row-title { font-size: .88rem; font-weight: 700; color: #0d2137; }
+  .event-row-meta  { font-size: .74rem; color: #888; margin-top: 2px; }
+  .event-row-cover { font-size: .78rem; font-weight: 700; color: #0b7a75; margin-top: 3px; }
+  .event-row-badge {
+    flex-shrink: 0; font-size: .65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .4px;
+    padding: 3px 8px; border-radius: 20px;
+    margin-left: auto; white-space: nowrap; align-self: flex-start;
+  }
+
+  /* ══ DISTRICTS ══ */
+  .districts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media(max-width:600px) { .districts-grid { grid-template-columns: 1fr; } }
+  .district-card {
+    border-radius: 16px; overflow: hidden; min-height: 180px;
+    display: flex; align-items: flex-end;
+    text-decoration: none; position: relative;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .district-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+  .district-emoji { position: absolute; top: 20px; right: 20px; font-size: 3rem; opacity: .25; }
+  .district-body  { padding: 20px; position: relative; z-index: 1; width: 100%; }
+  .district-name  { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .district-desc  { font-size: .8rem; color: rgba(255,255,255,.75); line-height: 1.4; }
+  .district-link  {
+    display: inline-block; margin-top: 12px;
+    background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+    color: #fff; font-size: .75rem; font-weight: 700;
+    padding: 6px 14px; border-radius: 20px; text-decoration: none; transition: background .15s;
+  }
+  .district-link:hover { background: rgba(255,255,255,.35); }
+
+  /* ══ TRIP CTA ══ */
+  .trip-cta-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; max-width: 860px; margin: 0 auto; flex-wrap: wrap;
+  }
+  .trip-cta-text h2 { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .trip-cta-text p  { font-size: .9rem; color: rgba(255,255,255,.75); max-width: 500px; line-height: 1.5; }
+  .trip-cta-btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .btn-white { background: #fff; color: #0d2137; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .9rem; text-decoration: none; transition: transform .15s, box-shadow .15s; }
+  .btn-white:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+  .btn-ghost-white { background: rgba(255,255,255,.15); border: 2px solid rgba(255,255,255,.4); color: #fff; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: .9rem; text-decoration: none; transition: background .15s; }
+  .btn-ghost-white:hover { background: rgba(255,255,255,.25); }
+
+  /* ══ CONTAINER ══ */
+  .hcont { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  /* ══ LOYALTY SIGNUP MODAL ══ */
+  .lm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    overflow-y: auto;
+  }
+  .lm-overlay.open { display: flex; }
+  .lm-modal {
+    background: #fff;
+    border-radius: 20px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 96vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 24px 80px rgba(0,0,0,.35);
+    animation: lmSlide .3s ease;
+  }
+  @keyframes lmSlide {
+    from { transform: translateY(28px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .lm-close {
+    position: absolute; top: 12px; right: 14px;
+    background: rgba(0,0,0,.07); border: none;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 18px; cursor: pointer; color: #555;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+    transition: background .15s;
+  }
+  .lm-close:hover { background: rgba(0,0,0,.14); }
+  .lm-head {
+    background: linear-gradient(135deg, #0b7a75 0%, #065f5b 50%, #c9831f 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 24px 22px;
+    text-align: center;
+    color: #fff;
+  }
+  .lm-head-icon { font-size: 2.8rem; margin-bottom: 8px; }
+  .lm-head-title { font-size: 1.35rem; font-weight: 800; margin-bottom: 4px; }
+  .lm-head-sub   { font-size: .85rem; opacity: .85; }
+  .lm-body { padding: 24px; }
+
+  /* Earn section */
+  .lm-earn-teaser {
+    background: #f0faf9;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .lm-earn-teaser-text {
+    font-size: .84rem;
+    color: #444;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .lm-earn-teaser-text strong { color: #0b7a75; display: block; margin-bottom: 3px; font-size: .88rem; }
+  .lm-earn-toggle-btn {
+    background: #0b7a75;
+    color: #fff;
+    border: none;
+    padding: 9px 14px;
+    border-radius: 9px;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background .15s;
+  }
+  .lm-earn-toggle-btn:hover { background: #065f5b; }
+  .lm-earn-dropdown {
+    display: none;
+    background: #fff;
+    border: 1.5px solid #d4ede9;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: -10px;
+    margin-bottom: 18px;
+  }
+  .lm-earn-dropdown.open { display: block; }
+  .lm-earn-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: .84rem;
+  }
+  .lm-earn-row:last-child { border-bottom: none; }
+  .lm-earn-row-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .lm-earn-row-title { font-weight: 700; color: #0d2137; }
+  .lm-earn-row-desc  { font-size: .72rem; color: #888; margin-top: 1px; }
+
+  /* Form */
+  .lm-form-group { margin-bottom: 14px; }
+  .lm-label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  .lm-label span.req { color: #e74c3c; }
+  .lm-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: .9rem;
+    font-family: inherit;
+    color: #1a1a1a;
+    transition: border .2s;
+    background: #fff;
+  }
+  .lm-input:focus { outline: none; border-color: #0b7a75; box-shadow: 0 0 0 3px rgba(11,122,117,.08); }
+  .lm-input::placeholder { color: #bbb; }
+  .lm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* Radio visitor type */
+  .lm-radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .lm-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: .88rem;
+    font-weight: 600;
+    transition: border .15s, background .15s;
+  }
+  .lm-radio-label input { display: none; }
+  .lm-radio-label.selected,
+  .lm-radio-label:has(input:checked) {
+    border-color: #0b7a75;
+    background: #f0faf9;
+    color: #0b7a75;
+  }
+  .lm-radio-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid #ccc; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: border .15s;
+  }
+  .lm-radio-label:has(input:checked) .lm-radio-dot {
+    border-color: #0b7a75;
+    background: #0b7a75;
+  }
+  .lm-radio-label:has(input:checked) .lm-radio-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  /* Date row (shown only for tourist/snowbird) */
+  .lm-dates-row { display: none; }
+  .lm-dates-row.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lm-date-hint { font-size: .7rem; color: #888; margin-top: 4px; }
+
+  /* Checkboxes */
+  .lm-checks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .lm-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 11px;
+    border: 2px solid #e5e7eb;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: .82rem;
+    font-weight: 600;
+    transition: border .15s, background .15s;
+  }
+  .lm-check-label input { display: none; }
+  .lm-check-label:has(input:checked) {
+    border-color: #0b7a75;
+    background: #f0faf9;
+    color: #0b7a75;
+  }
+  .lm-check-box {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 2px solid #ccc; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; transition: all .15s;
+  }
+  .lm-check-label:has(input:checked) .lm-check-box {
+    background: #0b7a75; border-color: #0b7a75; color: #fff;
+  }
+  .lm-check-label:has(input:checked) .lm-check-box::after { content: '✓'; }
+
+  /* Consent */
+  .lm-consent {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #fffbf0;
+    border: 1.5px solid #f5a623;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 14px;
+  }
+  .lm-consent input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: #0b7a75;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* Submit */
+  .lm-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #0b7a75, #14B8A6);
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+    margin-bottom: 14px;
+  }
+  .lm-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(11,122,117,.4); }
+
+  /* SMS disclosure */
+  .lm-disclosure {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: .7rem;
+    color: #666;
+    line-height: 1.6;
+    border-left: 3px solid #0b7a75;
+  }
+  .lm-disclosure strong { color: #333; display: block; margin-bottom: 6px; }
+
+  /* Success */
+  .lm-success {
+    display: none;
+    text-align: center;
+    padding: 32px 24px;
+  }
+  .lm-success-icon { font-size: 3.5rem; margin-bottom: 12px; }
+  .lm-success-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; color: #0b7a75; }
+  .lm-success-text  { font-size: .9rem; color: #555; line-height: 1.6; }
+
+  /* Section divider label */
+  .lm-section-label {
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #aaa;
+    margin-bottom: 8px;
+    margin-top: 18px;
+  }
+
+  /* ══ CALENDAR FULL MODAL ══ */
+  .cal-modal-wrap {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 9000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .cal-modal-wrap.open { display: flex; }
+
+  /* ══ MOBILE ══ */
+  @media(max-width:640px) {
+    .hero-title  { font-size: 1.8rem; }
+    .gcr-hero    { min-height: 340px; }
+    .hero-sub    { display: none; }
+    .stats-inner { gap: 20px; }
+    .cat-grid    { gap: 8px; }
+    .section-title { font-size: 1.4rem; }
+    .lm-row { grid-template-columns: 1fr; }
+    .lm-checks-grid { grid-template-columns: 1fr; }
+    .lm-earn-grid   { grid-template-columns: 1fr; }
+  }
+  @media(max-width:400px) {
+    .cat-tile-top  { height: 52px; font-size: 1.4rem; }
+    .cat-tile-name { font-size: .75rem; }
+    .cat-tile-desc { display: none; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER  (gcr-real.html style)
+══════════════════════════════════════════ -->
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+
+  <!-- Loyalty + Calendar action strip -->
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">
+      ⭐ Join Our Loyalty Program 🎁
+    </button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">
+      📅 Master Calendar 🎉
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HERO  (single search bar — no duplicate)
+══════════════════════════════════════════ -->
+<section class="gcr-hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Orange Beach · Gulf Shores · Fort Morgan</div>
+    <h1 class="hero-title">Find Anything<br>on the Gulf Coast</h1>
+    <p class="hero-sub">Restaurants, happy hours, events, boat rentals, live music &amp; more</p>
+
+    <div class="hero-search-box">
+      <input type="text" id="heroSearch"
+        placeholder='Try "crab legs", "happy hour", "boat rental", "live music"...'
+        autocomplete="off">
+      <button class="hero-search-submit" onclick="doHeroSearch()">🔍</button>
+      <div class="hero-search-dropdown" id="heroDropdown"></div>
+    </div>
+
+    <div class="hero-quick-tags">
+      <span class="hero-tag" onclick="doTagSearch('crab legs')">🦀 Crab Legs</span>
+      <span class="hero-tag" onclick="doTagSearch('happy hour')">🍻 Happy Hour</span>
+      <span class="hero-tag" onclick="doTagSearch('seafood')">🐟 Seafood</span>
+      <span class="hero-tag" onclick="doTagSearch('boat rental')">🚤 Boat Rental</span>
+      <span class="hero-tag" onclick="doTagSearch('live music')">🎸 Live Music</span>
+      <span class="hero-tag" onclick="doTagSearch('all you can eat')">🍽️ All You Can Eat</span>
+      <span class="hero-tag" onclick="doTagSearch('family friendly')">👨‍👩‍👧 Family Friendly</span>
+      <span class="hero-tag" onclick="doTagSearch('fishing')">🎣 Fishing</span>
+    </div>
+  </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <path d="M0,32 C240,0 480,48 720,32 C960,16 1200,48 1440,32 L1440,48 L0,48 Z" fill="#ffffff"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ══════════ STATS BAR ══════════ -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-num" id="statBiz">200+</div><div class="stat-lbl">Businesses</div></div>
+    <div class="stat-item"><div class="stat-num">9</div><div class="stat-lbl">Categories</div></div>
+    <div class="stat-item"><div class="stat-num" id="statEvents">25+</div><div class="stat-lbl">Events This Month</div></div>
+    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Use</div></div>
+  </div>
+</div>
+
+<!-- ══════════ WEATHER ══════════ -->
+<div style="background:#fff;padding:16px 20px 0;">
+  <div class="hcont">
+    <div class="weather-card" id="weatherCard">
+      <div class="weather-main">
+        <div>
+          <div class="weather-label">Gulf Shores, AL</div>
+          <div class="weather-temp-big" id="wTemp">--°</div>
+          <div class="weather-condition" id="wCond">Loading…</div>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <div class="weather-icon" id="wIcon">🌤️</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.75);margin-top:4px;"><span id="wHi">--°</span> / <span id="wLo">--°</span></div>
+      </div>
+      <div class="weather-details">
+        <div>💧 <span id="wHumid">--%</span></div>
+        <div>💨 <span id="wWind">-- mph</span></div>
+        <div>🌊 <span id="wFeels">Feels --°</span></div>
+        <div id="wBeachFlag">🏖️ Beach Open</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ BROWSE BY CATEGORY ══════════ -->
+<section class="home-section bg-sand">
+  <div class="hcont">
+    <div class="section-head">
+      <div class="section-label">Browse by Category</div>
+      <h2 class="section-title">What Are You Looking For?</h2>
+      <p class="section-sub">Tap a category to see everything in it</p>
+    </div>
+    <div class="cat-grid">
+      <a href="restaurants.html" class="cat-tile">
+        <div class="cat-tile-top ct-restaurants">🍽️</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Restaurants</div>
+          <div class="cat-tile-desc">Seafood, Southern, waterfront &amp; more</div>
+          <span class="cat-tile-count">62 listings →</span>
+        </div>
+      </a>
+      <a href="coffee-sweets.html" class="cat-tile">
+        <div class="cat-tile-top ct-coffee">☕</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Coffee &amp; Sweets</div>
+          <div class="cat-tile-desc">Coffee shops, ice cream &amp; bakeries</div>
+          <span class="cat-tile-count">18 listings →</span>
+        </div>
+      </a>
+      <a href="happy-hours.html" class="cat-tile">
+        <div class="cat-tile-top ct-happy">🍻</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Happy Hours</div>
+          <div class="cat-tile-desc">Drink deals &amp; food specials near you</div>
+          <span class="cat-tile-count">34 listings →</span>
+        </div>
+      </a>
+      <a href="specials.html" class="cat-tile">
+        <div class="cat-tile-top ct-specials">🏷️</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Specials</div>
+          <div class="cat-tile-desc">All you can eat, daily deals &amp; more</div>
+          <span class="cat-tile-count">28 listings →</span>
+        </div>
+      </a>
+      <a href="events.html" class="cat-tile">
+        <div class="cat-tile-top ct-events">🎉</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Events</div>
+          <div class="cat-tile-desc">Live music, concerts &amp; festivals</div>
+          <span class="cat-tile-count" id="eventsCount">12 this month →</span>
+        </div>
+      </a>
+      <a href="things-to-do.html" class="cat-tile">
+        <div class="cat-tile-top ct-thingstodo">🎯</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Things To Do</div>
+          <div class="cat-tile-desc">Fishing, boat rentals, tours &amp; fun</div>
+          <span class="cat-tile-count">45 listings →</span>
+        </div>
+      </a>
+      <a href="shopping.html" class="cat-tile">
+        <div class="cat-tile-top ct-shopping">🛍️</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Shopping</div>
+          <div class="cat-tile-desc">Boutiques, souvenirs &amp; gifts</div>
+          <span class="cat-tile-count">22 listings →</span>
+        </div>
+      </a>
+      <a href="other.html" class="cat-tile">
+        <div class="cat-tile-top ct-other">✨</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Other</div>
+          <div class="cat-tile-desc">Photography, services &amp; more</div>
+          <span class="cat-tile-count">15 listings →</span>
+        </div>
+      </a>
+      <a href="feed.html" class="cat-tile">
+        <div class="cat-tile-top ct-feed">📡</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Live Feed</div>
+          <div class="cat-tile-desc">Photos, reviews &amp; what's happening</div>
+          <span class="cat-tile-count">Live →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FEATURED ══════════ -->
+<section class="home-section bg-white">
+  <div class="hcont">
+    <div class="section-head" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="section-label">Handpicked</div>
+        <h2 class="section-title">Featured This Week</h2>
+      </div>
+      <a href="restaurants.html" style="font-size:.85rem;font-weight:700;color:#0b7a75;text-decoration:none;">See All →</a>
+    </div>
+    <div class="featured-scroller-wrap">
+      <div class="featured-scroller" id="featuredRow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MASTER CALENDAR ══════════ -->
+<section class="home-section bg-sand">
+  <div class="hcont">
+    <div class="section-head" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div class="section-label">What's On</div>
+        <h2 class="section-title">Events &amp; Live Music</h2>
+        <p class="section-sub">Don't miss a thing this month</p>
+      </div>
+      <a href="events.html" style="font-size:.85rem;font-weight:700;color:#0b7a75;text-decoration:none;">All Events →</a>
+    </div>
+    <div class="calendar-wrap">
+      <div class="cal-widget">
+        <div class="cal-header-row">
+          <button class="cal-nav-btn" id="calPrev">‹</button>
+          <div class="cal-month-lbl" id="calMonthLbl">March 2026</div>
+          <button class="cal-nav-btn" id="calNext">›</button>
+        </div>
+        <div class="cal-dow">
+          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
+          <span>Th</span><span>Fr</span><span>Sa</span>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+      </div>
+      <div class="events-panel">
+        <div class="events-panel-head">
+          <div class="events-panel-title" id="eventsTitle">Upcoming Events</div>
+          <a href="events.html" class="events-see-all">View All →</a>
+        </div>
+        <div id="eventsList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ LOCATION DISTRICTS ══════════ -->
+<section class="home-section bg-white">
+  <div class="hcont">
+    <div class="section-head">
+      <div class="section-label">Location Guides</div>
+      <h2 class="section-title">Entertainment Districts</h2>
+      <p class="section-sub">Everything at The Wharf and OWA — all in one place</p>
+    </div>
+    <div class="districts-grid">
+      <a href="the-wharf.html" class="district-card"
+         style="background:linear-gradient(135deg,#0d2137,#0b7a75);">
+        <div class="district-emoji">⚓</div>
+        <div class="district-body">
+          <div class="district-name">The Wharf</div>
+          <div class="district-desc">Orange Beach's waterfront marina district — dining, shops, concerts &amp; boat tours</div>
+          <span class="district-link">Explore The Wharf →</span>
+        </div>
+      </a>
+      <a href="owa.html" class="district-card"
+         style="background:linear-gradient(135deg,#2e4057,#6c3483);">
+        <div class="district-emoji">🎢</div>
+        <div class="district-body">
+          <div class="district-name">OWA</div>
+          <div class="district-desc">Theme parks, restaurants, shops &amp; live entertainment — minutes from the beach</div>
+          <span class="district-link">Explore OWA →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TRIP CTA ══════════ -->
+<section class="home-section bg-navy" style="padding:48px 0;">
+  <div class="hcont">
+    <div class="trip-cta-inner">
+      <div class="trip-cta-text">
+        <h2>Planning Your Gulf Coast Trip?</h2>
+        <p>Get a personal trip link — your own saved places, bookings, and co-op rewards. One link, the whole trip.</p>
+        <div class="trip-cta-btns">
+          <a href="trip.html" class="btn-white">Get My Trip Link</a>
+          <a href="restaurants.html" class="btn-ghost-white">Browse Everything</a>
+        </div>
+      </div>
+      <div style="font-size:4rem;opacity:.6;flex-shrink:0;">🏖️</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CLAIM CTA ══════════ -->
+<section style="background:#f5f6f8;padding:32px 20px;text-align:center;">
+  <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:6px;">Own a Business on the Gulf Coast?</h3>
+  <p style="font-size:.88rem;color:#666;margin-bottom:18px;">Claim your free listing and get in front of thousands of tourists every week.</p>
+  <a href="claim.html" style="background:#0b7a75;color:#fff;padding:12px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:.9rem;">Claim Your Business Free</a>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer style="background:#0d2137;color:rgba(255,255,255,.7);padding:40px 20px 24px;">
+  <div class="hcont">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:32px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:10px;">GULF<span style="color:#5dd9d4;">COAST</span>RADAR</div>
+        <p style="font-size:.8rem;line-height:1.6;max-width:260px;">The local guide for Orange Beach, Gulf Shores &amp; the Alabama Gulf Coast.</p>
+      </div>
+      <div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5dd9d4;margin-bottom:10px;">Explore</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem;">
+          <a href="restaurants.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Restaurants</a>
+          <a href="things-to-do.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Things To Do</a>
+          <a href="events.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Events</a>
+          <a href="happy-hours.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Happy Hours</a>
+          <a href="loyalty.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Rewards</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5dd9d4;margin-bottom:10px;">Locations</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem;">
+          <a href="the-wharf.html" style="color:rgba(255,255,255,.7);text-decoration:none;">The Wharf</a>
+          <a href="owa.html" style="color:rgba(255,255,255,.7);text-decoration:none;">OWA</a>
+          <a href="search.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Search</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5dd9d4;margin-bottom:10px;">For Businesses</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:.82rem;">
+          <a href="claim.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Claim Listing</a>
+          <a href="loyalty.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Join Co-Op</a>
+          <a href="trip.html" style="color:rgba(255,255,255,.7);text-decoration:none;">Trip Links</a>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.75rem;">
+      <span>© 2026 Gulf Coast Radar · Orange Beach · Gulf Shores, AL</span>
+      <span>Powered by <span style="color:#5dd9d4;font-weight:700;">CyberCheck</span></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     LOYALTY SIGNUP MODAL
+══════════════════════════════════════════ -->
+<div class="lm-overlay" id="lmOverlay">
+  <div class="lm-modal" id="lmModal">
+    <button class="lm-close" onclick="closeSignupModal()">✕</button>
+
+    <!-- Success state -->
+    <div class="lm-success" id="lmSuccess">
+      <div class="lm-success-icon">🎉</div>
+      <div class="lm-success-title">You're In!</div>
+      <div class="lm-success-text">
+        ✅ Check your texts! Your personal Gulf Coast trip guide link is on its way.<br><br>
+        Your AI assistant knows every restaurant, boat rental, and activity on the Gulf Coast — just ask!
+      </div>
+      <button onclick="closeSignupModal()" style="margin-top:20px;background:#0b7a75;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;">
+        Start Exploring →
+      </button>
+    </div>
+
+    <!-- Form state -->
+    <div id="lmFormState">
+      <div class="lm-head">
+        <div class="lm-head-icon">🏖️</div>
+        <div class="lm-head-title">Sign Up for Exclusive Deals!</div>
+        <div class="lm-head-sub">Get special offers sent directly to your phone</div>
+      </div>
+
+      <div class="lm-body">
+
+        <!-- Earn section — teaser + dropdown -->
+        <div class="lm-earn-teaser">
+          <div class="lm-earn-teaser-text">
+            <strong>🏖️ Capture Your Vacation &amp; Earn Rewards</strong>
+            Leave reviews, snap photos around town, check in at local spots — every action earns rewards you can redeem anywhere in the Gulf Coast co-op.
+          </div>
+          <button class="lm-earn-toggle-btn" onclick="toggleEarnList(this)">See How ▾</button>
+        </div>
+        <div class="lm-earn-dropdown" id="lmEarnList">
+          <div class="lm-earn-row">
+            <div class="lm-earn-row-icon">⭐</div>
+            <div>
+              <div class="lm-earn-row-title">Write a Review</div>
+              <div class="lm-earn-row-desc">Share your experience at any Gulf Coast business</div>
+            </div>
+          </div>
+          <div class="lm-earn-row">
+            <div class="lm-earn-row-icon">📸</div>
+            <div>
+              <div class="lm-earn-row-title">Upload Photos Around Town</div>
+              <div class="lm-earn-row-desc">Capture the Gulf Coast — beaches, food, sunsets, adventures</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form fields -->
+        <div class="lm-form-group">
+          <label class="lm-label" for="lmName">Name <span class="req">*</span></label>
+          <input type="text" id="lmName" class="lm-input" placeholder="Enter your name" autocomplete="name">
+        </div>
+
+        <div class="lm-form-group">
+          <label class="lm-label" for="lmPhone">Phone Number <span class="req">*</span></label>
+          <input type="tel" id="lmPhone" class="lm-input" placeholder="(251) 555-0100" maxlength="14" autocomplete="tel">
+          <div style="font-size:.7rem;color:#888;margin-top:4px;">We'll send exclusive deals via text</div>
+        </div>
+
+        <div class="lm-row">
+          <div class="lm-form-group">
+            <label class="lm-label" for="lmEmail">Email <span style="font-weight:400;color:#999;">(Optional)</span></label>
+            <input type="email" id="lmEmail" class="lm-input" placeholder="your@email.com" autocomplete="email">
+          </div>
+          <div class="lm-form-group">
+            <label class="lm-label" for="lmZip">Zip Code <span style="font-weight:400;color:#999;">(Optional)</span></label>
+            <input type="text" id="lmZip" class="lm-input" placeholder="36561" maxlength="5" inputmode="numeric">
+          </div>
+        </div>
+
+        <!-- Visitor type -->
+        <div class="lm-form-group">
+          <label class="lm-label">I am a: <span class="req">*</span></label>
+          <div class="lm-radio-group">
+            <label class="lm-radio-label" onclick="selectType(this,'tourist')">
+              <input type="radio" name="visitorType" value="tourist">
+              <div class="lm-radio-dot"></div>
+              🏖️ Tourist <span style="font-weight:400;color:#888;font-size:.82rem;">(Visiting for a few days)</span>
+            </label>
+            <label class="lm-radio-label" onclick="selectType(this,'snowbird')">
+              <input type="radio" name="visitorType" value="snowbird">
+              <div class="lm-radio-dot"></div>
+              ❄️ Snowbird <span style="font-weight:400;color:#888;font-size:.82rem;">(Here for the season)</span>
+            </label>
+            <label class="lm-radio-label" onclick="selectType(this,'local')">
+              <input type="radio" name="visitorType" value="local">
+              <div class="lm-radio-dot"></div>
+              🏠 Local <span style="font-weight:400;color:#888;font-size:.82rem;">(I live here)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Check-in / Check-out (shown for tourist/snowbird) -->
+        <div class="lm-dates-row" id="lmDatesRow">
+          <div class="lm-form-group">
+            <label class="lm-label" for="lmCheckin">Check-in <span class="req">*</span></label>
+            <input type="date" id="lmCheckin" class="lm-input">
+          </div>
+          <div class="lm-form-group">
+            <label class="lm-label" for="lmCheckout">Check-out <span class="req">*</span></label>
+            <input type="date" id="lmCheckout" class="lm-input">
+          </div>
+          <div class="lm-date-hint" style="grid-column:1/-1;">We'll only send you deals during your visit</div>
+        </div>
+
+        <!-- Interests -->
+        <div class="lm-form-group">
+          <label class="lm-label">What are you interested in? <span class="req">*</span></label>
+          <div class="lm-checks-grid">
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="restaurants">
+              <div class="lm-check-box"></div>
+              🍽️ Restaurant Deals
+            </label>
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="happyhours">
+              <div class="lm-check-box"></div>
+              🍹 Happy Hours
+            </label>
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="entertainment">
+              <div class="lm-check-box"></div>
+              🎵 Live Entertainment
+            </label>
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="activities">
+              <div class="lm-check-box"></div>
+              🎯 Activities &amp; Attractions
+            </label>
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="events">
+              <div class="lm-check-box"></div>
+              🎉 Special Events
+            </label>
+            <label class="lm-check-label">
+              <input type="checkbox" name="interest" value="shopping">
+              <div class="lm-check-box"></div>
+              🛍️ Shopping Deals
+            </label>
+          </div>
+        </div>
+
+        <!-- SMS Consent -->
+        <label class="lm-consent">
+          <input type="checkbox" id="lmConsent">
+          I agree to receive promotional text messages from Gulf Coast Radar and participating businesses. <span class="req">*</span>
+        </label>
+
+        <button class="lm-submit-btn" onclick="submitSignup()">Sign Up for Exclusive Deals 🎁</button>
+
+        <!-- SMS Disclosure -->
+        <div class="lm-disclosure">
+          <strong>📱 SMS Program Disclosure</strong>
+          By signing up and checking the consent box, you agree to receive recurring automated promotional and personalized marketing text messages from Gulf Coast Radar and participating local businesses at the phone number provided.<br><br>
+          <strong>Frequency:</strong> Message frequency varies based on your selected interests and when you're in town. We'll only send deals during your specified visit dates.<br><br>
+          <strong>Consent not required:</strong> Consent is not a condition to purchase. Message and data rates may apply.<br><br>
+          <strong>Opt-out:</strong> Reply <strong>STOP</strong> to cancel at any time. Reply <strong>HELP</strong> for help.
+        </div>
+
+      </div><!-- /lm-body -->
+    </div><!-- /lmFormState -->
+  </div>
+</div>
+
+<!-- ══════════ CALENDAR FULL MODAL ══════════ -->
+<div class="cal-modal-wrap" id="calModalWrap">
+  <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;position:relative;">
+    <button onclick="closeCalendarModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:#0d2137;">📅 Event Calendar</h2>
+    <div id="calModalContent"></div>
+  </div>
+</div>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+/* ══════════════════════════════════════════
+   HOME PAGE JS
+══════════════════════════════════════════ */
+function initHomePage() {
+  if (typeof GCR === 'undefined') return;
+
+  /* ── Stats ── */
+  const bizCount = GCR.businesses.length;
+  const evCount  = GCR.getUpcomingEvents().length;
+  document.getElementById('statBiz').textContent    = bizCount + '+';
+  document.getElementById('statEvents').textContent = evCount + '+';
+  document.getElementById('eventsCount').textContent = evCount + ' this month →';
+
+  /* ── Featured ── */
+  const featRow = document.getElementById('featuredRow');
+  if (featRow) {
+    const colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a' };
+    GCR.getFeatured().forEach(biz => {
+      const bg = colors[biz.category] || '#0b7a75';
+      featRow.innerHTML += `
+        <a href="business.html?id=${biz.slug||biz.id}" class="feat-card">
+          <div class="feat-card-top" style="background:linear-gradient(135deg,${bg},${bg}cc);">
+            <span style="font-size:3rem;">${biz.emoji||'🏪'}</span>
+            <span class="feat-badge">Featured</span>
+          </div>
+          <div class="feat-card-body">
+            <div class="feat-card-name">${biz.name}</div>
+            <div class="feat-card-cat">${biz.category.replace('-',' ')}</div>
+            <div class="feat-card-desc">${biz.tagline||biz.description||''}</div>
+            <div class="feat-card-meta">
+              <span>${biz.address||''}</span>
+              <span class="feat-card-rating">★ ${biz.rating||''}</span>
+            </div>
+          </div>
+        </a>`;
+    });
+  }
+
+  /* ── Calendar ── */
+  let calYear  = new Date().getFullYear();
+  let calMonth = new Date().getMonth() + 1;
+  let selDate  = new Date().toISOString().split('T')[0];
+
+  function buildCal(y, m) {
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('calMonthLbl').textContent = `${months[m-1]} ${y}`;
+    const events     = GCR.getEventsByMonth(y, m);
+    const eventDates = new Set(events.map(e => e.date));
+    const firstDay   = new Date(y, m-1, 1).getDay();
+    const daysInMonth= new Date(y, m, 0).getDate();
+    const today      = new Date().toISOString().split('T')[0];
+    let html = '';
+    for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      html += `<div class="cal-day${eventDates.has(ds)?' has-event':''}${ds===today?' today':''}${ds===selDate?' selected':''}" onclick="selectDay('${ds}')">${d}${eventDates.has(ds)?'<span class="cal-dot"></span>':''}</div>`;
+    }
+    document.getElementById('calDays').innerHTML = html;
+    renderEvents(selDate, y, m);
+  }
+
+  window.selectDay = function(ds) { selDate = ds; buildCal(calYear, calMonth); };
+
+  function renderEvents(ds, y, m) {
+    const list    = document.getElementById('eventsList');
+    const titleEl = document.getElementById('eventsTitle');
+    let events = GCR.getEventsByDate(ds);
+    if (events.length) {
+      const d = new Date(ds + 'T12:00:00');
+      titleEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    } else {
+      events = GCR.getUpcomingEvents(6);
+      titleEl.textContent = 'Upcoming Events';
+    }
+    if (!events.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem;">No upcoming events.</div>';
+      return;
+    }
+    const catColor = { concert:'#6c3483','live-music':'#0b7a75',festival:'#c9831f',sports:'#1a6496',holiday:'#c0392b',dining:'#065f5b','bar-event':'#e67e22',special:'#2e4057' };
+    list.innerHTML = events.map(e => {
+      const col = catColor[e.category] || '#555';
+      return `<div class="event-row" onclick="${e.bizId ? `window.location='business.html?id=${e.bizId}'` : ''}">
+        <div class="event-emoji-wrap">${e.emoji||'🎉'}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="event-row-title">${e.title}</div>
+          <div class="event-row-meta">${e.time} · ${e.venue}</div>
+          <div class="event-row-cover">${e.cover}</div>
+        </div>
+        <span class="event-row-badge" style="background:${col}18;color:${col};">${e.category.replace('-',' ')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('calPrev').addEventListener('click', () => {
+    calMonth--; if(calMonth<1){calMonth=12;calYear--;} selDate=null; buildCal(calYear,calMonth);
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    calMonth++; if(calMonth>12){calMonth=1;calYear++;} selDate=null; buildCal(calYear,calMonth);
+  });
+  buildCal(calYear, calMonth);
+
+  /* ── Hero search ── */
+  const heroInput = document.getElementById('heroSearch');
+  const heroDrop  = document.getElementById('heroDropdown');
+  heroInput.addEventListener('input', () => {
+    const q = heroInput.value.trim();
+    if (q.length < 2) { heroDrop.classList.remove('open'); return; }
+    const results = GCR.search(q).slice(0, 7);
+    if (!results.length) { heroDrop.classList.remove('open'); return; }
+    heroDrop.innerHTML = results.map(b =>
+      `<a href="business.html?id=${b.slug||b.id}" class="sri-item">
+        <span class="sri-emoji">${b.emoji||'🏪'}</span>
+        <div>
+          <div class="sri-name">${b.name}</div>
+          <div class="sri-meta">${b.category.replace('-',' ')} · ${b.address||''}</div>
+        </div>
+      </a>`
+    ).join('');
+    heroDrop.classList.add('open');
+  });
+  document.addEventListener('click', e => {
+    if (!heroInput.contains(e.target) && !heroDrop.contains(e.target)) heroDrop.classList.remove('open');
+  });
+
+  /* ── Loyalty popup (first visit, 3s delay) ── */
+  if (!localStorage.getItem('gcr_loyalty_seen')) {
+    setTimeout(openSignupModal, 3000);
+  }
+}
+
+// Wait for live data before rendering
+document.addEventListener('gcr:loaded', initHomePage);
+// Fallback if already loaded
+if (typeof GCR !== 'undefined' && GCR.loaded) initHomePage();
+
+/* ── Search handlers ── */
+window.doHeroSearch = function() {
+  const q = document.getElementById('heroSearch').value.trim();
+  if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+};
+window.doTagSearch = function(q) {
+  window.location.href = `search.html?q=${encodeURIComponent(q)}`;
+};
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('heroSearch').addEventListener('keydown', e => { if(e.key==='Enter') doHeroSearch(); });
+});
+
+/* ── Calendar modal ── */
+window.openCalendarModal = function() {
+  if (typeof GCR === 'undefined') return;
+  const wrap = document.getElementById('calModalWrap');
+  wrap.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const events = GCR.getUpcomingEvents(30);
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const grouped = {};
+  events.forEach(e => {
+    const d = new Date(e.date + 'T12:00:00');
+    const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(e);
+  });
+  const catColor = { concert:'#6c3483','live-music':'#0b7a75',festival:'#c9831f',sports:'#1a6496',holiday:'#c0392b',dining:'#065f5b','bar-event':'#e67e22' };
+  let html = '';
+  for (const [month, evs] of Object.entries(grouped)) {
+    html += `<div style="margin-bottom:28px;"><div style="font-size:1rem;font-weight:800;color:#0b7a75;border-bottom:2px solid #0b7a75;padding-bottom:8px;margin-bottom:14px;">${month}</div>`;
+    evs.forEach(e => {
+      const d = new Date(e.date + 'T12:00:00');
+      const day = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const col = catColor[e.category] || '#555';
+      html += `<div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0f0;align-items:flex-start;">
+        <div style="font-size:2rem;flex-shrink:0;">${e.emoji||'🎉'}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.95rem;">${e.title}</div>
+          <div style="font-size:.78rem;color:#888;margin-top:2px;">${day} · ${e.time} · ${e.venue}</div>
+          ${e.description?`<div style="font-size:.78rem;color:#666;margin-top:4px;line-height:1.4;">${e.description}</div>`:''}
+          <div style="margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:.75rem;font-weight:700;color:${col};background:${col}18;padding:2px 8px;border-radius:12px;">${e.category.replace('-',' ')}</span>
+            <span style="font-size:.78rem;font-weight:700;color:#0b7a75;">${e.cover}</span>
+            ${e.tickets?`<a href="${e.tickets}" target="_blank" style="font-size:.75rem;background:#0b7a75;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;">Tickets →</a>`:''}
+          </div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+  document.getElementById('calModalContent').innerHTML = html || '<div style="padding:32px;text-align:center;color:#aaa;">No upcoming events found.</div>';
+};
+window.closeCalendarModal = function() {
+  document.getElementById('calModalWrap').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+/* ══ LOYALTY SIGNUP MODAL ══ */
+window.openSignupModal = function() {
+  document.getElementById('lmOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeSignupModal = function() {
+  localStorage.setItem('gcr_loyalty_seen', '1');
+  document.getElementById('lmOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+/* Earn list toggle */
+window.toggleEarnList = function(btn) {
+  const list = document.getElementById('lmEarnList');
+  const open = list.classList.toggle('open');
+  btn.textContent = open ? 'Hide ▴' : 'See How ▾';
+};
+
+/* Show/hide date fields based on visitor type */
+window.selectType = function(label, type) {
+  document.querySelectorAll('.lm-radio-label').forEach(l => l.classList.remove('selected'));
+  label.classList.add('selected');
+  const datesRow = document.getElementById('lmDatesRow');
+  datesRow.classList.toggle('visible', type === 'tourist' || type === 'snowbird');
+};
+
+/* Phone formatter */
+document.addEventListener('DOMContentLoaded', () => {
+  const ph = document.getElementById('lmPhone');
+  if (ph) {
+    ph.addEventListener('input', function() {
+      let v = this.value.replace(/\D/g,'').slice(0,10);
+      if (v.length >= 7)      v = `(${v.slice(0,3)}) ${v.slice(3,6)}-${v.slice(6)}`;
+      else if (v.length >= 4) v = `(${v.slice(0,3)}) ${v.slice(3)}`;
+      else if (v.length > 0)  v = `(${v}`;
+      this.value = v;
+    });
+  }
+});
+
+window.submitSignup = function() {
+  const name    = document.getElementById('lmName').value.trim();
+  const phone   = document.getElementById('lmPhone').value.replace(/\D/g,'');
+  const consent = document.getElementById('lmConsent').checked;
+  const type    = document.querySelector('input[name="visitorType"]:checked')?.value;
+  const interests = [...document.querySelectorAll('input[name="interest"]:checked')].map(i => i.value);
+
+  if (!name) { alert('Please enter your name.'); return; }
+  if (phone.length < 10) { alert('Please enter a valid phone number.'); return; }
+  if (!type) { alert('Please select your visitor type.'); return; }
+  if (!interests.length) { alert('Please select at least one interest.'); return; }
+  if (!consent) { alert('Please agree to receive text messages to continue.'); return; }
+
+  /* Check date fields if tourist/snowbird */
+  if (type === 'tourist' || type === 'snowbird') {
+    const checkin  = document.getElementById('lmCheckin').value;
+    const checkout = document.getElementById('lmCheckout').value;
+    if (!checkin || !checkout) { alert('Please enter your check-in and check-out dates.'); return; }
+  }
+
+  const checkin  = document.getElementById('lmCheckin')?.value || null;
+  const checkout = document.getElementById('lmCheckout')?.value || null;
+
+  localStorage.setItem('gcr_loyalty_member', phone);
+  localStorage.setItem('gcr_loyalty_seen', '1');
+  localStorage.setItem('gcr_loyalty_type', type);
+  localStorage.setItem('gcr_loyalty_interests', interests.join(','));
+
+  /* register with concierge API — sends SMS with personal chat link */
+  fetch('https://cybercheck-api-database.vercel.app/api/gcr/tourist/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone: '+1' + phone, interests, visitor_type: type, checkin, checkout, sms_consent: true })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.session_id) {
+      localStorage.setItem('gcr_concierge_session', data.session_id);
+      localStorage.setItem('gcr_concierge_url', data.chat_url);
+    }
+  })
+  .catch(e => console.warn('Concierge register failed:', e));
+
+  /* Show success */
+  document.getElementById('lmFormState').style.display = 'none';
+  document.getElementById('lmSuccess').style.display = 'block';
+};
+
+/* Install App (PWA) */
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  if (btn) btn.style.display = 'inline-flex';
+});
+window.installApp = function() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+  }
+};
+
+/* ── Weather ── */
+fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.6003&current_weather=true&hourly=relativehumidity_2m,apparent_temperature&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&forecast_days=1')
+  .then(r => r.json())
+  .then(d => {
+    const cw = d.current_weather;
+    const tempF   = Math.round(cw.temperature);
+    const windMph = Math.round(cw.windspeed);
+    const hiF     = Math.round(d.daily.temperature_2m_max[0]);
+    const loF     = Math.round(d.daily.temperature_2m_min[0]);
+    const icons = [
+      [0,'☀️','Clear'],[1,'🌤️','Mostly Clear'],[2,'⛅','Partly Cloudy'],[3,'☁️','Overcast'],
+      [45,'🌫️','Foggy'],[51,'🌦️','Drizzle'],[61,'🌧️','Rain'],
+      [65,'🌧️','Heavy Rain'],[71,'❄️','Snow'],[80,'🌦️','Showers'],[95,'⛈️','Thunderstorm']
+    ];
+    const wc = cw.weathercode;
+    const wInfo = [...icons].reverse().find(([code]) => wc >= code) || [0,'🌤️','Clear'];
+    document.getElementById('wTemp').textContent  = `${tempF}°F`;
+    document.getElementById('wCond').textContent  = wInfo[2];
+    document.getElementById('wIcon').textContent  = wInfo[1];
+    document.getElementById('wHi').textContent    = `${hiF}°`;
+    document.getElementById('wLo').textContent    = `${loF}°`;
+    document.getElementById('wWind').textContent  = `${windMph} mph`;
+    document.getElementById('wFeels').textContent = `Feels ${tempF}°F`;
+    if (windMph > 20) document.getElementById('wBeachFlag').textContent = '🚩 Check Beach Flags';
+  })
+  .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
+</script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search — Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Search bar (inline, tight) ── */
+    .search-header {
+      background: var(--navy); padding: 24px 0;
+    }
+    .search-row {
+      display: flex; gap: 0; max-width: 760px;
+      background: #fff; border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    }
+    .search-row input {
+      flex: 1; border: none; outline: none; padding: 14px 18px;
+      font-size: .98rem; font-family: var(--font); color: var(--text);
+    }
+    /* Mode buttons beside the search */
+    .search-mode-btns {
+      display: flex; border-left: 1px solid var(--gray-200);
+    }
+    .search-mode-btn {
+      padding: 0 16px; font-size: .8rem; font-weight: 700;
+      color: var(--text-muted); border: none; background: #fff;
+      cursor: pointer; transition: all .15s; border-right: 1px solid var(--gray-200);
+      white-space: nowrap;
+    }
+    .search-mode-btn:hover  { background: var(--sky); color: var(--teal); }
+    .search-mode-btn.active { background: var(--teal); color: #fff; }
+    .search-submit {
+      background: var(--teal); color: #fff; padding: 0 24px;
+      font-size: .9rem; font-weight: 700; border: none; cursor: pointer;
+      transition: background .15s;
+    }
+    .search-submit:hover { background: var(--teal-dark); }
+
+    /* ── Food result card (compact with menu items) ── */
+    .food-result-card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+      margin-bottom: 16px; transition: box-shadow .2s;
+    }
+    .food-result-card:hover { box-shadow: var(--shadow); }
+    .food-result-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; border-bottom: 1px solid var(--gray-100);
+      flex-wrap: wrap;
+    }
+    .food-result-emoji { font-size: 2rem; flex-shrink: 0; }
+    .food-result-info  { flex: 1; }
+    .food-result-info h4 { font-size: 1rem; margin-bottom: 3px; }
+    .food-result-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .food-result-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .food-menu-items { padding: 12px 20px 16px; }
+    .food-menu-items .label {
+      font-size: .7rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .food-item-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 8px 0; border-bottom: 1px solid var(--gray-100); gap: 12px;
+    }
+    .food-item-row:last-child { border-bottom: none; }
+    .food-item-name { font-size: .88rem; font-weight: 600; }
+    .food-item-desc { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .food-item-price { font-size: .85rem; font-weight: 700; color: var(--teal); flex-shrink: 0; }
+
+    /* ── Result type toggle (above results) ── */
+    .result-type-bar {
+      background: #fff; border-bottom: 1px solid var(--gray-200);
+      padding: 10px 0; position: sticky; top: var(--header-h); z-index: 800;
+    }
+    .result-tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+    .result-tabs::-webkit-scrollbar { display: none; }
+    .result-tab {
+      padding: 8px 20px; font-size: .82rem; font-weight: 600;
+      color: var(--text-muted); border-bottom: 3px solid transparent;
+      cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .result-tab:hover  { color: var(--teal); }
+    .result-tab.active { color: var(--teal); border-color: var(--teal); }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center; padding: 60px 20px;
+    }
+    .no-results .big-icon { font-size: 3rem; margin-bottom: 16px; }
+    .no-results h3 { margin-bottom: 8px; }
+
+    /* ── Mobile search ── */
+    @media (max-width: 600px) {
+      .search-row { flex-wrap: wrap; overflow: visible; border-radius: var(--radius-sm); }
+      .search-row input { width: 100%; flex-basis: 100%; padding: 13px 14px; font-size: .9rem; }
+      .search-mode-btns { width: 100%; border-left: none; border-top: 1px solid var(--gray-200); }
+      .search-mode-btn { flex: 1; padding: 10px 4px; font-size: .75rem; }
+      .search-submit { width: 100%; padding: 12px; }
+      .food-result-header { flex-wrap: wrap; gap: 10px; }
+      .food-result-actions { width: 100%; }
+      .food-result-actions .btn { flex: 1; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .search-mode-btn { font-size: .7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
+      <nav class="main-nav">
+        <a href="restaurants.html">Restaurants</a>
+        <a href="things-to-do.html">Things To Do</a>
+        <a href="events.html">Events</a>
+        <a href="happy-hours.html">Happy Hours</a>
+        <a href="specials.html">Specials</a>
+        <a href="feed.html">Feed</a>
+      </nav>
+      <div class="header-actions">
+        <a href="trip.html" class="btn-trip">My Trip Link</a>
+        <a href="claim.html" class="btn-claim">+ Claim Business</a>
+        <button class="hamburger" id="hamburger">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
+    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
+    <a href="shopping.html">🛍️ Shopping</a><a href="other.html">✨ Other</a>
+    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
+    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
+    <a href="artists.html">🎵 Local Artists</a>
+  </div>
+
+  <!-- SEARCH HEADER -->
+  <div class="search-header">
+    <div class="container">
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder='Search restaurants, activities, "crab legs", "happy hour"...' autocomplete="off">
+        <!-- Mode buttons: sit right inside the search bar -->
+        <div class="search-mode-btns">
+          <button class="search-mode-btn active" id="modeAll"    data-mode="all">🔍 All</button>
+          <button class="search-mode-btn"         id="modeFood"  data-mode="food">🍽️ Food</button>
+          <button class="search-mode-btn"         id="modeTodo"  data-mode="todo">🎯 Activities</button>
+          <button class="search-mode-btn"         id="modeEvent" data-mode="events">🎉 Events</button>
+        </div>
+        <button class="search-submit" id="searchBtn">Search</button>
+      </div>
+
+      <!-- Quick tags -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+        <span class="search-tag" data-q="crab legs">🦀 Crab Legs</span>
+        <span class="search-tag" data-q="happy hour">🍻 Happy Hour</span>
+        <span class="search-tag" data-q="boat rental">🚤 Boat Rental</span>
+        <span class="search-tag" data-q="all you can eat">🍽️ All You Can Eat</span>
+        <span class="search-tag" data-q="live music">🎸 Live Music</span>
+        <span class="search-tag" data-q="fishing">🎣 Fishing</span>
+        <span class="search-tag" data-q="seafood">🐟 Seafood</span>
+        <span class="search-tag" data-q="kids">👨‍👩‍👧 Kids Friendly</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT TYPE TABS (shown after search) -->
+  <div class="result-type-bar" id="resultTypeBar" style="display:none;">
+    <div class="container">
+      <div class="result-tabs">
+        <div class="result-tab active" data-cat="all">All Results <span id="countAll" style="background:var(--teal);color:#fff;font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="restaurants">🍽️ Restaurants <span id="countRestaurants" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="things-to-do">🎯 Things To Do <span id="countTodo" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="events">🎉 Events <span id="countEvents" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="coffee-sweets">☕ Coffee & Sweets <span id="countCoffee" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="shopping">🛍️ Shopping <span id="countShopping" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+        <div class="result-tab" data-cat="other">✨ Other <span id="countOther" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="section">
+    <div class="container">
+
+      <!-- Heading -->
+      <div style="margin-bottom:24px;">
+        <h2 id="searchHeading" style="font-size:1.3rem;">Search the Gulf Coast</h2>
+        <p id="searchSubheading" class="text-muted" style="font-size:.85rem;margin-top:4px;">Try "crab legs", "all you can eat", "boat rental", or any restaurant name</p>
+      </div>
+
+      <!-- FOOD MODE: compact cards with menu item matches shown inline -->
+      <div id="foodResults" style="display:none;"></div>
+
+      <!-- ALL / ACTIVITY / EVENT MODE: standard grid cards -->
+      <div class="listings-grid" id="gridResults" style="display:none;"></div>
+
+      <!-- Empty state -->
+      <div id="noResults" style="display:none;" class="no-results">
+        <div class="big-icon">🔍</div>
+        <h3>No results found</h3>
+        <p>Try something like "seafood", "happy hour", "crab legs", or "fishing charter"</p>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <a href="restaurants.html" class="btn btn-outline btn-sm">Browse Restaurants</a>
+          <a href="things-to-do.html" class="btn btn-outline btn-sm">Browse Activities</a>
+          <a href="events.html" class="btn btn-outline btn-sm">Browse Events</a>
+        </div>
+      </div>
+
+      <!-- Default state: browse by category -->
+      <div id="defaultState">
+        <div class="section-heading mb-32">
+          <div class="eyebrow">Browse</div>
+          <h2 style="font-size:1.4rem;">Popular Searches</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+          <a href="?q=crab+legs&mode=food"       class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#c0392b,#922b21);height:70px;">🦀</div><div class="tile-body"><h3>Crab Legs</h3><p>All you can eat & more</p></div></a>
+          <a href="?q=happy+hour&mode=food"       class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#c9831f,#a0621a);height:70px;">🍻</div><div class="tile-body"><h3>Happy Hour</h3><p>Drink deals near you</p></div></a>
+          <a href="?q=seafood&mode=food"          class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#0b7a75,#065f5b);height:70px;">🐟</div><div class="tile-body"><h3>Seafood</h3><p>Fresh Gulf Coast catch</p></div></a>
+          <a href="?q=boat+rental&mode=todo"      class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#1a6496,#134f78);height:70px;">🚤</div><div class="tile-body"><h3>Boat Rentals</h3><p>Get on the water</p></div></a>
+          <a href="?q=fishing+charter&mode=todo"  class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#1e8449,#186038);height:70px;">🎣</div><div class="tile-body"><h3>Fishing Charters</h3><p>Deep sea & inshore</p></div></a>
+          <a href="?q=live+music&mode=events"     class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#6c3483,#5b2c6f);height:70px;">🎸</div><div class="tile-body"><h3>Live Music</h3><p>Who's playing tonight</p></div></a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer"><div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+      <p>Powered by <span class="powered">CyberCheck</span></p>
+    </div>
+  </div></footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let currentMode = 'all';
+    let currentCatFilter = 'all';
+    let lastResults = [];
+
+    const FOOD_MENU_DATA = {
+      'lunas-eat-drink': [
+        { name:'Seafood Gumbo',          desc:'Rich Gulf seafood gumbo',                     price:'Cup $6 · Bowl $10', tags:['seafood','soup'] },
+        { name:'Crab Claws',             desc:'Gulf blue crab claws, lightly fried',          price:'Market',           tags:['seafood','crab'] },
+        { name:'Crab & Artichoke Dip',   desc:'Baked with Swiss & Parmesan, grilled pita',   price:'$14',              tags:['seafood','crab','dip'] },
+        { name:'Creole BBQ Gulf Shrimp', desc:'Herb-scented Worcestershire butter, shell-on', price:'$17',             tags:['seafood','shrimp'] },
+        { name:'Shrimp & Grits',         desc:'Creole Gulf shrimp over stone-ground grits',   price:'$22',             tags:['seafood','shrimp'] },
+        { name:'All You Can Eat Crab',   desc:'Fridays from 6pm — snow crab legs',            price:'$48',             tags:['crab','ayce','crab legs'] },
+        { name:'Happy Hour Drafts',      desc:'All 32 taps half price · Daily 3–5pm',         price:'$3–$5',           tags:['happy hour','drinks','beer'] },
+      ],
+      'angry-crab-shack': [
+        { name:'Snow Crab Legs',         desc:'Cajun boil with your choice of seasoning',     price:'Market',          tags:['crab','crab legs','seafood'] },
+        { name:'All You Can Eat Crab',   desc:'AYCE snow crab — ask your server for current pricing', price:'Market', tags:['ayce','crab legs','crab'] },
+        { name:'Shrimp Boil',            desc:'Gulf shrimp, corn, potatoes, sausage',         price:'$18',             tags:['seafood','shrimp','boil'] },
+        { name:'Lobster',                desc:'Whole Maine lobster',                           price:'Market',          tags:['seafood','lobster'] },
+      ],
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mode button switching
+      document.querySelectorAll('.search-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.search-mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMode = btn.dataset.mode;
+        });
+      });
+
+      // Search tags
+      document.querySelectorAll('.search-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+          const q = tag.dataset.q || tag.textContent.trim();
+          document.getElementById('searchInput').value = q;
+          doSearch(q);
+        });
+      });
+
+      // Search button + enter
+      const doSearchFromBtn = () => {
+        const q = document.getElementById('searchInput').value.trim();
+        if (q) {
+          history.pushState({}, '', `?q=${encodeURIComponent(q)}&mode=${currentMode}`);
+          doSearch(q);
+        }
+      };
+      document.getElementById('searchBtn').addEventListener('click', doSearchFromBtn);
+      document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') doSearchFromBtn(); });
+
+      // Result type tabs
+      document.querySelectorAll('.result-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentCatFilter = tab.dataset.cat;
+          renderResults(lastResults, document.getElementById('searchInput').value.trim());
+        });
+      });
+
+      // Auto-run from URL params
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      const m = params.get('mode');
+      if (m && ['all','food','todo','events'].includes(m)) {
+        currentMode = m;
+        document.querySelectorAll('.search-mode-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === m);
+        });
+      }
+      if (q) {
+        document.getElementById('searchInput').value = q;
+        doSearch(q);
+      }
+    });
+
+    function doSearch(q) {
+      if (!q || typeof GCR === 'undefined') return;
+      document.getElementById('defaultState').style.display = 'none';
+      document.getElementById('resultTypeBar').style.display = '';
+
+      // Filter by mode
+      let results = GCR.search(q);
+      if (currentMode === 'food')   results = results.filter(b => ['restaurants','coffee-sweets','specials','happy-hours'].includes(b.category));
+      if (currentMode === 'todo')   results = results.filter(b => b.category === 'things-to-do');
+      if (currentMode === 'events') results = results.filter(b => b.category === 'events');
+
+      lastResults = results;
+
+      // Update count badges
+      const allR = GCR.search(q);
+      document.getElementById('countAll').textContent        = allR.length;
+      document.getElementById('countRestaurants').textContent = allR.filter(b=>b.category==='restaurants').length;
+      document.getElementById('countTodo').textContent        = allR.filter(b=>b.category==='things-to-do').length;
+      document.getElementById('countEvents').textContent      = allR.filter(b=>b.category==='events').length;
+      document.getElementById('countCoffee').textContent      = allR.filter(b=>b.category==='coffee-sweets').length;
+      document.getElementById('countShopping').textContent    = allR.filter(b=>b.category==='shopping').length;
+      document.getElementById('countOther').textContent       = allR.filter(b=>b.category==='other').length;
+
+      renderResults(results, q);
+    }
+
+    function renderResults(results, q) {
+      // Apply category filter
+      let filtered = currentCatFilter === 'all' ? results : results.filter(b => b.category === currentCatFilter);
+
+      const headingEl     = document.getElementById('searchHeading');
+      const subEl         = document.getElementById('searchSubheading');
+      const foodEl        = document.getElementById('foodResults');
+      const gridEl        = document.getElementById('gridResults');
+      const noEl          = document.getElementById('noResults');
+
+      headingEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
+      subEl.textContent     = `Showing ${currentCatFilter === 'all' ? 'everything' : currentCatFilter} · Orange Beach & Gulf Shores`;
+
+      if (!filtered.length) {
+        foodEl.style.display = 'none';
+        gridEl.style.display = 'none';
+        noEl.style.display   = '';
+        return;
+      }
+      noEl.style.display = 'none';
+
+      // FOOD mode: compact cards with matching menu items inline
+      if (currentMode === 'food' || currentCatFilter === 'restaurants') {
+        gridEl.style.display = 'none';
+        foodEl.style.display = '';
+        foodEl.innerHTML = filtered.map(biz => {
+          const term    = q.toLowerCase();
+          const menuData = FOOD_MENU_DATA[biz.id] || [];
+          const matching = menuData.filter(item =>
+            item.name.toLowerCase().includes(term) ||
+            (item.desc && item.desc.toLowerCase().includes(term)) ||
+            (item.tags && item.tags.some(t => t.includes(term)))
+          );
+          const stars = '★'.repeat(Math.round(biz.rating||4)) + '☆'.repeat(5 - Math.round(biz.rating||4));
+          return `
+          <div class="food-result-card">
+            <div class="food-result-header">
+              <div class="food-result-emoji">${biz.emoji||'🍽️'}</div>
+              <div class="food-result-info">
+                <h4>${biz.name}</h4>
+                <div class="food-result-meta">
+                  ${biz.priceRange ? `<span class="biz-tag">${biz.priceRange}</span>` : ''}
+                  ${biz.happyHour  ? `<span class="biz-tag" style="background:#e6f9f0;color:#1a7a47">HH ${biz.happyHour}</span>` : ''}
+                  ${biz.rating     ? `<span class="biz-rating"><span class="stars">${stars}</span> ${biz.rating}</span>` : ''}
+                  <span class="text-muted" style="font-size:.75rem;">${biz.address||''}</span>
+                </div>
+                <p style="font-size:.82rem;margin-top:5px;color:var(--text);">${biz.tagline||''}</p>
+              </div>
+              <div class="food-result-actions">
+                <a href="business.html?id=${biz.slug}" class="btn btn-primary btn-sm">View</a>
+                ${biz.phone ? `<a href="tel:${biz.phone}" class="btn btn-outline btn-sm">Call</a>` : ''}
+              </div>
+            </div>
+            ${matching.length ? `
+            <div class="food-menu-items">
+              <div class="label">🍴 Matching menu items</div>
+              ${matching.slice(0,4).map(item => `
+              <div class="food-item-row">
+                <div>
+                  <div class="food-item-name">${item.name}</div>
+                  <div class="food-item-desc">${item.desc}</div>
+                </div>
+                <div class="food-item-price">${item.price}</div>
+              </div>`).join('')}
+            </div>` : ''}
+          </div>`;
+        }).join('');
+      } else {
+        // ALL / ACTIVITY / EVENT mode: standard grid
+        foodEl.style.display = 'none';
+        gridEl.style.display = '';
+        gridEl.innerHTML = filtered.map(renderBizCard).join('');
+      }
+    }
+  </script>
+</body>
+</html>
