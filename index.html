@@ -1851,11 +1851,21 @@ function startVoiceChat() {
 }
 
 let _recognition = null;
-function startAiVoice() {
+async function startAiVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     appendMsg('bot', "Voice isn't supported in this browser. Try Chrome!");
     return;
   }
+
+  // Force mic permission prompt FIRST
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop()); // release immediately
+  } catch (err) {
+    appendMsg('bot', "🎙️ Please allow microphone access when prompted, then tap the mic again.");
+    return;
+  }
+
   if (_recognition) { try { _recognition.stop(); } catch(e){} _recognition = null; }
 
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1869,10 +1879,15 @@ function startAiVoice() {
   const voiceBtn = document.getElementById('voiceBtn');
   micBtn.classList.add('listening');
   if (voiceBtn) voiceBtn.classList.add('listening');
+  appendMsg('bot', "🎙️ Listening... speak now!");
 
   recognition.onresult = (e) => {
     const transcript = e.results[0][0].transcript;
     document.getElementById('aiInput').value = transcript;
+    // Remove the "Listening" message
+    const msgs = document.getElementById('aiMsgs');
+    const last = msgs.lastElementChild;
+    if (last && last.textContent.includes('Listening')) last.remove();
     sendAiChat();
   };
   recognition.onend = () => {
@@ -1884,9 +1899,11 @@ function startAiVoice() {
     micBtn.classList.remove('listening');
     if (voiceBtn) voiceBtn.classList.remove('listening');
     _recognition = null;
-    if (e.error === 'not-allowed') {
-      appendMsg('bot', "🎙️ Mic blocked — click the 🔒 lock in your browser address bar, allow microphone, then try again.");
-    } else if (e.error === 'no-speech') {
+    // Remove the "Listening" message
+    const msgs = document.getElementById('aiMsgs');
+    const last = msgs.lastElementChild;
+    if (last && last.textContent.includes('Listening')) last.remove();
+    if (e.error === 'no-speech') {
       appendMsg('bot', "Didn't catch that — tap mic and speak clearly.");
     } else if (e.error === 'network') {
       appendMsg('bot', "Voice needs internet — just type your question!");
