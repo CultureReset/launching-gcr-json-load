@@ -209,7 +209,7 @@
   }
   .hero-search-box input {
     width: 100%;
-    padding: 16px 56px 16px 22px;
+    padding: 16px 100px 16px 22px;
     font-size: 15px;
     font-family: inherit;
     border: none;
@@ -222,7 +222,7 @@
   .hero-search-box input::placeholder { color: #999; }
   .hero-search-submit {
     position: absolute;
-    right: 10px;
+    right: 56px;
     top: 50%;
     transform: translateY(-50%);
     background: #0b7a75;
@@ -236,6 +236,124 @@
     align-items: center;
     justify-content: center;
   }
+  .hero-mic-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a56db;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+  }
+  .hero-mic-btn:hover { background: #1648c0; }
+  .hero-mic-btn.listening { background: #e53e3e; animation: pulse-mic .8s infinite; }
+  @keyframes pulse-mic { 0%,100%{box-shadow:0 0 0 0 rgba(229,62,62,.5)} 50%{box-shadow:0 0 0 8px rgba(229,62,62,0)} }
+
+  /* AI Chat popup */
+  #aiChatPanel {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 48px rgba(0,0,0,.22);
+    z-index: 9999;
+    overflow: hidden;
+    flex-direction: column;
+  }
+  #aiChatPanel.open { display: flex; }
+  .ai-chat-header {
+    background: linear-gradient(135deg, #1a56db, #0b7a75);
+    color: #fff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .ai-chat-header span { flex: 1; }
+  .ai-chat-close { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; line-height:1; }
+  .ai-chat-msgs {
+    flex: 1;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ai-msg { max-width: 88%; padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.45; }
+  .ai-msg.bot { background: #f0f4ff; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .ai-msg.user { background: #1a56db; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .ai-msg.typing { color: #888; font-style: italic; }
+  .ai-chat-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid #eee;
+  }
+  .ai-chat-input-row input {
+    flex: 1;
+    padding: 10px 13px;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .ai-chat-input-row input:focus { border-color: #1a56db; }
+  .ai-chat-send {
+    background: #1a56db;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .ai-chat-voice {
+    background: #0b7a75;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  .ai-chat-voice.listening { background: #e53e3e; }
+  /* FAB button */
+  #aiChatFab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #1a56db, #0b7a75);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,.3);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .2s;
+  }
+  #aiChatFab:hover { transform: scale(1.08); }
   /* Search dropdown */
   .hero-search-dropdown {
     display: none;
@@ -880,6 +998,7 @@
         placeholder='Try "crab legs", "happy hour", "boat rental", "live music"...'
         autocomplete="off">
       <button class="hero-search-submit" onclick="doHeroSearch()">🔍</button>
+      <button class="hero-mic-btn" id="micBtn" onclick="startVoiceChat()" title="Ask AI with your voice">🎙️</button>
       <div class="hero-search-dropdown" id="heroDropdown"></div>
     </div>
 
@@ -1677,6 +1796,116 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.600
     if (windMph > 20) document.getElementById('wBeachFlag').textContent = '🚩 Check Beach Flags';
   })
   .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
+
+/* ── AI Chat ── */
+const AI_API = 'https://cybercheck-api-database.vercel.app/api/public/gcr-chat';
+let aiHistory = [];
+
+function toggleAiChat() {
+  const panel = document.getElementById('aiChatPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open') && aiHistory.length === 0) {
+    appendMsg('bot', "Hey! 👋 I'm your Gulf Coast guide. Ask me anything — best seafood, happy hours, boat rentals, live music tonight, kid-friendly spots... What are you looking for?");
+  }
+  if (panel.classList.contains('open')) {
+    setTimeout(() => document.getElementById('aiInput').focus(), 100);
+  }
+}
+
+function appendMsg(role, text) {
+  const msgs = document.getElementById('aiMsgs');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendAiChat() {
+  const input = document.getElementById('aiInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendMsg('user', msg);
+  aiHistory.push({ role: 'user', content: msg });
+  const typing = appendMsg('bot typing', '...');
+  try {
+    const res = await fetch(AI_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, history: aiHistory.slice(-6) })
+    });
+    const data = await res.json();
+    typing.remove();
+    const reply = data.reply || "Sorry, couldn't get a response right now.";
+    appendMsg('bot', reply);
+    aiHistory.push({ role: 'assistant', content: reply });
+  } catch {
+    typing.remove();
+    appendMsg('bot', "Connection error — check back in a moment!");
+  }
+}
+
+function startVoiceChat() {
+  const panel = document.getElementById('aiChatPanel');
+  if (!panel.classList.contains('open')) toggleAiChat();
+  startAiVoice();
+}
+
+function startAiVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    appendMsg('bot', "Voice isn't supported in this browser. Try Chrome!");
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SR();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const micBtn = document.getElementById('micBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  micBtn.classList.add('listening');
+  if (voiceBtn) voiceBtn.classList.add('listening');
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('aiInput').value = transcript;
+    sendAiChat();
+  };
+  recognition.onend = () => {
+    micBtn.classList.remove('listening');
+    if (voiceBtn) voiceBtn.classList.remove('listening');
+  };
+  recognition.onerror = () => {
+    micBtn.classList.remove('listening');
+    if (voiceBtn) voiceBtn.classList.remove('listening');
+    appendMsg('bot', "Couldn't hear that — try again!");
+  };
+  recognition.start();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.activeElement.id === 'aiInput') sendAiChat();
+});
 </script>
+
+<!-- AI Chat Panel -->
+<button id="aiChatFab" onclick="toggleAiChat()" title="Ask AI">🤖</button>
+
+<div id="aiChatPanel">
+  <div class="ai-chat-header">
+    <span>🌊 Gulf Coast AI Guide</span>
+    <button class="ai-chat-close" onclick="toggleAiChat()">✕</button>
+  </div>
+  <div class="ai-chat-msgs" id="aiMsgs"></div>
+  <div class="ai-chat-input-row">
+    <input type="text" id="aiInput" placeholder="Ask about food, events, activities...">
+    <button class="ai-chat-voice" id="voiceBtn" onclick="startAiVoice()" title="Voice input">🎙️</button>
+    <button class="ai-chat-send" onclick="sendAiChat()">➤</button>
+  </div>
+</div>
+
 </body>
 </html>
