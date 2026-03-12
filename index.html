@@ -1598,10 +1598,7 @@ function initHomePage() {
     if (!heroInput.contains(e.target) && !heroDrop.contains(e.target)) heroDrop.classList.remove('open');
   });
 
-  /* ── Loyalty popup (first visit, 3s delay) ── */
-  if (!localStorage.getItem('gcr_loyalty_seen')) {
-    setTimeout(openSignupModal, 3000);
-  }
+  /* ── Loyalty popup — only opens via button click ── */
 }
 
 // Wait for live data before rendering
