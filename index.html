@@ -1853,13 +1853,17 @@ function startVoiceChat() {
   startAiVoice();
 }
 
+let _recognition = null;
 function startAiVoice() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
     appendMsg('bot', "Voice isn't supported in this browser. Try Chrome!");
     return;
   }
+  if (_recognition) { try { _recognition.stop(); } catch(e){} _recognition = null; }
+
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SR();
+  _recognition = recognition;
   recognition.lang = 'en-US';
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
@@ -1877,11 +1881,21 @@ function startAiVoice() {
   recognition.onend = () => {
     micBtn.classList.remove('listening');
     if (voiceBtn) voiceBtn.classList.remove('listening');
+    _recognition = null;
   };
-  recognition.onerror = () => {
+  recognition.onerror = (e) => {
     micBtn.classList.remove('listening');
     if (voiceBtn) voiceBtn.classList.remove('listening');
-    appendMsg('bot', "Couldn't hear that — try again!");
+    _recognition = null;
+    if (e.error === 'not-allowed') {
+      appendMsg('bot', "🎙️ Mic blocked — click the 🔒 lock in your browser address bar, allow microphone, then try again.");
+    } else if (e.error === 'no-speech') {
+      appendMsg('bot', "Didn't catch that — tap mic and speak clearly.");
+    } else if (e.error === 'network') {
+      appendMsg('bot', "Voice needs internet — just type your question!");
+    } else {
+      appendMsg('bot', `Voice error (${e.error}) — try typing instead.`);
+    }
   };
   recognition.start();
 }
