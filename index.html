@@ -1798,7 +1798,7 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.600
   .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
 
 /* ── AI Chat ── */
-const AI_API = 'https://cybercheck-api-database.vercel.app/api/public/gcr-chat';
+const AI_API = 'https://cybercheck-api-database.vercel.app/api/gcr/chat';
 let aiHistory = [];
 
 function toggleAiChat() {
