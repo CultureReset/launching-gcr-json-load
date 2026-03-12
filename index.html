@@ -1370,21 +1370,23 @@ function initHomePage() {
   const featRow = document.getElementById('featuredRow');
   if (featRow) {
     const colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a' };
-    GCR.getFeatured().forEach(biz => {
-      const bg = colors[biz.category] || '#0b7a75';
+    const featList = GCR.getFeatured().length ? GCR.getFeatured() : GCR.businesses.slice(0, 12);
+    featList.forEach(biz => {
+      const cat = biz.type || biz.category || 'other';
+      const bg = colors[cat] || '#0b7a75';
       featRow.innerHTML += `
-        <a href="business.html?id=${biz.slug||biz.id}" class="feat-card">
+        <a href="business.html?id=${biz.subdomain||biz.slug||biz.id}" class="feat-card">
           <div class="feat-card-top" style="background:linear-gradient(135deg,${bg},${bg}cc);">
             <span style="font-size:3rem;">${biz.emoji||'🏪'}</span>
-            <span class="feat-badge">Featured</span>
+            ${biz.featured ? '<span class="feat-badge">Featured</span>' : ''}
           </div>
           <div class="feat-card-body">
             <div class="feat-card-name">${biz.name}</div>
-            <div class="feat-card-cat">${biz.category.replace('-',' ')}</div>
+            <div class="feat-card-cat">${cat.replace(/-/g,' ')}</div>
             <div class="feat-card-desc">${biz.tagline||biz.description||''}</div>
             <div class="feat-card-meta">
-              <span>${biz.address||''}</span>
-              <span class="feat-card-rating">★ ${biz.rating||''}</span>
+              <span>${biz.area||''}</span>
+              <span class="feat-card-rating">${biz.rating ? '★ '+biz.rating : ''}</span>
             </div>
           </div>
         </a>`;
