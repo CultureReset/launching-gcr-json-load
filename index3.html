@@ -904,9 +904,9 @@
 <!-- ══════════ STATS BAR ══════════ -->
 <div class="stats-bar">
   <div class="stats-inner">
-    <div class="stat-item"><div class="stat-num" id="statBiz">200+</div><div class="stat-lbl">Businesses</div></div>
+    <div class="stat-item"><div class="stat-num" id="statBiz">—</div><div class="stat-lbl">Businesses</div></div>
     <div class="stat-item"><div class="stat-num">9</div><div class="stat-lbl">Categories</div></div>
-    <div class="stat-item"><div class="stat-num" id="statEvents">25+</div><div class="stat-lbl">Events This Month</div></div>
+    <div class="stat-item"><div class="stat-num" id="statEvents">—</div><div class="stat-lbl">Events This Month</div></div>
     <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Use</div></div>
   </div>
 </div>
@@ -950,7 +950,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Restaurants</div>
           <div class="cat-tile-desc">Seafood, Southern, waterfront &amp; more</div>
-          <span class="cat-tile-count">62 listings →</span>
+          <span class="cat-tile-count" id="countRestaurants">→</span>
         </div>
       </a>
       <a href="coffee-sweets.html" class="cat-tile">
@@ -958,7 +958,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Coffee &amp; Sweets</div>
           <div class="cat-tile-desc">Coffee shops, ice cream &amp; bakeries</div>
-          <span class="cat-tile-count">18 listings →</span>
+          <span class="cat-tile-count" id="countCoffee">→</span>
         </div>
       </a>
       <a href="happy-hours.html" class="cat-tile">
@@ -966,7 +966,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Happy Hours</div>
           <div class="cat-tile-desc">Drink deals &amp; food specials near you</div>
-          <span class="cat-tile-count">34 listings →</span>
+          <span class="cat-tile-count" id="countHappy">→</span>
         </div>
       </a>
       <a href="specials.html" class="cat-tile">
@@ -974,7 +974,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Specials</div>
           <div class="cat-tile-desc">All you can eat, daily deals &amp; more</div>
-          <span class="cat-tile-count">28 listings →</span>
+          <span class="cat-tile-count" id="countSpecials">→</span>
         </div>
       </a>
       <a href="events.html" class="cat-tile">
@@ -982,7 +982,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Events</div>
           <div class="cat-tile-desc">Live music, concerts &amp; festivals</div>
-          <span class="cat-tile-count" id="eventsCount">12 this month →</span>
+          <span class="cat-tile-count" id="eventsCount">→</span>
         </div>
       </a>
       <a href="things-to-do.html" class="cat-tile">
@@ -990,7 +990,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Things To Do</div>
           <div class="cat-tile-desc">Fishing, boat rentals, tours &amp; fun</div>
-          <span class="cat-tile-count">45 listings →</span>
+          <span class="cat-tile-count" id="countThingsToDo">→</span>
         </div>
       </a>
       <a href="shopping.html" class="cat-tile">
@@ -998,7 +998,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Shopping</div>
           <div class="cat-tile-desc">Boutiques, souvenirs &amp; gifts</div>
-          <span class="cat-tile-count">22 listings →</span>
+          <span class="cat-tile-count" id="countShopping">→</span>
         </div>
       </a>
       <a href="other.html" class="cat-tile">
@@ -1006,7 +1006,7 @@
         <div class="cat-tile-body">
           <div class="cat-tile-name">Other</div>
           <div class="cat-tile-desc">Photography, services &amp; more</div>
-          <span class="cat-tile-count">15 listings →</span>
+          <span class="cat-tile-count" id="countOther">→</span>
         </div>
       </a>
       <a href="feed.html" class="cat-tile">
@@ -1362,15 +1362,28 @@ function initHomePage() {
   /* ── Stats ── */
   const bizCount = GCR.businesses.length;
   const evCount  = GCR.getUpcomingEvents().length;
-  document.getElementById('statBiz').textContent    = bizCount + '+';
-  document.getElementById('statEvents').textContent = evCount + '+';
-  document.getElementById('eventsCount').textContent = evCount + ' this month →';
+  document.getElementById('statBiz').textContent    = bizCount;
+  document.getElementById('statEvents').textContent = evCount;
+
+  /* ── Category counts ── */
+  const catCount = (type) => GCR.businesses.filter(b => b.type === type || b.category === type).length;
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n ? n + ' listing' + (n===1?'':'s') + ' →' : 'Browse →'; };
+  setCount('countRestaurants', catCount('restaurants'));
+  setCount('countCoffee',      catCount('coffee-sweets'));
+  setCount('countHappy',       GCR.businesses.filter(b => b.happy_hour).length);
+  setCount('countSpecials',    GCR.specials.length);
+  setCount('eventsCount',      evCount ? evCount + ' this month →' : 'Browse →');
+  document.getElementById('eventsCount').textContent = evCount ? evCount + ' this month →' : 'Browse →';
+  setCount('countThingsToDo',  catCount('things-to-do'));
+  setCount('countShopping',    catCount('shopping'));
+  setCount('countOther',       catCount('other'));
 
   /* ── Featured ── */
   const featRow = document.getElementById('featuredRow');
   if (featRow) {
     const colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a' };
-    GCR.getFeatured().forEach(biz => {
+    const featList = GCR.getFeatured().length ? GCR.getFeatured() : GCR.businesses.slice(0, 10);
+    featList.forEach(biz => {
       const bg = colors[biz.category] || '#0b7a75';
       featRow.innerHTML += `
         <a href="business.html?id=${biz.slug||biz.id}" class="feat-card">
