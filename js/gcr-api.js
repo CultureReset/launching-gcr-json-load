@@ -90,12 +90,19 @@ const GCR = {
   },
   search(q) {
     const term = q.toLowerCase();
-    return this.businesses.filter(b =>
-      (b.name || '').toLowerCase().includes(term) ||
-      (b.description || '').toLowerCase().includes(term) ||
-      (b.tagline || '').toLowerCase().includes(term) ||
-      (b.tags && b.tags.some(t => t.toLowerCase().includes(term)))
-    );
+    return this.businesses.filter(b => {
+      if ((b.name        || '').toLowerCase().includes(term)) return true;
+      if ((b.tagline     || '').toLowerCase().includes(term)) return true;
+      if ((b.description || '').toLowerCase().includes(term)) return true;
+      if ((b.area        || '').toLowerCase().includes(term)) return true;
+      if ((b.type        || '').toLowerCase().includes(term)) return true;
+      if (b.tags && b.tags.some(t => t.toLowerCase().includes(term))) return true;
+      return false;
+    }).sort((a, b) => {
+      const aTop = (a.name || '').toLowerCase().startsWith(term) ? 1 : 0;
+      const bTop = (b.name || '').toLowerCase().startsWith(term) ? 1 : 0;
+      return bTop - aTop;
+    });
   },
   getBusiness(slugOrId) {
     return this.businesses.find(b => b.slug === slugOrId || b.id === slugOrId || b.site_id === slugOrId || b.subdomain === slugOrId);
