@@ -57,20 +57,8 @@ const GCR = {
 
   /* ── HELPERS (same interface as data.js) ── */
   getByCategory(cat) {
-    // Map plural page slugs → singular DB values
-    const typeMap = {
-      'restaurants': 'restaurant',
-      'things-to-do': 'things-to-do',
-      'coffee-sweets': 'coffee-sweets',
-      'shopping': 'shopping',
-      'nightlife': 'nightlife',
-      'services': 'services',
-      'hotels': 'hotel',
-      'other': 'other'
-    };
-    const dbType = typeMap[cat] || cat;
     return this.businesses.filter(b =>
-      b.type === dbType || b.type === cat || b.category === cat
+      b.type === cat || b.category === cat
     );
   },
   getFeatured() {
