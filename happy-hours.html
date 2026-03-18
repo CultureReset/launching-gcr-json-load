@@ -169,87 +169,109 @@
     return h * 60 + min;
   }
 
-  // ── Check if a business has HH today ──
-  function getHHToday(biz) {
-    const hh = biz.happyHour || biz.happy_hour;
-    if (!hh || hh === 'false' || hh === false) return null;
+  const todayLower = DAYS[new Date().getDay()].toLowerCase(); // e.g. "monday"
 
-    // Structured HH data: { days, start, end, deals }
-    if (typeof hh === 'object') {
-      const todayShort = SHORT_DAYS[new Date().getDay()];
-      const days = hh.days || [];
-      if (days.length && !days.includes(todayShort) && !days.includes(DAYS[new Date().getDay()])) return null;
-      return hh;
-    }
-
-    // String like "3pm–6pm daily" or "Mon–Fri 4–7pm" — show as-is
-    if (typeof hh === 'string' && hh !== 'false') {
-      return { display: hh, deals: [] };
-    }
-    return null;
+  // ── Check if a special runs today ──
+  function runsToday(sp) {
+    const days = sp.days || [];
+    if (!days.length) return true; // no days = every day
+    return days.map(d => d.toLowerCase()).includes(todayLower);
   }
 
-  // ── Determine HH status: 'live', 'soon', 'later' ──
-  function hhStatus(hh) {
-    const now = new Date();
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-    const start = toMinutes(hh.start);
-    const end   = toMinutes(hh.end);
+  // ── Determine HH status ──
+  function hhStatus(startStr, endStr) {
+    const n = new Date(), nowMin = n.getHours()*60+n.getMinutes();
+    const start = toMinutes(startStr), end = toMinutes(endStr);
     if (start === null) return 'later';
-    if (nowMin >= start && (end === null || nowMin < end)) return 'live';
-    if (start - nowMin <= 60 && start > nowMin) return 'soon';
-    if (start > nowMin) return 'later';
-    return null; // already ended
+    if (end !== null && nowMin >= end) return null; // ended
+    if (nowMin >= start) return 'live';
+    if (start - nowMin <= 60) return 'soon';
+    return 'later';
   }
 
-  // ── Build a card HTML ──
-  function buildCard(biz, hh, idx) {
+  // ── Build card from specials data ──
+  function buildCard(bizName, bizEmoji, bizSlug, bizTags, specials, idx) {
     const id = `hh-${idx}`;
-    const status = hh.start ? hhStatus(hh) : 'later';
+    // Use first HH special for time display
+    const sp = specials[0];
+    const startStr = sp.start_time || sp.description?.match(/(\d+:\d+\s*(?:AM|PM))/i)?.[1] || '';
+    const endStr   = sp.end_time   || sp.description?.match(/.*-\s*(\d+:\d+\s*(?:AM|PM))/i)?.[1] || '';
+    const status   = hhStatus(startStr, endStr);
+    const timeStr  = startStr && endStr ? `${startStr} – ${endStr}` : sp.description || 'Happy Hour Today';
+
     const badgeHtml = status === 'live'  ? `<span class="hh-status-badge hh-live">🟢 Live Now</span>` :
                       status === 'soon'  ? `<span class="hh-status-badge hh-soon">🟡 Starting Soon</span>` :
                                            `<span class="hh-status-badge hh-later">🕐 Later</span>`;
 
-    const timeStr = hh.start && hh.end ? `${hh.start} – ${hh.end}` : hh.display || 'Happy Hour Today';
-    const bTags = (biz.tags || []).join(' ').toLowerCase();
+    const bTags = (bizTags || []).join(' ').toLowerCase();
 
-    const deals = hh.deals || [];
-    const dealsHtml = deals.length
-      ? deals.map(d => `<div class="expand-item-row"><div><div class="expand-item-name">${d.name || d}</div>${d.desc ? `<div class="expand-item-desc">${d.desc}</div>` : ''}</div><div class="expand-item-price">${d.price || ''}</div></div>`).join('')
-      : `<div style="padding:12px 0;color:#888;font-size:.85rem;">Happy hour details coming soon. Call to confirm specials.</div>`;
+    // Build deals from drink_specials + items
+    let dealsHtml = '';
+    specials.forEach(s => {
+      (s.drink_specials || []).forEach(d => {
+        dealsHtml += `<div class="expand-item-row">
+          <div><div class="expand-item-name">${d.name}</div>${d.note ? `<div class="expand-item-desc">${d.note}</div>` : ''}</div>
+          <div class="expand-item-price">$${typeof d.price === 'number' ? d.price.toFixed(2) : d.price}</div>
+        </div>`;
+      });
+      (s.items || s.items_list || []).forEach(item => {
+        dealsHtml += `<div class="expand-item-row">
+          <div><div class="expand-item-name">${item.name || item}</div>${item.desc ? `<div class="expand-item-desc">${item.desc}</div>` : ''}</div>
+          <div class="expand-item-price">${item.price || ''}</div>
+        </div>`;
+      });
+    });
+    if (!dealsHtml) dealsHtml = `<div style="padding:12px 0;color:#888;font-size:.85rem;">Call to confirm today's specials.</div>`;
 
-    return `<div class="listing-expand-card" data-tags="${bTags}" data-status="${status}">
-      <div class="listing-expand-header">
-        <span class="listing-expand-emoji">${biz.emoji || '🍻'}</span>
-        <div class="listing-expand-info">
-          <h4>${biz.name}</h4>
-          <p>${timeStr} &nbsp;${badgeHtml}</p>
+    return { status, startMin: toMinutes(startStr) || 999, html: `
+      <div class="listing-expand-card" data-tags="${bTags}" data-status="${status || 'later'}">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">${bizEmoji || '🍻'}</span>
+          <div class="listing-expand-info">
+            <h4>${bizName}</h4>
+            <p>${timeStr} &nbsp;${badgeHtml}</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=${bizSlug}" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}')">See Specials ▼</button>
+          </div>
         </div>
-        <div class="listing-expand-actions">
-          <a href="business.html?id=${biz.slug || biz.id}" class="btn btn-outline btn-sm">View Profile</a>
-          <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}')">See Specials ▼</button>
-        </div>
-      </div>
-      <div class="listing-expand-details" id="${id}">${dealsHtml}</div>
-    </div>`;
+        <div class="listing-expand-details" id="${id}">${dealsHtml}</div>
+      </div>`
+    };
   }
 
-  // ── Render all HH businesses ──
-  function renderHH(businesses) {
-    const now = [], soon = [], later = [];
+  // ── Render all HH from specials table ──
+  function renderHH(specials, businesses) {
+    const bizMap = {};
+    (businesses || []).forEach(b => { bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; });
 
-    businesses.forEach((biz, i) => {
-      const hh = getHHToday(biz);
-      if (!hh) return;
-      const status = hh.start ? hhStatus(hh) : 'later';
-      if (status === null) return; // ended
-      const card = buildCard(biz, hh, i);
-      if (status === 'live')  now.push({ card, start: toMinutes(hh.start) || 0 });
-      else if (status === 'soon') soon.push({ card, start: toMinutes(hh.start) || 999 });
-      else later.push({ card, start: toMinutes(hh.start) || 999 });
+    // Filter: type=happy_hour, active, runs today
+    const hhToday = (specials || []).filter(sp =>
+      sp.active !== false &&
+      (sp.type === 'happy_hour' || (sp.name || '').toLowerCase().includes('happy hour')) &&
+      runsToday(sp)
+    );
+
+    // Group by business
+    const byBiz = {};
+    hhToday.forEach(sp => {
+      const key = sp.site_id || sp.business_id || sp.slug || 'unknown';
+      if (!byBiz[key]) byBiz[key] = { biz: bizMap[key] || { name: sp.businessName, emoji: sp.businessEmoji, slug: sp.slug, tags:[] }, specials: [] };
+      byBiz[key].specials.push(sp);
     });
 
-    const sortByTime = arr => arr.sort((a,b) => a.start - b.start).map(x => x.card).join('');
+    const now = [], soon = [], later = [];
+    let idx = 0;
+    Object.values(byBiz).forEach(({ biz, specials }) => {
+      const card = buildCard(biz.name, biz.emoji, biz.slug || biz.id, biz.tags, specials, idx++);
+      if (card.status === null) return; // ended
+      if (card.status === 'live')  now.push(card);
+      else if (card.status === 'soon') soon.push(card);
+      else later.push(card);
+    });
+
+    const sortByTime = arr => arr.sort((a,b) => a.startMin - b.startMin).map(x => x.html).join('');
 
     document.getElementById('hhLoading').style.display = 'none';
 
@@ -286,6 +308,6 @@
     event.target.textContent = el.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
   }
 
-  document.addEventListener('gcr:loaded', e => renderHH(e.detail.businesses || []));
+  document.addEventListener('gcr:loaded', e => renderHH(e.detail.specials || [], e.detail.businesses || []));
 </script>
 </body></html>

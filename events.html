@@ -223,40 +223,54 @@
       bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; bizMap[b.subdomain] = b;
     });
 
-    // Filter: today only, not already ended (allow events within past 3hrs)
+    const todayLower = now.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+    const dayNames   = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
+    // Dated events for today that haven't ended
     const todayEvents = (events || []).filter(ev => {
       const d = ev.date || ev.event_date || '';
+      if (!d) return false;
       if (!d.startsWith(todayStr)) return false;
       const evMin = toMinutes(ev.start_time || ev.time || ev.event_time || '');
-      if (evMin !== null && evMin < nowMin - 180) return false; // ended >3hrs ago
+      if (evMin !== null && evMin < nowMin - 180) return false;
       return true;
+    }).sort((a,b) => {
+      const aMin = toMinutes(a.start_time||a.time||a.event_time||'') ?? 9999;
+      const bMin = toMinutes(b.start_time||b.time||b.event_time||'') ?? 9999;
+      return aMin - bMin;
     });
 
-    // Also include recurring events that fire today (no specific date)
-    const recurringToday = (events || []).filter(ev => {
-      if (ev.date || ev.event_date) return false; // has specific date, handled above
-      if (!ev.recurring && !ev.recurrence) return false;
+    // Recurring events (no date) — skip if name references a different day
+    const recurringEvents = (events || []).filter(ev => {
+      if (ev.date || ev.event_date) return false;
+      const name = (ev.name || ev.title || '').toLowerCase();
+      const mentionedDay = dayNames.find(d => name.includes(d));
+      if (mentionedDay && mentionedDay !== todayLower) return false;
       return true;
+    }).sort((a,b) => {
+      const aMin = toMinutes(a.start_time||a.time||a.event_time||'') ?? 9999;
+      const bMin = toMinutes(b.start_time||b.time||b.event_time||'') ?? 9999;
+      return aMin - bMin;
     });
 
-    const allToday = [...todayEvents, ...recurringToday];
-
-    if (allToday.length === 0) {
+    if (todayEvents.length === 0 && recurringEvents.length === 0) {
       document.getElementById('evEmpty').style.display = 'block';
       return;
     }
 
-    // Sort by start time, nulls last
-    allToday.sort((a, b) => {
-      const aMin = toMinutes(a.start_time || a.time || a.event_time || '') ?? 9999;
-      const bMin = toMinutes(b.start_time || b.time || b.event_time || '') ?? 9999;
-      return aMin - bMin;
-    });
+    let html = '';
 
-    document.getElementById('eventsContainer').innerHTML =
-      `<div class="section-date-label">📅 ${now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' })}</div>` +
-      allToday.map(ev => buildEventCard(ev, bizMap)).join('');
+    if (todayEvents.length) {
+      html += `<div class="section-date-label">📅 ${now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' })}</div>`;
+      html += todayEvents.map(ev => buildEventCard(ev, bizMap)).join('');
+    }
 
+    if (recurringEvents.length) {
+      html += `<div class="section-date-label" style="margin-top:${todayEvents.length ? '32px':'0'};">🔁 Recurring — Happening Every Week</div>`;
+      html += recurringEvents.map(ev => buildEventCard(ev, bizMap)).join('');
+    }
+
+    document.getElementById('eventsContainer').innerHTML = html;
     wireFilters();
   }
 

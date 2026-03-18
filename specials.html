@@ -110,18 +110,16 @@
   document.getElementById('spDayName').textContent  = todayDay + "'s Specials";
   document.getElementById('spFullDate').textContent = today.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
 
-  // Check if a special runs today
+  const todayLower = todayDay.toLowerCase(); // e.g. "monday"
+
+  // Check if a special runs today — days stored as lowercase full names
   function specialRunsToday(sp) {
     if (!sp) return false;
-    const days = sp.days || sp.day_of_week || [];
-    // No days = runs every day
-    if (!days.length) return true;
-    // "daily" keyword
-    if (days.includes('daily') || days.includes('Daily') || days.includes('Everyday')) return true;
-    // Check today
-    if (days.includes(todayDay) || days.includes(todayShort)) return true;
-    // Weekend check
-    if (isWeekend && (days.includes('Weekend') || days.includes('Weekends'))) return true;
+    const days = (sp.days || sp.day_of_week || []).map(d => d.toLowerCase());
+    if (!days.length) return true; // no days = every day
+    if (days.includes('daily') || days.includes('everyday') || days.includes('all')) return true;
+    if (days.includes(todayLower)) return true;
+    if (isWeekend && (days.includes('weekend') || days.includes('weekends'))) return true;
     return false;
   }
 
