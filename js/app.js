@@ -6,6 +6,28 @@
    ============================================ */
 
 /* ══════════════════════════════════════════
+   GLOBAL SEARCH HELPERS (called from HTML onclick)
+══════════════════════════════════════════ */
+window.doHeroSearch = function() {
+  const q = (document.getElementById('heroSearch') || {}).value?.trim();
+  if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+};
+window.doTagSearch = function(q) {
+  if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+};
+window.installApp = function() {
+  if (window._deferredInstallPrompt) {
+    window._deferredInstallPrompt.prompt();
+    window._deferredInstallPrompt.userChoice.then(() => { window._deferredInstallPrompt = null; });
+  }
+};
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  window._deferredInstallPrompt = e;
+  document.querySelectorAll('#installBtn').forEach(b => b.style.display = 'inline-flex');
+});
+
+/* ══════════════════════════════════════════
    NAV TAB SCROLL PERSISTENCE + ACTIVE STATE
 ══════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
@@ -331,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* ── Search bar ── */
+  /* ── Search bar (generic, for pages with #mainSearch) ── */
   const searchInput = document.getElementById('mainSearch');
   const searchBtn   = document.getElementById('searchBtn');
   if (searchBtn && searchInput) {
@@ -341,6 +363,36 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     searchBtn.addEventListener('click', doSearch);
     searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  }
+
+  /* ── Hero search (index3.html — #heroSearch + dropdown) ── */
+  const heroInput    = document.getElementById('heroSearch');
+  const heroDropdown = document.getElementById('heroDropdown');
+  if (heroInput) {
+    heroInput.addEventListener('keydown', e => { if (e.key === 'Enter') doHeroSearch(); });
+    heroInput.addEventListener('input', () => {
+      const q = heroInput.value.trim();
+      if (!heroDropdown) return;
+      if (!q || q.length < 2 || typeof GCR === 'undefined' || !GCR.loaded) {
+        heroDropdown.classList.remove('open');
+        return;
+      }
+      const results = GCR.search(q).slice(0, 6);
+      if (!results.length) { heroDropdown.classList.remove('open'); return; }
+      heroDropdown.innerHTML = results.map(b => `
+        <a href="business.html?id=${b.slug || b.site_id}" class="sri-item">
+          <span style="font-size:1.4rem">${b.emoji || '🏖️'}</span>
+          <div>
+            <div style="font-weight:600;font-size:.88rem">${b.name}</div>
+            <div style="font-size:.75rem;color:#888">${b.tagline || b.type || ''}</div>
+          </div>
+        </a>`).join('');
+      heroDropdown.classList.add('open');
+    });
+    document.addEventListener('click', e => {
+      if (heroDropdown && !heroInput.contains(e.target) && !heroDropdown.contains(e.target))
+        heroDropdown.classList.remove('open');
+    });
   }
 
   /* ── Tag pills on homepage ── */

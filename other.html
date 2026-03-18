@@ -1,10 +1,67 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Other Services — Gulf Coast Radar</title>
+  <title>Beach Access & Public Spots — Gulf Coast Radar</title>
+  <meta name="description" content="Public beach accesses, boat launches, parks, and public amenities in Orange Beach & Gulf Shores, AL.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .spot-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .spot-card-icon {
+      height: 90px;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--navy) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+    }
+    .spot-card-body { padding: 14px 16px 16px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .spot-card-body h4 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+    .spot-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+    .spot-tag {
+      font-size: 0.72rem; font-weight: 600; padding: 3px 8px;
+      border-radius: 20px; background: var(--surface-raised); color: var(--teal-light);
+      border: 1px solid var(--border);
+    }
+    .spot-desc { font-size: 0.84rem; color: var(--text-secondary); margin: 0; line-height: 1.45; flex: 1; }
+    .spot-amenities { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .spot-amenity { font-size: 0.75rem; color: var(--text-muted); background: var(--surface-raised); border-radius: 6px; padding: 2px 7px; }
+    .spot-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .spot-btn-dir {
+      flex: 1; background: var(--teal); color: #fff; border: none; border-radius: 10px;
+      padding: 9px 0; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .spot-btn-dir:hover { background: var(--teal-light); }
+    .spot-section-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--teal-light); margin: 24px 0 10px; padding-left: 2px;
+    }
+    .spots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .tip-box {
+      background: linear-gradient(135deg, rgba(0,200,200,.08), rgba(0,200,200,.02));
+      border: 1px solid rgba(0,200,200,.25);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .tip-box strong { color: var(--teal-light); }
+  </style>
 </head><body>
 
 <div class="gcr-header">
@@ -17,7 +74,7 @@
       📲 Install App
     </button>
   </div>
-    <div class="gcr-cat-tabs" id="gcrCatTabs">
+  <div class="gcr-cat-tabs" id="gcrCatTabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
     <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
     <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
@@ -36,40 +93,311 @@
   </div>
 </div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="photography">📸 Photography</button>
-    <button class="filter-chip" data-filter="weddings">💍 Weddings</button>
-    <button class="filter-chip" data-filter="health">🧘 Health & Wellness</button>
-    <button class="filter-chip" data-filter="transportation">🚗 Transportation</button>
-    <button class="filter-chip" data-filter="rentals">🔑 Rentals</button>
-    <button class="filter-chip" data-filter="services">⚙️ Services</button>
-  </div></div></div>
-  <section class="section"><div class="container">
-    <div class="listings-grid" id="listingsGrid" data-category="other">
-      <div class="biz-card" data-tags="photography weddings">
-        <div class="biz-card-img"><span>📸</span></div>
-        <div class="biz-card-body">
-          <h4>Gulf Coast Photography Studios</h4>
-          <div class="biz-meta">
-            <span class="biz-tag">Other Services</span>
-            <span class="biz-tag">$$$</span>
-          </div>
-          <div class="biz-rating"><span class="stars">★★★★★</span> 4.9 <span style="color:var(--gray-400)">(156)</span></div>
-          <p class="biz-desc">Professional photography for weddings, portraits, and events. Stunning beach locations.</p>
-          <div class="biz-card-actions">
-            <a href="business.html?id=gulf-photography" class="biz-btn-view">View Profile</a>
-            <button class="biz-btn-book" onclick="openBookingModal('gulf-photography')">📅 Book Now</button>
-          </div>
+<div class="filters-bar"><div class="container"><div class="filters-inner">
+  <button class="filter-chip active" data-filter="all">All</button>
+  <button class="filter-chip" data-filter="beach-access">🏖️ Beach Access</button>
+  <button class="filter-chip" data-filter="boat-launch">⛵ Boat Launches</button>
+  <button class="filter-chip" data-filter="park">🌿 Parks</button>
+  <button class="filter-chip" data-filter="pier">🎣 Piers & Fishing</button>
+  <button class="filter-chip" data-filter="restroom">🚻 Restrooms</button>
+  <button class="filter-chip" data-filter="parking">🅿️ Parking</button>
+</div></div></div>
+
+<section class="section"><div class="container">
+
+  <div class="tip-box">
+    <strong>🏖️ Free &amp; Public</strong> — These spots are free or low-cost public amenities.
+    Most beach accesses have <strong>free parking</strong> and are open sunrise to sunset.
+    Always check for seasonal changes and <strong>beach flag conditions</strong> before swimming.
+  </div>
+
+  <div class="spot-section-label">🏖️ Public Beach Accesses</div>
+  <div class="spots-grid" id="beachGrid">
+
+    <div class="spot-card" data-filter="beach-access">
+      <div class="spot-card-icon">🏖️</div>
+      <div class="spot-card-body">
+        <h4>Gulf Place Beach Access</h4>
+        <div class="spot-meta"><span class="spot-tag">Beach Access</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">One of the most popular public accesses on the island. Wide sandy beach with easy gulf views and plenty of room.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🚿 Showers</span>
+          <span class="spot-amenity">🚻 Restrooms</span>
+          <span class="spot-amenity">🅿️ Free Parking</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+Place+Beach+Access+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
         </div>
       </div>
     </div>
-  </div></section>
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
+
+    <div class="spot-card" data-filter="beach-access">
+      <div class="spot-card-icon">🏖️</div>
+      <div class="spot-card-body">
+        <h4>Romar Beach Access</h4>
+        <div class="spot-meta"><span class="spot-tag">Beach Access</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">Public beach access at Romar House. Boardwalk walkover to the gulf with nearby parking.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🚿 Showers</span>
+          <span class="spot-amenity">🅿️ Free Parking</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Romar+Beach+Access+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
     </div>
-  </div></footer>
-  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
+
+    <div class="spot-card" data-filter="beach-access">
+      <div class="spot-card-icon">🏖️</div>
+      <div class="spot-card-body">
+        <h4>Gulf Shores Public Beach</h4>
+        <div class="spot-meta"><span class="spot-tag">Beach Access</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">Main public beach at Gulf Shores. Right by the 59 Pier area. Lifeguards on duty in season.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🏊 Lifeguard (seasonal)</span>
+          <span class="spot-amenity">🚻 Restrooms</span>
+          <span class="spot-amenity">🚿 Showers</span>
+          <span class="spot-amenity">🅿️ Paid Parking</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+Shores+Public+Beach+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="beach-access park">
+      <div class="spot-card-icon">🌊</div>
+      <div class="spot-card-body">
+        <h4>Gulf State Park Beach</h4>
+        <div class="spot-meta"><span class="spot-tag">Beach Access</span><span class="spot-tag">State Park</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">2.5 miles of undeveloped white sand beach inside Gulf State Park. Beautiful and less crowded than the main strip.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🅿️ Park Fee</span>
+          <span class="spot-amenity">🚿 Showers</span>
+          <span class="spot-amenity">🚻 Restrooms</span>
+          <span class="spot-amenity">🐠 Snorkeling</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+State+Park+Beach+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spot-section-label">⛵ Boat Launches</div>
+  <div class="spots-grid">
+
+    <div class="spot-card" data-filter="boat-launch">
+      <div class="spot-card-icon">⛵</div>
+      <div class="spot-card-body">
+        <h4>Boggy Point Boat Launch</h4>
+        <div class="spot-meta"><span class="spot-tag">Boat Launch</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">Public boat ramp with access to Wolf Bay and Perdido Bay. Multiple lanes, trailer parking available.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🅿️ Trailer Parking</span>
+          <span class="spot-amenity">🐟 Fishing Access</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Boggy+Point+Boat+Launch+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="boat-launch">
+      <div class="spot-card-icon">⛵</div>
+      <div class="spot-card-body">
+        <h4>Cotton Bayou Boat Launch</h4>
+        <div class="spot-meta"><span class="spot-tag">Boat Launch</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">City-operated boat ramp on Cotton Bayou with direct access to the Intracoastal Waterway.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🅿️ Parking</span>
+          <span class="spot-amenity">🌊 ICW Access</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Cotton+Bayou+Boat+Launch+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="boat-launch">
+      <div class="spot-card-icon">⛵</div>
+      <div class="spot-card-body">
+        <h4>Gulf Shores Boat Launch (Ft. Morgan Rd)</h4>
+        <div class="spot-meta"><span class="spot-tag">Boat Launch</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">Public ramp on Little Lagoon. Great launch point for bay fishing and kayaking.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🅿️ Free Parking</span>
+          <span class="spot-amenity">🎣 Bay Access</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Little+Lagoon+Boat+Launch+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spot-section-label">🎣 Fishing Piers</div>
+  <div class="spots-grid">
+
+    <div class="spot-card" data-filter="pier">
+      <div class="spot-card-icon">🎣</div>
+      <div class="spot-card-body">
+        <h4>Gulf State Park Pier</h4>
+        <div class="spot-meta"><span class="spot-tag">Fishing Pier</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">1,540-foot pier — one of the longest on the Gulf Coast. No fishing license required on the pier. Bait &amp; tackle shop on site.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🐟 No License Needed</span>
+          <span class="spot-amenity">🏪 Bait Shop</span>
+          <span class="spot-amenity">💲 Small Fee</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+State+Park+Pier+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="pier">
+      <div class="spot-card-icon">🎣</div>
+      <div class="spot-card-body">
+        <h4>Orange Beach Fishing Pier</h4>
+        <div class="spot-meta"><span class="spot-tag">Fishing Pier</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">Public fishing pier in Orange Beach with great access to gulf waters. Popular for Spanish mackerel, pompano, and redfish.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🐟 License Required</span>
+          <span class="spot-amenity">🅿️ Free Parking</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Orange+Beach+Fishing+Pier+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spot-section-label">🌿 Parks & Nature</div>
+  <div class="spots-grid">
+
+    <div class="spot-card" data-filter="park">
+      <div class="spot-card-icon">🌿</div>
+      <div class="spot-card-body">
+        <h4>Gulf State Park</h4>
+        <div class="spot-meta"><span class="spot-tag">State Park</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">6,500-acre state park with beach, trails, campground, lake, and fishing pier. The crown jewel of the Alabama Gulf Coast.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🏕️ Camping</span>
+          <span class="spot-amenity">🚴 Bike Trails</span>
+          <span class="spot-amenity">🐦 Birdwatching</span>
+          <span class="spot-amenity">🎣 Lake Fishing</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+State+Park+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="park">
+      <div class="spot-card-icon">🌊</div>
+      <div class="spot-card-body">
+        <h4>Bon Secour National Wildlife Refuge</h4>
+        <div class="spot-meta"><span class="spot-tag">Wildlife Refuge</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">7,000 acres of undeveloped coastal land. Critical habitat for sea turtles and migratory birds. Hiking trails and beach access.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🐢 Sea Turtles</span>
+          <span class="spot-amenity">🦅 Birding</span>
+          <span class="spot-amenity">🥾 Hiking</span>
+          <span class="spot-amenity">🆓 Free</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Bon+Secour+National+Wildlife+Refuge+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="park">
+      <div class="spot-card-icon">🌲</div>
+      <div class="spot-card-body">
+        <h4>Hugh S. Branyon Backcountry Trail</h4>
+        <div class="spot-meta"><span class="spot-tag">Trail System</span><span class="spot-tag">Orange Beach / Gulf Shores</span></div>
+        <p class="spot-desc">28+ miles of paved and natural trails through diverse Gulf Coast habitats. Great for biking, walking, and wildlife viewing.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🚴 Biking</span>
+          <span class="spot-amenity">🥾 Hiking</span>
+          <span class="spot-amenity">🆓 Free</span>
+          <span class="spot-amenity">🐊 Wildlife</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Hugh+Branyon+Backcountry+Trail+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="spot-section-label">🚻 Restrooms & Facilities</div>
+  <div class="spots-grid">
+
+    <div class="spot-card" data-filter="restroom">
+      <div class="spot-card-icon">🚻</div>
+      <div class="spot-card-body">
+        <h4>Gulf Shores Public Beach Pavilion</h4>
+        <div class="spot-meta"><span class="spot-tag">Restrooms</span><span class="spot-tag">Gulf Shores</span></div>
+        <p class="spot-desc">Public pavilion with restrooms, showers, and changing areas right on the beach at the main Gulf Shores access.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🚿 Outdoor Showers</span>
+          <span class="spot-amenity">♿ ADA Accessible</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Gulf+Shores+Public+Beach+Pavilion+Gulf+Shores+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="spot-card" data-filter="restroom">
+      <div class="spot-card-icon">🚻</div>
+      <div class="spot-card-body">
+        <h4>Orange Beach Waterfront Park Facilities</h4>
+        <div class="spot-meta"><span class="spot-tag">Restrooms</span><span class="spot-tag">Orange Beach</span></div>
+        <p class="spot-desc">Clean public restrooms and showers near the Orange Beach marina and waterfront park area.</p>
+        <div class="spot-amenities">
+          <span class="spot-amenity">🚿 Showers</span>
+          <span class="spot-amenity">♿ ADA Accessible</span>
+        </div>
+        <div class="spot-actions">
+          <a class="spot-btn-dir" href="https://maps.google.com/?q=Orange+Beach+Waterfront+Park+Orange+Beach+AL" target="_blank">📍 Get Directions</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div></section>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+/* Filter chips for static cards */
+document.querySelectorAll('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const f = this.dataset.filter;
+    document.querySelectorAll('.spot-card').forEach(card => {
+      if (f === 'all') {
+        card.style.display = '';
+      } else {
+        card.style.display = card.dataset.filter && card.dataset.filter.includes(f) ? '' : 'none';
+      }
+    });
+  });
+});
+</script>
 </body></html>
