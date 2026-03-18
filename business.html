@@ -196,23 +196,20 @@
   <!-- PROFILE HERO -->
   <div class="profile-hero">
     <div class="container">
-      <div class="profile-hero-inner">
-        <div class="profile-logo" id="profileEmoji" style="width:140px;height:140px;font-size:4.5rem;">🍽️</div>
-        <div class="profile-info" style="flex:1;">
+      <div class="profile-hero-inner" style="flex-direction:column;align-items:center;text-align:center;">
+        <div class="profile-logo" id="profileEmoji" style="width:200px;height:200px;font-size:6rem;margin:0 auto 20px;">🍽️</div>
+        <div class="profile-info" style="flex:1;text-align:center;">
           <h1 id="profileName">Business Name</h1>
           <p id="profileTagline" style="margin-top:4px;">Tagline goes here</p>
-          <div id="profileAddress" style="font-size:.88rem;color:rgba(255,255,255,.75);margin-top:6px;display:flex;align-items:center;gap:6px;">📍 Orange Beach, AL</div>
-          <div id="profileBadges" class="profile-badges" style="margin-top:10px;"></div>
-          <div class="profile-actions" style="margin-top:14px;">
+          <div id="profileAddress" style="font-size:.88rem;color:rgba(255,255,255,.75);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;">📍 Orange Beach, AL</div>
+          <div id="profileBadges" class="profile-badges" style="margin-top:10px;justify-content:center;"></div>
+          <div style="font-size:.95rem;font-weight:700;color:#f59e0b;margin-top:8px;" id="profileRating">★ 4.7 (312)</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:2px;" id="profilePriceRange">$$</div>
+          <div class="profile-actions" style="margin-top:14px;justify-content:center;">
             <a id="profileDirections" href="#" class="btn btn-ghost btn-sm">📍 Get Directions</a>
             <a id="profilePhone"      href="#" class="btn btn-ghost btn-sm">📞 Call</a>
-            <a id="profileWebsite"    href="#" class="btn btn-ghost btn-sm" target="_blank">🌐 Website</a>
             <button class="btn btn-secondary btn-sm" id="profileBookBtn" style="display:none" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
           </div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div id="profileRating" style="font-size:1.1rem;font-weight:700;color:#f59e0b;">★ 4.7 (312)</div>
-          <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:4px;" id="profilePriceRange">$$</div>
         </div>
       </div>
     </div>
@@ -413,7 +410,6 @@
         panel.innerHTML = `<div class="booking-card">
           <h4>📍 Plan Your Visit</h4>
           <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">${biz.priceRange === 'Free to visit' ? 'Free to visit — open daily. Parking is free.' : 'Admission required for some attractions.'}</p>
-          ${biz.website ? `<a href="${biz.website}" target="_blank" class="btn btn-primary" style="width:100%;text-align:center;justify-content:center;display:flex;margin-bottom:8px;">🌐 Visit Website</a>` : ''}
           ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">📞 ${phone}</a>` : ''}
         </div>`;
         return;
@@ -423,7 +419,6 @@
       panel.innerHTML = `<div class="booking-card">
         <h4>📞 Contact</h4>
         ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;margin-bottom:8px;">📞 ${phone}</a>` : ''}
-        ${biz.website ? `<a href="${biz.website}" target="_blank" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">🌐 Website</a>` : ''}
       </div>`;
     }
     /* ══════════════════════════════════════════════
