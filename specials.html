@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Specials — Gulf Coast Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,30 +13,30 @@
       transition:box-shadow .15s;
     }
     .listing-expand-card:hover { box-shadow:var(--shadow); }
-    .listing-expand-header {
-      display:flex; align-items:center; gap:14px; padding:16px 20px; flex-wrap:wrap;
-    }
+    .listing-expand-header { display:flex; align-items:center; gap:14px; padding:16px 20px; flex-wrap:wrap; }
     .listing-expand-emoji { font-size:2rem; flex-shrink:0; }
     .listing-expand-info  { flex:1; min-width:0; }
     .listing-expand-info h4 { font-size:.95rem; font-weight:700; margin:0 0 2px; }
     .listing-expand-info p  { font-size:.82rem; color:var(--text-muted); margin:0; }
-    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; }
+    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
     .expand-btn { background:var(--teal); color:#fff; border:none; cursor:pointer; }
-    .expand-btn:hover { background:var(--teal-dark); }
-    .listing-expand-details {
-      display:none; padding:0 20px 16px; border-top:1px solid var(--gray-100);
-    }
+    .listing-expand-details { display:none; padding:0 20px 16px; border-top:1px solid var(--gray-100); }
     .listing-expand-details.open { display:block; }
-    .expand-item-row {
-      display:flex; justify-content:space-between; align-items:flex-start;
-      padding:10px 0; border-bottom:1px solid var(--gray-100); gap:12px;
-    }
+    .expand-item-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--gray-100); gap:12px; }
     .expand-item-row:last-child { border-bottom:none; }
     .expand-item-name  { font-weight:600; font-size:.88rem; }
     .expand-item-desc  { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
     .expand-item-price { font-size:.9rem; font-weight:700; color:var(--teal); white-space:nowrap; flex-shrink:0; }
+    .date-hero {
+      background: linear-gradient(135deg,#c0392b,#922b21);
+      color:#fff; padding:20px 16px; text-align:center;
+    }
+    .date-hero .day-name  { font-size:1.8rem; font-weight:800; }
+    .date-hero .full-date { font-size:.9rem; opacity:.85; margin-top:2px; }
+    .empty-state { text-align:center; padding:48px 24px; color:#888; }
   </style>
-</head><body>
+</head>
+<body>
 
 <div class="gcr-header">
   <div class="gcr-header-top">
@@ -43,9 +44,7 @@
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
   </div>
   <div class="gcr-cat-tabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
@@ -54,9 +53,8 @@
     <a href="specials.html"      class="gcr-cat-tab active">🏷️ Specials</a>
     <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
     <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
     <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
   </div>
   <div class="gcr-action-strip">
     <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
@@ -64,54 +62,177 @@
   </div>
 </div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="ayce">🦀 All You Can Eat</button>
-    <button class="filter-chip" data-filter="daily">📅 Daily Specials</button>
-    <button class="filter-chip" data-filter="weekend">🎉 Weekend Deals</button>
-    <button class="filter-chip" data-filter="lunch">🥗 Lunch Specials</button>
-    <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family Deals</button>
-    <button class="filter-chip" data-filter="early-bird">🌅 Early Bird</button>
-    <button class="filter-chip" data-filter="kids">👶 Kids Eat Free</button>
-  </div></div></div>
-  <section class="section"><div class="container">
-    <div id="specialsGrid">
-      <div class="listing-expand-card" data-tags="daily lunch">
+<div class="date-hero">
+  <div class="day-name" id="spDayName">—</div>
+  <div class="full-date" id="spFullDate">—</div>
+</div>
+
+<div class="filters-bar"><div class="container"><div class="filters-inner">
+  <button class="filter-chip active" data-filter="all">All</button>
+  <button class="filter-chip" data-filter="ayce">🦀 All You Can Eat</button>
+  <button class="filter-chip" data-filter="daily">📅 Daily Specials</button>
+  <button class="filter-chip" data-filter="weekend">🎉 Weekend Deals</button>
+  <button class="filter-chip" data-filter="lunch">🥗 Lunch Specials</button>
+  <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family Deals</button>
+  <button class="filter-chip" data-filter="early-bird">🌅 Early Bird</button>
+  <button class="filter-chip" data-filter="kids">👶 Kids Eat Free</button>
+</div></div></div>
+
+<section class="section"><div class="container">
+  <div id="spLoading" style="text-align:center;padding:48px 0;color:#888;">
+    <div style="font-size:2rem;margin-bottom:8px;">🏷️</div>Loading today's specials…
+  </div>
+  <div id="specialsGrid"></div>
+  <div id="spEmpty" style="display:none;" class="empty-state">
+    <div style="font-size:3rem;margin-bottom:12px;">🏷️</div>
+    <div style="font-weight:600;font-size:1.1rem;">No specials found for today</div>
+    <p style="margin-top:8px;font-size:.9rem;">Check back soon or browse all restaurants.</p>
+  </div>
+</div></section>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+  const DAYS    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const SHORT_D = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today   = new Date();
+  const todayDay   = DAYS[today.getDay()];
+  const todayShort = SHORT_D[today.getDay()];
+  const isWeekend  = today.getDay() === 0 || today.getDay() === 6;
+
+  document.getElementById('spDayName').textContent  = todayDay + "'s Specials";
+  document.getElementById('spFullDate').textContent = today.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+  // Check if a special runs today
+  function specialRunsToday(sp) {
+    if (!sp) return false;
+    const days = sp.days || sp.day_of_week || [];
+    // No days = runs every day
+    if (!days.length) return true;
+    // "daily" keyword
+    if (days.includes('daily') || days.includes('Daily') || days.includes('Everyday')) return true;
+    // Check today
+    if (days.includes(todayDay) || days.includes(todayShort)) return true;
+    // Weekend check
+    if (isWeekend && (days.includes('Weekend') || days.includes('Weekends'))) return true;
+    return false;
+  }
+
+  // Get filter tags for a special
+  function specialTags(sp) {
+    const tags = (sp.tags || []).map(t => t.toLowerCase());
+    const name = (sp.name || '').toLowerCase() + ' ' + (sp.description || sp.desc || '').toLowerCase();
+    if (name.includes('all you can eat') || name.includes('ayce')) tags.push('ayce');
+    if (name.includes('lunch')) tags.push('lunch');
+    if (name.includes('early bird') || name.includes('earlybird')) tags.push('early-bird');
+    if (name.includes('kid') || name.includes('children')) tags.push('kids', 'family');
+    if (name.includes('weekend')) tags.push('weekend');
+    if (name.includes('daily') || (sp.days || []).length === 0) tags.push('daily');
+    if (isWeekend) tags.push('weekend');
+    return [...new Set(tags)].join(' ');
+  }
+
+  function renderSpecials(allSpecials, businesses) {
+    document.getElementById('spLoading').style.display = 'none';
+
+    // Build business lookup
+    const bizMap = {};
+    (businesses || []).forEach(b => {
+      bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; bizMap[b.subdomain] = b;
+    });
+
+    // Filter specials for today
+    const todaySpecials = (allSpecials || []).filter(sp => specialRunsToday(sp));
+
+    // Also check businesses with happyHourSpecials or specials data
+    const bizWithSpecials = (businesses || []).filter(b => {
+      const sp = b.specials || b.happyHourSpecials || b.todaySpecials;
+      return sp && (Array.isArray(sp) ? sp.length > 0 : true);
+    });
+
+    if (todaySpecials.length === 0 && bizWithSpecials.length === 0) {
+      document.getElementById('spEmpty').style.display = 'block';
+      return;
+    }
+
+    let html = '';
+    let idx = 0;
+
+    // Render from specials table
+    // Group by business
+    const byBiz = {};
+    todaySpecials.forEach(sp => {
+      const key = sp.site_id || sp.business_id || 'unknown';
+      if (!byBiz[key]) byBiz[key] = { biz: bizMap[key], specials: [] };
+      byBiz[key].specials.push(sp);
+    });
+
+    Object.values(byBiz).forEach(({ biz, specials }) => {
+      const name  = biz?.name  || 'Local Business';
+      const emoji = biz?.emoji || '🏪';
+      const slug  = biz?.slug  || biz?.id || '';
+      const tags  = specials.map(s => specialTags(s)).join(' ');
+      const id    = `sp-${idx++}`;
+
+      const items = specials.map(sp => `
+        <div class="expand-item-row">
+          <div>
+            <div class="expand-item-name">${sp.name || sp.title || 'Special'}</div>
+            ${sp.description || sp.desc ? `<div class="expand-item-desc">${sp.description || sp.desc}</div>` : ''}
+            ${sp.time ? `<div class="expand-item-desc">⏰ ${sp.time}</div>` : ''}
+          </div>
+          <div class="expand-item-price">${sp.price || sp.discount || ''}</div>
+        </div>`).join('');
+
+      html += `<div class="listing-expand-card" data-tags="${tags}">
         <div class="listing-expand-header">
-          <span class="listing-expand-emoji">🍽️</span>
+          <span class="listing-expand-emoji">${emoji}</span>
           <div class="listing-expand-info">
-            <h4>Anchor Bar & Grill</h4>
-            <p>2 active specials</p>
+            <h4>${name}</h4>
+            <p>${specials.length} special${specials.length > 1 ? 's' : ''} today</p>
           </div>
           <div class="listing-expand-actions">
-            <a href="business.html?id=anchor-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('sp-anchor-bar')">See Specials ▼</button>
+            ${slug ? `<a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>` : ''}
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}')">See Specials ▼</button>
           </div>
         </div>
-        <div class="listing-expand-details" id="sp-anchor-bar-details">
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Lunch Special — Half Off Appetizers</div>
-              <div class="expand-item-desc">11am–2pm daily on select appetizers</div>
-            </div>
-            <div class="expand-item-price">50% off</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Taco Tuesday</div>
-              <div class="expand-item-desc">$1.50 per fish or shrimp taco every Tuesday</div>
-            </div>
-            <div class="expand-item-price">$1.50 ea</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div></section>
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
-    </div>
-  </div></footer>
-  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
+        <div class="listing-expand-details" id="${id}">${items}</div>
+      </div>`;
+    });
+
+    document.getElementById('specialsGrid').innerHTML = html || '<div class="empty-state"><div style="font-size:2rem">🏷️</div><p>No specials found for today.</p></div>';
+    wireFilters();
+  }
+
+  function wireFilters() {
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.listing-expand-card').forEach(card => {
+          card.style.display = (f === 'all' || card.dataset.tags.includes(f)) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  function toggleExpand(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('open');
+    event.target.textContent = el.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
+  }
+
+  document.addEventListener('gcr:loaded', e => {
+    renderSpecials(e.detail.specials || [], e.detail.businesses || []);
+  });
+</script>
 </body></html>

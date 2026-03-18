@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* ── Expandable listing cards ── */
     .listing-expand-card {
       background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-sm);
       margin-bottom:12px; overflow:hidden; border:1.5px solid var(--gray-200);
@@ -21,7 +20,7 @@
     .listing-expand-info  { flex:1; min-width:0; }
     .listing-expand-info h4 { font-size:.95rem; font-weight:700; margin:0 0 2px; }
     .listing-expand-info p  { font-size:.82rem; color:var(--text-muted); margin:0; }
-    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; }
+    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
     .expand-btn { background:var(--teal); color:#fff; border:none; cursor:pointer; }
     .expand-btn:hover { background:var(--teal-dark); }
     .listing-expand-details {
@@ -37,17 +36,30 @@
     .expand-item-desc  { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
     .expand-item-price { font-size:.9rem; font-weight:700; color:var(--teal); white-space:nowrap; flex-shrink:0; }
 
-    .hh-banner {
+    .date-hero {
       background: linear-gradient(135deg,#c9831f,#a0621a);
-      color:#fff; text-align:center; padding:12px;
-      font-size:.88rem; font-weight:600;
+      color:#fff; padding:20px 16px; text-align:center;
     }
-    .hh-now-card {
-      background: linear-gradient(135deg,var(--teal-dark),var(--navy));
-      border-radius:var(--radius); padding:24px; color:#fff;
-      display:flex; align-items:center; gap:20px; margin-bottom:24px; flex-wrap:wrap;
+    .date-hero .day-name { font-size:1.8rem; font-weight:800; letter-spacing:-.5px; }
+    .date-hero .full-date { font-size:.9rem; opacity:.85; margin-top:2px; }
+    .date-hero .live-clock { font-size:1.1rem; font-weight:700; margin-top:4px; color:#ffe0a0; }
+
+    .hh-status-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700;
     }
-    .hh-now-card .big-time { font-size:2.2rem; font-weight:800; color:var(--teal-light); }
+    .hh-live  { background:#d1fae5; color:#065f46; }
+    .hh-soon  { background:#fef3c7; color:#92400e; }
+    .hh-later { background:#f3f4f6; color:#6b7280; }
+
+    .section-label-bar {
+      padding:10px 0 6px;
+      font-size:.75rem; font-weight:800; letter-spacing:1px;
+      text-transform:uppercase; color:var(--text-muted);
+      border-bottom:2px solid var(--gray-200); margin-bottom:12px;
+    }
+    .empty-state { text-align:center; padding:48px 24px; color:#888; }
+    .empty-state .empty-icon { font-size:3rem; margin-bottom:12px; }
   </style>
 </head>
 <body>
@@ -58,9 +70,7 @@
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
   </div>
   <div class="gcr-cat-tabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
@@ -69,9 +79,8 @@
     <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
     <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
     <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
     <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
   </div>
   <div class="gcr-action-strip">
     <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
@@ -79,175 +88,204 @@
   </div>
 </div>
 
+<!-- DATE HERO -->
+<div class="date-hero">
+  <div class="day-name" id="hhDayName">—</div>
+  <div class="full-date" id="hhFullDate">—</div>
+  <div class="live-clock" id="hhClock">—</div>
+</div>
 
-  <div class="hh-banner">🍻 Happy Hour is a state of mind. Scroll down to find yours.</div>
+<!-- FILTERS -->
+<div class="filters-bar"><div class="container"><div class="filters-inner">
+  <button class="filter-chip active" data-filter="all">All</button>
+  <button class="filter-chip" data-filter="bar">🍺 Bars</button>
+  <button class="filter-chip" data-filter="beach-bar">🏖️ Beach Bars</button>
+  <button class="filter-chip" data-filter="sports-bar">📺 Sports Bars</button>
+  <button class="filter-chip" data-filter="waterfront">⚓ Waterfront</button>
+  <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
+  <button class="filter-chip" data-filter="food-specials">🍔 Food Specials</button>
+</div></div></div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="bar">🍺 All Bars</button>
-    <button class="filter-chip" data-filter="beach-bar">🏖️ Beach Bars</button>
-    <button class="filter-chip" data-filter="sports-bar">📺 Sports Bars</button>
-    <button class="filter-chip" data-filter="waterfront">⚓ Waterfront</button>
-    <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
-    <button class="filter-chip" data-filter="food-specials">🍔 Food Specials</button>
-    <button class="filter-chip" data-filter="open-now">✅ Open Now</button>
-  </div></div></div>
+<section class="section"><div class="container">
+  <div id="hhNowSection" style="display:none;">
+    <div class="section-label-bar">🟢 Happening Right Now</div>
+    <div id="hhNowGrid"></div>
+  </div>
+  <div id="hhSoonSection" style="display:none;">
+    <div class="section-label-bar">🟡 Starting Soon</div>
+    <div id="hhSoonGrid"></div>
+  </div>
+  <div id="hhLaterSection" style="display:none;">
+    <div class="section-label-bar">🕐 Later Today</div>
+    <div id="hhLaterGrid"></div>
+  </div>
+  <div id="hhLoading" style="text-align:center;padding:48px 0;color:#888;">
+    <div style="font-size:2rem;margin-bottom:8px;">🍻</div>
+    Loading today's happy hours…
+  </div>
+  <div id="hhEmpty" style="display:none;" class="empty-state">
+    <div class="empty-icon">🍻</div>
+    <div style="font-weight:600;font-size:1.1rem;">No happy hours found for today</div>
+    <p style="margin-top:8px;font-size:.9rem;">Check back later or browse all restaurants.</p>
+  </div>
+</div></section>
 
-  <section class="section"><div class="container">
-    <div class="hh-now-card">
-      <div>
-        <div class="big-time" id="currentTime">—</div>
-        <div style="font-size:.82rem;opacity:.8">Current local time · Orange Beach, AL</div>
-      </div>
-      <div>
-        <h3 style="color:#fff;margin-bottom:4px">Happy Hour Finder</h3>
-        <p style="color:rgba(255,255,255,.7);font-size:.85rem">Businesses below with a green "HH" tag are currently running happy hour specials</p>
-      </div>
-    </div>
-    <div id="hhGrid">
-      <div class="listing-expand-card" data-tags="bar live-music">
-        <div class="listing-expand-header">
-          <span class="listing-expand-emoji">🍺</span>
-          <div class="listing-expand-info">
-            <h4>The Lighthouse Bar & Music Hall</h4>
-            <p>Happy Hour: 4pm–7pm daily</p>
-          </div>
-          <div class="listing-expand-actions">
-            <a href="business.html?id=lighthouse-bar" class="btn btn-outline btn-sm">View Profile</a>
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-lighthouse-details')">See Specials ▼</button>
-          </div>
-        </div>
-        <div class="listing-expand-details" id="hh-lighthouse-details">
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Draft Beer</div>
-              <div class="expand-item-desc">Select domestic & local drafts</div>
-            </div>
-            <div class="expand-item-price">$2.50</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">House Wine</div>
-              <div class="expand-item-desc">Red, white, or rosé</div>
-            </div>
-            <div class="expand-item-price">$4.00</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Half Price Appetizers</div>
-              <div class="expand-item-desc">Wings, nachos, calamari & more</div>
-            </div>
-            <div class="expand-item-price">50% off</div>
-          </div>
-        </div>
-      </div>
+<section class="section-sm" style="background:var(--gray-100);"><div class="container">
+  <div class="claim-cta"><h4>Run Happy Hour Specials?</h4>
+  <p>Get in front of tourists looking for deals right now. Free to list.</p>
+  <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
+</div></section>
 
-      <div class="listing-expand-card" data-tags="bar waterfront">
-        <div class="listing-expand-header">
-          <span class="listing-expand-emoji">🍻</span>
-          <div class="listing-expand-info">
-            <h4>Anchor Bar & Grill</h4>
-            <p>Happy Hour: 3pm–6pm Mon–Fri</p>
-          </div>
-          <div class="listing-expand-actions">
-            <a href="business.html?id=anchor-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-anchor-details')">See Specials ▼</button>
-          </div>
-        </div>
-        <div class="listing-expand-details" id="hh-anchor-details">
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Domestic Pints</div>
-              <div class="expand-item-desc">Bud Light, Miller High Life, Coors</div>
-            </div>
-            <div class="expand-item-price">$3.00</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Well Cocktails</div>
-              <div class="expand-item-desc">Vodka, gin, rum, whiskey, tequila</div>
-            </div>
-            <div class="expand-item-price">$4.50</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Fried Pickles</div>
-              <div class="expand-item-desc">Served with ranch dip</div>
-            </div>
-            <div class="expand-item-price">$2.99</div>
-          </div>
-        </div>
-      </div>
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
 
-      <div class="listing-expand-card" data-tags="beach-bar">
-        <div class="listing-expand-header">
-          <span class="listing-expand-emoji">🏖️</span>
-          <div class="listing-expand-info">
-            <h4>Beach Bar & Grill</h4>
-            <p>Happy Hour: Sunset to 8pm daily</p>
-          </div>
-          <div class="listing-expand-actions">
-            <a href="business.html?id=beach-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-beach-details')">See Specials ▼</button>
-          </div>
-        </div>
-        <div class="listing-expand-details" id="hh-beach-details">
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Margaritas</div>
-              <div class="expand-item-desc">Classic, strawberry, or mango</div>
-            </div>
-            <div class="expand-item-price">$5.00</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Corona & Modelo</div>
-              <div class="expand-item-desc">Ice cold imported beers</div>
-            </div>
-            <div class="expand-item-price">$3.50</div>
-          </div>
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">Fish Tacos</div>
-              <div class="expand-item-desc">Blackened or fried, 3 tacos</div>
-            </div>
-            <div class="expand-item-price">$4.99</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div></section>
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const SHORT_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
-    <div class="claim-cta"><h4>Run Happy Hour Specials?</h4>
-    <p>Get in front of tourists looking for deals right now. Free to list.</p>
-    <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
-  </div></section>
+  // ── Date / clock display ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('hhDayName').textContent  = DAYS[now.getDay()];
+    document.getElementById('hhFullDate').textContent = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+    document.getElementById('hhClock').textContent    = now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
+  }
+  updateClock(); setInterval(updateClock, 30000);
 
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a> · <a href="restaurants.html" style="color:var(--teal-light)">Restaurants</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
-    </div>
-  </div></footer>
+  // ── Parse "3:00 PM" → minutes since midnight ──
+  function toMinutes(timeStr) {
+    if (!timeStr) return null;
+    const m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return null;
+    let h = parseInt(m[1]), min = parseInt(m[2]), ampm = m[3].toUpperCase();
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + min;
+  }
 
-  <script src="js/gcr-api.js"></script>
-  <script src="js/app.js"></script>
-  <script>
-    // Live clock
-    function updateTime() {
-      const el = document.getElementById('currentTime');
-      if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
+  // ── Check if a business has HH today ──
+  function getHHToday(biz) {
+    const hh = biz.happyHour || biz.happy_hour;
+    if (!hh || hh === 'false' || hh === false) return null;
+
+    // Structured HH data: { days, start, end, deals }
+    if (typeof hh === 'object') {
+      const todayShort = SHORT_DAYS[new Date().getDay()];
+      const days = hh.days || [];
+      if (days.length && !days.includes(todayShort) && !days.includes(DAYS[new Date().getDay()])) return null;
+      return hh;
     }
-    updateTime(); setInterval(updateTime, 30000);
 
-    // Toggle expandable sections
-    function toggleExpand(detailsId) {
-      const details = document.getElementById(detailsId);
-      if (details) {
-        details.classList.toggle('open');
-        event.target.textContent = details.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
-      }
+    // String like "3pm–6pm daily" or "Mon–Fri 4–7pm" — show as-is
+    if (typeof hh === 'string' && hh !== 'false') {
+      return { display: hh, deals: [] };
     }
-  </script>
+    return null;
+  }
+
+  // ── Determine HH status: 'live', 'soon', 'later' ──
+  function hhStatus(hh) {
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const start = toMinutes(hh.start);
+    const end   = toMinutes(hh.end);
+    if (start === null) return 'later';
+    if (nowMin >= start && (end === null || nowMin < end)) return 'live';
+    if (start - nowMin <= 60 && start > nowMin) return 'soon';
+    if (start > nowMin) return 'later';
+    return null; // already ended
+  }
+
+  // ── Build a card HTML ──
+  function buildCard(biz, hh, idx) {
+    const id = `hh-${idx}`;
+    const status = hh.start ? hhStatus(hh) : 'later';
+    const badgeHtml = status === 'live'  ? `<span class="hh-status-badge hh-live">🟢 Live Now</span>` :
+                      status === 'soon'  ? `<span class="hh-status-badge hh-soon">🟡 Starting Soon</span>` :
+                                           `<span class="hh-status-badge hh-later">🕐 Later</span>`;
+
+    const timeStr = hh.start && hh.end ? `${hh.start} – ${hh.end}` : hh.display || 'Happy Hour Today';
+    const bTags = (biz.tags || []).join(' ').toLowerCase();
+
+    const deals = hh.deals || [];
+    const dealsHtml = deals.length
+      ? deals.map(d => `<div class="expand-item-row"><div><div class="expand-item-name">${d.name || d}</div>${d.desc ? `<div class="expand-item-desc">${d.desc}</div>` : ''}</div><div class="expand-item-price">${d.price || ''}</div></div>`).join('')
+      : `<div style="padding:12px 0;color:#888;font-size:.85rem;">Happy hour details coming soon. Call to confirm specials.</div>`;
+
+    return `<div class="listing-expand-card" data-tags="${bTags}" data-status="${status}">
+      <div class="listing-expand-header">
+        <span class="listing-expand-emoji">${biz.emoji || '🍻'}</span>
+        <div class="listing-expand-info">
+          <h4>${biz.name}</h4>
+          <p>${timeStr} &nbsp;${badgeHtml}</p>
+        </div>
+        <div class="listing-expand-actions">
+          <a href="business.html?id=${biz.slug || biz.id}" class="btn btn-outline btn-sm">View Profile</a>
+          <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}')">See Specials ▼</button>
+        </div>
+      </div>
+      <div class="listing-expand-details" id="${id}">${dealsHtml}</div>
+    </div>`;
+  }
+
+  // ── Render all HH businesses ──
+  function renderHH(businesses) {
+    const now = [], soon = [], later = [];
+
+    businesses.forEach((biz, i) => {
+      const hh = getHHToday(biz);
+      if (!hh) return;
+      const status = hh.start ? hhStatus(hh) : 'later';
+      if (status === null) return; // ended
+      const card = buildCard(biz, hh, i);
+      if (status === 'live')  now.push({ card, start: toMinutes(hh.start) || 0 });
+      else if (status === 'soon') soon.push({ card, start: toMinutes(hh.start) || 999 });
+      else later.push({ card, start: toMinutes(hh.start) || 999 });
+    });
+
+    const sortByTime = arr => arr.sort((a,b) => a.start - b.start).map(x => x.card).join('');
+
+    document.getElementById('hhLoading').style.display = 'none';
+
+    if (now.length + soon.length + later.length === 0) {
+      document.getElementById('hhEmpty').style.display = 'block';
+      return;
+    }
+
+    if (now.length)  { document.getElementById('hhNowSection').style.display = 'block';   document.getElementById('hhNowGrid').innerHTML  = sortByTime(now);   }
+    if (soon.length) { document.getElementById('hhSoonSection').style.display = 'block';  document.getElementById('hhSoonGrid').innerHTML  = sortByTime(soon);  }
+    if (later.length){ document.getElementById('hhLaterSection').style.display = 'block'; document.getElementById('hhLaterGrid').innerHTML = sortByTime(later); }
+
+    wireFilters();
+  }
+
+  // ── Filter chips ──
+  function wireFilters() {
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.listing-expand-card').forEach(card => {
+          card.style.display = (f === 'all' || card.dataset.tags.includes(f)) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  function toggleExpand(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('open');
+    event.target.textContent = el.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
+  }
+
+  document.addEventListener('gcr:loaded', e => renderHH(e.detail.businesses || []));
+</script>
 </body></html>

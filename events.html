@@ -7,61 +7,55 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* ── View toggle ── */
-    .view-toggle { display:flex; gap:6px; }
-    .events-view-toggle {
-      padding:7px 16px; border-radius:var(--radius-sm); font-size:.82rem; font-weight:600;
-      border:1.5px solid var(--gray-200); background:#fff; cursor:pointer; color:var(--text-muted);
-      transition:all .15s;
+    .date-hero {
+      background: linear-gradient(135deg,#6c3483,#4a235a);
+      color:#fff; padding:20px 16px; text-align:center;
     }
-    .events-view-toggle:hover  { border-color:var(--teal); color:var(--teal); }
-    .events-view-toggle.active { background:var(--teal); border-color:var(--teal); color:#fff; }
+    .date-hero .day-name  { font-size:1.8rem; font-weight:800; }
+    .date-hero .full-date { font-size:.9rem; opacity:.85; margin-top:2px; }
 
-    /* ── Card view rows ── */
-    .events-full-list { display:flex; flex-direction:column; gap:14px; }
     .event-row {
-      background:#fff; border-radius:var(--radius); padding:20px 24px;
-      display:flex; align-items:center; gap:20px; box-shadow:var(--shadow-sm);
+      background:#fff; border-radius:var(--radius); padding:18px 20px;
+      display:flex; align-items:center; gap:16px; box-shadow:var(--shadow-sm);
+      border:1.5px solid var(--gray-200); margin-bottom:12px;
       transition:transform .15s,box-shadow .15s; flex-wrap:wrap;
     }
     .event-row:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
-    .event-date-box {
-      background:var(--teal); color:#fff; border-radius:var(--radius-sm);
-      padding:10px 14px; text-align:center; min-width:60px; flex-shrink:0;
-    }
-    .event-date-box .month { font-size:.65rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
-    .event-date-box .day   { font-size:1.6rem; font-weight:800; line-height:1; }
-    .event-info { flex:1; min-width:200px; }
-    .event-info h4 { font-size:1.05rem; margin-bottom:3px; }
-    .event-info p  { font-size:.83rem; color:var(--text-muted); }
-    .event-meta { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
-    .event-actions { display:flex; gap:8px; flex-shrink:0; }
-    .event-cat-badge {
-      background:var(--sky); color:var(--teal);
-      font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:20px;
-    }
-    .event-cat-badge.concert  { background:#f3e8ff; color:#7c3aed; }
-    .event-cat-badge.festival { background:#fef3c7; color:#d97706; }
-    .event-cat-badge.sports   { background:#dcfce7; color:#16a34a; }
-    .event-cat-badge.holiday  { background:#fee2e2; color:#dc2626; }
 
-    /* ── List view ── */
-    .event-date-header {
-      display:flex; align-items:baseline; gap:12px;
-      padding:18px 0 8px; border-bottom:2px solid var(--teal);
-      margin-top:20px;
+    .event-time-box {
+      background:var(--teal); color:#fff; border-radius:var(--radius-sm);
+      padding:10px 14px; text-align:center; min-width:68px; flex-shrink:0;
     }
-    .event-date-header:first-child { margin-top:0; }
-    .event-date-label { font-size:1.05rem; font-weight:800; color:var(--navy); }
-    .event-date-sub   { font-size:.78rem; color:var(--text-muted); }
-    .event-list-row {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px 0; border-bottom:1px solid var(--gray-100); gap:12px; flex-wrap:wrap;
+    .event-time-box .time-main { font-size:1rem; font-weight:800; line-height:1.1; }
+    .event-time-box .time-ampm { font-size:.65rem; font-weight:700; letter-spacing:1px; opacity:.85; }
+    .event-time-box.passed     { background:#9ca3af; }
+    .event-time-box.live-now   { background:#059669; }
+
+    .event-info { flex:1; min-width:180px; }
+    .event-info h4 { font-size:.98rem; font-weight:700; margin-bottom:3px; }
+    .event-info .venue { font-size:.82rem; color:var(--text-muted); }
+    .event-meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+    .event-badge {
+      font-size:.7rem; font-weight:700; padding:2px 9px; border-radius:20px;
     }
-    .event-list-left  { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
-    .event-list-emoji { font-size:1.6rem; flex-shrink:0; }
-    .event-list-title { font-size:.92rem; font-weight:700; margin-bottom:2px; }
-    .event-list-meta  { font-size:.78rem; color:var(--text-muted); }
+    .badge-music    { background:#f3e8ff; color:#7c3aed; }
+    .badge-free     { background:#dcfce7; color:#16a34a; }
+    .badge-family   { background:#fef3c7; color:#d97706; }
+    .badge-recurring{ background:#e0f2fe; color:#0369a1; }
+    .badge-artist   { background:#fce7f3; color:#be185d; }
+    .badge-live     { background:#d1fae5; color:#065f46; }
+
+    .event-actions { display:flex; gap:8px; flex-shrink:0; }
+
+    .section-date-label {
+      font-size:.8rem; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+      color:var(--teal); padding:14px 0 8px; border-bottom:2px solid var(--teal);
+      margin:24px 0 12px;
+    }
+    .section-date-label:first-child { margin-top:0; }
+
+    .empty-state { text-align:center; padding:48px 24px; color:#888; }
+    .no-more { text-align:center; padding:24px; color:#aaa; font-size:.85rem; }
   </style>
 </head>
 <body>
@@ -72,9 +66,7 @@
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
   </div>
   <div class="gcr-cat-tabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
@@ -83,102 +75,206 @@
     <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
     <a href="events.html"        class="gcr-cat-tab active">🎉 Events</a>
     <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
+    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
   </div>
   <div class="gcr-action-strip">
     <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Full Calendar 🎉</button>
   </div>
 </div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All Events</button>
-    <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
-    <button class="filter-chip" data-filter="concert">🎤 Concerts</button>
-    <button class="filter-chip" data-filter="festival">🎪 Festivals</button>
-    <button class="filter-chip" data-filter="sports">🏐 Sports</button>
-    <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family</button>
-    <button class="filter-chip" data-filter="bar-event">🍻 Bar Events</button>
-    <button class="filter-chip" data-filter="holiday">🎊 Holidays</button>
-    <button class="filter-chip" data-filter="the-wharf">⚓ The Wharf</button>
-  </div></div></div>
+<!-- DATE HERO -->
+<div class="date-hero">
+  <div class="day-name" id="evDayName">—</div>
+  <div class="full-date" id="evFullDate">—</div>
+</div>
 
-  <section class="section"><div class="container">
-    <!-- Calendar widget -->
-    <div style="background:#fff;border-radius:var(--radius);padding:24px;margin-bottom:32px;box-shadow:var(--shadow-sm);max-width:380px;">
-      <div class="calendar-header">
-        <button class="cal-nav">‹</button>
-        <h4 id="calMonth">March 2026</h4>
-        <button class="cal-nav">›</button>
+<!-- FILTERS -->
+<div class="filters-bar"><div class="container"><div class="filters-inner">
+  <button class="filter-chip active" data-filter="all">All Events</button>
+  <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
+  <button class="filter-chip" data-filter="concert">🎤 Concerts</button>
+  <button class="filter-chip" data-filter="festival">🎪 Festivals</button>
+  <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family</button>
+  <button class="filter-chip" data-filter="free">✅ Free</button>
+  <button class="filter-chip" data-filter="bar-event">🍻 Bar Events</button>
+  <button class="filter-chip" data-filter="the-wharf">⚓ The Wharf</button>
+  <button class="filter-chip" data-filter="recurring">🔁 Recurring</button>
+</div></div></div>
+
+<section class="section"><div class="container">
+  <div id="evLoading" style="text-align:center;padding:48px 0;color:#888;">
+    <div style="font-size:2rem;margin-bottom:8px;">🎉</div>Loading today's events…
+  </div>
+  <div id="eventsContainer"></div>
+  <div id="evEmpty" style="display:none;" class="empty-state">
+    <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+    <div style="font-weight:600;font-size:1.1rem;">No events found starting from now</div>
+    <p style="margin-top:8px;font-size:.9rem;">Check back soon or view the full calendar.</p>
+  </div>
+</div></section>
+
+<section class="section-sm" style="background:var(--gray-100);"><div class="container">
+  <div class="claim-cta"><h4>Have an Event to List?</h4>
+  <p>Submit your event and get it in front of thousands of Gulf Coast visitors.</p>
+  <a href="claim.html" class="btn btn-primary">Submit an Event</a></div>
+</div></section>
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a> · <a href="artists.html" style="color:var(--teal-light)">Local Artists</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const nowMin   = now.getHours() * 60 + now.getMinutes();
+
+  // Date hero
+  document.getElementById('evDayName').textContent  = now.toLocaleDateString('en-US', { weekday:'long' }) + "'s Events";
+  document.getElementById('evFullDate').textContent = now.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+
+  function toMinutes(timeStr) {
+    if (!timeStr) return null;
+    const m = timeStr.match(/(\d+):?(\d*)\s*(AM|PM)?/i);
+    if (!m) return null;
+    let h = parseInt(m[1]), min = parseInt(m[2] || '0');
+    const ampm = (m[3] || '').toUpperCase();
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + min;
+  }
+
+  function formatTime(timeStr) {
+    if (!timeStr) return { main:'TBD', ampm:'' };
+    const m = timeStr.match(/(\d+):?(\d*)\s*(AM|PM)?/i);
+    if (!m) return { main: timeStr, ampm:'' };
+    let h = parseInt(m[1]), min = parseInt(m[2] || '0');
+    const ampm = (m[3] || '').toUpperCase() || (h >= 12 ? 'PM' : 'AM');
+    if (!m[3]) { if (h >= 12) { if (h > 12) h -= 12; } else if (h === 0) h = 12; }
+    else { if (ampm === 'PM' && h !== 12) h -= 0; if (ampm === 'AM' && h === 12) h = 12; }
+    const display = h + (min ? `:${String(min).padStart(2,'0')}` : '');
+    return { main: display, ampm };
+  }
+
+  function eventTags(ev) {
+    const tags = [...(ev.tags || []), (ev.category || ''), (ev.type || '')].map(t => t.toLowerCase()).join(' ');
+    const name = (ev.name || ev.title || '').toLowerCase();
+    let extra = '';
+    if (name.includes('live') || name.includes('music') || tags.includes('live-music')) extra += ' live-music';
+    if (name.includes('concert')) extra += ' concert';
+    if (name.includes('festival')) extra += ' festival';
+    if (name.includes('family') || name.includes('kid')) extra += ' family';
+    if (name.includes('free') || ev.free || ev.price === '0' || ev.price === 'Free') extra += ' free';
+    if (ev.recurring || ev.recurrence) extra += ' recurring';
+    if ((ev.venue || '').toLowerCase().includes('wharf')) extra += ' the-wharf';
+    return (tags + extra).trim();
+  }
+
+  function buildEventCard(ev, bizMap) {
+    const biz = bizMap[ev.site_id] || bizMap[ev.business_id] || {};
+    const timeStr  = ev.start_time || ev.time || ev.event_time || '';
+    const evMin    = toMinutes(timeStr);
+    const isLive   = evMin !== null && nowMin >= evMin && nowMin < evMin + 180;
+    const { main, ampm } = formatTime(timeStr);
+
+    const timeBox = `<div class="event-time-box${isLive ? ' live-now' : ''}">
+      <div class="time-main">${main}</div>
+      ${ampm ? `<div class="time-ampm">${ampm}</div>` : ''}
+    </div>`;
+
+    const venueName = ev.venue || ev.businessName || biz.name || '';
+    const slug = ev.slug || biz.slug || biz.id || '';
+
+    const badges = [];
+    if (isLive) badges.push(`<span class="event-badge badge-live">🟢 Live Now</span>`);
+    if (ev.recurring || ev.recurrence) badges.push(`<span class="event-badge badge-recurring">🔁 ${ev.recurrence || 'Recurring'}</span>`);
+    if (ev.artist_name) badges.push(`<span class="event-badge badge-artist">🎤 ${ev.artist_name}</span>`);
+    if (ev.free || ev.price === 'Free' || ev.price === '0') badges.push(`<span class="event-badge badge-free">✅ Free</span>`);
+    if (ev.price && ev.price !== 'Free' && ev.price !== '0') badges.push(`<span class="event-badge" style="background:#fef9c3;color:#854d0e;">${ev.price}</span>`);
+
+    const artistLink = ev.artist_link ? `<a href="${ev.artist_link}" class="btn btn-ghost btn-sm" style="font-size:.75rem;">🎸 Artist Page</a>` : '';
+
+    return `<div class="event-row" data-tags="${eventTags(ev)}">
+      ${timeBox}
+      <div class="event-info">
+        <h4>${ev.name || ev.title || 'Event'}</h4>
+        ${venueName ? `<div class="venue">📍 ${venueName}</div>` : ''}
+        ${ev.description ? `<div class="venue" style="margin-top:4px;">${ev.description}</div>` : ''}
+        <div class="event-meta">${badges.join('')}</div>
       </div>
-      <div class="cal-days-header">
-        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
-        <span>Th</span><span>Fr</span><span>Sa</span>
+      <div class="event-actions">
+        ${artistLink}
+        ${slug ? `<a href="business.html?id=${slug}" class="btn btn-primary btn-sm">Details</a>` : ''}
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <p style="font-size:.72rem;color:var(--text-muted);margin-top:12px">● = event day</p>
-    </div>
+    </div>`;
+  }
 
-    <!-- Events list header + toggle -->
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-      <div>
-        <div class="eyebrow">Upcoming</div>
-        <h2 style="margin:0">All Events</h2>
-      </div>
-      <div class="view-toggle">
-        <button class="events-view-toggle active" data-view="card">📋 Cards</button>
-        <button class="events-view-toggle" data-view="list">📅 By Date</button>
-      </div>
-    </div>
+  function renderEvents(events, businesses) {
+    document.getElementById('evLoading').style.display = 'none';
 
-    <!-- Card view -->
-    <div class="events-full-list" id="eventsCardView">
-      <div class="event-row" data-tags="live-music">
-        <div class="event-date-box">
-          <div class="month">Mar</div>
-          <div class="day">21</div>
-        </div>
-        <div class="event-info">
-          <h4>Gulf Coast Live Music Festival</h4>
-          <p>The Wharf Orange Beach · 7:00 PM</p>
-          <div class="event-meta">
-            <span class="event-cat-badge">Live Music</span>
-            <span class="event-cat-badge" style="background:#dcfce7;color:#16a34a">Free</span>
-          </div>
-        </div>
-        <div class="event-actions">
-          <a href="business.html?id=wharf-orange-beach" class="btn btn-primary btn-sm">Details</a>
-        </div>
-      </div>
-    </div>
+    const bizMap = {};
+    (businesses || []).forEach(b => {
+      bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; bizMap[b.subdomain] = b;
+    });
 
-    <!-- List view (hidden by default) -->
-    <div id="eventsListView" style="display:none"></div>
+    // Filter: today only, not already ended (allow events within past 3hrs)
+    const todayEvents = (events || []).filter(ev => {
+      const d = ev.date || ev.event_date || '';
+      if (!d.startsWith(todayStr)) return false;
+      const evMin = toMinutes(ev.start_time || ev.time || ev.event_time || '');
+      if (evMin !== null && evMin < nowMin - 180) return false; // ended >3hrs ago
+      return true;
+    });
 
-    <!-- Artist listings -->
-    <div class="section-heading mt-32 mb-32" style="margin-top:48px;">
-      <div class="eyebrow">Local Talent</div>
-      <h2>Artists & Musicians</h2>
-      <p>Find your favorite Gulf Coast acts — click an artist to see their full schedule</p>
-    </div>
-    <div class="listings-grid" id="listingsGrid" data-category="events"></div>
-  </div></section>
+    // Also include recurring events that fire today (no specific date)
+    const recurringToday = (events || []).filter(ev => {
+      if (ev.date || ev.event_date) return false; // has specific date, handled above
+      if (!ev.recurring && !ev.recurrence) return false;
+      return true;
+    });
 
-  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
-    <div class="claim-cta"><h4>Have an Event to List?</h4>
-    <p>Submit your event and get it in front of thousands of Gulf Coast visitors.</p>
-    <a href="claim.html" class="btn btn-primary">Submit an Event</a></div>
-  </div></section>
+    const allToday = [...todayEvents, ...recurringToday];
 
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a> · <a href="artists.html" style="color:var(--teal-light)">Local Artists</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
-    </div>
-  </div></footer>
+    if (allToday.length === 0) {
+      document.getElementById('evEmpty').style.display = 'block';
+      return;
+    }
 
-  <script src="js/gcr-api.js"></script>
-  <script src="js/app.js"></script>
+    // Sort by start time, nulls last
+    allToday.sort((a, b) => {
+      const aMin = toMinutes(a.start_time || a.time || a.event_time || '') ?? 9999;
+      const bMin = toMinutes(b.start_time || b.time || b.event_time || '') ?? 9999;
+      return aMin - bMin;
+    });
+
+    document.getElementById('eventsContainer').innerHTML =
+      `<div class="section-date-label">📅 ${now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' })}</div>` +
+      allToday.map(ev => buildEventCard(ev, bizMap)).join('');
+
+    wireFilters();
+  }
+
+  function wireFilters() {
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const f = btn.dataset.filter;
+        document.querySelectorAll('.event-row').forEach(row => {
+          row.style.display = (f === 'all' || row.dataset.tags.includes(f)) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  document.addEventListener('gcr:loaded', e => {
+    renderEvents(e.detail.events || [], e.detail.businesses || []);
+  });
+</script>
 </body></html>
