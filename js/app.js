@@ -5,6 +5,319 @@
    gcr:loaded event from gcr-api.js
    ============================================ */
 
+/* ══════════════════════════════════════════
+   NAV TAB SCROLL PERSISTENCE + ACTIVE STATE
+══════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.getElementById('gcrCatTabs') || document.querySelector('.gcr-cat-tabs');
+  if (tabs) {
+    // Mark active tab based on current page
+    const page = window.location.pathname.split('/').pop() || 'index3.html';
+    tabs.querySelectorAll('.gcr-cat-tab').forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === page) a.classList.add('active');
+    });
+    // Restore scroll position from sessionStorage
+    const saved = sessionStorage.getItem('gcr_tabs_scroll');
+    if (saved) tabs.scrollLeft = parseInt(saved, 10);
+    // Scroll active tab into view if nothing was saved
+    else {
+      const active = tabs.querySelector('.gcr-cat-tab.active');
+      if (active) setTimeout(() => active.scrollIntoView({ behavior:'instant', block:'nearest', inline:'center' }), 30);
+    }
+    // Save scroll on every tab click
+    tabs.querySelectorAll('.gcr-cat-tab').forEach(a => {
+      a.addEventListener('click', () => sessionStorage.setItem('gcr_tabs_scroll', tabs.scrollLeft));
+    });
+  }
+});
+
+/* ══════════════════════════════════════════
+   MASTER CALENDAR MODAL  (works on every page)
+══════════════════════════════════════════ */
+let _gcrCalDate   = new Date();
+let _gcrCalTypes  = new Set(['events','happy_hour','special','live-music']);
+
+/* Inject modal HTML once into page body */
+function _gcrInjectCal() {
+  if (document.getElementById('gcrCalModal')) return;
+  const style = `
+    <style>
+    #gcrCalModal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);overflow-y:auto;padding:12px;box-sizing:border-box;}
+    #gcrCalModal .cal-inner{background:#fff;border-radius:18px;max-width:920px;width:100%;margin:0 auto;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);}
+    #gcrCalModal .cal-head{background:linear-gradient(135deg,#0b7a75,#065f5b);color:#fff;padding:18px 20px 14px;display:flex;justify-content:space-between;align-items:flex-start;}
+    #gcrCalModal .cal-daterow{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 20px;border-bottom:1px solid #f0f0f0;background:#fafafa;flex-wrap:wrap;}
+    #gcrCalModal .cal-navbtn{background:#e0f2fe;border:none;cursor:pointer;border-radius:8px;padding:7px 14px;font-weight:700;font-size:.85rem;color:#0369a1;}
+    #gcrCalModal .cal-datelabel{font-size:1rem;font-weight:800;color:#0d2137;min-width:200px;text-align:center;}
+    #gcrCalModal .cal-filters{padding:10px 20px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    #gcrCalModal .cal-toggle{background:#f3f4f6;color:#374151;border:1.5px solid #d1d5db;cursor:pointer;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;transition:.15s;}
+    #gcrCalModal .cal-toggle.on{background:#0b7a75;color:#fff;border-color:#0b7a75;}
+    #gcrCalModal .cal-body{display:flex;flex-wrap:wrap;min-height:360px;}
+    #gcrCalModal .cal-mini{width:268px;min-width:268px;padding:16px;border-right:1px solid #f0f0f0;background:#fafafa;flex-shrink:0;}
+    #gcrCalModal .cal-events{flex:1;min-width:260px;padding:16px;overflow-y:auto;max-height:500px;}
+    #gcrCalModal .cal-day-cell{text-align:center;padding:5px 3px;cursor:pointer;border-radius:7px;font-size:.82rem;transition:.12s;}
+    #gcrCalModal .cal-day-cell:hover{background:#e0f2fe;}
+    #gcrCalModal .cal-day-sel{background:#0b7a75!important;color:#fff;font-weight:700;}
+    #gcrCalModal .cal-day-today{background:#e0f2fe;color:#0369a1;font-weight:700;}
+    #gcrCalModal .cal-day-hasdot::after{content:'';display:block;width:5px;height:5px;background:#0b7a75;border-radius:50%;margin:1px auto 0;}
+    #gcrCalModal .cal-ev-card{display:flex;gap:12px;padding:12px;border-radius:10px;margin-bottom:9px;}
+    #gcrCalModal .cal-closebtn{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;cursor:pointer;border-radius:8px;padding:7px 11px;}
+    @media(max-width:600px){#gcrCalModal .cal-mini{width:100%;min-width:0;border-right:none;border-bottom:1px solid #f0f0f0;} #gcrCalModal .cal-events{max-height:360px;}}
+    </style>`;
+
+  const html = `${style}
+  <div id="gcrCalModal">
+    <div class="cal-inner">
+      <div class="cal-head">
+        <div>
+          <div style="font-size:.68rem;opacity:.8;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Gulf Coast Radar</div>
+          <div style="font-size:1.25rem;font-weight:800;margin-top:2px;">📅 Master Calendar</div>
+          <div id="gcrCalToday" style="font-size:.8rem;opacity:.8;margin-top:3px;"></div>
+        </div>
+        <button class="cal-closebtn" onclick="closeCalendarModal()">✕</button>
+      </div>
+      <div class="cal-daterow">
+        <button class="cal-navbtn" onclick="gcrCalNav(-1)">◀ Prev</button>
+        <div id="gcrCalLabel" class="cal-datelabel"></div>
+        <button class="cal-navbtn" onclick="gcrCalNav(1)">Next ▶</button>
+      </div>
+      <div class="cal-filters">
+        <span style="font-size:.7rem;font-weight:700;color:#888;">Show:</span>
+        <button class="cal-toggle on" data-t="events"     onclick="gcrCalToggle(this)">🎉 Events</button>
+        <button class="cal-toggle on" data-t="happy_hour" onclick="gcrCalToggle(this)">🍻 Happy Hours</button>
+        <button class="cal-toggle on" data-t="special"    onclick="gcrCalToggle(this)">🏷️ Specials</button>
+        <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎶 Live Music</button>
+      </div>
+      <div class="cal-body">
+        <div class="cal-mini" id="gcrMiniCal"></div>
+        <div class="cal-events" id="gcrCalEvents"></div>
+      </div>
+    </div>
+  </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('gcrCalModal').addEventListener('click', e => {
+    if (e.target.id === 'gcrCalModal') closeCalendarModal();
+  });
+}
+
+window.openCalendarModal = function(dateStr) {
+  _gcrInjectCal();
+  _gcrCalDate = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
+  document.getElementById('gcrCalModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  const now = new Date();
+  document.getElementById('gcrCalToday').textContent =
+    'Today: ' + now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  _gcrCalRender();
+};
+
+window.closeCalendarModal = function() {
+  const m = document.getElementById('gcrCalModal');
+  if (m) m.style.display = 'none';
+  document.body.style.overflow = '';
+};
+
+window.gcrCalNav = function(dir) {
+  _gcrCalDate = new Date(_gcrCalDate);
+  _gcrCalDate.setDate(_gcrCalDate.getDate() + dir);
+  _gcrCalRender();
+};
+
+window.gcrCalToggle = function(btn) {
+  btn.classList.toggle('on');
+  const t = btn.dataset.t;
+  if (_gcrCalTypes.has(t)) _gcrCalTypes.delete(t); else _gcrCalTypes.add(t);
+  _gcrCalRenderEvents();
+};
+
+window.gcrCalSelectDay = function(ds) {
+  _gcrCalDate = new Date(ds + 'T12:00:00');
+  _gcrCalRender();
+};
+
+window.gcrCalMiniNav = function(dir) {
+  _gcrCalDate = new Date(_gcrCalDate);
+  _gcrCalDate.setMonth(_gcrCalDate.getMonth() + dir);
+  _gcrCalRenderMini();
+};
+
+function _gcrCalRender() {
+  const d = _gcrCalDate;
+  document.getElementById('gcrCalLabel').textContent =
+    d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  _gcrCalRenderMini();
+  _gcrCalRenderEvents();
+}
+
+function _gcrCalRenderMini() {
+  const d     = _gcrCalDate;
+  const yr    = d.getFullYear(), mo = d.getMonth();
+  const MONS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const SHORT = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const first = new Date(yr, mo, 1).getDay();
+  const dim   = new Date(yr, mo + 1, 0).getDate();
+  const now   = new Date();
+  const selStr= `${yr}-${String(mo+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  // Gather dates with events this month (for dot indicators)
+  let dotDates = new Set();
+  if (typeof GCR !== 'undefined' && GCR.loaded) {
+    const prefix = `${yr}-${String(mo+1).padStart(2,'0')}`;
+    (GCR.events || []).forEach(ev => { if ((ev.date||ev.event_date||'').startsWith(prefix)) {
+      dotDates.add(parseInt((ev.date||ev.event_date).split('-')[2]));
+    }});
+  }
+
+  let h = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+    <button onclick="gcrCalMiniNav(-1)" style="background:none;border:none;cursor:pointer;font-size:.9rem;color:#0b7a75;padding:4px;">◀</button>
+    <span style="font-size:.85rem;font-weight:800;color:#0b7a75;">${MONS[mo]} ${yr}</span>
+    <button onclick="gcrCalMiniNav(1)" style="background:none;border:none;cursor:pointer;font-size:.9rem;color:#0b7a75;padding:4px;">▶</button>
+  </div>
+  <table style="width:100%;border-collapse:collapse;">
+  <tr>${SHORT.map(s=>`<th style="text-align:center;font-size:.72rem;color:#888;font-weight:700;padding:3px 0;">${s}</th>`).join('')}</tr><tr>`;
+
+  let col = 0;
+  for (let i = 0; i < first; i++) { h += `<td></td>`; col++; }
+
+  for (let day = 1; day <= dim; day++) {
+    const ds  = `${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isTd = now.getFullYear()===yr && now.getMonth()===mo && now.getDate()===day;
+    const isSel= ds === selStr;
+    const hasDot = dotDates.has(day);
+    const cls = 'cal-day-cell' + (isSel?' cal-day-sel':isTd?' cal-day-today':'') + (hasDot&&!isSel?' cal-day-hasdot':'');
+    h += `<td class="${cls}" onclick="gcrCalSelectDay('${ds}')">${day}</td>`;
+    col++;
+    if (col === 7 && day < dim) { h += `</tr><tr>`; col = 0; }
+  }
+  h += `</tr></table>`;
+
+  const todayStr = now.toISOString().split('T')[0];
+  const tmrStr   = new Date(now.getTime()+86400000).toISOString().split('T')[0];
+  h += `<div style="margin-top:12px;display:flex;gap:6px;">
+    <button onclick="gcrCalSelectDay('${todayStr}')" style="flex:1;background:#0b7a75;color:#fff;border:none;cursor:pointer;border-radius:8px;padding:7px 4px;font-size:.73rem;font-weight:700;">Today</button>
+    <button onclick="gcrCalSelectDay('${tmrStr}')" style="flex:1;background:#e0f2fe;color:#0369a1;border:none;cursor:pointer;border-radius:8px;padding:7px 4px;font-size:.73rem;font-weight:700;">Tomorrow</button>
+  </div>`;
+
+  document.getElementById('gcrMiniCal').innerHTML = h;
+}
+
+function _gcrCalToMin(t) {
+  if (!t) return null;
+  const m = t.match(/(\d+):?(\d*)\s*(AM|PM)?/i);
+  if (!m) return null;
+  let h=parseInt(m[1]), mn=parseInt(m[2]||'0');
+  const ap=(m[3]||'').toUpperCase();
+  if(ap==='PM'&&h!==12)h+=12; if(ap==='AM'&&h===12)h=0;
+  return h*60+mn;
+}
+
+function _gcrCalRenderEvents() {
+  const el = document.getElementById('gcrCalEvents');
+  if (!el) return;
+  if (typeof GCR === 'undefined' || !GCR.loaded) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Loading data…</div>';
+    return;
+  }
+
+  const d       = _gcrCalDate;
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const dayName = d.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+  const DAY_NAMES = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const isWeekend = d.getDay()===0 || d.getDay()===6;
+  const now     = new Date();
+  const isToday = dateStr === now.toISOString().split('T')[0];
+  const nowMin  = now.getHours()*60+now.getMinutes();
+
+  const bizMap = {};
+  (GCR.businesses||[]).forEach(b=>{ bizMap[b.id]=b; bizMap[b.site_id]=b; bizMap[b.slug]=b; });
+
+  const items = [];
+
+  // — Dated events —
+  if (_gcrCalTypes.has('events')) {
+    (GCR.events||[]).filter(ev=>(ev.date||ev.event_date||'').startsWith(dateStr))
+      .forEach(ev=>items.push({...ev,_src:'event'}));
+    // Recurring events (no date)
+    (GCR.events||[]).filter(ev=>{
+      if (ev.date||ev.event_date) return false;
+      const nm=(ev.name||ev.title||'').toLowerCase();
+      const md=DAY_NAMES.find(dd=>nm.includes(dd));
+      if (md && md!==dayName) return false;
+      const tags=(ev.tags||[]).join(' ').toLowerCase();
+      if (_gcrCalTypes.has('live-music') && (tags.includes('live-music')||nm.includes('live')||nm.includes('music'))) return true;
+      return _gcrCalTypes.has('events');
+    }).forEach(ev=>items.push({...ev,_src:'event-rec'}));
+  }
+
+  // — Specials + Happy Hours —
+  (GCR.specials||[]).filter(sp=>{
+    if (sp.active===false) return false;
+    const days=(sp.days||sp.day_of_week||[]).map(dd=>dd.toLowerCase());
+    const dayMatch = !days.length || ['daily','everyday','all'].some(k=>days.includes(k)) ||
+      days.includes(dayName) || (isWeekend&&(days.includes('weekend')||days.includes('weekends')));
+    if (!dayMatch) return false;
+    const type=(sp.type||'special').toLowerCase();
+    if (type==='happy_hour') return _gcrCalTypes.has('happy_hour');
+    return _gcrCalTypes.has('special');
+  }).forEach(sp=>items.push({...sp,_src:sp.type==='happy_hour'?'happy_hour':'special'}));
+
+  // Sort by time
+  items.sort((a,b)=>{
+    const at=_gcrCalToMin(a.start_time||a.time||a.event_time||'')??9999;
+    const bt=_gcrCalToMin(b.start_time||b.time||b.event_time||'')??9999;
+    return at-bt;
+  });
+
+  if (!items.length) {
+    el.innerHTML=`<div style="text-align:center;padding:48px 16px;color:#888;">
+      <div style="font-size:2.5rem;margin-bottom:10px;">🗓️</div>
+      <div style="font-weight:600;font-size:.95rem;">Nothing scheduled</div>
+      <p style="font-size:.82rem;margin-top:6px;">Try a different day or adjust filters above.</p>
+    </div>`;
+    return;
+  }
+
+  const CLRS = {
+    'event'     :{bg:'#f0fdf4',bdr:'#16a34a',ic:'🎉',lbl:'Event'},
+    'event-rec' :{bg:'#f0fdf4',bdr:'#16a34a',ic:'🔁',lbl:'Recurring'},
+    'happy_hour':{bg:'#fff7ed',bdr:'#ea580c',ic:'🍻',lbl:'Happy Hour'},
+    'special'   :{bg:'#fef9c3',bdr:'#ca8a04',ic:'🏷️',lbl:'Special'},
+  };
+
+  let html=`<div style="font-size:.75rem;font-weight:700;color:#888;margin-bottom:10px;">${items.length} item${items.length!==1?'s':''} · ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>`;
+
+  items.forEach(item=>{
+    const biz=bizMap[item.site_id]||bizMap[item.business_id]||{};
+    const t=item.start_time||item.time||item.event_time||'';
+    const eMin=_gcrCalToMin(t);
+    const live=isToday&&eMin!==null&&nowMin>=eMin&&nowMin<eMin+180;
+    const past=isToday&&eMin!==null&&eMin<nowMin-180;
+    const c=CLRS[item._src]||CLRS['event'];
+    const venue=item.venue||item.businessName||biz.name||'';
+    const title=item.name||item.title||'Event';
+    const desc=item.description||item.desc||'';
+    const slug=biz.slug||biz.id||biz.site_id||'';
+
+    html+=`<div class="cal-ev-card" style="background:${c.bg};border:1.5px solid ${c.bdr}22;${past?'opacity:.45':''}">
+      <div style="font-size:1.5rem;flex-shrink:0;line-height:1;">${c.ic}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:1px;">${title}</div>
+        ${venue?`<div style="font-size:.75rem;color:#666;">📍 ${venue}</div>`:''}
+        ${t?`<div style="font-size:.75rem;color:#666;">⏰ ${t}${live?' · <span style="color:#059669;font-weight:700;">🟢 Live Now</span>':''}</div>`:''}
+        ${desc?`<div style="font-size:.75rem;color:#555;margin-top:3px;line-height:1.4;">${desc}</div>`:''}
+        ${item.artist_name?`<div style="font-size:.75rem;color:#be185d;font-weight:600;margin-top:3px;">🎤 ${item.artist_name}</div>`:''}
+        <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+          <span style="background:${c.bdr}18;color:${c.bdr};font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:12px;">${c.lbl}</span>
+          ${slug?`<a href="business.html?id=${slug}" style="font-size:.7rem;color:#0b7a75;font-weight:600;text-decoration:none;">View →</a>`:''}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
 /* ── Mobile Menu + Nav (no data needed) ── */
 document.addEventListener('DOMContentLoaded', () => {
 

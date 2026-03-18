@@ -845,13 +845,15 @@
   </div>
 
   <!-- Category tabs -->
-  <div class="gcr-cat-tabs">
+    <div class="gcr-cat-tabs" id="gcrCatTabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
     <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
     <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
     <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
     <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
     <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
+    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
     <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
     <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
     <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
@@ -1359,223 +1361,11 @@
   </div>
 </div>
 
-<!-- ══════════ CALENDAR FULL MODAL ══════════ -->
-<div class="cal-modal-wrap" id="calModalWrap">
-  <div style="background:#fff;border-radius:18px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;padding:28px;position:relative;">
-    <button onclick="closeCalendarModal()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
-    <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:10px;color:#0d2137;">📅 Event Calendar</h2>
-    <div id="calModalContent"></div>
-  </div>
-</div>
-
-<script src="js/gcr-api.js"></script>
-<script src="js/app.js"></script>
-<script>
-/* ══════════════════════════════════════════
-   HOME PAGE JS
-══════════════════════════════════════════ */
-function initHomePage() {
-  if (typeof GCR === 'undefined') return;
-
-  /* ── Stats ── */
-  const bizCount = GCR.businesses.length;
-  const evCount  = GCR.getUpcomingEvents().length;
-  document.getElementById('statBiz').textContent    = bizCount;
-  document.getElementById('statEvents').textContent = evCount;
-
-  /* ── Category counts ── */
-  const catCount = (type) => GCR.businesses.filter(b => b.type === type || b.category === type).length;
-  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n ? n + ' listing' + (n===1?'':'s') + ' →' : 'Browse →'; };
-  setCount('countRestaurants', catCount('restaurants'));
-  setCount('countCoffee',      catCount('coffee-sweets'));
-  setCount('countHappy',       GCR.businesses.filter(b => b.happy_hour).length);
-  setCount('countSpecials',    GCR.specials.length);
-  setCount('eventsCount',      evCount ? evCount + ' this month →' : 'Browse →');
-  document.getElementById('eventsCount').textContent = evCount ? evCount + ' this month →' : 'Browse →';
-  setCount('countThingsToDo',  catCount('things-to-do'));
-  setCount('countShopping',    catCount('shopping'));
-  setCount('countOther',       catCount('other'));
-
-  /* ── Featured ── */
-  const featRow = document.getElementById('featuredRow');
-  if (featRow) {
-    const colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a' };
-    const featList = GCR.getFeatured().length ? GCR.getFeatured() : GCR.businesses.slice(0, 10);
-    featList.forEach(biz => {
-      const bg = colors[biz.category] || '#0b7a75';
-      featRow.innerHTML += `
-        <a href="business.html?id=${biz.slug||biz.id}" class="feat-card">
-          <div class="feat-card-top" style="background:linear-gradient(135deg,${bg},${bg}cc);">
-            <span style="font-size:3rem;">${biz.emoji||'🏪'}</span>
-            <span class="feat-badge">Featured</span>
-          </div>
-          <div class="feat-card-body">
-            <div class="feat-card-name">${biz.name}</div>
-            <div class="feat-card-cat">${biz.category.replace('-',' ')}</div>
-            <div class="feat-card-desc">${biz.tagline||biz.description||''}</div>
-            <div class="feat-card-meta">
-              <span>${biz.address||''}</span>
-              <span class="feat-card-rating">★ ${biz.rating||''}</span>
-            </div>
-          </div>
-        </a>`;
-    });
-  }
-
-  /* ── Calendar ── */
-  let calYear  = new Date().getFullYear();
-  let calMonth = new Date().getMonth() + 1;
-  let selDate  = new Date().toISOString().split('T')[0];
-
-  function buildCal(y, m) {
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    document.getElementById('calMonthLbl').textContent = `${months[m-1]} ${y}`;
-    const events     = GCR.getEventsByMonth(y, m);
-    const eventDates = new Set(events.map(e => e.date));
-    const firstDay   = new Date(y, m-1, 1).getDay();
-    const daysInMonth= new Date(y, m, 0).getDate();
-    const today      = new Date().toISOString().split('T')[0];
-    let html = '';
-    for (let i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
-    for (let d = 1; d <= daysInMonth; d++) {
-      const ds = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      html += `<div class="cal-day${eventDates.has(ds)?' has-event':''}${ds===today?' today':''}${ds===selDate?' selected':''}" onclick="selectDay('${ds}')">${d}${eventDates.has(ds)?'<span class="cal-dot"></span>':''}</div>`;
-    }
-    document.getElementById('calDays').innerHTML = html;
-    renderEvents(selDate, y, m);
-  }
-
-  window.selectDay = function(ds) { selDate = ds; buildCal(calYear, calMonth); };
-
-  function renderEvents(ds, y, m) {
-    const list    = document.getElementById('eventsList');
-    const titleEl = document.getElementById('eventsTitle');
-    let events = GCR.getEventsByDate(ds);
-    if (events.length) {
-      const d = new Date(ds + 'T12:00:00');
-      titleEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    } else {
-      events = GCR.getUpcomingEvents(6);
-      titleEl.textContent = 'Upcoming Events';
-    }
-    if (!events.length) {
-      list.innerHTML = '<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem;">No upcoming events.</div>';
-      return;
-    }
-    const catColor = { concert:'#6c3483','live-music':'#0b7a75',festival:'#c9831f',sports:'#1a6496',holiday:'#c0392b',dining:'#065f5b','bar-event':'#e67e22',special:'#2e4057' };
-    list.innerHTML = events.map(e => {
-      const col = catColor[e.category] || '#555';
-      return `<div class="event-row" onclick="${e.bizId ? `window.location='business.html?id=${e.bizId}'` : ''}">
-        <div class="event-emoji-wrap">${e.emoji||'🎉'}</div>
-        <div style="flex:1;min-width:0;">
-          <div class="event-row-title">${e.title}</div>
-          <div class="event-row-meta">${e.time} · ${e.venue}</div>
-          <div class="event-row-cover">${e.cover}</div>
-        </div>
-        <span class="event-row-badge" style="background:${col}18;color:${col};">${e.category.replace('-',' ')}</span>
-      </div>`;
-    }).join('');
-  }
-
-  document.getElementById('calPrev').addEventListener('click', () => {
-    calMonth--; if(calMonth<1){calMonth=12;calYear--;} selDate=null; buildCal(calYear,calMonth);
-  });
-  document.getElementById('calNext').addEventListener('click', () => {
-    calMonth++; if(calMonth>12){calMonth=1;calYear++;} selDate=null; buildCal(calYear,calMonth);
-  });
-  buildCal(calYear, calMonth);
-
-  /* ── Hero search ── */
-  const heroInput = document.getElementById('heroSearch');
-  const heroDrop  = document.getElementById('heroDropdown');
-  heroInput.addEventListener('input', () => {
-    const q = heroInput.value.trim();
-    if (q.length < 2) { heroDrop.classList.remove('open'); return; }
-    const results = GCR.search(q).slice(0, 7);
-    if (!results.length) { heroDrop.classList.remove('open'); return; }
-    heroDrop.innerHTML = results.map(b =>
-      `<a href="business.html?id=${b.slug||b.id}" class="sri-item">
-        <span class="sri-emoji">${b.emoji||'🏪'}</span>
-        <div>
-          <div class="sri-name">${b.name}</div>
-          <div class="sri-meta">${b.category.replace('-',' ')} · ${b.address||''}</div>
-        </div>
-      </a>`
-    ).join('');
-    heroDrop.classList.add('open');
-  });
-  document.addEventListener('click', e => {
-    if (!heroInput.contains(e.target) && !heroDrop.contains(e.target)) heroDrop.classList.remove('open');
-  });
-
-  /* ── Loyalty popup (first visit, 3s delay) ── */
-  if (!localStorage.getItem('gcr_loyalty_seen')) {
-    setTimeout(openSignupModal, 3000);
-  }
-}
-
-// Wait for live data before rendering
-document.addEventListener('gcr:loaded', initHomePage);
-// Fallback if already loaded
-if (typeof GCR !== 'undefined' && GCR.loaded) initHomePage();
-
-/* ── Search handlers ── */
-window.doHeroSearch = function() {
-  const q = document.getElementById('heroSearch').value.trim();
-  if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
-};
-window.doTagSearch = function(q) {
-  window.location.href = `search.html?q=${encodeURIComponent(q)}`;
-};
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('heroSearch').addEventListener('keydown', e => { if(e.key==='Enter') doHeroSearch(); });
-});
-
-/* ── Calendar modal ── */
-window.openCalendarModal = function() {
-  if (typeof GCR === 'undefined') return;
-  const wrap = document.getElementById('calModalWrap');
-  wrap.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  const events = GCR.getUpcomingEvents(30);
-  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const grouped = {};
-  events.forEach(e => {
-    const d = new Date(e.date + 'T12:00:00');
-    const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(e);
-  });
-  const catColor = { concert:'#6c3483','live-music':'#0b7a75',festival:'#c9831f',sports:'#1a6496',holiday:'#c0392b',dining:'#065f5b','bar-event':'#e67e22' };
-  let html = '';
-  for (const [month, evs] of Object.entries(grouped)) {
-    html += `<div style="margin-bottom:28px;"><div style="font-size:1rem;font-weight:800;color:#0b7a75;border-bottom:2px solid #0b7a75;padding-bottom:8px;margin-bottom:14px;">${month}</div>`;
-    evs.forEach(e => {
-      const d = new Date(e.date + 'T12:00:00');
-      const day = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-      const col = catColor[e.category] || '#555';
-      html += `<div style="display:flex;gap:14px;padding:14px 0;border-bottom:1px solid #f0f0f0;align-items:flex-start;">
-        <div style="font-size:2rem;flex-shrink:0;">${e.emoji||'🎉'}</div>
-        <div style="flex:1;">
-          <div style="font-weight:700;font-size:.95rem;">${e.title}</div>
-          <div style="font-size:.78rem;color:#888;margin-top:2px;">${day} · ${e.time} · ${e.venue}</div>
-          ${e.description?`<div style="font-size:.78rem;color:#666;margin-top:4px;line-height:1.4;">${e.description}</div>`:''}
-          <div style="margin-top:6px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <span style="font-size:.75rem;font-weight:700;color:${col};background:${col}18;padding:2px 8px;border-radius:12px;">${e.category.replace('-',' ')}</span>
-            <span style="font-size:.78rem;font-weight:700;color:#0b7a75;">${e.cover}</span>
-            ${e.tickets?`<a href="${e.tickets}" target="_blank" style="font-size:.75rem;background:#0b7a75;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;">Tickets →</a>`:''}
-          </div>
-        </div>
+<!-- Calendar modal injected by app.js -->
       </div>`;
     });
     html += '</div>';
   }
-  document.getElementById('calModalContent').innerHTML = html || '<div style="padding:32px;text-align:center;color:#aaa;">No upcoming events found.</div>';
-};
-window.closeCalendarModal = function() {
-  document.getElementById('calModalWrap').classList.remove('open');
-  document.body.style.overflow = '';
-};
 
 /* ══ LOYALTY SIGNUP MODAL ══ */
 window.openSignupModal = function() {
