@@ -442,18 +442,34 @@
         return;
       }
 
-      const sections = [
-        { key:'apps',     label:'Appetizers',    icon:'🍴' },
-        { key:'lunch',    label:'Lunch',         icon:'☀️' },
-        { key:'dinner',   label:'Dinner',        icon:'🌙' },
-        { key:'drinks',   label:'Drinks & Bar',  icon:'🍹' },
-        { key:'kids',     label:'Kids Menu',     icon:'👶' },
-        { key:'desserts', label:'Desserts',       icon:'🍰' },
-        { key:'specials', label:'Daily Specials', icon:'📅' }
-      ];
+      // Known section labels/icons — any key NOT in here still works, just gets auto-labeled
+      const knownSections = {
+        breakfast:    { label:'Breakfast',      icon:'🌅' },
+        brunch:       { label:'Brunch',         icon:'🥂' },
+        lunch:        { label:'Lunch',          icon:'☀️' },
+        dinner:       { label:'Dinner',         icon:'🌙' },
+        late_night:   { label:'Late Night',     icon:'🌃' },
+        apps:         { label:'Appetizers',     icon:'🍴' },
+        appetizers:   { label:'Appetizers',     icon:'🍴' },
+        kids:         { label:'Kids Menu',      icon:'👧' },
+        drinks:       { label:'Drinks & Bar',   icon:'🍹' },
+        cocktails:    { label:'Cocktails',      icon:'🍸' },
+        beer_wine:    { label:'Beer & Wine',    icon:'🍺' },
+        desserts:     { label:'Desserts',       icon:'🍰' },
+        specials:     { label:'Daily Specials', icon:'📅' },
+        catering:     { label:'Catering',       icon:'🎉' },
+        happy_hour:   { label:'Happy Hour',     icon:'🍻' },
+      };
 
-      // Only show tabs for sections that have items
-      const available = sections.filter(s => biz.menu[s.key] && biz.menu[s.key].length > 0);
+      // Dynamically build from whatever keys the business actually has
+      const available = Object.keys(biz.menu)
+        .filter(key => Array.isArray(biz.menu[key]) && biz.menu[key].length > 0)
+        .map(key => ({
+          key,
+          label: knownSections[key]?.label || key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()),
+          icon:  knownSections[key]?.icon  || '🍽️'
+        }));
+
       if (available.length === 0) {
         container.innerHTML = `<div style="padding:24px;text-align:center;color:#888;">No menu items available.</div>`;
         return;
@@ -462,30 +478,46 @@
       // Build nav tabs
       let navHtml = `<div class="menu-section-nav" id="menuSectionNav">`;
       available.forEach((s, i) => {
-        navHtml += `<div class="menu-sec-tab${i===0?' active':''}" data-menu="${s.key}">${s.label}</div>`;
+        navHtml += `<div class="menu-sec-tab${i===0?' active':''}" data-menu="${s.key}">${s.icon} ${s.label}</div>`;
       });
       navHtml += `</div>`;
 
-      // Build panels
+      // Build panels — with dietary/food-type tag filters per section
       let panelsHtml = '';
       available.forEach((s, i) => {
+        const items = biz.menu[s.key];
+
+        // Collect all unique tags across items in this section
+        const allTags = [...new Set(items.flatMap(item => item.tags || []))];
+        const filterTags = allTags.filter(t => t); // remove empty
+
+        const filterHtml = filterTags.length > 1 ? `
+          <div class="menu-subcats" data-section="${s.key}">
+            <button class="menu-subcat active" data-tag="all">All</button>
+            ${filterTags.map(t => `<button class="menu-subcat" data-tag="${t}">${tagLabel(t)}</button>`).join('')}
+          </div>` : '';
+
         panelsHtml += `<div class="menu-panel${i===0?' active':''}" id="menu-${s.key}">`;
-        panelsHtml += `<div class="menu-category-title">${s.icon} ${s.label}</div>`;
-        biz.menu[s.key].forEach(item => {
-          panelsHtml += `<div class="menu-item-row">
-            <div>
+        panelsHtml += filterHtml;
+        panelsHtml += `<div class="menu-items-list" data-section="${s.key}">`;
+        items.forEach(item => {
+          const tagAttr = item.tags ? item.tags.join(' ') : '';
+          const tagBadges = item.tags?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${item.tags.map(t=>`<span style="font-size:.7rem;background:#f0fafa;color:#0b7a75;border-radius:10px;padding:2px 8px;font-weight:600;">${tagLabel(t)}</span>`).join('')}</div>` : '';
+          panelsHtml += `<div class="menu-item-row" data-tags="${tagAttr}">
+            <div style="flex:1;">
               <div class="menu-item-name">${item.name}</div>
               ${item.desc ? `<div class="menu-item-desc">${item.desc}</div>` : ''}
+              ${tagBadges}
             </div>
             <div class="menu-item-price">${item.price || ''}</div>
           </div>`;
         });
-        panelsHtml += `</div>`;
+        panelsHtml += `</div></div>`;
       });
 
       container.innerHTML = navHtml + panelsHtml;
 
-      // Wire up tab clicks
+      // Wire up section tab clicks
       container.querySelectorAll('.menu-sec-tab').forEach(tab => {
         tab.addEventListener('click', () => {
           container.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
@@ -495,6 +527,32 @@
           if (panel) panel.classList.add('active');
         });
       });
+
+      // Wire up dietary/food-type tag filter clicks
+      container.querySelectorAll('.menu-subcat').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const section = btn.closest('.menu-panel');
+          section.querySelectorAll('.menu-subcat').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const tag = btn.dataset.tag;
+          section.querySelectorAll('.menu-item-row').forEach(row => {
+            if (tag === 'all') { row.style.display = ''; return; }
+            row.style.display = row.dataset.tags.includes(tag) ? '' : 'none';
+          });
+        });
+      });
+    }
+
+    // Human-readable tag labels
+    function tagLabel(t) {
+      const map = {
+        vegan:'🌱 Vegan', vegetarian:'🥦 Vegetarian', 'gluten-free':'🌾 GF',
+        seafood:'🦐 Seafood', burger:'🍔 Burger', burgers:'🍔 Burgers',
+        pizza:'🍕 Pizza', pasta:'🍝 Pasta', salad:'🥗 Salad',
+        spicy:'🌶️ Spicy', 'nut-free':'🥜 Nut Free', halal:'☪️ Halal',
+        'fan-fav':'⭐ Fan Fav', new:'✨ New', seasonal:'🌿 Seasonal',
+      };
+      return map[t] || t.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     }
     /* ═══════════════════════════════════════════ */
 
