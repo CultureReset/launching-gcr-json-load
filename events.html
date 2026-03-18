@@ -65,40 +65,33 @@
   </style>
 </head>
 <body>
-  <header class="site-header"><div class="container header-inner">
-    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-    <nav class="main-nav">
-      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
-      <a href="events.html" class="active">Events</a><a href="happy-hours.html">Happy Hours</a>
-      <a href="specials.html">Specials</a><a href="feed.html">Feed</a>
-    </nav>
-    <div class="header-actions">
-      <a href="trip.html" class="btn-trip">My Trip Link</a>
-      <a href="claim.html" class="btn-claim">+ Claim Business</a>
-      <button class="hamburger" id="hamburger">☰</button>
-    </div>
-  </div></header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
-    <a href="shopping.html">🛍️ Shopping</a><a href="services.html">💼 Services</a><a href="other.html">✨ Other</a>
-    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
-  </div>
 
-  <div class="page-header"><div class="container"><div class="page-header-inner">
-    <div>
-      <div class="eyebrow">🎉 Events</div>
-      <h1>Events & Live Music</h1>
-      <p>Concerts, festivals, live music, and everything happening on the Gulf Coast</p>
-    </div>
-    <div class="page-search">
-      <input type="text" id="mainSearch" placeholder="Search events...">
-      <button id="searchBtn">Go</button>
-    </div>
-  </div></div></div>
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
+  </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab active">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
 
   <div class="filters-bar"><div class="container"><div class="filters-inner">
     <button class="filter-chip active" data-filter="all">All Events</button>
@@ -141,7 +134,25 @@
     </div>
 
     <!-- Card view -->
-    <div class="events-full-list" id="eventsCardView"></div>
+    <div class="events-full-list" id="eventsCardView">
+      <div class="event-row" data-tags="live-music">
+        <div class="event-date-box">
+          <div class="month">Mar</div>
+          <div class="day">21</div>
+        </div>
+        <div class="event-info">
+          <h4>Gulf Coast Live Music Festival</h4>
+          <p>The Wharf Orange Beach · 7:00 PM</p>
+          <div class="event-meta">
+            <span class="event-cat-badge">Live Music</span>
+            <span class="event-cat-badge" style="background:#dcfce7;color:#16a34a">Free</span>
+          </div>
+        </div>
+        <div class="event-actions">
+          <a href="business.html?id=wharf-orange-beach" class="btn btn-primary btn-sm">Details</a>
+        </div>
+      </div>
+    </div>
 
     <!-- List view (hidden by default) -->
     <div id="eventsListView" style="display:none"></div>

@@ -1794,9 +1794,27 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.600
   })
   .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
 
-/* ── AI Chat ── */
-const AI_API = 'https://cybercheck-api-database.vercel.app/api/gcr/chat';
+/* ── AI Chat — Direct OpenAI (Chat + Whisper Voice) ── */
+const GCR_CHAT_API = 'https://cybercheck-api-database.vercel.app/api/gcr/chat';
 let aiHistory = [];
+
+/* Chat uses backend API — no client-side AI keys needed */
+let _voiceMode = false; // true when user initiated via voice
+
+function speakReply(text) {
+  if (!_voiceMode || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.05;
+  utter.pitch = 1;
+  // Pick a natural-sounding voice if available
+  const voices = speechSynthesis.getVoices();
+  const preferred = voices.find(v => v.name.includes('Samantha')) ||
+                    voices.find(v => v.lang === 'en-US' && v.localService) ||
+                    voices[0];
+  if (preferred) utter.voice = preferred;
+  speechSynthesis.speak(utter);
+}
 
 function toggleAiChat() {
   const panel = document.getElementById('aiChatPanel');
@@ -1819,99 +1837,98 @@ function appendMsg(role, text) {
   return div;
 }
 
-async function sendAiChat() {
+async function sendAiChat(fromVoice) {
   const input = document.getElementById('aiInput');
   const msg = input.value.trim();
   if (!msg) return;
   input.value = '';
+  _voiceMode = !!fromVoice;
   appendMsg('user', msg);
   aiHistory.push({ role: 'user', content: msg });
   const typing = appendMsg('bot typing', '...');
   try {
-    const res = await fetch(AI_API, {
+    const res = await fetch(GCR_CHAT_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, history: aiHistory.slice(-6) })
+      body: JSON.stringify({ message: msg, history: aiHistory.slice(-10) })
     });
     const data = await res.json();
     typing.remove();
     const reply = data.reply || "Sorry, couldn't get a response right now.";
     appendMsg('bot', reply);
     aiHistory.push({ role: 'assistant', content: reply });
-  } catch {
+    speakReply(reply);
+  } catch(err) {
     typing.remove();
-    appendMsg('bot', "Connection error — check back in a moment!");
+    appendMsg('bot', "Connection error — check your internet and try again!");
   }
 }
 
 function startVoiceChat() {
   const panel = document.getElementById('aiChatPanel');
   if (!panel.classList.contains('open')) toggleAiChat();
-  startAiVoice();
+  startWhisperVoice();
 }
 
+/* ── Voice-to-Text (Web Speech API — free, no API key) ── */
+let _isRecording = false;
 let _recognition = null;
-async function startAiVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    appendMsg('bot', "Voice isn't supported in this browser. Try Chrome!");
+
+function startWhisperVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    appendMsg('bot', "Voice not supported in this browser — try Chrome or Safari.");
     return;
   }
-
-  // Force mic permission prompt FIRST
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(t => t.stop()); // release immediately
-  } catch (err) {
-    appendMsg('bot', "🎙️ Please allow microphone access when prompted, then tap the mic again.");
-    return;
-  }
-
-  if (_recognition) { try { _recognition.stop(); } catch(e){} _recognition = null; }
-
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SR();
-  _recognition = recognition;
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
 
   const micBtn = document.getElementById('micBtn');
   const voiceBtn = document.getElementById('voiceBtn');
-  micBtn.classList.add('listening');
-  if (voiceBtn) voiceBtn.classList.add('listening');
-  appendMsg('bot', "🎙️ Listening... speak now!");
 
-  recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    document.getElementById('aiInput').value = transcript;
-    // Remove the "Listening" message
+  if (_isRecording && _recognition) {
+    _recognition.stop();
+    return;
+  }
+
+  _recognition = new SpeechRecognition();
+  _recognition.lang = 'en-US';
+  _recognition.interimResults = false;
+  _recognition.maxAlternatives = 1;
+
+  _isRecording = true;
+  if (micBtn) micBtn.classList.add('listening');
+  if (voiceBtn) voiceBtn.classList.add('listening');
+  appendMsg('bot', "Listening... speak now.");
+
+  _recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript.trim();
+    /* Remove "Listening..." message */
     const msgs = document.getElementById('aiMsgs');
     const last = msgs.lastElementChild;
     if (last && last.textContent.includes('Listening')) last.remove();
-    sendAiChat();
-  };
-  recognition.onend = () => {
-    micBtn.classList.remove('listening');
-    if (voiceBtn) voiceBtn.classList.remove('listening');
-    _recognition = null;
-  };
-  recognition.onerror = (e) => {
-    micBtn.classList.remove('listening');
-    if (voiceBtn) voiceBtn.classList.remove('listening');
-    _recognition = null;
-    // Remove the "Listening" message
-    const msgs = document.getElementById('aiMsgs');
-    const last = msgs.lastElementChild;
-    if (last && last.textContent.includes('Listening')) last.remove();
-    if (e.error === 'no-speech') {
-      appendMsg('bot', "Didn't catch that — tap mic and speak clearly.");
-    } else if (e.error === 'network') {
-      appendMsg('bot', "Voice needs internet — just type your question!");
-    } else {
-      appendMsg('bot', `Voice error (${e.error}) — try typing instead.`);
+
+    if (transcript) {
+      document.getElementById('aiInput').value = transcript;
+      sendAiChat(true);
     }
   };
-  recognition.start();
+
+  _recognition.onerror = (e) => {
+    _isRecording = false;
+    if (micBtn) micBtn.classList.remove('listening');
+    if (voiceBtn) voiceBtn.classList.remove('listening');
+    const msgs = document.getElementById('aiMsgs');
+    const last = msgs.lastElementChild;
+    if (last && last.textContent.includes('Listening')) last.remove();
+    appendMsg('bot', "Couldn't hear that — try again or just type.");
+  };
+
+  _recognition.onend = () => {
+    _isRecording = false;
+    if (micBtn) micBtn.classList.remove('listening');
+    if (voiceBtn) voiceBtn.classList.remove('listening');
+  };
+
+  _recognition.start();
 }
 
 document.addEventListener('keydown', (e) => {

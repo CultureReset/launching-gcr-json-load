@@ -36,41 +36,34 @@
     .expand-item-price { font-size:.9rem; font-weight:700; color:var(--teal); white-space:nowrap; flex-shrink:0; }
   </style>
 </head><body>
-  <header class="site-header"><div class="container header-inner">
-    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-    <nav class="main-nav">
-      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
-      <a href="events.html">Events</a><a href="happy-hours.html">Happy Hours</a>
-      <a href="specials.html" class="active">Specials</a><a href="feed.html">Feed</a>
-    </nav>
-    <div class="header-actions">
-      <a href="trip.html" class="btn-trip">My Trip Link</a>
-      <a href="claim.html" class="btn-claim">+ Claim Business</a>
-      <button class="hamburger" id="hamburger">☰</button>
-    </div>
-  </div></header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="specials.html">🏷️ Specials</a><a href="events.html">🎉 Events</a>
-    <a href="things-to-do.html">🎯 Things To Do</a><a href="shopping.html">🛍️ Shopping</a>
-    <a href="other.html">✨ Other</a><a href="feed.html">📡 Live Feed</a>
-    <div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
-    <a href="claim.html">+ Claim / Submit Your Page</a>
+
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
   </div>
-  <div class="page-header"><div class="container"><div class="page-header-inner">
-    <div>
-      <div class="eyebrow">🏷️ Specials</div>
-      <h1>Specials & Deals</h1>
-      <p>All you can eat, daily specials, weekend deals & family packages</p>
-    </div>
-    <div class="page-search">
-      <input type="text" id="mainSearch" placeholder='Try "all you can eat crab"...'>
-      <button id="searchBtn">Go</button>
-    </div>
-  </div></div></div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab active">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
+
   <div class="filters-bar"><div class="container"><div class="filters-inner">
     <button class="filter-chip active" data-filter="all">All</button>
     <button class="filter-chip" data-filter="ayce">🦀 All You Can Eat</button>
@@ -82,7 +75,37 @@
     <button class="filter-chip" data-filter="kids">👶 Kids Eat Free</button>
   </div></div></div>
   <section class="section"><div class="container">
-    <div id="specialsGrid"></div>
+    <div id="specialsGrid">
+      <div class="listing-expand-card" data-tags="daily lunch">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">🍽️</span>
+          <div class="listing-expand-info">
+            <h4>Anchor Bar & Grill</h4>
+            <p>2 active specials</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=anchor-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('sp-anchor-bar')">See Specials ▼</button>
+          </div>
+        </div>
+        <div class="listing-expand-details" id="sp-anchor-bar-details">
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Lunch Special — Half Off Appetizers</div>
+              <div class="expand-item-desc">11am–2pm daily on select appetizers</div>
+            </div>
+            <div class="expand-item-price">50% off</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Taco Tuesday</div>
+              <div class="expand-item-desc">$1.50 per fish or shrimp taco every Tuesday</div>
+            </div>
+            <div class="expand-item-price">$1.50 ea</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div></section>
   <footer class="site-footer"><div class="container">
     <div class="footer-bottom" style="border-top:none;padding-top:0">

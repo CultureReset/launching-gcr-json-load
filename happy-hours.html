@@ -51,42 +51,36 @@
   </style>
 </head>
 <body>
-  <header class="site-header"><div class="container header-inner">
-    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-    <nav class="main-nav">
-      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
-      <a href="events.html">Events</a><a href="happy-hours.html" class="active">Happy Hours</a>
-      <a href="specials.html">Specials</a><a href="feed.html">Feed</a>
-    </nav>
-    <div class="header-actions">
-      <a href="trip.html" class="btn-trip">My Trip Link</a>
-      <a href="claim.html" class="btn-claim">+ Claim Business</a>
-      <button class="hamburger" id="hamburger">☰</button>
-    </div>
-  </div></header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
-    <a href="shopping.html">🛍️ Shopping</a><a href="services.html">💼 Services</a><a href="other.html">✨ Other</a>
-    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
+
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
   </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab active">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
+
 
   <div class="hh-banner">🍻 Happy Hour is a state of mind. Scroll down to find yours.</div>
-
-  <div class="page-header"><div class="container"><div class="page-header-inner">
-    <div>
-      <div class="eyebrow">🍻 Happy Hours</div>
-      <h1>Happy Hours</h1>
-      <p>Drink deals, food specials & the best bar scenes on the Gulf Coast</p>
-    </div>
-    <div class="page-search">
-      <input type="text" id="mainSearch" placeholder="Search bars & happy hours...">
-      <button id="searchBtn">Go</button>
-    </div>
-  </div></div></div>
 
   <div class="filters-bar"><div class="container"><div class="filters-inner">
     <button class="filter-chip active" data-filter="all">All</button>
@@ -110,7 +104,118 @@
         <p style="color:rgba(255,255,255,.7);font-size:.85rem">Businesses below with a green "HH" tag are currently running happy hour specials</p>
       </div>
     </div>
-    <div id="hhGrid"></div>
+    <div id="hhGrid">
+      <div class="listing-expand-card" data-tags="bar live-music">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">🍺</span>
+          <div class="listing-expand-info">
+            <h4>The Lighthouse Bar & Music Hall</h4>
+            <p>Happy Hour: 4pm–7pm daily</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=lighthouse-bar" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-lighthouse-details')">See Specials ▼</button>
+          </div>
+        </div>
+        <div class="listing-expand-details" id="hh-lighthouse-details">
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Draft Beer</div>
+              <div class="expand-item-desc">Select domestic & local drafts</div>
+            </div>
+            <div class="expand-item-price">$2.50</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">House Wine</div>
+              <div class="expand-item-desc">Red, white, or rosé</div>
+            </div>
+            <div class="expand-item-price">$4.00</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Half Price Appetizers</div>
+              <div class="expand-item-desc">Wings, nachos, calamari & more</div>
+            </div>
+            <div class="expand-item-price">50% off</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-expand-card" data-tags="bar waterfront">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">🍻</span>
+          <div class="listing-expand-info">
+            <h4>Anchor Bar & Grill</h4>
+            <p>Happy Hour: 3pm–6pm Mon–Fri</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=anchor-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-anchor-details')">See Specials ▼</button>
+          </div>
+        </div>
+        <div class="listing-expand-details" id="hh-anchor-details">
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Domestic Pints</div>
+              <div class="expand-item-desc">Bud Light, Miller High Life, Coors</div>
+            </div>
+            <div class="expand-item-price">$3.00</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Well Cocktails</div>
+              <div class="expand-item-desc">Vodka, gin, rum, whiskey, tequila</div>
+            </div>
+            <div class="expand-item-price">$4.50</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Fried Pickles</div>
+              <div class="expand-item-desc">Served with ranch dip</div>
+            </div>
+            <div class="expand-item-price">$2.99</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-expand-card" data-tags="beach-bar">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">🏖️</span>
+          <div class="listing-expand-info">
+            <h4>Beach Bar & Grill</h4>
+            <p>Happy Hour: Sunset to 8pm daily</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=beach-bar-grill" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('hh-beach-details')">See Specials ▼</button>
+          </div>
+        </div>
+        <div class="listing-expand-details" id="hh-beach-details">
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Margaritas</div>
+              <div class="expand-item-desc">Classic, strawberry, or mango</div>
+            </div>
+            <div class="expand-item-price">$5.00</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Corona & Modelo</div>
+              <div class="expand-item-desc">Ice cold imported beers</div>
+            </div>
+            <div class="expand-item-price">$3.50</div>
+          </div>
+          <div class="expand-item-row">
+            <div>
+              <div class="expand-item-name">Fish Tacos</div>
+              <div class="expand-item-desc">Blackened or fried, 3 tacos</div>
+            </div>
+            <div class="expand-item-price">$4.99</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div></section>
 
   <section class="section-sm" style="background:var(--gray-100);"><div class="container">
@@ -135,5 +240,14 @@
       if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit',hour12:true});
     }
     updateTime(); setInterval(updateTime, 30000);
+
+    // Toggle expandable sections
+    function toggleExpand(detailsId) {
+      const details = document.getElementById(detailsId);
+      if (details) {
+        details.classList.toggle('open');
+        event.target.textContent = details.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
+      }
+    }
   </script>
 </body></html>

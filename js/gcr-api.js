@@ -123,5 +123,11 @@ const GCR = {
   },
 };
 
-// Auto-load on script parse
-GCR.load();
+// Auto-load on script parse (skip on localhost to avoid CORS errors)
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  GCR.load();
+} else {
+  // Mark as loaded to dispatch event (pages use hardwired sample data)
+  GCR.loaded = true;
+  document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: GCR }));
+}

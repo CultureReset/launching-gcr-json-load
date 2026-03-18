@@ -11,60 +11,32 @@
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="container header-inner">
-      <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-      <nav class="main-nav">
-        <a href="restaurants.html" class="active">Restaurants</a>
-        <a href="things-to-do.html">Things To Do</a>
-        <a href="events.html">Events</a>
-        <a href="happy-hours.html">Happy Hours</a>
-        <a href="specials.html">Specials</a>
-        <a href="feed.html">Feed</a>
-      </nav>
-      <div class="header-actions">
-        <a href="trip.html" class="btn-trip">My Trip Link</a>
-        <a href="claim.html" class="btn-claim">+ Claim Business</a>
-        <button class="hamburger" id="hamburger">☰</button>
-      </div>
-    </div>
-  </header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a>
-    <a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a>
-    <a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="specials.html">🏷️ Specials</a>
-    <a href="events.html">🎉 Events</a>
-    <a href="things-to-do.html">🎯 Things To Do</a>
-    <a href="shopping.html">🛍️ Shopping</a>
-    <a href="services.html">💼 Services</a>
-    <a href="other.html">✨ Other</a>
-    <a href="feed.html">📡 Live Feed</a>
-    <div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a>
-    <a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
-    <a href="claim.html">+ Claim Your Business</a>
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
   </div>
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="container">
-      <div class="page-header-inner">
-        <div>
-          <div class="eyebrow">🎶 Category</div>
-          <h1>Nightlife</h1>
-          <p>Seafood, Southern comfort, waterfront dining & everything in between</p>
-        </div>
-        <div class="page-search">
-          <input type="text" id="mainSearch" placeholder="Search nightlife...">
-          <button id="searchBtn">Go</button>
-        </div>
-      </div>
-    </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
   </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
 
   <!-- SUB-CATEGORY FILTERS -->
   <div class="filters-bar">
@@ -92,7 +64,7 @@
   <section class="section">
     <div class="container">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-        <p class="text-muted" style="font-size:.85rem;">Showing all restaurants · Orange Beach & Gulf Shores</p>
+        <p class="text-muted" style="font-size:.85rem;">Showing all nightlife venues · Orange Beach & Gulf Shores</p>
         <select style="padding:7px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:var(--font);font-size:.85rem;color:var(--text);">
           <option>Sort: Top Rated</option>
           <option>Sort: Most Reviewed</option>
@@ -100,7 +72,23 @@
           <option>Sort: Open Now</option>
         </select>
       </div>
-      <div class="listings-grid" id="listingsGrid" data-category="nightlife"></div>
+      <div class="listings-grid" id="listingsGrid" data-category="nightlife">
+        <div class="biz-card" data-tags="live-music bar-and-grill">
+          <div class="biz-card-img"><span>🎸</span></div>
+          <div class="biz-card-body">
+            <h4>The Lighthouse Bar & Music Hall</h4>
+            <div class="biz-meta">
+              <span class="biz-tag">Nightlife</span>
+              <span class="biz-tag">$$</span>
+            </div>
+            <div class="biz-rating"><span class="stars">★★★★☆</span> 4.4 <span style="color:var(--gray-400)">(198)</span></div>
+            <p class="biz-desc">Live music every night, full bar, and dancing. Home to the best beach bands on the Gulf Coast.</p>
+            <div class="biz-card-actions">
+              <a href="business.html?id=lighthouse-bar" class="biz-btn-view">View Profile</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 

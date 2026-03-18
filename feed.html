@@ -8,39 +8,34 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header class="site-header"><div class="container header-inner">
-    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-    <nav class="main-nav">
-      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
-      <a href="events.html">Events</a><a href="happy-hours.html">Happy Hours</a>
-      <a href="specials.html">Specials</a><a href="feed.html" class="active">Feed</a>
-    </nav>
-    <div class="header-actions">
-      <a href="trip.html" class="btn-trip">My Trip Link</a>
-      <a href="claim.html" class="btn-claim">+ Claim Business</a>
-      <button class="hamburger" id="hamburger">☰</button>
-    </div>
-  </div></header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="events.html">🎉 Events</a><a href="things-to-do.html">🎯 Things To Do</a>
-    <a href="shopping.html">🛍️ Shopping</a><a href="other.html">✨ Other</a>
-    <a href="feed.html">📡 Live Feed</a><div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
-  </div>
 
-  <div class="page-header"><div class="container"><div class="page-header-inner">
-    <div>
-      <div class="eyebrow">📡 Live</div>
-      <h1>Live Feed</h1>
-      <p>What's happening right now — photos, reviews, deals & new openings</p>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <span style="background:var(--coral);color:#fff;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;animation:pulse 2s infinite">● LIVE</span>
-    </div>
-  </div></div></div>
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
+  </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab active">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
+
 
   <div class="filters-bar"><div class="container"><div class="filters-inner">
     <button class="filter-chip active" data-filter="all">All</button>
@@ -55,76 +50,14 @@
     <div class="feed-layout">
 
       <div class="feed-list">
-        <!-- Sample feed posts -->
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar">L</div>
-            <div class="feed-post-meta">
-              <h4>Luna's Eat & Drink</h4>
-              <span>📍 Orange Beach · 2 hours ago</span>
-            </div>
-          </div>
-          <p>🦀 Friday night All You Can Eat Crab Legs is BACK! Starting at 6pm tonight. Come hungry. First come, first served. See you on the water! 🌊</p>
-          <div class="feed-post-img">🦞</div>
+        <div style="text-align:center;padding:80px 40px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);">
+          <div style="font-size:3rem;margin-bottom:16px;">📡</div>
+          <h2 style="font-size:1.8rem;margin-bottom:12px;color:var(--navy);">Live Feed Coming Soon</h2>
+          <p style="font-size:1rem;color:var(--text-muted);margin-bottom:24px;max-width:500px;margin-left:auto;margin-right:auto;">
+            Real-time updates from businesses, events, specials, and community posts. Stay tuned for the next big update!
+          </p>
+          <a href="index.html" class="btn btn-primary">← Back to Home</a>
         </div>
-
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar" style="background:var(--coral)">T</div>
-            <div class="feed-post-meta">
-              <h4>Tim Roberts</h4>
-              <span>🎸 Orange Beach · 4 hours ago</span>
-            </div>
-          </div>
-          <p>Playing tonight at Luna's at 7pm! Come out, it's gonna be a great night. No cover. Bring your friends 🎶</p>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar" style="background:#7c3aed">C</div>
-            <div class="feed-post-meta">
-              <h4>Circle Boats</h4>
-              <span>🚤 Orange Beach · Yesterday</span>
-            </div>
-          </div>
-          <p>Perfect weather this weekend! All boats are available — no experience needed. Book your spot online or walk in. Best way to see the back bays 🌊</p>
-          <div class="feed-post-img">🚤</div>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar" style="background:#d97706">S</div>
-            <div class="feed-post-meta">
-              <h4>Sugar Sands Creamery</h4>
-              <span>🍦 Orange Beach · Yesterday</span>
-            </div>
-          </div>
-          <p>New flavor alert: 🥭 Mango Habanero Sorbet. Sounds wild, tastes amazing. Come try it before it's gone!</p>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar" style="background:#16a34a">K</div>
-            <div class="feed-post-meta">
-              <h4>Kraken Reels Fishing</h4>
-              <span>🎣 Orange Beach · 2 days ago</span>
-            </div>
-          </div>
-          <p>Caught a 42lb Amberjack yesterday offshore! Clients are having an incredible season. Spring is the best time to fish — book your charter now before we fill up 🎣🐟</p>
-          <div class="feed-post-img">🎣</div>
-        </div>
-
-        <div class="feed-post">
-          <div class="feed-post-header">
-            <div class="feed-avatar" style="background:#0b7a75">G</div>
-            <div class="feed-post-meta">
-              <h4>GCR Staff Pick</h4>
-              <span>✨ New Opening · 3 days ago</span>
-            </div>
-          </div>
-          <p>🆕 <strong>Gulf Brew Coffee House</strong> just opened in Gulf Shores! Specialty espresso, pastries, and a great workspace. Definitely worth checking out on your next visit.</p>
-        </div>
-
       </div>
 
       <!-- Sidebar -->

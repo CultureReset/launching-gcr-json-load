@@ -8,41 +8,34 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header class="site-header"><div class="container header-inner">
-    <a href="index.html" class="logo">Gulf<span>Coast</span>Radar</a>
-    <nav class="main-nav">
-      <a href="restaurants.html">Restaurants</a><a href="things-to-do.html">Things To Do</a>
-      <a href="events.html">Events</a><a href="happy-hours.html">Happy Hours</a>
-      <a href="coffee-sweets.html" class="active">Coffee & Sweets</a><a href="feed.html">Feed</a>
-    </nav>
-    <div class="header-actions">
-      <a href="trip.html" class="btn-trip">My Trip Link</a>
-      <a href="claim.html" class="btn-claim">+ Claim Business</a>
-      <button class="hamburger" id="hamburger">☰</button>
-    </div>
-  </div></header>
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="index.html">🏠 Home</a><a href="restaurants.html">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html">☕ Coffee & Sweets</a><a href="happy-hours.html">🍻 Happy Hours</a>
-    <a href="specials.html">🏷️ Specials</a><a href="events.html">🎉 Events</a>
-    <a href="things-to-do.html">🎯 Things To Do</a><a href="shopping.html">🛍️ Shopping</a>
-    <a href="other.html">✨ Other</a><a href="feed.html">📡 Live Feed</a>
-    <div class="divider"></div>
-    <a href="the-wharf.html">⚓ The Wharf</a><a href="owa.html">🎢 OWA</a>
-    <a href="artists.html">🎵 Local Artists</a>
-    <a href="claim.html">+ Claim / Submit Your Page</a>
+
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
   </div>
-  <div class="page-header"><div class="container"><div class="page-header-inner">
-    <div>
-      <div class="eyebrow">☕ Category</div>
-      <h1>Coffee & Sweets</h1>
-      <p>Coffee shops, ice cream, bakeries, smoothies & dessert spots</p>
-    </div>
-    <div class="page-search">
-      <input type="text" id="mainSearch" placeholder="Search coffee & sweets...">
-      <button id="searchBtn">Go</button>
-    </div>
-  </div></div></div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab active">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+  </div>
+</div>
+
   <div class="filters-bar"><div class="container"><div class="filters-inner">
     <button class="filter-chip active" data-filter="all">All</button>
     <button class="filter-chip" data-filter="coffee">☕ Coffee Shops</button>
@@ -55,7 +48,23 @@
     <button class="filter-chip" data-filter="pet-friendly">🐾 Pet Friendly</button>
   </div></div></div>
   <section class="section"><div class="container">
-    <div class="listings-grid" id="listingsGrid" data-category="coffee-sweets"></div>
+    <div class="listings-grid" id="listingsGrid" data-category="coffee-sweets">
+      <div class="biz-card" data-tags="coffee wifi">
+        <div class="biz-card-img"><span>☕</span></div>
+        <div class="biz-card-body">
+          <h4>The Daily Grind Coffee House</h4>
+          <div class="biz-meta">
+            <span class="biz-tag">Coffee & Sweets</span>
+            <span class="biz-tag">$</span>
+          </div>
+          <div class="biz-rating"><span class="stars">★★★★☆</span> 4.3 <span style="color:var(--gray-400)">(67)</span></div>
+          <p class="biz-desc">Specialty coffee, fresh pastries, and free WiFi. Local favorite since 2015.</p>
+          <div class="biz-card-actions">
+            <a href="business.html?id=daily-grind-coffee" class="biz-btn-view">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div></section>
   <section class="section-sm" style="background:var(--gray-100);"><div class="container">
     <div class="claim-cta"><h4>Own a Coffee Shop or Sweet Spot?</h4>

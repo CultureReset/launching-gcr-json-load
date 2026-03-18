@@ -176,14 +176,19 @@
   <!-- input -->
   <div class="chat-input-bar">
     <textarea class="chat-input" id="input" placeholder="Ask me anything about the Gulf Coast..." rows="1"></textarea>
+    <button class="mic-btn" id="micBtn" onclick="startVoice()" title="Click to record" style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:4px 8px;">🎙️</button>
     <button class="send-btn" id="sendBtn" onclick="sendInput()">➤</button>
   </div>
 
 <script>
-  const API = 'http://localhost:8000'; // change to your server URL
+  const API = 'http://localhost:3000/api/gcr';
   const params = new URLSearchParams(location.search);
   let sessionId = params.get('s') || null;
+  let chatHistory = [];
   let waiting = false;
+  let _voiceMode = false;
+  let _continuousMode = false;
+  let _autoListeningEnabled = false;
 
   const messagesEl = document.getElementById('messages');
   const inputEl    = document.getElementById('input');
@@ -234,21 +239,20 @@
     showTyping();
 
     try {
-      const res = await fetch(`${API}/ask`, {
+      chatHistory.push({ role: 'user', content: text });
+
+      const res = await fetch(`${API}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text, session_id: sessionId })
+        body: JSON.stringify({ message: text, history: chatHistory.slice(-10) })
       });
       const data = await res.json();
-      sessionId = data.session_id;
-
-      // update URL with session so link stays shareable
-      const url = new URL(location.href);
-      url.searchParams.set('s', sessionId);
-      history.replaceState({}, '', url);
+      const reply = data.reply || 'Sorry, try again!';
+      chatHistory.push({ role: 'assistant', content: reply });
 
       removeTyping();
-      addMsg('ai', data.answer.replace(/\n/g, '<br>'));
+      addMsg('ai', reply.replace(/\n/g, '<br>'));
+      if (_voiceMode) speakWithOpenAI(reply);
     } catch (e) {
       removeTyping();
       addMsg('ai', 'Sorry, something went wrong. Try again in a moment.');
@@ -263,10 +267,213 @@
     if (!text) return;
     inputEl.value = '';
     inputEl.style.height = 'auto';
+    if (!_voiceMode) _voiceMode = false;
     send(text);
   }
 
-  // opening greeting
+  /* ── Text-to-Speech ── */
+  function speakReply(text) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1.05;
+    const voices = speechSynthesis.getVoices();
+    const pick = voices.find(v => v.name.includes('Samantha')) ||
+                 voices.find(v => v.lang === 'en-US' && v.localService) || voices[0];
+    if (pick) utter.voice = pick;
+    speechSynthesis.speak(utter);
+  }
+  // preload voices
+  if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => {};
+
+  /* ── Voice Input with OpenAI Whisper ── */
+  let _mediaRecorder = null;
+  let _audioChunks = [];
+  let _isRecording = false;
+
+  let _silenceTimer = null;
+  let _audioAnalyser = null;
+
+  async function startVoice() {
+    console.log('🎤 startVoice called, _isRecording:', _isRecording);
+    const micBtn = document.getElementById('micBtn');
+    if (_isRecording) {
+      console.log('⏹️ Manually stopping recording...');
+      _mediaRecorder.stop();
+      clearTimeout(_silenceTimer);
+      return;
+    }
+
+    try {
+      console.log('🎤 Requesting microphone access...');
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      _audioChunks = [];
+      _mediaRecorder = new MediaRecorder(stream);
+      _isRecording = true;
+      micBtn.style.color = '#ff4444';
+      micBtn.textContent = '⏺️';
+      console.log('🎤 Recording started (auto-stops after 3 sec silence)...');
+
+      // Detect silence and auto-stop
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      _audioAnalyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(_audioAnalyser);
+      const dataArray = new Uint8Array(_audioAnalyser.frequencyBinCount);
+      let silenceStart = null;
+
+      const checkSilence = () => {
+        _audioAnalyser.getByteFrequencyData(dataArray);
+        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+        if (average < 15) {
+          if (!silenceStart) silenceStart = Date.now();
+          if (Date.now() - silenceStart > 3000) {
+            console.log('🔇 Silence detected, auto-stopping...');
+            _mediaRecorder.stop();
+            return;
+          }
+        } else {
+          silenceStart = null;
+        }
+        if (_isRecording) requestAnimationFrame(checkSilence);
+      };
+      checkSilence();
+
+      _mediaRecorder.ondataavailable = (e) => {
+        console.log('📦 Audio chunk received:', e.data.size, 'bytes');
+        _audioChunks.push(e.data);
+      };
+
+      _mediaRecorder.onstop = async () => {
+        console.log('⏹️ Recording stopped, total chunks:', _audioChunks.length);
+        _isRecording = false;
+        micBtn.style.color = '';
+        micBtn.textContent = '🎙️';
+
+        if (_audioChunks.length === 0) {
+          console.error('❌ No audio recorded!');
+          addMsg('ai', 'No audio recorded — try again');
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+
+        const audioBlob = new Blob(_audioChunks, { type: 'audio/wav' });
+        console.log('🎙️ Audio blob created, size:', audioBlob.size, 'bytes');
+        if (audioBlob.size === 0) {
+          console.error('❌ Audio blob is empty!');
+          addMsg('ai', 'Audio is empty — try again');
+          stream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        await transcribeWithOpenAI(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      _mediaRecorder.start();
+    } catch (err) {
+      console.error('❌ Mic error:', err);
+      addMsg('ai', `Mic error: ${err.message}`);
+    }
+  }
+
+  async function transcribeWithOpenAI(audioBlob) {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'audio.wav');
+    formData.append('model', 'whisper-1');
+
+    try {
+      console.log('🔵 Starting Whisper transcription...');
+      showTyping();
+      const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer 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' },
+        body: formData
+      });
+      console.log('Whisper response status:', whisperRes.status);
+      const data = await whisperRes.json();
+      console.log('📝 Transcribed text:', data.text);
+      removeTyping();
+
+      if (data.text) {
+        console.log('✅ Got transcription, sending to chat API...');
+        _voiceMode = true;
+        addMsg('user', data.text);
+        chatHistory.push({ role: 'user', content: data.text });
+        showTyping();
+
+        console.log('🔍 Calling:', `${API}/chat`);
+        const chatRes = await fetch(`${API}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: data.text, history: chatHistory.slice(-10) })
+        });
+        console.log('Chat API response status:', chatRes.status);
+        const respData = await chatRes.json();
+        console.log('💬 AI response:', respData.reply);
+        const reply = respData.reply || 'Sorry, try again!';
+
+        removeTyping();
+        chatHistory.push({ role: 'assistant', content: reply });
+        addMsg('ai', reply.replace(/\n/g, '<br>'));
+        console.log('🔊 Speaking with TTS and listening...');
+        speakWithOpenAIAndListen(reply);
+      } else {
+        console.log('❌ No text from Whisper:', data);
+      }
+    } catch (err) {
+      console.error('💥 Error in transcribeWithOpenAI:', err);
+      removeTyping();
+      addMsg('ai', `Error: ${err.message}`);
+    }
+  }
+
+  async function speakWithOpenAI(text) {
+    try {
+      console.log('Speaking:', text);
+      const res = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+        body: JSON.stringify({ model: 'tts-1', input: text, voice: 'alloy' })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('OpenAI TTS error:', err);
+        return;
+      }
+      const audioBlob = await res.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log('Playing audio...');
+      new Audio(audioUrl).play();
+    } catch (err) {
+      console.error('TTS error:', err);
+    }
+  }
+
+
+  async function speakWithOpenAIAndListen(text) {
+    try {
+      console.log('🔊 TTS: Speaking text:', text.substring(0, 50) + '...');
+      const res = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+        body: JSON.stringify({ model: 'tts-1', input: text, voice: 'alloy' })
+      });
+      console.log('TTS response status:', res.status);
+      if (!res.ok) {
+        const err = await res.json();
+        console.error('❌ OpenAI TTS error:', err);
+        return;
+      }
+      const audioBlob = await res.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log('🎵 Playing audio (click mic to ask next question)');
+      const audio = new Audio(audioUrl);
+      audio.play();
+    } catch (err) {
+      console.error('💥 TTS error:', err);
+    }
+  }
+
   window.addEventListener('load', () => {
     if (sessionId) {
       // returning user — load right in
