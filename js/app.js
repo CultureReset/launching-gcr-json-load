@@ -450,6 +450,7 @@ function renderBizCard(biz, context) {
   const rating   = biz.rating || biz.rating_avg;
   const reviews  = biz.review_count || biz.reviewCount || 0;
   const stars    = rating ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) : '';
+  const imgUrl   = biz.logo || biz.image || biz.hero_image || biz.cover_image || '';
 
   const isBookingCtx    = context === 'things-to-do' || context === 'services';
   const isRestaurantCtx = context === 'restaurants'  || context === 'coffee-sweets';
@@ -469,7 +470,7 @@ function renderBizCard(biz, context) {
   <div class="biz-card" data-tags="${(biz.tags||[]).join(' ')} ${category}">
     <div class="biz-card-img">
       ${featured}
-      <span>${biz.emoji || '🏖️'}</span>
+      ${imgUrl ? `<img src="${imgUrl}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span>${biz.emoji || '🏖️'}</span>`}
     </div>
     <div class="biz-card-body">
       <h4>${escGcr(biz.name)}</h4>
@@ -874,7 +875,14 @@ function _renderBusinessProfile(biz) {
   setText('#profileName',    biz.name || '');
   setText('#profileTagline', biz.tagline || '');
   const emojiEl = document.getElementById('profileEmoji');
-  if (emojiEl) emojiEl.textContent = biz.emoji || '🏖️';
+  if (emojiEl) {
+    const logoUrl = biz.logo || biz.image || biz.hero_image || biz.cover_image || '';
+    if (logoUrl) {
+      emojiEl.innerHTML = `<img src="${logoUrl}" alt="${escGcr(biz.name || '')}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${biz.emoji || '🏖️'}'">`;
+    } else {
+      emojiEl.textContent = biz.emoji || '🏖️';
+    }
+  }
 
   if (biz.phone) {
     const ph = document.getElementById('profilePhone');
@@ -930,14 +938,28 @@ function _renderBusinessProfile(biz) {
     badgeEl.innerHTML = biz.tags.map(t => `<span class="profile-badge">${t.replace(/-/g,' ')}</span>`).join('');
   }
 
-  /* Hours */
+  /* Hours — handles both string ("Mon 08:00–18:00, Tue...") and object {Mon:"..."} */
   const hoursEl = document.getElementById('profileHours');
   if (hoursEl && biz.hours) {
-    const days  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
-    hoursEl.innerHTML = days.map(d =>
-      `<div class="hours-row ${d === today ? 'today' : ''}"><span>${d}</span><span>${biz.hours[d] || biz.hours[d.toLowerCase()] || 'Closed'}</span></div>`
-    ).join('');
+    if (typeof biz.hours === 'string') {
+      /* Convert military times → AM/PM */
+      let hStr = biz.hours.replace(/\b(\d{1,2}):(\d{2})\b/g, (_, h, min) => {
+        h = parseInt(h);
+        const ap = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) h -= 12; if (h === 0) h = 12;
+        return h + ':' + min + ' ' + ap;
+      });
+      /* Split by newline first, fall back to comma */
+      let lines = hStr.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length <= 1) lines = hStr.split(',').map(l => l.trim()).filter(Boolean);
+      hoursEl.innerHTML = lines.map(l => `<div class="hours-row"><span>${escGcr(l)}</span></div>`).join('');
+    } else {
+      const days  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+      hoursEl.innerHTML = days.map(d =>
+        `<div class="hours-row ${d === today ? 'today' : ''}"><span>${d}</span><span>${biz.hours[d] || biz.hours[d.toLowerCase()] || 'Closed'}</span></div>`
+      ).join('');
+    }
   }
 
   /* Specials tab — use profile's own specials array (from full profile API) */
@@ -979,6 +1001,21 @@ function _renderBusinessProfile(biz) {
       }).join('') + '</div>';
     } else {
       evEl.innerHTML = '<p class="text-muted">No upcoming events.</p>';
+    }
+  }
+
+  /* Gallery tab — real photos from profile data */
+  const galEl = document.getElementById('tab-gallery');
+  if (galEl) {
+    const gallery = biz.gallery || biz.images || [];
+    const galGrid = galEl.querySelector('.gallery-grid');
+    if (galGrid && gallery.length) {
+      galGrid.innerHTML = gallery.slice(0, 12).map(img => {
+        const src = typeof img === 'string' ? img : (img.url || img.src || '');
+        return src ? `<div class="gallery-item"><img src="${src}" alt="${escGcr(biz.name)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : '';
+      }).join('');
+      const claimNote = galEl.querySelector('p');
+      if (claimNote) claimNote.style.display = 'none';
     }
   }
 
@@ -1066,37 +1103,86 @@ window.openBookingModal = function(bizId) {
   const biz = GCR.getBusiness(bizId);
   if (!biz) return;
 
+  const isRental  = biz.bookingType === 'rental' || (biz.tags || []).includes('boat-rentals') || (biz.type||'').includes('things-to-do');
   const typeLabel = { rental:'Rental Options', charter:'Charter Packages', tickets:'Admission & Tickets', reservation:'Reserve a Table', inquiry:'Book an Inquiry' };
-  const heading   = typeLabel[biz.bookingType] || 'Book Now';
+  const heading   = typeLabel[biz.bookingType] || (isRental ? 'Rental Options' : 'Book Now');
   const slug      = biz.slug || biz.site_id || biz.id;
+  const logoUrl   = biz.logo || biz.image || biz.hero_image || biz.cover_image || '';
 
-  let html = `
-    <div style="text-align:center;font-size:3rem;margin-bottom:8px;">${biz.emoji||'🎯'}</div>
-    <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:4px;color:#0d2137;">${escGcr(biz.name)}</h2>
-    <p style="font-size:.83rem;color:#666;margin-bottom:20px;">${escGcr(biz.tagline||'')}</p>
-    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#0b7a75;margin-bottom:10px;">${heading}</div>`;
+  let html = ``;
 
-  if (biz.packages && biz.packages.length) {
+  /* Header — show real photo if available */
+  if (logoUrl) {
+    html += `<img src="${logoUrl}" alt="${escGcr(biz.name)}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px;" onerror="this.style.display='none'">`;
+  } else {
+    html += `<div style="text-align:center;font-size:3rem;margin-bottom:8px;">${biz.emoji||'🎯'}</div>`;
+  }
+  html += `<h2 style="font-size:1.25rem;font-weight:800;margin-bottom:4px;color:#0d2137;">${escGcr(biz.name)}</h2>
+    <p style="font-size:.83rem;color:#666;margin-bottom:16px;">${escGcr(biz.tagline||'')}</p>
+    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#0b7a75;margin-bottom:12px;">${heading}</div>`;
+
+  /* Fleet packages (rentals) — show image + time slots */
+  const fleet   = biz.fleet || [];
+  const pricing = biz.pricing || [];
+  if (isRental && fleet.length) {
+    const priceMap = {};
+    pricing.forEach(p => {
+      if (!priceMap[p.fleet_type_id]) priceMap[p.fleet_type_id] = {};
+      priceMap[p.fleet_type_id][p.slot_label] = p.price;
+    });
+    html += fleet.map(ft => {
+      const prices  = priceMap[ft.fleet_type_id || ft.id] || {};
+      const slots   = Object.entries(prices);
+      const minPrice = slots.length ? Math.min(...slots.map(([,v]) => v)) : null;
+      return `<div style="border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+        ${ft.image ? `<img src="${ft.image}" alt="${escGcr(ft.name)}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:10px;" loading="lazy">` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+          <div style="font-size:.92rem;font-weight:700;color:#0d2137;">${escGcr(ft.name)}</div>
+          ${minPrice ? `<div style="font-size:.85rem;font-weight:800;color:#0b7a75;white-space:nowrap;">from $${minPrice}</div>` : ''}
+        </div>
+        ${ft.description ? `<div style="font-size:.75rem;color:#666;margin-bottom:8px;">${escGcr(ft.description)}</div>` : ''}
+        ${slots.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;">${slots.map(([label, price]) => `<span style="background:#f0fafa;color:#0b7a75;border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;">${escGcr(label)} — $${price}</span>`).join('')}</div>` : ''}
+      </div>`;
+    }).join('');
+  } else if (biz.packages && biz.packages.length) {
+    /* Legacy packages */
     html += biz.packages.map(p => `
       <div style="border:2px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+        ${p.image ? `<img src="${p.image}" alt="${escGcr(p.name)}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;margin-bottom:10px;" loading="lazy">` : ''}
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div style="font-size:.92rem;font-weight:700;color:#0d2137;">${escGcr(p.name)}</div>
-          <div style="font-size:.92rem;font-weight:800;color:#0b7a75;white-space:nowrap;">${escGcr(p.price)}</div>
+          <div style="font-size:.92rem;font-weight:800;color:#0b7a75;white-space:nowrap;">${escGcr(p.price||'')}</div>
         </div>
         <div style="font-size:.78rem;color:#666;margin-top:4px;">${escGcr(p.desc||p.description||'')}</div>
         ${p.maxGuests||p.max_guests ? `<div style="font-size:.7rem;color:#888;margin-top:4px;">👥 Max ${p.maxGuests||p.max_guests} guests</div>` : ''}
       </div>`).join('');
   }
 
-  if (biz.phone) {
-    html += `<a href="tel:${biz.phone.replace(/\D/g,'')}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#0b7a75,#14B8A6);color:#fff;padding:14px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.95rem;margin:20px 0 8px;">📞 Call to Book — ${escGcr(biz.phone)}</a>`;
+  /* Action buttons */
+  if (biz.links_page_url || biz.website) {
+    const bookUrl = biz.links_page_url || biz.website;
+    html += `<a href="${bookUrl}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#0b7a75,#14B8A6);color:#fff;padding:14px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.95rem;margin:16px 0 8px;">📅 Book Now</a>`;
+  } else if (biz.phone) {
+    html += `<a href="tel:${biz.phone.replace(/\D/g,'')}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#0b7a75,#14B8A6);color:#fff;padding:14px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.95rem;margin:16px 0 8px;">📞 Call to Book — ${escGcr(biz.phone)}</a>`;
   }
   html += `<a href="business.html?id=${slug}" style="display:block;text-align:center;padding:10px;font-size:.82rem;color:#0b7a75;text-decoration:none;font-weight:600;">View Full Profile →</a>`;
 
+  /* Load full profile to get fleet/pricing if not already loaded */
   document.getElementById('gcrBookingContent').innerHTML = html;
   const modal = document.getElementById('gcrBookingModal');
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+
+  /* Upgrade with full profile data (fleet+pricing) if not already present */
+  if (isRental && !fleet.length) {
+    GCR.loadProfile(slug).then(profile => {
+      if (profile && document.getElementById('gcrBookingModal').style.display === 'flex') {
+        window.openBookingModal.__cache = window.openBookingModal.__cache || {};
+        Object.assign(biz, { fleet: profile.fleet || [], pricing: profile.pricing || [], packages: profile.packages || biz.packages });
+        window.openBookingModal(bizId);
+      }
+    });
+  }
 };
 
 window.closeBookingModal = function() {
