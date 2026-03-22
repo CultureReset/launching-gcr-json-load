@@ -1,83 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coffee & Sweets — Gulf Coast Radar</title>
+  <meta name="description" content="Find the best coffee shops and sweet treats in Orange Beach and Gulf Shores.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#12263a;
+      --muted:#66788a;
+      --line:#e2e8f0;
+      --nav:#0f2233;
+      --brand:#0f7c90;
+      --brand-dark:#0b6475;
+      --brand-soft:#e8f7fa;
+      --gold:#f4b400;
+      --green:#2e9b55;
+      --shadow:0 10px 28px rgba(15,34,51,.08);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body.coffee-page{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{text-decoration:none;color:inherit}
+    button,input{font:inherit}
+    .page{max-width:1240px;margin:0 auto;padding-bottom:32px}
+    .hero{
+      margin:16px 18px 0;
+      border-radius:28px;overflow:hidden;position:relative;min-height:280px;
+      background:
+        linear-gradient(rgba(0,0,0,.24), rgba(0,0,0,.44)),
+        url('https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      display:flex;align-items:flex-end;
+    }
+    .hero-content{padding:28px;color:#fff;max-width:760px}
+    .hero h1{margin:0;font-size:56px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .hero p{margin:10px 0 0;font-size:20px;line-height:1.45;color:rgba(255,255,255,.92)}
+    .toolbar{
+      margin:14px 18px 0;
+      background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+      border-radius:18px;padding:12px;
+    }
+    .toolbar-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .toolbar-title{font-size:20px;font-weight:800}
+    .toolbar-meta{color:var(--muted);font-weight:600}
+    .tag-row{
+      display:flex;gap:10px;overflow-x:auto;padding-top:12px;
+    }
+    .tag-btn{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);color:#446072;
+      padding:11px 16px;border-radius:999px;font-weight:700;
+      transition:.18s ease;
+      flex-shrink:0;
+    }
+    .tag-btn.active,.tag-btn:hover{
+      background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark);
+    }
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;
+      padding:18px;
+    }
+    .results-title{font-size:34px;font-weight:900;letter-spacing:-.03em;margin:2px 0 14px}
+    .list{display:flex;flex-direction:column;gap:14px}
+    .cafe-card{
+      display:grid;grid-template-columns:290px minmax(0,1fr);
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);overflow:hidden;
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .cafe-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .cafe-image{
+      min-height:208px;background-size:cover;background-position:center;position:relative;
+    }
+    .image-badge{
+      position:absolute;left:14px;bottom:14px;
+      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.92);
+      color:#21485d;font-weight:800;font-size:13px;
+    }
+    .cafe-body{padding:16px 18px}
+    .title-row{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    }
+    .name{font-size:30px;font-weight:900;letter-spacing:-.03em}
+    .status{
+      background:#e9f9ef;color:var(--green);
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap
+    }
+    .subline{
+      margin-top:4px;color:var(--muted);font-size:16px;font-weight:600;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    }
+    .rating{
+      margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      font-size:15px;font-weight:700;color:#384f61;
+    }
+    .stars{color:var(--gold);letter-spacing:1px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{
+      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700
+    }
+    .desc{
+      margin-top:12px;color:#50677a;line-height:1.6;font-size:14px;
+    }
+    .bottom-row{
+      margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
+      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+    }
+    .address{color:#425b70;font-weight:700;font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action{
+      border:1px solid var(--line);background:#fff;color:#25465b;
+      padding:10px 14px;border-radius:12px;font-weight:800;
+    }
+    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mini-card{
+      display:flex;gap:12px;padding:10px 0;border-top:1px solid #edf2f7;
+    }
+    .mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-thumb{
+      width:90px;height:76px;border-radius:14px;flex:0 0 90px;background-size:cover;background-position:center;
+    }
+    .mini-name{font-weight:800;font-size:17px}
+    .mini-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .mini-links a{
+      background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+    .mapbox{
+      height:150px;border-radius:16px;background:
+        linear-gradient(90deg, rgba(255,255,255,.60), rgba(255,255,255,.60)),
+        repeating-linear-gradient(0deg,#d9e6f3 0 2px, transparent 2px 28px),
+        repeating-linear-gradient(90deg,#d9e6f3 0 2px, transparent 2px 28px),
+        linear-gradient(135deg,#eef5fd,#d9ecff);
+      position:relative;overflow:hidden
+    }
+    .river{
+      position:absolute;left:-10%;right:-10%;top:48%;
+      height:30px;background:#7dc2fb;border-radius:99px;transform:rotate(-12deg)
+    }
+    .pin{
+      position:absolute;right:34%;top:32%;
+      width:24px;height:24px;border-radius:50% 50% 50% 0;background:#ea5b4e;transform:rotate(-45deg)
+    }
+    .pin:after{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}
+    .cta{
+      background:linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;
+      text-align:center;display:block;text-decoration:none;cursor:pointer;
+    }
+    @media (max-width: 1080px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{order:2}
+    }
+    @media (max-width: 760px){
+      .hero{min-height:220px}
+      .hero h1{font-size:38px}
+      .hero p{font-size:16px}
+      .layout{padding:12px}
+      .toolbar,.hero{margin-left:12px;margin-right:12px}
+      .cafe-card{grid-template-columns:1fr}
+      .cafe-image{min-height:190px}
+      .results-title{font-size:28px}
+    }
+  </style>
 </head>
-<body>
+<body class="coffee-page">
 
-<div class="gcr-header">
-  <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
-      <img src="gcr-logo.png" alt="Gulf Coast Radar">
-      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-    </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
-  </div>
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+        📲 Install App
+      </button>
+    </div>
     <div class="gcr-cat-tabs" id="gcrCatTabs">
-    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
-    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
-    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
-    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
-    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab active">☕ Coffee &amp; Sweets</a>
+      <a href="happy-hours.html" class="gcr-cat-tab">🍻 Happy Hours</a>
+      <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
   </div>
-  <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
-  </div>
-</div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="coffee">☕ Coffee Shops</button>
-    <button class="filter-chip" data-filter="ice-cream">🍦 Ice Cream</button>
-    <button class="filter-chip" data-filter="bakery">🥐 Bakery</button>
-    <button class="filter-chip" data-filter="smoothies">🥤 Smoothies</button>
-    <button class="filter-chip" data-filter="dessert">🍰 Dessert</button>
-    <button class="filter-chip" data-filter="breakfast">🍳 Breakfast</button>
-    <button class="filter-chip" data-filter="wifi">📶 WiFi</button>
-    <button class="filter-chip" data-filter="pet-friendly">🐾 Pet Friendly</button>
-  </div></div></div>
-  <section class="section"><div class="container">
-    <div class="listings-grid" id="listingsGrid" data-category="coffee-sweets">
-      <div class="biz-card" data-tags="coffee wifi">
-        <div class="biz-card-img"><span>☕</span></div>
-        <div class="biz-card-body">
-          <h4>The Daily Grind Coffee House</h4>
-          <div class="biz-meta">
-            <span class="biz-tag">Coffee & Sweets</span>
-            <span class="biz-tag">$</span>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Coffee & Sweets</h1>
+        <p>Browse Gulf Coast coffee shops and sweet treats. Use tags to narrow results by vibe, specialty, and what makes each place special.</p>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Shops</div>
+        <div class="toolbar-meta">Browse all</div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active" data-filter="all">All</button>
+        <button class="tag-btn" data-filter="coffee">☕ Coffee</button>
+        <button class="tag-btn" data-filter="sweets">🍰 Sweets</button>
+        <button class="tag-btn" data-filter="bakery">🥐 Bakery</button>
+        <button class="tag-btn" data-filter="specialty">✨ Specialty Drinks</button>
+        <button class="tag-btn" data-filter="wifi">📶 WiFi</button>
+        <button class="tag-btn" data-filter="outdoor">☀️ Outdoor Seating</button>
+        <button class="tag-btn" data-filter="local">🏘️ Local Roasters</button>
+        <button class="tag-btn" data-filter="pet-friendly">🐕 Pet Friendly</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <main>
+        <div class="results-title">Coffee & Sweets</div>
+
+        <div class="list" id="listingsGrid" data-category="coffee-sweets">
+          <article class="cafe-card" data-tags="coffee bakery">
+            <div class="cafe-image" style="background-image:url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=80')">
+              <div class="image-badge">Local Roaster</div>
+            </div>
+            <div class="cafe-body">
+              <div class="title-row">
+                <div>
+                  <div class="name">Morning Brew Coffee</div>
+                  <div class="subline">
+                    <span>Orange Beach, AL</span>
+                    <span>$</span>
+                  </div>
+                </div>
+                <div class="status">Open Now</div>
+              </div>
+
+              <div class="rating">
+                <span class="stars">★★★★★</span>
+                <span>4.7</span>
+                <span>245 reviews</span>
+              </div>
+
+              <div class="chips">
+                <span class="chip">Coffee</span>
+                <span class="chip">Bakery</span>
+                <span class="chip">WiFi</span>
+                <span class="chip">Pet Friendly</span>
+              </div>
+
+              <div class="desc">
+                Cozy local roaster with fresh-baked pastries, perfect espresso, and the perfect spot to work or relax.
+              </div>
+
+              <div class="bottom-row">
+                <div class="address">📍 123 Main St, Orange Beach, AL</div>
+                <div class="actions">
+                  <a href="business.html?id=morning-brew" class="action">Directions</a>
+                  <a href="tel:+1" class="action">Call</a>
+                  <a href="business.html?id=morning-brew" class="action primary">View Page</a>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Popular Nearby</h3>
+
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Morning Brew</div>
+              <div class="mini-meta">Orange Beach, AL</div>
+              <div class="mini-links">
+                <a href="#">Directions</a>
+                <a href="#">Call</a>
+              </div>
+            </div>
           </div>
-          <div class="biz-rating"><span class="stars">★★★★☆</span> 4.3 <span style="color:var(--gray-400)">(67)</span></div>
-          <p class="biz-desc">Specialty coffee, fresh pastries, and free WiFi. Local favorite since 2015.</p>
-          <div class="biz-card-actions">
-            <a href="business.html?id=daily-grind-coffee" class="biz-btn-view">View Profile</a>
+
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514432324607-2e467f4af3fb?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Sweet Treats Cafe</div>
+              <div class="mini-meta">Gulf Shores, AL</div>
+              <div class="mini-links">
+                <a href="#">Directions</a>
+                <a href="#">Call</a>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="panel">
+          <h3>Map Area</h3>
+          <div class="mapbox">
+            <div class="river"></div>
+            <div class="pin"></div>
+          </div>
+          <div class="mini-meta" style="margin-top:10px">Use a real map here to find shops near where you're staying.</div>
+        </div>
+
+        <div class="panel">
+          <h3>Claim Your Listing</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Is your coffee shop or bakery missing? Claim your free listing and reach customers faster.</p>
+          <a href="claim.html" class="cta">Claim Your Listing Free</a>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="specials.html">Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
       </div>
     </div>
-  </div></section>
-  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
-    <div class="claim-cta"><h4>Own a Coffee Shop or Sweet Spot?</h4>
-    <p>Get listed and reach Gulf Coast visitors looking for their morning fix.</p>
-    <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
-  </div></section>
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0;">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a> · <a href="restaurants.html" style="color:var(--teal-light)">Restaurants</a> · <a href="things-to-do.html" style="color:var(--teal-light)">Things To Do</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
-    </div>
-  </div></footer>
-  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
-</body></html>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

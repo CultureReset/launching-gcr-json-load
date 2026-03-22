@@ -412,6 +412,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  /* ── Tag filter buttons (new toolbar) ── */
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      filterListings(btn.dataset.filter);
+    });
+  });
+
   /* ── Profile tabs ── */
   document.querySelectorAll('.profile-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -450,7 +459,7 @@ function renderBizCard(biz, context) {
   const rating   = biz.rating || biz.rating_avg;
   const reviews  = biz.review_count || biz.reviewCount || 0;
   const stars    = rating ? '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) : '';
-  const imgUrl   = biz.logo || biz.image || biz.hero_image || biz.cover_image || '';
+  const imgUrl   = biz.logo_url || biz.logo || biz.image || biz.hero_image || biz.cover_image || biz.cover_url || '';
 
   const isBookingCtx    = context === 'things-to-do' || context === 'services';
   const isRestaurantCtx = context === 'restaurants'  || context === 'coffee-sweets';
@@ -466,28 +475,60 @@ function renderBizCard(biz, context) {
   const priceRange   = biz.price_range || biz.priceRange || '';
   const category     = biz.type || biz.category || '';
 
+  // Use specific card classes for different contexts
+  const isCoffeeCtx = context === 'coffee-sweets';
+  const isActivityCtx = context === 'things-to-do';
+  const cardClass = isRestaurantCtx ? 'restaurant-card' : (isCoffeeCtx ? 'cafe-card' : (isActivityCtx ? 'activity-card' : 'biz-card'));
+  const imageClass = isRestaurantCtx ? 'restaurant-image' : (isCoffeeCtx ? 'cafe-image' : (isActivityCtx ? 'activity-image' : 'biz-card-img'));
+  const bodyClass = isRestaurantCtx ? 'restaurant-body' : (isCoffeeCtx ? 'cafe-body' : (isActivityCtx ? 'activity-body' : 'biz-card-body'));
+  const nameClass = isRestaurantCtx ? 'name' : '';
+  const sublineClass = isRestaurantCtx ? 'subline' : '';
+  const chipsClass = isRestaurantCtx ? 'chips' : '';
+  const descClass = isRestaurantCtx ? 'desc' : 'biz-desc';
+  const actionClass = isRestaurantCtx ? 'action' : 'biz-btn-view';
+  const actionPrimaryClass = isRestaurantCtx ? 'action primary' : 'biz-btn-book';
+
+  const useHorizontalLayout = isRestaurantCtx || isCoffeeCtx || isActivityCtx;
+
   return `
-  <div class="biz-card" data-tags="${(biz.tags||[]).join(' ')} ${category}">
-    <div class="biz-card-img">
+  <article class="${cardClass}" data-tags="${(biz.tags||[]).join(' ')} ${category}">
+    <div class="${imageClass}" ${!useHorizontalLayout ? '' : 'style="background-image:url(' + (imgUrl ? `'${imgUrl}'` : '') + ')"'}>
       ${featured}
-      ${imgUrl ? `<img src="${imgUrl}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span>${biz.emoji || '🏖️'}</span>`}
+      ${!useHorizontalLayout && imgUrl ? `<img src="${imgUrl}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+      ${!useHorizontalLayout && !imgUrl ? `<span>${biz.emoji || '🏖️'}</span>` : ''}
+      ${useHorizontalLayout ? '<div class="image-badge">Featured</div>' : ''}
     </div>
-    <div class="biz-card-body">
-      <h4>${escGcr(biz.name)}</h4>
-      <div class="biz-meta">
+    <div class="${bodyClass}">
+      ${useHorizontalLayout ? `<div class="title-row"><div><div class="${nameClass}">${escGcr(biz.name)}</div>` : `<h4>${escGcr(biz.name)}</h4>`}
+      ${useHorizontalLayout ? `<div class="${sublineClass}"><span>${biz.location || 'Location'}</span><span>${priceRange || '$$'}</span></div></div>` : ''}
+      ${useHorizontalLayout ? `<div class="status">Featured</div></div>` : ''}
+
+      ${rating ? `<div class="rating"><span class="stars">${stars}</span> ${rating} <span style="color:var(--gray-400)">(${reviews})</span></div>` : `${!useHorizontalLayout ? `<div class="biz-rating"><span class="stars">${stars}</span> ${rating} <span style="color:var(--gray-400)">(${reviews})</span></div>` : ''}`}
+
+      ${useHorizontalLayout ? `<div class="${chipsClass}">
+        ${(biz.tags||[]).slice(0,4).map(t => `<span class="chip">${escGcr(t)}</span>`).join('')}
+      </div>` : `<div class="biz-card-meta">
         ${showCatTag ? `<span class="biz-tag">${categoryLabel(category)}</span>` : ''}
         ${priceRange ? `<span class="biz-tag">${priceRange}</span>` : ''}
         ${showHHTag ? `<span class="biz-tag" style="background:#e6f9f0;color:#1a7a47">🍻 HH ${hhText}</span>` : ''}
-      </div>
-      ${rating ? `<div class="biz-rating"><span class="stars">${stars}</span> ${rating} <span style="color:var(--gray-400)">(${reviews})</span></div>` : ''}
-      <p class="biz-desc">${escGcr(biz.description || biz.tagline || '')}</p>
-      <div class="biz-card-actions">
-        <a href="business.html?id=${slug}" class="biz-btn-view">View Profile</a>
-        ${showBookBtn  ? `<button class="biz-btn-book" onclick="openBookingModal('${slug}')">📅 Book Now</button>` : ''}
+      </div>`}
+
+      <p class="${descClass}">${escGcr((biz.description || biz.tagline || '').substring(0, 180))}${(biz.description || biz.tagline || '').length > 180 ? '... <a href="business.html?id=' + slug + '" style="color:var(--brand);font-weight:800;text-decoration:underline;cursor:pointer">More</a>' : ''}</p>
+
+      ${useHorizontalLayout ? `<div class="bottom-row">
+        <div class="venue">📍 ${biz.address || biz.location || 'See details for address'}</div>
+        <div class="actions">
+          <a href="business.html?id=${slug}" class="${actionClass}">Details</a>
+          <a href="#" class="${actionClass}">Directions</a>
+          <a href="business.html?id=${slug}" class="${actionPrimaryClass}">Book Now</a>
+        </div>
+      </div>` : `<div class="biz-card-actions">
+        <a href="business.html?id=${slug}" class="${actionClass}">View Profile</a>
+        ${showBookBtn  ? `<button class="${actionPrimaryClass}" onclick="openBookingModal('${slug}')">📅 Book Now</button>` : ''}
         ${showMenuBtn  ? `<a href="${biz.links.menu}" class="biz-btn-menu">Full Menu</a>` : ''}
-      </div>
+      </div>`}
     </div>
-  </div>`;
+  </article>`;
 }
 
 /* ── Auto-render #listingsGrid on category pages ── */
@@ -874,9 +915,30 @@ function _renderBusinessProfile(biz) {
 
   setText('#profileName',    biz.name || '');
   setText('#profileTagline', biz.tagline || '');
+
+  /* ── Profile logo / pic (covers all Supabase field names) ── */
+  const logoUrl  = biz.logo_url  || biz.logo  || biz.image || biz.hero_image || biz.cover_image  || biz.cover_url  || '';
+  const coverUrl = biz.cover_url || biz.hero_image || biz.cover_image || biz.logo_url || biz.image || biz.logo || '';
+
+  /* New layout: #profilePic (circular) */
+  const picEl = document.getElementById('profilePic');
+  if (picEl) {
+    if (logoUrl) {
+      picEl.innerHTML = `<img src="${logoUrl}" alt="${escGcr(biz.name || '')}" onerror="this.parentElement.textContent='${biz.emoji || '🏖️'}'">`;
+    } else {
+      picEl.textContent = biz.emoji || '🏖️';
+    }
+  }
+
+  /* Cover banner image (#profileCoverWrap) */
+  const coverEl = document.getElementById('profileCoverWrap');
+  if (coverEl && coverUrl) {
+    coverEl.style.backgroundImage = `url('${coverUrl}')`;
+  }
+
+  /* Legacy: #profileEmoji (old layout fallback) */
   const emojiEl = document.getElementById('profileEmoji');
   if (emojiEl) {
-    const logoUrl = biz.logo || biz.image || biz.hero_image || biz.cover_image || '';
     if (logoUrl) {
       emojiEl.innerHTML = `<img src="${logoUrl}" alt="${escGcr(biz.name || '')}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${biz.emoji || '🏖️'}'">`;
     } else {
@@ -924,13 +986,37 @@ function _renderBusinessProfile(biz) {
   const prDetail = document.getElementById('profilePrice');
   if (prDetail && biz.price_range) prDetail.textContent = biz.price_range;
 
-  /* Quick info */
-  const hh = document.getElementById('profileHHour');
-  if (hh) hh.textContent = biz.happy_hour || biz.happyHour || '—';
-  const kf = document.getElementById('profileKids');
-  if (kf) kf.textContent = (biz.kids_friendly || biz.kidsFriendly) ? '✅ Yes' : '✗ No';
-  const od = document.getElementById('profileOutdoor');
-  if (od) od.textContent = biz.outdoor ? '✅ Yes' : '✗ No';
+  /* Business type — used throughout this function */
+  const cat             = biz.type || biz.category || '';
+  const isRestaurantType = cat === 'restaurants' || cat === 'coffee-sweets' ||
+                           cat === 'nightlife'   || cat === 'happy-hours';
+  const isActivity      = cat === 'things-to-do' || cat === 'services';
+
+  /* ── Tab visibility: switch Menu ↔ Pricing based on type ── */
+  const tabMenuEl    = document.getElementById('tabMenu');
+  const tabPricingEl = document.getElementById('tabPricing');
+  if (isActivity) {
+    if (tabMenuEl)    tabMenuEl.style.display    = 'none';
+    if (tabPricingEl) tabPricingEl.style.display = '';
+  }
+
+  const quickGrid = document.getElementById('quickInfoGrid');
+  if (quickGrid) {
+    if (!isRestaurantType) {
+      quickGrid.style.display = 'none'; /* hide for rentals/tours/activities */
+    } else {
+      const hh = document.getElementById('profileHHour');
+      if (hh) hh.textContent = biz.happy_hour || biz.happyHour || '—';
+      const kf = document.getElementById('profileKids');
+      if (kf) kf.textContent = (biz.kids_friendly || biz.kidsFriendly) ? '✅ Yes' : '✗ No';
+      const od = document.getElementById('profileOutdoor');
+      if (od) od.textContent = biz.outdoor ? '✅ Yes' : '✗ No';
+    }
+  }
+
+  /* Menu Highlights — only for restaurants */
+  const mhEl = document.getElementById('profileMenuHighlights');
+  if (mhEl && !isRestaurantType) mhEl.style.display = 'none';
 
   /* Badges */
   const badgeEl = document.getElementById('profileBadges');
@@ -962,8 +1048,9 @@ function _renderBusinessProfile(biz) {
     }
   }
 
-  /* Specials tab — use profile's own specials array (from full profile API) */
+  /* Specials tab — hide tab entirely if no specials */
   const specEl = document.getElementById('profileSpecials');
+  const specTab = document.querySelector('[data-panel="tab-specials"]');
   if (specEl) {
     const bizSpecials = biz.specials && biz.specials.length
       ? biz.specials
@@ -976,7 +1063,8 @@ function _renderBusinessProfile(biz) {
           ${s.discount ? `<span class="biz-tag" style="margin-top:4px;display:inline-block">${escGcr(s.discount)}</span>` : ''}
         </div>`).join('');
     } else {
-      specEl.innerHTML = '<p class="text-muted">No active specials right now.</p>';
+      /* No specials — hide the tab */
+      if (specTab) specTab.style.display = 'none';
     }
   }
 
@@ -1000,7 +1088,9 @@ function _renderBusinessProfile(biz) {
         </div>`;
       }).join('') + '</div>';
     } else {
-      evEl.innerHTML = '<p class="text-muted">No upcoming events.</p>';
+      /* No events — hide the tab */
+      const evTab = document.querySelector('[data-panel="tab-events"]');
+      if (evTab) evTab.style.display = 'none';
     }
   }
 
@@ -1008,14 +1098,16 @@ function _renderBusinessProfile(biz) {
   const galEl = document.getElementById('tab-gallery');
   if (galEl) {
     const gallery = biz.gallery || biz.images || [];
-    const galGrid = galEl.querySelector('.gallery-grid');
+    const galGrid = document.getElementById('galleryGrid') || galEl.querySelector('.gallery-grid');
     if (galGrid && gallery.length) {
       galGrid.innerHTML = gallery.slice(0, 12).map(img => {
         const src = typeof img === 'string' ? img : (img.url || img.src || '');
-        return src ? `<div class="gallery-item"><img src="${src}" alt="${escGcr(biz.name)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : '';
+        return src ? `<div class="gallery-item"><img src="${src}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : '';
       }).join('');
-      const claimNote = galEl.querySelector('p');
-      if (claimNote) claimNote.style.display = 'none';
+    }
+    /* If no gallery but business has a main image, show that as first photo */
+    else if (galGrid && logoUrl) {
+      galGrid.innerHTML = `<div class="gallery-item"><img src="${logoUrl}" alt="${escGcr(biz.name)}" loading="lazy"></div>`;
     }
   }
 
@@ -1049,7 +1141,6 @@ function _renderBusinessProfile(biz) {
 
   /* Breadcrumb */
   const catMap = { restaurants:'Restaurants','things-to-do':'Things To Do','coffee-sweets':'Coffee & Sweets', events:'Events', shopping:'Shopping', other:'Other', nightlife:'Nightlife' };
-  const cat    = biz.type || biz.category || '';
   const bcCat  = document.getElementById('breadcrumbCat');
   const bcName = document.getElementById('breadcrumbName');
   if (bcCat) bcCat.textContent = catMap[cat] || cat;
@@ -1066,10 +1157,12 @@ function _renderBusinessProfile(biz) {
     }).join('');
   }
 
-  /* Booking panel + menu tabs (defined in business.html) */
+  /* Booking panel + content tabs (defined in business.html) */
   if (typeof renderBookingPanel === 'function') renderBookingPanel(biz);
-  if (typeof renderMenuTabs    === 'function') renderMenuTabs(biz);
-  if (typeof renderPricingTab  === 'function') renderPricingTab(biz);
+  /* Only render menu for restaurant-type businesses */
+  if (typeof renderMenuTabs === 'function' && isRestaurantType) renderMenuTabs(biz);
+  /* Only render pricing/fleet for activity businesses */
+  if (typeof renderPricingTab === 'function' && isActivity) renderPricingTab(biz);
 }
 
 /* ── Category label ── */

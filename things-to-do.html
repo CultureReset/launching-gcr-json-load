@@ -1,88 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Things To Do — Gulf Coast Radar</title>
+  <meta name="description" content="Discover rentals, tours, family activities, fishing trips, and outdoor experiences across Orange Beach and Gulf Shores.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{
+      --bg:#f4f7fb;--card:#fff;--text:#12263a;--muted:#66788a;--line:#e2e8f0;--nav:#0f2233;--brand:#0f7c90;--brand-dark:#0b6475;--brand-soft:#e8f7fa;--gold:#f4b400;--green:#2e9b55;--shadow:0 10px 28px rgba(15,34,51,.08);--radius:20px
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body.activity-page{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{text-decoration:none;color:inherit} button,input,select{font:inherit}
+    .page{max-width:1280px;margin:0 auto;padding-bottom:32px}
+    .header{margin:18px 18px 0;background:linear-gradient(135deg,#0f2233,#0f7c90);color:#fff;border-radius:28px;padding:24px 24px 20px;box-shadow:var(--shadow)}
+    .header-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}
+    .header h1{margin:0;font-size:52px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .header p{margin:10px 0 0;font-size:18px;line-height:1.5;color:rgba(255,255,255,.92);max-width:760px}
+    .livebox{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);padding:14px 16px;border-radius:18px;min-width:250px}
+    .livebox strong{display:block;font-size:18px}.livebox span{display:block;margin-top:6px;color:rgba(255,255,255,.9);font-weight:600}
+    .toolbar{position:sticky;top:140px;z-index:30;margin:14px 18px 0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:12px}
+    .toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .toolbar-title{font-size:20px;font-weight:900}.toolbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .ctrl{border:1px solid var(--line);background:#fff;color:#37556a;padding:10px 12px;border-radius:12px;font-weight:700}
+    .tag-row{display:flex;gap:10px;overflow-x:auto;padding-top:12px}
+    .tag-btn{border:none;cursor:pointer;white-space:nowrap;background:#fff;border:1px solid var(--line);color:#446072;padding:11px 16px;border-radius:999px;font-weight:700;transition:.18s ease}
+    .tag-btn.active,.tag-btn:hover{background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark)}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;padding:18px}
+    .section{margin-bottom:18px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .section-title{font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0}.section-sub{color:var(--muted);font-weight:700}
+    .cards{display:flex;flex-direction:column;gap:14px}
+    .activity-card{display:grid;grid-template-columns:270px minmax(0,1fr);background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .14s ease,box-shadow .14s ease}
+    .activity-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .activity-image{min-height:220px;background-size:cover;background-position:center;position:relative}
+    .image-badge{position:absolute;left:14px;bottom:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.94);color:#21485d;font-weight:800;font-size:13px}
+    .activity-body{padding:16px 18px}
+    .title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .name{font-size:28px;font-weight:900;letter-spacing:-.03em}
+    .price-pill{background:#edf9f1;color:var(--green);padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
+    .subline{margin-top:4px;color:var(--muted);font-size:15px;font-weight:600;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .rating{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:15px;font-weight:700;color:#384f61}
+    .stars{color:var(--gold);letter-spacing:1px}
+    .meta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .meta-pill{display:inline-flex;align-items:center;gap:6px;background:#f8fafc;color:#3d596d;border:1px solid #ecf1f6;border-radius:999px;padding:8px 12px;font-weight:800;font-size:14px}
+    .event-copy{margin-top:12px;color:#42596c;line-height:1.6;font-weight:700}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{background:#f7fafc;border:1px solid #e7edf3;color:#496376;padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700}
+    .bottom-row{margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+    .venue{color:#425b70;font-weight:700;font-size:14px}.actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action{border:1px solid var(--line);background:#fff;color:#25465b;padding:10px 14px;border-radius:12px;font-weight:800}
+    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px}
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mini-card{display:flex;gap:12px;padding:10px 0;border-top:1px solid #edf2f7}.mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-thumb{width:90px;height:76px;border-radius:14px;flex:0 0 90px;background-size:cover;background-position:center}
+    .mini-name{font-weight:800;font-size:17px}.mini-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}.mini-links a{background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;font-size:12px;font-weight:800;color:#36566b}
+    .mapbox{height:170px;border-radius:16px;background:linear-gradient(90deg,rgba(255,255,255,.60),rgba(255,255,255,.60)),repeating-linear-gradient(0deg,#d9e6f3 0 2px,transparent 2px 28px),repeating-linear-gradient(90deg,#d9e6f3 0 2px,transparent 2px 28px),linear-gradient(135deg,#eef5fd,#d9ecff);position:relative;overflow:hidden}
+    .river{position:absolute;left:-10%;right:-10%;top:48%;height:30px;background:#7dc2fb;border-radius:99px;transform:rotate(-12deg)}
+    .pin{position:absolute;right:34%;top:32%;width:24px;height:24px;border-radius:50% 50% 50% 0;background:#ea5b4e;transform:rotate(-45deg)}
+    .pin:after{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}
+    .cta{background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;text-align:center;display:block;text-decoration:none;cursor:pointer}
+    @media (max-width:1080px){.layout{grid-template-columns:1fr}.sidebar{order:2}}
+    @media (max-width:760px){.header{margin-left:12px;margin-right:12px}.header h1{font-size:38px}.header p{font-size:16px}.toolbar{top:130px;margin-left:12px;margin-right:12px}.layout{padding:12px}.activity-card{grid-template-columns:1fr}.activity-image{min-height:190px}.section-title{font-size:26px}}
+  </style>
 </head>
-<body>
+<body class="activity-page">
 
-<div class="gcr-header">
-  <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
-      <img src="gcr-logo.png" alt="Gulf Coast Radar">
-      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-    </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
-  </div>
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+        📲 Install App
+      </button>
+    </div>
     <div class="gcr-cat-tabs" id="gcrCatTabs">
-    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
-    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
-    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
-    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
-    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="happy-hours.html" class="gcr-cat-tab">🍻 Happy Hours</a>
+      <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab active">🎯 Things To Do</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
   </div>
-  <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
-  </div>
-</div>
 
-  <div class="filters-bar"><div class="container"><div class="filters-inner">
-    <button class="filter-chip active" data-filter="all">All</button>
-    <button class="filter-chip" data-filter="water-sports">🌊 Water Sports</button>
-    <button class="filter-chip" data-filter="fishing">🎣 Fishing</button>
-    <button class="filter-chip" data-filter="boat-rentals">🚤 Boat Rentals</button>
-    <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family</button>
-    <button class="filter-chip" data-filter="outdoor">🌿 Outdoor</button>
-    <button class="filter-chip" data-filter="golf">⛳ Golf</button>
-    <button class="filter-chip" data-filter="tours">🗺️ Tours</button>
-    <button class="filter-chip" data-filter="free">🆓 Free</button>
-    <button class="filter-chip" data-filter="bikes">🚴 Bikes</button>
-    <button class="filter-chip" data-filter="animals">🦁 Animals</button>
-    <button class="filter-chip" data-filter="the-wharf">⚓ At The Wharf</button>
-    <button class="filter-chip" data-filter="owa">🎢 At OWA</button>
-  </div></div></div>
-  <section class="section"><div class="container">
-    <div class="listings-grid" id="listingsGrid" data-category="things-to-do">
-      <div class="biz-card" data-tags="boat-rentals water-sports">
-        <div class="biz-card-img"><span>🚤</span></div>
-        <div class="biz-card-body">
-          <h4>Gulf Coast Boat Rentals</h4>
-          <div class="biz-meta">
-            <span class="biz-tag">Things To Do</span>
-            <span class="biz-tag">$$</span>
-          </div>
-          <div class="biz-rating"><span class="stars">★★★★★</span> 4.8 <span style="color:var(--gray-400)">(203)</span></div>
-          <p class="biz-desc">Pontoon, jet ski, and fishing boat rentals. Full-day and hourly rates available.</p>
-          <div class="biz-card-actions">
-            <a href="business.html?id=gulf-coast-boats" class="biz-btn-view">View Profile</a>
-            <button class="biz-btn-book" onclick="openBookingModal('gulf-coast-boats')">📅 Book Now</button>
-          </div>
+  <div class="page">
+    <section class="header">
+      <div class="header-top">
+        <div>
+          <h1>Things To Do</h1>
+          <p>Discover rentals, tours, family activities, fishing trips, and outdoor experiences across Orange Beach, Gulf Shores, and nearby.</p>
+        </div>
+        <div class="livebox">
+          <strong>Sunday, March 22</strong>
+          <span>64 activities listed</span>
+          <span>18 family-friendly</span>
+          <span>12 water activities</span>
         </div>
       </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Activities</div>
+        <div class="toolbar-actions">
+          <select class="ctrl">
+            <option>Sort: Most Popular</option>
+            <option>Nearest</option>
+            <option>Best Rated</option>
+            <option>Lowest Price</option>
+          </select>
+        </div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active" data-filter="all">All</button>
+        <button class="tag-btn" data-filter="boat-rentals">🚤 Boat Rentals</button>
+        <button class="tag-btn" data-filter="fishing">🎣 Fishing</button>
+        <button class="tag-btn" data-filter="tours">🎯 Tours</button>
+        <button class="tag-btn" data-filter="family">👨‍👩‍👧 Family</button>
+        <button class="tag-btn" data-filter="outdoor">🏕️ Outdoor</button>
+        <button class="tag-btn" data-filter="free">Free</button>
+        <button class="tag-btn" data-filter="wharf">⚓ At The Wharf</button>
+        <button class="tag-btn" data-filter="animals">🐠 Animals</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <main>
+        <section class="section">
+          <div class="section-head"><h2 class="section-title">Things To Do</h2><div class="section-sub">All listings in full-card format</div></div>
+          <div class="cards" id="listingsGrid" data-category="things-to-do">
+            <article class="activity-card" data-tags="boat-rentals outdoor">
+              <div class="activity-image" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1400&q=80')"><div class="image-badge">Boat Rental</div></div>
+              <div class="activity-body">
+                <div class="title-row"><div><div class="name">Gulf Coast Boat Rentals</div><div class="subline"><span>Orange Beach, AL</span><span>Boat Access</span></div></div><div class="price-pill">From $295</div></div>
+                <div class="rating"><span class="stars">★★★★★</span><span>4.8</span><span>214 reviews</span></div>
+                <div class="meta-row"><span class="meta-pill">⏱️ 4 hrs+</span><span class="meta-pill">👨‍👩‍👧 Family Friendly</span><span class="meta-pill">🌦️ Weather Dependent</span></div>
+                <div class="event-copy">Pontoon and day-boat rentals for groups wanting a flexible way to spend time on the water.</div>
+                <div class="chips"><span class="chip">Boat Rentals</span><span class="chip">Outdoor</span><span class="chip">Groups</span><span class="chip">Popular</span></div>
+                <div class="bottom-row"><div class="venue">📍 Terry Cove Marina • Orange Beach</div><div class="actions"><a href="business.html?id=gulf-boat-rentals" class="action">Details</a><a href="#" class="action">Directions</a><a href="#" class="action primary">Book Now</a></div></div>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Popular Nearby</h3>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')"></div>
+            <div><div class="mini-name">Dolphin Cruise</div><div class="mini-meta">Orange Beach Marina</div><div class="mini-links"><a href="#">Details</a><a href="#">Book</a></div></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80')"></div>
+            <div><div class="mini-name">Pontoon Rental</div><div class="mini-meta">Terry Cove</div><div class="mini-links"><a href="#">Details</a><a href="#">Book</a></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Add Your Activity</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Claim or add your attraction, rental, or tour so tourists can find it faster on GCR.</p>
+          <a href="#" class="cta">Claim Listing Free</a>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="specials.html">Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
     </div>
-  </div></section>
-  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
-    <div class="claim-cta"><h4>Offer Tours, Rentals or Activities?</h4>
-    <p>Get your activity listed and connect with tourists looking for adventure.</p>
-    <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
-  </div></section>
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
-    </div>
-  </div></footer>
-  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
-</body></html>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
