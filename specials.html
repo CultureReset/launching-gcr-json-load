@@ -1,239 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Specials — Gulf Coast Radar</title>
+  <meta name="description" content="Find the best special deals and specials across Orange Beach and Gulf Shores.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    .listing-expand-card {
-      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-sm);
-      margin-bottom:12px; overflow:hidden; border:1.5px solid var(--gray-200);
-      transition:box-shadow .15s;
+    :root{
+      --bg:#f4f7fb;--card:#ffffff;--text:#12263a;--muted:#66788a;--line:#e2e8f0;
+      --nav:#0f2233;--brand:#0f7c90;--brand-dark:#0b6475;--brand-soft:#e8f7fa;
+      --gold:#f4b400;--green:#2e9b55;--orange:#f97316;--shadow:0 10px 28px rgba(15,34,51,.08);--radius:20px;
     }
-    .listing-expand-card:hover { box-shadow:var(--shadow); }
-    .listing-expand-header { display:flex; align-items:center; gap:14px; padding:16px 20px; flex-wrap:wrap; }
-    .listing-expand-emoji { font-size:2rem; flex-shrink:0; }
-    .listing-expand-info  { flex:1; min-width:0; }
-    .listing-expand-info h4 { font-size:.95rem; font-weight:700; margin:0 0 2px; }
-    .listing-expand-info p  { font-size:.82rem; color:var(--text-muted); margin:0; }
-    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-    .expand-btn { background:var(--teal); color:#fff; border:none; cursor:pointer; }
-    .listing-expand-details { display:none; padding:0 20px 16px; border-top:1px solid var(--gray-100); }
-    .listing-expand-details.open { display:block; }
-    .expand-item-row { display:flex; justify-content:space-between; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--gray-100); gap:12px; }
-    .expand-item-row:last-child { border-bottom:none; }
-    .expand-item-name  { font-weight:600; font-size:.88rem; }
-    .expand-item-desc  { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
-    .expand-item-price { font-size:.9rem; font-weight:700; color:var(--teal); white-space:nowrap; flex-shrink:0; }
-    .date-hero {
-      background: linear-gradient(135deg,#c0392b,#922b21);
-      color:#fff; padding:20px 16px; text-align:center;
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    .date-hero .day-name  { font-size:1.8rem; font-weight:800; }
-    .date-hero .full-date { font-size:.9rem; opacity:.85; margin-top:2px; }
-    .empty-state { text-align:center; padding:48px 24px; color:#888; }
+    a{text-decoration:none;color:inherit}
+    button,input,select{font:inherit}
+    .page{max-width:1280px;margin:0 auto;padding-bottom:32px}
+    .header{
+      margin:18px 18px 0;
+      background:linear-gradient(135deg,#0f7c90,#115b75);
+      color:#fff;border-radius:28px;padding:24px 24px 20px;
+      box-shadow:var(--shadow);
+    }
+    .header-top{
+      display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;
+    }
+    .header h1{margin:0;font-size:52px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .header p{margin:10px 0 0;font-size:18px;line-height:1.5;color:rgba(255,255,255,.92);max-width:720px}
+    .livebox{
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
+      padding:14px 16px;border-radius:18px;min-width:240px
+    }
+    .livebox strong{display:block;font-size:18px}
+    .livebox span{display:block;margin-top:6px;color:rgba(255,255,255,.9);font-weight:600}
+    .controls{
+      margin-top:16px;
+      display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border-radius:999px;padding:10px 14px;font-weight:800;
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)
+    }
+    .toolbar{
+      position:sticky;top:66px;z-index:30;
+      margin:14px 18px 0;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      border-radius:18px;padding:12px;
+    }
+    .toolbar-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .toolbar-title{font-size:20px;font-weight:900}
+    .toolbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .ctrl{
+      border:1px solid var(--line);background:#fff;color:#37556a;
+      padding:10px 12px;border-radius:12px;font-weight:700;
+    }
+    .tag-row{
+      display:flex;gap:10px;overflow-x:auto;padding-top:12px;
+    }
+    .tag-btn{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);color:#446072;
+      padding:11px 16px;border-radius:999px;font-weight:700;
+      transition:.18s ease;
+    }
+    .tag-btn.active,.tag-btn:hover{
+      background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark);
+    }
+
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;
+      padding:18px;
+    }
+    .section{margin-bottom:18px}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .section-title{font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0}
+    .section-sub{color:var(--muted);font-weight:700}
+
+    .cards{display:flex;flex-direction:column;gap:14px}
+    .sp-card{
+      display:grid;grid-template-columns:250px minmax(0,1fr);
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);overflow:hidden;
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .sp-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .sp-image{
+      min-height:210px;background-size:cover;background-position:center;position:relative;
+    }
+    .image-badge{
+      position:absolute;left:14px;bottom:14px;
+      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.94);
+      color:#21485d;font-weight:800;font-size:13px;
+    }
+    .sp-body{padding:16px 18px}
+    .title-row{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    }
+    .name{font-size:28px;font-weight:900;letter-spacing:-.03em}
+    .status{
+      background:#e9f9ef;color:var(--green);
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap
+    }
+    .subline{
+      margin-top:4px;color:var(--muted);font-size:15px;font-weight:600;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    }
+    .rating{
+      margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      font-size:15px;font-weight:700;color:#384f61;
+    }
+    .stars{color:var(--gold);letter-spacing:1px}
+    .timepill{
+      display:inline-flex;align-items:center;gap:6px;
+      margin-top:12px;background:#eef8fb;color:var(--brand-dark);
+      border:1px solid #d3eef3;border-radius:999px;padding:8px 12px;font-weight:800;font-size:14px;
+    }
+    .deals{margin-top:12px;display:grid;gap:8px}
+    .deal{
+      background:#f8fafc;border:1px solid #ecf1f6;border-radius:14px;padding:10px 12px;
+      color:#42596c;font-weight:700
+    }
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{
+      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700
+    }
+    .bottom-row{
+      margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
+      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+    }
+    .address{color:#425b70;font-weight:700;font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action{
+      border:1px solid var(--line);background:#fff;color:#25465b;
+      padding:10px 14px;border-radius:12px;font-weight:800;
+    }
+    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+
+    .compact-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:12px;
+    }
+    .compact-card{
+      background:var(--card);border:1px solid var(--line);border-radius:18px;
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .compact-card h4{margin:0;font-size:20px;font-weight:900}
+    .countdown{
+      display:inline-block;margin-top:8px;background:#fff3e9;color:var(--orange);
+      border:1px solid #ffd9bf;border-radius:999px;padding:7px 10px;font-weight:800;font-size:13px;
+    }
+    .compact-meta{margin-top:6px;color:var(--muted);font-weight:700}
+    .compact-deal{margin-top:10px;color:#41596d;font-weight:700}
+    .compact-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .compact-actions a{
+      background:#f7fafc;border:1px solid var(--line);padding:8px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mini-card{
+      display:flex;gap:12px;padding:10px 0;border-top:1px solid #edf2f7;
+    }
+    .mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-thumb{
+      width:90px;height:76px;border-radius:14px;flex:0 0 90px;background-size:cover;background-position:center;
+    }
+    .mini-name{font-weight:800;font-size:17px}
+    .mini-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .mini-links a{
+      background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+    .mapbox{
+      height:170px;border-radius:16px;background:
+        linear-gradient(90deg, rgba(255,255,255,.60), rgba(255,255,255,.60)),
+        repeating-linear-gradient(0deg,#d9e6f3 0 2px, transparent 2px 28px),
+        repeating-linear-gradient(90deg,#d9e6f3 0 2px, transparent 2px 28px),
+        linear-gradient(135deg,#eef5fd,#d9ecff);
+      position:relative;overflow:hidden
+    }
+    .river{
+      position:absolute;left:-10%;right:-10%;top:48%;
+      height:30px;background:#7dc2fb;border-radius:99px;transform:rotate(-12deg)
+    }
+    .pin{
+      position:absolute;right:34%;top:32%;
+      width:24px;height:24px;border-radius:50% 50% 50% 0;background:#ea5b4e;transform:rotate(-45deg)
+    }
+    .pin:after{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}
+    .cta{
+      background:linear-gradient(135deg,#0f7c90,#115b75);
+      color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;text-align:center;display:block
+    }
+    .empty{
+      background:#fff;border:1px dashed #cdd8e5;border-radius:18px;padding:18px;color:#4f667a;font-weight:700
+    }
+
+    @media (max-width:1080px){.layout{grid-template-columns:1fr}.sidebar{order:2}}
+    @media (max-width:760px){
+      .header{margin-left:12px;margin-right:12px}
+      .header h1{font-size:38px}
+      .header p{font-size:16px}
+      .toolbar{margin-left:12px;margin-right:12px}
+      .layout{padding:12px}
+      .sp-card{grid-template-columns:1fr}
+      .sp-image{min-height:190px}
+      .compact-grid{grid-template-columns:1fr}
+      .section-title{font-size:26px}
+    }
   </style>
 </head>
 <body>
 
-<div class="gcr-header">
-  <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
-      <img src="gcr-logo.png" alt="Gulf Coast Radar">
-      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-    </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
-  </div>
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
+    </div>
     <div class="gcr-cat-tabs" id="gcrCatTabs">
-    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
-    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
-    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
-    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
-    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="happy-hours.html" class="gcr-cat-tab active">🏷️ Specials</a>
+      <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
   </div>
-  <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
-  </div>
-</div>
 
-<div class="date-hero">
-  <div class="day-name" id="spDayName">—</div>
-  <div class="full-date" id="spFullDate">—</div>
-</div>
+  <div class="page">
+    <section class="header">
+      <div class="header-top">
+        <div>
+          <h1>Specials</h1>
+          <p>Best food and drink specials happening now across Orange Beach and Gulf Shores.</p>
+        </div>
+        <div class="livebox">
+          <strong id="sp-time">Tuesday • 4:18 PM</strong>
+          <span>18 active specials today</span>
+          <span>7 starting soon</span>
+        </div>
+      </div>
+      <div class="controls">
+        <span class="pill">🔥 Happening Now</span>
+        <span class="pill">🕒 Starting Soon</span>
+        <span class="pill">🌊 Waterfront</span>
+      </div>
+    </section>
 
-<div class="filters-bar"><div class="container"><div class="filters-inner">
-  <button class="filter-chip active" data-filter="all">All</button>
-  <button class="filter-chip" data-filter="ayce">🦀 All You Can Eat</button>
-  <button class="filter-chip" data-filter="daily">📅 Daily Specials</button>
-  <button class="filter-chip" data-filter="weekend">🎉 Weekend Deals</button>
-  <button class="filter-chip" data-filter="lunch">🥗 Lunch Specials</button>
-  <button class="filter-chip" data-filter="family">👨‍👩‍👧 Family Deals</button>
-  <button class="filter-chip" data-filter="early-bird">🌅 Early Bird</button>
-  <button class="filter-chip" data-filter="kids">👶 Kids Eat Free</button>
-</div></div></div>
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Specials</div>
+        <div class="toolbar-actions">
+          <button class="ctrl">List View</button>
+          <button class="ctrl">Map View</button>
+          <select class="ctrl">
+            <option>Sort: Happening Now</option>
+            <option>Nearest</option>
+            <option>Best Rated</option>
+            <option>Start Time</option>
+          </select>
+        </div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active">Happening Now</button>
+        <button class="tag-btn">Starting Soon</button>
+        <button class="tag-btn">Later Today</button>
+        <button class="tag-btn">Waterfront</button>
+        <button class="tag-btn">Drink Specials</button>
+        <button class="tag-btn">Orange Beach</button>
+        <button class="tag-btn">Gulf Shores</button>
+        <button class="tag-btn">Family Friendly</button>
+      </div>
+    </section>
 
-<section class="section"><div class="container">
-  <div id="spLoading" style="text-align:center;padding:48px 0;color:#888;">
-    <div style="font-size:2rem;margin-bottom:8px;">🏷️</div>Loading today's specials…
-  </div>
-  <div id="specialsGrid"></div>
-  <div id="spEmpty" style="display:none;" class="empty-state">
-    <div style="font-size:3rem;margin-bottom:12px;">🏷️</div>
-    <div style="font-weight:600;font-size:1.1rem;">No specials found for today</div>
-    <p style="margin-top:8px;font-size:.9rem;">Check back soon or browse all restaurants.</p>
-  </div>
-</div></section>
-
-<footer class="site-footer"><div class="container">
-  <div class="footer-bottom" style="border-top:none;padding-top:0">
-    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
-    <p>Powered by <span class="powered">CyberCheck</span></p>
-  </div>
-</div></footer>
-
-<script src="js/gcr-api.js"></script>
-<script src="js/app.js"></script>
-<script>
-  const DAYS    = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const SHORT_D = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today   = new Date();
-  const todayDay   = DAYS[today.getDay()];
-  const todayShort = SHORT_D[today.getDay()];
-  const isWeekend  = today.getDay() === 0 || today.getDay() === 6;
-
-  document.getElementById('spDayName').textContent  = todayDay + "'s Specials";
-  document.getElementById('spFullDate').textContent = today.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
-
-  const todayLower = todayDay.toLowerCase(); // e.g. "monday"
-
-  // Check if a special runs today — days stored as lowercase full names
-  function specialRunsToday(sp) {
-    if (!sp) return false;
-    const days = (sp.days || sp.day_of_week || []).map(d => d.toLowerCase());
-    if (!days.length) return true; // no days = every day
-    if (days.includes('daily') || days.includes('everyday') || days.includes('all')) return true;
-    if (days.includes(todayLower)) return true;
-    if (isWeekend && (days.includes('weekend') || days.includes('weekends'))) return true;
-    return false;
-  }
-
-  // Get filter tags for a special
-  function specialTags(sp) {
-    const tags = (sp.tags || []).map(t => t.toLowerCase());
-    const name = (sp.name || '').toLowerCase() + ' ' + (sp.description || sp.desc || '').toLowerCase();
-    if (name.includes('all you can eat') || name.includes('ayce')) tags.push('ayce');
-    if (name.includes('lunch')) tags.push('lunch');
-    if (name.includes('early bird') || name.includes('earlybird')) tags.push('early-bird');
-    if (name.includes('kid') || name.includes('children')) tags.push('kids', 'family');
-    if (name.includes('weekend')) tags.push('weekend');
-    if (name.includes('daily') || (sp.days || []).length === 0) tags.push('daily');
-    if (isWeekend) tags.push('weekend');
-    return [...new Set(tags)].join(' ');
-  }
-
-  function renderSpecials(allSpecials, businesses) {
-    document.getElementById('spLoading').style.display = 'none';
-
-    // Build business lookup
-    const bizMap = {};
-    (businesses || []).forEach(b => {
-      bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; bizMap[b.subdomain] = b;
-    });
-
-    // Filter specials for today
-    const todaySpecials = (allSpecials || []).filter(sp => specialRunsToday(sp));
-
-    // Also check businesses with happyHourSpecials or specials data
-    const bizWithSpecials = (businesses || []).filter(b => {
-      const sp = b.specials || b.happyHourSpecials || b.todaySpecials;
-      return sp && (Array.isArray(sp) ? sp.length > 0 : true);
-    });
-
-    if (todaySpecials.length === 0 && bizWithSpecials.length === 0) {
-      document.getElementById('spEmpty').style.display = 'block';
-      return;
-    }
-
-    let html = '';
-    let idx = 0;
-
-    // Render from specials table
-    // Group by business
-    const byBiz = {};
-    todaySpecials.forEach(sp => {
-      const key = sp.site_id || sp.business_id || 'unknown';
-      if (!byBiz[key]) byBiz[key] = { biz: bizMap[key], specials: [] };
-      byBiz[key].specials.push(sp);
-    });
-
-    Object.values(byBiz).forEach(({ biz, specials }) => {
-      const name  = biz?.name  || 'Local Business';
-      const emoji = biz?.emoji || '🏪';
-      const slug  = biz?.slug  || biz?.id || '';
-      const tags  = specials.map(s => specialTags(s)).join(' ');
-      const id    = `sp-${idx++}`;
-
-      const items = specials.map(sp => `
-        <div class="expand-item-row">
-          <div>
-            <div class="expand-item-name">${sp.name || sp.title || 'Special'}</div>
-            ${sp.description || sp.desc ? `<div class="expand-item-desc">${sp.description || sp.desc}</div>` : ''}
-            ${sp.time ? `<div class="expand-item-desc">⏰ ${sp.time}</div>` : ''}
+    <section class="layout">
+      <main>
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Active Now</h2>
+            <div class="section-sub">8 live specials</div>
           </div>
-          <div class="expand-item-price">${sp.price || sp.discount || ''}</div>
-        </div>`).join('');
+          <div class="cards" id="spActiveGrid"></div>
+        </section>
 
-      html += `<div class="listing-expand-card" data-tags="${tags}">
-        <div class="listing-expand-header">
-          <span class="listing-expand-emoji">${emoji}</span>
-          <div class="listing-expand-info">
-            <h4>${name}</h4>
-            <p>${specials.length} special${specials.length > 1 ? 's' : ''} today</p>
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Starting Soon</h2>
+            <div class="section-sub">Starts within the next 2 hours</div>
           </div>
-          <div class="listing-expand-actions">
-            ${slug ? `<a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>` : ''}
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}', this)">See Specials ▼</button>
+          <div class="compact-grid" id="spSoonGrid"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Later Today</h2>
+            <div class="section-sub">Plan ahead</div>
+          </div>
+          <div class="compact-grid" id="spLaterGrid"></div>
+        </section>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Map View</h3>
+          <div class="mapbox">
+            <div class="river"></div>
+            <div class="pin"></div>
+          </div>
+          <div class="mini-meta" style="margin-top:10px">Use list, map, or split view so people can choose based on where they are.</div>
+        </div>
+
+        <div class="panel">
+          <h3>Featured Happy Hour</h3>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Cobalt</div>
+              <div class="mini-meta">Starts at 4:00 PM • Waterfront</div>
+              <div class="mini-links">
+                <a href="#">Save</a>
+                <a href="#">Details</a>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="listing-expand-details" id="${id}">${items}</div>
-      </div>`;
-    });
 
-    document.getElementById('specialsGrid').innerHTML = html || '<div class="empty-state"><div style="font-size:2rem">🏷️</div><p>No specials found for today.</p></div>';
-    wireFilters();
-  }
+        <div class="panel">
+          <h3>Nearby Live Music</h3>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Anchor Bar & Grill</div>
+              <div class="mini-meta">Band starts at 7:00 PM</div>
+              <div class="mini-links">
+                <a href="#">See Event</a>
+                <a href="#">Directions</a>
+              </div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">GTs on the Bay</div>
+              <div class="mini-meta">Acoustic set at 6:30 PM</div>
+              <div class="mini-links">
+                <a href="#">See Event</a>
+                <a href="#">Directions</a>
+              </div>
+            </div>
+          </div>
+        </div>
 
-  function wireFilters() {
-    document.querySelectorAll('.filter-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const f = btn.dataset.filter;
-        document.querySelectorAll('.listing-expand-card').forEach(card => {
-          card.style.display = (f === 'all' || card.dataset.tags.includes(f)) ? '' : 'none';
-        });
-      });
-    });
-  }
+        <div class="panel">
+          <h3>Run Happy Hour Specials?</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">
+            Claim your listing and get your specials in front of locals and tourists looking right now.
+          </p>
+          <a href="claim.html" class="cta">Claim Your Listing Free</a>
+        </div>
+      </aside>
+    </section>
+  </div>
 
-  function toggleExpand(id, btn) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle('open');
-    if (btn) btn.textContent = el.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
-  }
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Specials</a>
+          <a href="specials.html">Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
 
-  document.addEventListener('gcr:loaded', e => {
-    renderSpecials(e.detail.specials || [], e.detail.businesses || []);
-  });
-</script>
-</body></html>
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Update time
+    function updateTime() {
+      const now = new Date();
+      const day = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now.getDay()];
+      const time = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+      document.getElementById('sp-time').textContent = day + ' • ' + time;
+    }
+    updateTime();
+    setInterval(updateTime, 30000);
+  </script>
+</body>
+</html>
