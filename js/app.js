@@ -743,14 +743,106 @@ function renderHappyHourPage() {
    SPECIALS PAGE — expandable listings
 ══════════════════════════════════════════ */
 function renderSpecialsPage() {
-  const grid = document.getElementById('specialsGrid');
-  if (!grid || typeof GCR === 'undefined') return;
+  const activeGrid = document.getElementById('spActiveGrid');
+  const soonGrid   = document.getElementById('spSoonGrid');
+  const laterGrid  = document.getElementById('spLaterGrid');
+  const grid       = document.getElementById('specialsGrid');
+  if (!activeGrid && !grid) return;
+  if (typeof GCR === 'undefined') return;
 
   const specials = GCR.getSpecials();
-  if (!specials.length) {
-    grid.innerHTML = '<p class="text-muted text-center" style="padding:40px">No active specials right now. Check back soon!</p>';
+
+  // New mockup layout
+  if (activeGrid) {
+    if (!specials.length) {
+      activeGrid.innerHTML = '<div class="empty">No active specials right now. Check "Starting Soon" below.</div>';
+      if (soonGrid) soonGrid.innerHTML = '<div class="empty" style="grid-column:1/-1">None starting soon.</div>';
+      if (laterGrid) laterGrid.innerHTML = '<div class="empty" style="grid-column:1/-1">No more specials today.</div>';
+      return;
+    }
+
+    function spStatus(spec) {
+      const now = new Date();
+      const cur = now.getHours() * 60 + now.getMinutes();
+      if (!spec.start_time) return 'active';
+      const m = spec.start_time.match(/(\d{1,2}):?(\d{2})?/);
+      if (!m) return 'active';
+      const sh = parseInt(m[1]), sm = parseInt(m[2]||0);
+      const startMin = sh * 60 + sm;
+      if (cur >= startMin && cur < startMin + 120) return 'active';
+      if (startMin > cur && startMin - cur <= 120) return 'soon';
+      return 'later';
+    }
+
+    function spFullCard(spec) {
+      const biz = GCR.businesses.find(b => b.site_id === spec.site_id || b.id === spec.site_id);
+      const slug = spec.site_id || (biz && biz.slug);
+      const photo = biz && (biz.photo || biz.cover_photo) || '';
+      return `
+      <div class="hh-card">
+        <div class="hh-image" style="background-image:url('${escGcr(photo)}');background-color:#fef3c7">
+          <div class="image-badge">🏷️ Special</div>
+        </div>
+        <div class="hh-body">
+          <div class="title-row">
+            <div class="name">${escGcr(spec.name || 'Special')}</div>
+            <div class="status">● Active</div>
+          </div>
+          <div class="subline">${escGcr(biz && biz.area || '')}</div>
+          <div class="timepill">🕒 ${escGcr(spec.start_time || 'All day')}${spec.end_time ? ' – ' + escGcr(spec.end_time) : ''}</div>
+          <div class="deals"><div class="deal">${escGcr(spec.description || spec.discount || 'Special offer')}</div></div>
+          <div class="bottom-row">
+            <div class="address">${escGcr(biz && biz.address || '')}</div>
+            <div class="actions">
+              <a href="business.html?id=${slug}" class="action">Details</a>
+              <a href="business.html?id=${slug}" class="action primary">View</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function spCompactCard(spec) {
+      const biz = GCR.businesses.find(b => b.site_id === spec.site_id || b.id === spec.site_id);
+      const slug = spec.site_id || (biz && biz.slug);
+      const m = spec.start_time && spec.start_time.match(/(\d{1,2}):?(\d{2})?/);
+      const sh = m ? parseInt(m[1]) : null;
+      const sm = m ? parseInt(m[2]||0) : null;
+      const cur = new Date().getHours()*60 + new Date().getMinutes();
+      const startMin = sh !== null ? sh * 60 + sm : null;
+      const minsUntil = startMin && startMin > cur ? startMin - cur : null;
+      const countdown = minsUntil ? `<span class="countdown">In ${minsUntil>=60?Math.floor(minsUntil/60)+'h ':''}${minsUntil%60}m</span>` : '';
+      return `
+      <div class="compact-card">
+        <h4>${escGcr(spec.name || 'Special')}</h4>
+        ${countdown}
+        <div class="compact-meta">${escGcr(spec.start_time || 'All day')}${biz && biz.area ? ' · ' + escGcr(biz.area) : ''}</div>
+        <div class="compact-deal">${escGcr(spec.description || spec.discount || 'Special offer')}</div>
+        <div class="compact-actions">
+          <a href="business.html?id=${slug}">Details</a>
+          <a href="business.html?id=${slug}">View</a>
+        </div>
+      </div>`;
+    }
+
+    const activeSp = specials.filter(s => spStatus(s) === 'active');
+    const soonSp = specials.filter(s => spStatus(s) === 'soon');
+    const laterSp = specials.filter(s => spStatus(s) === 'later');
+
+    activeGrid.innerHTML = activeSp.length
+      ? activeSp.map(spFullCard).join('')
+      : '<div class="empty">No active specials right now. Check "Starting Soon" below.</div>';
+    if (soonGrid) soonGrid.innerHTML = soonSp.length
+      ? soonSp.map(spCompactCard).join('')
+      : '<div class="empty" style="grid-column:1/-1">None starting in the next 2 hours.</div>';
+    if (laterGrid) laterGrid.innerHTML = laterSp.length
+      ? laterSp.map(spCompactCard).join('')
+      : '<div class="empty" style="grid-column:1/-1">No more specials today.</div>';
     return;
   }
+
+  // Old layout fallback
+  if (!grid) return;
 
   /* Group specials by business */
   const byBiz = {};
