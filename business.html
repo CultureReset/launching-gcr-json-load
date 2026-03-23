@@ -1,411 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Business Profile — Gulf Coast Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
+    :root{
+      --bg:#f4fbfb;
+      --bg2:#eef7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#5b677a;
+      --line:#dbe7ec;
+      --teal:#0f766e;
+      --teal-2:#14b8a6;
+      --cyan:#0891b2;
+      --navy:#0b1f33;
+      --gold:#f59e0b;
+      --green:#22c55e;
+      --danger:#f97316;
+      --shadow:0 10px 28px rgba(2,12,27,.10);
+      --shadow-soft:0 6px 18px rgba(2,12,27,.07);
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg,var(--bg),var(--bg2));
+    }
+    a{text-decoration:none;color:inherit}
 
-    /* ═══════════════════════════════════════════════
-       HERO COVER
-    ═══════════════════════════════════════════════ */
-    .bp-hero {
-      position: relative;
-      width: 100%;
-      height: 380px;
-      background: linear-gradient(160deg, #0a2233 0%, #0e3a54 50%, #1a6e8a 100%);
-      background-size: cover;
-      background-position: center;
-      overflow: hidden;
-    }
-    .bp-hero-img {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
-    }
-    .bp-hero-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to bottom, rgba(10,34,51,.15) 0%, rgba(10,34,51,.7) 100%);
-    }
-    /* Business name + rating overlaid on hero */
-    .bp-hero-info {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 28px 32px;
-      color: #fff;
-    }
-    .bp-hero-info h1 {
-      font-size: 2rem; font-weight: 800;
-      color: #fff; margin-bottom: 6px;
-      text-shadow: 0 2px 8px rgba(0,0,0,.4);
-    }
-    .bp-hero-info .bp-hero-meta {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-      font-size: .88rem; color: rgba(255,255,255,.85);
-    }
-    .bp-hero-info .bp-hero-rating { color: #FFD700; font-weight: 700; }
-    .bp-hero-badge {
-      background: rgba(255,255,255,.18);
-      backdrop-filter: blur(6px);
-      border: 1px solid rgba(255,255,255,.3);
-      padding: 3px 12px; border-radius: 20px;
-      font-size: .75rem; font-weight: 600;
-    }
-    /* Back link overlay */
-    .bp-back {
-      position: absolute; top: 14px; left: 20px; z-index: 10;
-      background: rgba(0,0,0,.35); backdrop-filter: blur(6px);
-      color: #fff; text-decoration: none;
-      padding: 7px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600;
-    }
-    /* Photo grid toggle — bottom-right of hero */
-    .bp-photo-btn {
-      position: absolute; bottom: 20px; right: 20px; z-index: 10;
-      background: rgba(255,255,255,.9); backdrop-filter: blur(6px);
-      color: var(--text, #0d2233); border: none; cursor: pointer;
-      padding: 8px 16px; border-radius: 8px; font-size: .8rem; font-weight: 700;
-      transition: background .15s;
-    }
-    .bp-photo-btn:hover { background: #fff; }
-
-    @media (max-width: 600px) {
-      .bp-hero { height: 260px; }
-      .bp-hero-info { padding: 20px 16px; }
-      .bp-hero-info h1 { font-size: 1.45rem; }
+    .app{
+      max-width:680px;
+      margin:0 auto;
+      background:transparent;
+      min-height:100vh;
+      padding-bottom:100px;
     }
 
-    /* ═══════════════════════════════════════════════
-       BODY LAYOUT
-    ═══════════════════════════════════════════════ */
-    .bp-wrap {
-      max-width: 1060px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-      display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 36px;
-      align-items: start;
+    /* HERO */
+    .bp-hero{
+      position:relative;
+      height:320px;
+      overflow:hidden;
+      background:linear-gradient(135deg,#0b3d5e,#0b7a75);
     }
-    @media (max-width: 860px) {
-      .bp-wrap { grid-template-columns: 1fr; gap: 24px; padding: 20px 14px 60px; }
+    #bpHeroImg{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:cover;display:none;
+    }
+    .bp-hero::after{
+      content:"";
+      position:absolute;inset:0;
+      background:linear-gradient(to top,rgba(8,18,31,.82) 0%,rgba(8,18,31,.3) 44%,transparent 70%);
+      pointer-events:none;
+    }
+    .bp-hero-actions{
+      position:absolute;top:14px;right:14px;z-index:3;
+      display:flex;gap:8px;
+    }
+    .glass-btn{
+      border:none;border-radius:999px;
+      padding:10px 14px;
+      background:rgba(255,255,255,.16);
+      color:#fff;
+      backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,.24);
+      font-size:13px;font-weight:700;
+      cursor:pointer;
+    }
+    .bp-hero-copy{
+      position:absolute;left:18px;right:18px;bottom:20px;z-index:3;color:#fff;
+    }
+    .bp-hero-title{
+      margin:0;font-size:32px;line-height:1.05;
+      font-weight:900;letter-spacing:-.04em;
+    }
+    .bp-hero-meta{
+      display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;
+      border-radius:999px;padding:7px 12px;
+      font-size:12px;font-weight:800;
+    }
+    .pill-open{background:rgba(34,197,94,.95);color:#fff;}
+    .pill-rating{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.22)}
+    .bp-hero-addr{margin-top:8px;font-size:14px;color:rgba(255,255,255,.9);}
+
+    /* SECTION */
+    .bp-section{padding:14px 16px 0;}
+
+    /* CARD */
+    .bp-card{
+      background:var(--card);border:1px solid var(--line);
+      border-radius:var(--radius);box-shadow:var(--shadow-soft);
     }
 
-    /* ═══════════════════════════════════════════════
-       IDENTITY ROW (logo + name + actions)
-    ═══════════════════════════════════════════════ */
-    .bp-identity {
-      display: flex; gap: 20px; align-items: flex-start;
-      margin-bottom: 28px;
+    /* BADGE ROW */
+    .bp-badge-row{
+      display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;
+      scrollbar-width:none;-ms-overflow-style:none;
     }
-    .bp-logo {
-      width: 88px; height: 88px; border-radius: 16px;
-      border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.14);
-      background: #eaf4f8; overflow: hidden; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.6rem; margin-top: -48px; position: relative; z-index: 5;
+    .bp-badge-row::-webkit-scrollbar{display:none}
+    .bp-badge{
+      flex:0 0 auto;border-radius:999px;
+      padding:11px 15px;font-size:13px;font-weight:700;
+      border:1px solid var(--line);background:#fff;color:#183243;
+      cursor:pointer;white-space:nowrap;box-shadow:var(--shadow-soft);
     }
-    .bp-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 13px; }
-    .bp-identity-text { flex: 1; padding-top: 4px; }
-    .bp-tagline { font-size: .92rem; color: var(--text-muted, #6b7280); margin-bottom: 10px; }
-    .bp-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .bp-actions .btn { font-size: .82rem; padding: 8px 16px; }
+    .bp-badge.teal{border-color:#b7ece7;background:#f0fdfa}
+    .bp-badge.cyan{border-color:#cceff6;background:#f0f9ff}
+    .bp-badge.gold{border-color:#fde7ba;background:#fff8eb}
 
-    /* ═══════════════════════════════════════════════
-       SECTION BLOCKS
-    ═══════════════════════════════════════════════ */
-    .bp-section {
-      margin-bottom: 36px;
-      padding-bottom: 36px;
-      border-bottom: 1px solid var(--gray-200, #e5e7eb);
-    }
-    .bp-section:last-child { border-bottom: none; }
-    .bp-section-title {
-      font-size: 1.15rem; font-weight: 700;
-      margin-bottom: 16px; color: var(--text, #0d2233);
-    }
+    /* BIO */
+    .bp-bio{padding:18px;font-size:15px;line-height:1.6;color:#334155;}
 
-    /* ═══════════════════════════════════════════════
-       PHOTO GALLERY
-    ═══════════════════════════════════════════════ */
-    .bp-gallery {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+    /* ACTIONS */
+    .bp-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .bp-btn{
+      border:none;border-radius:22px;padding:15px 16px;
+      font-size:15px;font-weight:800;cursor:pointer;
+      box-shadow:var(--shadow-soft);display:block;
+      text-align:center;
     }
-    .bp-gallery-item {
-      aspect-ratio: 4/3;
-      border-radius: 10px;
-      overflow: hidden;
-      background: #eaf4f8;
-      cursor: pointer;
-      transition: opacity .15s;
-    }
-    .bp-gallery-item:hover { opacity: .88; }
-    .bp-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    /* First photo spans 2 cols */
-    .bp-gallery-item:first-child {
-      grid-column: span 2;
-      aspect-ratio: 16/9;
-    }
-    @media (max-width: 500px) {
-      .bp-gallery { grid-template-columns: 1fr 1fr; }
-      .bp-gallery-item:first-child { grid-column: span 2; }
-    }
+    .bp-btn:hover{transform:translateY(-1px)}
+    .bp-btn-primary{background:linear-gradient(135deg,var(--teal),var(--cyan));color:#fff;}
+    .bp-btn-secondary{background:#fff;border:1px solid #bae6e0;color:var(--teal);}
+    .bp-btn-dark{width:100%;background:var(--navy);color:#fff;margin-top:10px;}
 
-    /* ═══════════════════════════════════════════════
-       ABOUT / QUICK STATS
-    ═══════════════════════════════════════════════ */
-    .bp-desc {
-      font-size: .95rem; line-height: 1.8;
-      color: var(--text, #0d2233); margin-bottom: 20px;
+    /* SPECIALS PREVIEW */
+    .bp-special-preview{padding:18px;cursor:pointer;}
+    .bp-special-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+    .bp-special-title{font-size:17px;font-weight:900;letter-spacing:-.02em;}
+    .bp-special-timer{
+      flex:0 0 auto;font-size:12px;font-weight:800;color:#c2410c;
+      background:#fff7ed;border-radius:999px;padding:7px 10px;
     }
-    .bp-quick-stats {
-      display: flex; flex-wrap: wrap; gap: 10px;
-    }
-    .bp-stat {
-      background: #eaf4f8; border-radius: 10px;
-      padding: 12px 18px; min-width: 120px;
-    }
-    .bp-stat-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0096c7; margin-bottom: 3px; }
-    .bp-stat-value { font-size: .92rem; font-weight: 600; color: var(--text, #0d2233); }
+    .bp-special-body{display:flex;gap:14px;margin-top:14px;align-items:center;flex-wrap:wrap;}
+    .bp-special-item-name{font-size:15px;font-weight:800;line-height:1.25;}
+    .bp-special-price{font-size:26px;font-weight:900;color:var(--teal);letter-spacing:-.03em;}
+    .bp-special-note{font-size:13px;color:var(--muted);margin-top:3px;}
 
-    /* ═══════════════════════════════════════════════
-       FLEET / PRICING CARDS
-    ═══════════════════════════════════════════════ */
-    .bp-fleet-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
+    /* TABS */
+    .bp-tabs{
+      position:sticky;top:59px;z-index:45;
+      margin-top:14px;
+      background:rgba(255,255,255,.95);
+      backdrop-filter:blur(10px);
+      border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+      display:flex;gap:24px;overflow-x:auto;padding:12px 16px;
+      scrollbar-width:none;-ms-overflow-style:none;
     }
-    .bp-fleet-card {
-      border: 1.5px solid var(--gray-200, #e5e7eb);
-      border-radius: 12px; overflow: hidden;
-      background: #fff; transition: box-shadow .15s;
+    .bp-tabs::-webkit-scrollbar{display:none}
+    .bp-tab{
+      border:none;background:none;padding:0 0 8px;
+      font-size:14px;font-weight:800;color:#334155;
+      white-space:nowrap;cursor:pointer;
+      border-bottom:2px solid transparent;
     }
-    .bp-fleet-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); }
-    .bp-fleet-img {
-      width: 100%; height: 160px;
-      background: #eaf4f8; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; font-size: 3rem;
-    }
-    .bp-fleet-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .bp-fleet-body { padding: 16px; }
-    .bp-fleet-name { font-weight: 700; font-size: .98rem; margin-bottom: 4px; }
-    .bp-fleet-desc { font-size: .82rem; color: var(--text-muted, #6b7280); margin-bottom: 4px; }
-    .bp-fleet-specs { font-size: .75rem; color: #0096c7; font-weight: 600; margin-bottom: 12px; }
-    .bp-fleet-prices { border-top: 1px solid var(--gray-200, #e5e7eb); padding-top: 10px; }
-    .bp-price-row {
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: .85rem; padding: 3px 0;
-    }
-    .bp-price-row .bp-price { font-weight: 800; color: #0096c7; font-size: .95rem; }
+    .bp-tab.active,.bp-tab:hover{color:var(--teal);border-bottom-color:var(--teal);}
 
-    /* Add-ons */
-    .bp-addons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-    .bp-addon-pill {
-      background: #eaf4f8; border-radius: 8px;
-      padding: 8px 14px; font-size: .82rem; font-weight: 600;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .bp-addon-pill .price { color: #0096c7; }
+    /* SUBHEAD */
+    .bp-subhead{font-size:20px;font-weight:900;letter-spacing:-.03em;margin:0 0 12px;}
 
-    /* What's included */
-    .bp-included {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 8px; margin-top: 16px;
+    /* TAG GRID */
+    .bp-tag-grid{display:flex;flex-wrap:wrap;gap:8px;}
+    .bp-tag{border-radius:999px;padding:9px 12px;font-size:13px;font-weight:800;}
+    .bp-tag.teal{background:#f0fdfa;color:#0f766e}
+    .bp-tag.cyan{background:#f0f9ff;color:#0e7490}
+    .bp-tag.gold{background:#fff7ed;color:#b45309}
+    .bp-tag.pink{background:#fdf2f8;color:#be185d}
+    .bp-tag-link{
+      background:#f0fdfa;color:#0f766e;border:1px solid #b7ece7;
+      border-radius:999px;padding:9px 12px;font-size:13px;font-weight:800;
+      text-decoration:none;
     }
-    .bp-included-item {
-      display: flex; align-items: center; gap: 8px;
-      font-size: .85rem; color: var(--text, #0d2233);
-    }
-    .bp-included-item .check { color: #0096c7; font-size: 1rem; }
+    .bp-tag-link:hover{background:#d0f7f3;}
 
-    /* ═══════════════════════════════════════════════
-       MENU
-    ═══════════════════════════════════════════════ */
-    .menu-section-nav {
-      display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
-      border-bottom: 2px solid var(--gray-200, #e5e7eb); margin-bottom: 20px;
-    }
-    .menu-section-nav::-webkit-scrollbar { display: none; }
-    .menu-sec-tab {
-      padding: 10px 20px; white-space: nowrap;
-      font-size: .83rem; font-weight: 600; color: var(--text-muted, #6b7280);
-      border-bottom: 3px solid transparent; margin-bottom: -2px;
-      cursor: pointer; transition: all .15s;
-    }
-    .menu-sec-tab:hover  { color: #0096c7; }
-    .menu-sec-tab.active { color: #0096c7; border-color: #0096c7; }
-    .menu-panel { display: none; }
-    .menu-panel.active { display: block; }
-    .menu-item-row {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 12px 0; border-bottom: 1px solid var(--gray-100, #f3f4f6); gap: 12px;
-    }
-    .menu-item-name { font-weight: 600; font-size: .9rem; }
-    .menu-item-desc { font-size: .8rem; color: var(--text-muted, #6b7280); margin-top: 2px; }
-    .menu-item-price { font-size: .9rem; font-weight: 800; color: #0096c7; white-space: nowrap; flex-shrink: 0; }
+    /* STAT GRID */
+    .bp-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .bp-stat-box{padding:18px;}
+    .bp-stat-label{font-size:13px;color:var(--muted);font-weight:700;}
+    .bp-stat-value{margin-top:5px;font-size:24px;font-weight:900;letter-spacing:-.03em;}
 
-    /* ═══════════════════════════════════════════════
-       REVIEWS
-    ═══════════════════════════════════════════════ */
-    .bp-reviews-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 14px;
-    }
-    .bp-review {
-      background: var(--gray-100, #f9fafb);
-      border-radius: 12px; padding: 16px;
-    }
-    .bp-review-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-    .bp-review-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: #0096c7; color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: .9rem; flex-shrink: 0;
-    }
-    .bp-review-name { font-weight: 700; font-size: .88rem; }
-    .bp-review-date { font-size: .72rem; color: var(--text-muted, #6b7280); }
-    .bp-review-stars { color: #f59e0b; margin-bottom: 6px; font-size: .9rem; }
-    .bp-review-text { font-size: .85rem; line-height: 1.6; color: var(--text, #0d2233); }
+    /* LEGACY stat class support */
+    .bp-stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;}
+    .bp-stat-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+    .bp-stat-value{font-size:20px;font-weight:900;margin-top:4px;}
 
-    /* ═══════════════════════════════════════════════
-       SPECIALS + EVENTS
-    ═══════════════════════════════════════════════ */
-    .bp-specials-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;
+    /* HOURS */
+    .hours-list{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+    .hours-row{
+      display:flex;justify-content:space-between;gap:10px;
+      font-size:14px;color:#334155;
+      padding-bottom:10px;border-bottom:1px solid #edf2f7;
     }
-    .bp-special-card {
-      background: linear-gradient(135deg, #0e3a54, #1a6e8a);
-      color: #fff; border-radius: 12px; padding: 18px;
-    }
-    .bp-special-card h4 { color: #fff; margin-bottom: 6px; }
-    .bp-special-card p { font-size: .85rem; color: rgba(255,255,255,.8); margin-bottom: 8px; }
-    .bp-special-card .bp-discount {
-      background: rgba(255,255,255,.2); display: inline-block;
-      padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700;
-    }
-    .bp-event-card {
-      border: 1.5px solid var(--gray-200, #e5e7eb);
-      border-radius: 12px; padding: 16px;
-      display: flex; gap: 14px; align-items: flex-start;
-    }
-    .bp-event-date-box {
-      background: #0096c7; color: #fff; border-radius: 8px;
-      width: 50px; flex-shrink: 0; text-align: center; padding: 8px 4px;
-    }
-    .bp-event-date-box .month { font-size: .65rem; font-weight: 700; text-transform: uppercase; }
-    .bp-event-date-box .day   { font-size: 1.4rem; font-weight: 800; line-height: 1; }
-    .bp-event-title { font-weight: 700; font-size: .92rem; margin-bottom: 4px; }
-    .bp-event-desc  { font-size: .82rem; color: var(--text-muted, #6b7280); }
+    .hours-row:last-child{border-bottom:none;}
+    .hours-row.today{font-weight:700;color:var(--teal);}
 
-    /* ═══════════════════════════════════════════════
-       SIDEBAR
-    ═══════════════════════════════════════════════ */
-    .bp-sidebar {
-      display: flex; flex-direction: column; gap: 16px;
-      position: sticky; top: calc(var(--header-h, 56px) + 20px);
-    }
-    @media (max-width: 860px) {
-      .bp-sidebar { position: static; order: -1; }
+    /* PHOTO GRID */
+    .bp-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .bp-gallery-item img{
+      width:100%;height:160px;object-fit:cover;
+      border-radius:22px;box-shadow:var(--shadow-soft);
+      border:1px solid #e6eef2;display:block;
     }
 
-    /* Booking widget */
-    .bp-book-widget {
-      background: #fff;
-      border: 2px solid #0096c7;
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 4px 24px rgba(0,150,199,.12);
+    /* REVIEWS */
+    .review-list{display:flex;flex-direction:column;gap:12px;}
+    .bp-review{padding:16px;}
+    .bp-review-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+    .bp-review-avatar{
+      width:40px;height:40px;border-radius:50%;
+      background:linear-gradient(135deg,var(--teal),var(--cyan));
+      color:#fff;display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:16px;flex-shrink:0;
     }
-    .bp-book-price {
-      font-size: 1.5rem; font-weight: 800; color: var(--text, #0d2233);
-      margin-bottom: 4px;
+    .bp-review-name{font-weight:800;font-size:14px;}
+    .bp-review-date{font-size:12px;color:var(--muted);margin-top:2px;}
+    .bp-review-stars{color:#f59e0b;letter-spacing:1px;margin-bottom:6px;}
+    .bp-review-text{font-size:14px;color:#475569;line-height:1.55;}
+
+    /* LOCATION */
+    .bp-location-body{padding:18px;}
+    .bp-addr-text{margin-bottom:14px;color:#334155;font-size:15px;line-height:1.5;}
+
+    /* FLEET / PRICING (activities) */
+    .bp-fleet-card{
+      display:flex;gap:14px;padding:14px 0;
+      border-bottom:1px solid var(--line);
     }
-    .bp-book-price span { font-size: .88rem; font-weight: 400; color: var(--text-muted, #6b7280); }
-    .bp-book-sub { font-size: .82rem; color: var(--text-muted, #6b7280); margin-bottom: 16px; }
-    .bp-book-btn {
-      display: block; width: 100%; padding: 14px;
-      background: linear-gradient(135deg, #FFD700, #FFC200);
-      color: #1a1a1a; font-weight: 800; font-size: 1rem;
-      border: none; border-radius: 10px; cursor: pointer;
-      text-align: center; text-decoration: none;
-      transition: opacity .15s; margin-bottom: 10px;
+    .bp-fleet-card:last-child{border-bottom:none;}
+    .bp-fleet-img{
+      width:90px;height:72px;border-radius:14px;
+      background:#e2f0f5;overflow:hidden;flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:2rem;
     }
-    .bp-book-btn:hover { opacity: .88; }
-    .bp-book-phone {
-      display: block; width: 100%; padding: 11px;
-      border: 1.5px solid var(--gray-200, #e5e7eb);
-      border-radius: 10px; text-align: center;
-      font-size: .88rem; font-weight: 600; color: var(--text, #0d2233);
-      text-decoration: none; transition: border-color .15s;
+    .bp-fleet-img img{width:100%;height:100%;object-fit:cover;}
+    .bp-fleet-name{font-weight:800;font-size:15px;}
+    .bp-fleet-desc{font-size:13px;color:var(--muted);margin-top:4px;}
+    .bp-fleet-specs{font-size:12px;color:var(--muted);margin-top:4px;}
+    .bp-fleet-prices{margin-top:8px;}
+    .bp-price-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+    .bp-price{font-weight:800;color:var(--teal);}
+
+    /* ADD-ONS */
+    .bp-addon-pill{
+      display:inline-flex;align-items:center;gap:6px;
+      background:#f0fdfa;border:1px solid #b7ece7;
+      border-radius:999px;padding:8px 12px;font-size:13px;font-weight:700;color:#0f766e;
+      margin:4px;
     }
-    .bp-book-phone:hover { border-color: #0096c7; color: #0096c7; }
-    .bp-book-note {
-      text-align: center; font-size: .75rem;
-      color: var(--text-muted, #6b7280); margin-top: 10px;
+    .bp-addon-pill .price{color:#0891b2;font-weight:800;}
+
+    /* WHAT'S INCLUDED */
+    .bp-included-item{
+      display:flex;align-items:flex-start;gap:10px;
+      padding:8px 0;border-bottom:1px solid #f0f4f8;font-size:14px;
+    }
+    .bp-included-item:last-child{border-bottom:none;}
+    .bp-included-item .check{color:var(--green);font-weight:900;flex-shrink:0;}
+
+    /* MENU */
+    .menu-section-nav{
+      display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;
+      scrollbar-width:none;
+    }
+    .menu-section-nav::-webkit-scrollbar{display:none}
+    .menu-sec-tab{
+      flex:0 0 auto;padding:8px 14px;border-radius:999px;
+      font-size:13px;font-weight:700;cursor:pointer;
+      background:#f0f4f8;color:#334155;border:1px solid #e2e8f0;
+    }
+    .menu-sec-tab.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+    .menu-panel{display:none;}
+    .menu-panel.active{display:block;}
+    .menu-item-row{
+      display:flex;justify-content:space-between;align-items:flex-start;
+      padding:12px 0;border-bottom:1px solid #f0f4f8;gap:12px;
+    }
+    .menu-item-row:last-child{border-bottom:none;}
+    .menu-item-name{font-weight:700;font-size:14px;}
+    .menu-item-desc{font-size:12px;color:var(--muted);margin-top:2px;}
+    .menu-item-price{font-weight:800;font-size:14px;color:var(--teal);white-space:nowrap;flex-shrink:0;}
+
+    /* SPECIALS LIST */
+    .bp-special-card{
+      background:#fff8eb;border:1px solid #fde7ba;
+      border-radius:18px;padding:14px;margin-bottom:10px;
+    }
+    .bp-special-card h4{margin:0 0 6px;font-size:15px;font-weight:800;}
+    .bp-special-card p{margin:0;font-size:13px;color:var(--muted);}
+    .bp-discount{
+      display:inline-block;margin-top:8px;
+      background:var(--teal);color:#fff;
+      font-weight:800;font-size:13px;
+      padding:5px 10px;border-radius:999px;
     }
 
-    /* Sidebar info cards */
-    .bp-info-card {
-      background: #fff; border-radius: 12px;
-      border: 1.5px solid var(--gray-200, #e5e7eb);
-      padding: 18px;
+    /* EVENTS */
+    .bp-event-card{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid #f0f4f8;}
+    .bp-event-card:last-child{border-bottom:none;}
+    .bp-event-date-box{
+      flex-shrink:0;width:48px;height:54px;
+      background:linear-gradient(135deg,var(--teal),var(--cyan));
+      border-radius:14px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;color:#fff;
     }
-    .bp-info-card h4 {
-      font-size: .88rem; font-weight: 700;
-      margin-bottom: 12px; color: var(--text, #0d2233);
-    }
-    .hours-row {
-      display: flex; justify-content: space-between;
-      font-size: .83rem; padding: 4px 0;
-      border-bottom: 1px solid var(--gray-100, #f3f4f6);
-      color: var(--text, #0d2233);
-    }
-    .hours-row:last-child { border-bottom: none; }
-    .hours-row.today { font-weight: 700; color: #0096c7; }
-    .bp-map-placeholder {
-      background: linear-gradient(135deg, #eaf4f8, #cce9f5);
-      border-radius: 8px; height: 130px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .85rem; color: #0096c7; font-weight: 600;
-      margin-bottom: 10px; cursor: pointer;
-    }
-    .bp-tag-wrap {
-      display: flex; flex-wrap: wrap; gap: 6px;
-    }
-    .bp-tag-link {
-      background: #eaf4f8; color: #0096c7;
-      font-size: .75rem; font-weight: 600;
-      padding: 4px 10px; border-radius: 20px;
-      text-decoration: none; transition: background .15s;
-    }
-    .bp-tag-link:hover { background: #cce9f5; }
+    .bp-event-date-box .month{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+    .bp-event-date-box .day{font-size:20px;font-weight:900;line-height:1;}
+    .bp-event-title{font-weight:800;font-size:15px;}
+    .bp-event-desc{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5;}
 
-    /* ═══════════════════════════════════════════════
-       MOBILE BOOK BAR
-    ═══════════════════════════════════════════════ */
-    .bp-mobile-book {
-      display: none;
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      background: #fff; border-top: 1px solid var(--gray-200, #e5e7eb);
-      padding: 12px 16px; gap: 10px; align-items: center;
+    /* BOOKING WIDGET */
+    .bp-book-btn{
+      display:block;width:100%;padding:14px;border-radius:18px;
+      background:linear-gradient(135deg,var(--teal),var(--cyan));
+      color:#fff;font-weight:800;font-size:15px;
+      text-align:center;border:none;cursor:pointer;
     }
-    @media (max-width: 860px) {
-      .bp-mobile-book { display: flex; }
-    }
-    .bp-mobile-price { font-size: 1rem; font-weight: 800; flex: 1; }
-    .bp-mobile-price small { font-weight: 400; font-size: .78rem; color: var(--text-muted, #6b7280); }
-    .bp-mobile-btn {
-      padding: 12px 28px; border-radius: 10px;
-      background: linear-gradient(135deg, #FFD700, #FFC200);
-      color: #1a1a1a; font-weight: 800; font-size: .9rem;
-      border: none; cursor: pointer;
+    .bp-book-phone{
+      display:block;text-align:center;color:var(--teal);
+      font-weight:700;font-size:14px;padding:10px;
     }
 
+    /* BOTTOM BAR */
+    .bp-bottom-bar{
+      position:fixed;
+      left:50%;transform:translateX(-50%);
+      bottom:0;width:100%;max-width:680px;z-index:80;
+      background:rgba(255,255,255,.97);
+      backdrop-filter:blur(12px);
+      border-top:1px solid var(--line);
+      box-shadow:0 -4px 20px rgba(2,12,27,.06);
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .bp-bottom-grid{
+      display:grid;grid-template-columns:repeat(4,1fr);
+      padding:10px 4px 12px;
+    }
+    .bp-icon-btn{
+      border:none;background:none;
+      display:flex;flex-direction:column;align-items:center;gap:3px;
+      color:#334155;cursor:pointer;font-size:11px;font-weight:700;
+      text-decoration:none;
+    }
+    .bp-icon{font-size:26px;line-height:1;}
+
+    /* MOBILE BOOKING BAR */
+    #bpMobileBook{
+      display:none;
+      position:fixed;bottom:65px;left:50%;transform:translateX(-50%);
+      width:calc(100% - 32px);max-width:648px;z-index:75;
+      background:var(--navy);color:#fff;
+      border-radius:20px;padding:14px 18px;
+      align-items:center;justify-content:space-between;gap:12px;
+      box-shadow:0 8px 32px rgba(2,12,27,.28);
+    }
+
+    /* OVERLAY */
+    .bp-overlay{
+      position:fixed;inset:0;
+      background:rgba(3,10,20,.58);z-index:120;display:none;
+    }
+    /* MODAL */
+    .bp-modal{
+      position:fixed;left:16px;right:16px;top:80px;
+      max-width:440px;margin:0 auto;z-index:130;
+      background:#fff;border-radius:28px;
+      border:1px solid var(--line);
+      box-shadow:0 28px 70px rgba(2,12,27,.28);
+      display:none;overflow:hidden;
+    }
+    .bp-modal.open,.bp-overlay.open{display:block;}
+    .bp-modal-head{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      padding:18px 18px 14px;border-bottom:1px solid #eef3f6;
+    }
+    .bp-modal-title{font-size:20px;font-weight:900;letter-spacing:-.03em;}
+    .bp-close{
+      border:none;background:#f8fafc;width:40px;height:40px;
+      border-radius:14px;font-size:24px;line-height:1;cursor:pointer;color:#1e293b;
+    }
+    .bp-modal-body{padding:16px 18px 20px;max-height:65vh;overflow:auto;}
+    .bp-item-list{display:flex;flex-direction:column;gap:12px;}
+    .bp-item{border:1px solid #e8eef2;border-radius:20px;padding:14px;background:#fff;}
+    .bp-item-name{font-size:15px;font-weight:900;margin:0 0 4px;}
+    .bp-item-copy{margin:0;font-size:14px;line-height:1.5;color:#475569;}
+    .bp-item-price{margin-top:6px;font-size:22px;font-weight:900;color:var(--teal);letter-spacing:-.03em;}
+    .bp-field{
+      width:100%;border:1px solid #dbe7ec;border-radius:18px;
+      padding:14px 15px;font-size:15px;outline:none;
+      margin-bottom:10px;background:#fff;font-family:inherit;
+    }
+
+    @media(max-width:480px){
+      .bp-hero-title{font-size:26px;}
+      .bp-photo-grid{grid-template-columns:1fr 1fr;}
+    }
   </style>
 </head>
 <body>
@@ -417,7 +417,9 @@
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
   </div>
   <div class="gcr-cat-tabs" id="gcrCatTabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
@@ -438,157 +440,237 @@
   </div>
 </div>
 
-<!-- HERO COVER IMAGE -->
-<div class="bp-hero" id="bpHero">
-  <a href="javascript:history.back()" class="bp-back">← Back</a>
-  <img id="bpHeroImg" class="bp-hero-img" src="" alt="" style="display:none;">
-  <div class="bp-hero-overlay"></div>
-  <div class="bp-hero-info">
-    <h1 id="bpHeroName">Loading…</h1>
-    <div class="bp-hero-meta">
-      <span class="bp-hero-rating" id="bpHeroRating"></span>
-      <span id="bpHeroAddr"></span>
-      <span class="bp-hero-badge" id="bpHeroCat"></span>
+<div class="app">
+
+  <!-- HERO -->
+  <section class="bp-hero" id="bpHero">
+    <img id="bpHeroImg" src="" alt="" style="display:none">
+    <div class="bp-hero-actions">
+      <button class="glass-btn" id="bpPhotoBtn" style="display:none" onclick="document.getElementById('bpGallerySection').scrollIntoView({behavior:'smooth'})">📷 Photos</button>
+      <button class="glass-btn" onclick="navigator.share ? navigator.share({title:document.title,url:location.href}) : null">↗ Share</button>
     </div>
+    <div class="bp-hero-copy">
+      <h1 class="bp-hero-title" id="bpHeroName">Loading...</h1>
+      <div class="bp-hero-meta">
+        <span class="pill pill-rating" id="bpHeroRating"></span>
+        <span class="pill pill-open" id="bpHeroCat" style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.22)"></span>
+      </div>
+      <div class="bp-hero-addr" id="bpHeroAddr"></div>
+    </div>
+  </section>
+
+  <!-- BADGE ROW (tags populated by JS via bpTags) -->
+  <div class="bp-section" style="padding-top:16px;">
+    <div class="bp-badge-row" id="bpTags"></div>
   </div>
-  <button class="bp-photo-btn" id="bpPhotoBtn" style="display:none" onclick="document.getElementById('bpGallerySection').scrollIntoView({behavior:'smooth'})">📷 See all photos</button>
-</div>
 
-<!-- MAIN BODY -->
-<div class="bp-wrap">
+  <!-- ABOUT / BIO -->
+  <div class="bp-section" id="bpAboutSection" style="display:none">
+    <div class="bp-card bp-bio" id="bpDesc"></div>
+  </div>
 
-  <!-- ── LEFT COLUMN ── -->
-  <div>
+  <!-- QUICK STATS -->
+  <div class="bp-section" id="bpStatsSection" style="display:none">
+    <div class="bp-stat-grid" id="bpStats"></div>
+  </div>
 
-    <!-- Identity: logo + tagline + action buttons -->
-    <div class="bp-identity">
-      <div class="bp-logo" id="bpLogo">🏖️</div>
-      <div class="bp-identity-text">
-        <p class="bp-tagline" id="bpTagline"></p>
-        <div class="bp-actions">
-          <a id="bpDirections" href="#" class="btn btn-outline btn-sm" style="display:none">📍 Directions</a>
-          <a id="bpPhone"      href="#" class="btn btn-outline btn-sm" style="display:none">📞 Call</a>
-          <a id="bpWebsite"    href="#" class="btn btn-outline btn-sm" target="_blank" style="display:none">🌐 Website</a>
+  <!-- ACTION BUTTONS -->
+  <div class="bp-section">
+    <div class="bp-actions">
+      <a class="bp-btn bp-btn-primary" id="bpDirections" href="#" style="display:none">🗺️ Directions</a>
+      <a class="bp-btn bp-btn-secondary" id="bpWebsite" href="#" target="_blank" style="display:none">🌐 Website</a>
+    </div>
+    <a class="bp-btn bp-btn-dark" id="bpPhone" href="#" style="display:none;margin-top:10px;"></a>
+  </div>
+
+  <!-- IDENTITY (logo + tagline for sidebar-style display) -->
+  <div style="display:none">
+    <div id="bpLogo"></div>
+    <div id="bpTagline"></div>
+  </div>
+
+  <!-- SPECIALS PREVIEW -->
+  <div class="bp-section" id="bpSpecialsSection" style="display:none">
+    <div class="bp-card bp-special-preview" onclick="document.getElementById('bpSpecialsModal').parentElement.classList.add('open');document.getElementById('bpOverlay').classList.add('open')">
+      <div class="bp-special-head">
+        <div>
+          <div class="bp-special-title">Today's Specials & Happy Hour</div>
+          <div class="bp-special-note" style="font-size:13px;color:var(--muted);margin-top:4px;">Tap to see food deals, drinks, and timing</div>
         </div>
+        <div class="bp-special-timer">Tap to view</div>
       </div>
+      <div class="bp-special-body" id="bpSpecials"></div>
     </div>
-
-    <!-- ABOUT -->
-    <div class="bp-section" id="bpAboutSection" style="display:none">
-      <div class="bp-section-title">About</div>
-      <p class="bp-desc" id="bpDesc"></p>
-      <div class="bp-quick-stats" id="bpStats"></div>
-    </div>
-
-    <!-- PHOTO GALLERY -->
-    <div class="bp-section" id="bpGallerySection" style="display:none">
-      <div class="bp-section-title">Photos</div>
-      <div class="bp-gallery" id="bpGallery"></div>
-    </div>
-
-    <!-- FLEET / PRICING (things-to-do) -->
-    <div class="bp-section" id="bpPricingSection" style="display:none">
-      <div class="bp-section-title" id="bpPricingTitle">Rentals &amp; Pricing</div>
-      <div class="bp-fleet-grid" id="bpFleetGrid"></div>
-      <!-- Group rate -->
-      <div id="bpGroupRate" style="display:none;margin-top:14px;"></div>
-      <!-- Add-ons -->
-      <div id="bpAddonsSection" style="display:none;margin-top:24px;">
-        <div style="font-size:.88rem;font-weight:700;margin-bottom:10px;">Add-Ons</div>
-        <div class="bp-addons" id="bpAddons"></div>
-      </div>
-      <!-- What's included -->
-      <div id="bpIncludedSection" style="display:none;margin-top:24px;">
-        <div style="font-size:.88rem;font-weight:700;margin-bottom:10px;">What's Included</div>
-        <div class="bp-included" id="bpIncluded"></div>
-      </div>
-    </div>
-
-    <!-- MENU (restaurants) -->
-    <div class="bp-section" id="bpMenuSection" style="display:none">
-      <div class="bp-section-title">Menu</div>
-      <div id="bpMenuContent"></div>
-    </div>
-
-    <!-- SPECIALS -->
-    <div class="bp-section" id="bpSpecialsSection" style="display:none">
-      <div class="bp-section-title">🏷️ Specials</div>
-      <div class="bp-specials-grid" id="bpSpecials"></div>
-    </div>
-
-    <!-- EVENTS -->
-    <div class="bp-section" id="bpEventsSection" style="display:none">
-      <div class="bp-section-title">🎉 Events</div>
-      <div id="bpEvents"></div>
-    </div>
-
-    <!-- REVIEWS -->
-    <div class="bp-section" id="bpReviewsSection" style="display:none">
-      <div class="bp-section-title" id="bpReviewsTitle">Reviews</div>
-      <div class="bp-reviews-grid" id="bpReviews"></div>
-      <div style="margin-top:16px;">
-        <a href="#" class="btn btn-outline btn-sm">Write a Review</a>
-      </div>
-    </div>
-
-    <!-- Claim -->
-    <div style="background:#f9fafb;border-radius:12px;padding:20px;text-align:center;margin-top:8px;">
-      <p style="font-size:.85rem;color:var(--text-muted,#6b7280);margin-bottom:10px;">Is this your business? Claim it to add photos, update info, and enable bookings.</p>
-      <a href="claim.html" class="btn btn-outline btn-sm">Claim &amp; Manage Free →</a>
-    </div>
-
-  </div><!-- end left col -->
-
-  <!-- ── RIGHT SIDEBAR ── -->
-  <div class="bp-sidebar">
-
-    <!-- Booking widget -->
-    <div class="bp-book-widget" id="bpBookWidget">
-      <div class="bp-book-price" id="bpBookPrice"></div>
-      <div class="bp-book-sub"  id="bpBookSub"></div>
-      <button class="bp-book-btn" id="bpBookBtn" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
-      <a id="bpBookPhone" href="#" class="bp-book-phone" style="display:none">📞 Call to Reserve</a>
-      <div class="bp-book-note">No booking fees · Instant confirmation</div>
-    </div>
-
-    <!-- Hours -->
-    <div class="bp-info-card" id="bpHoursCard" style="display:none">
-      <h4>🕐 Hours</h4>
-      <div id="bpHours"></div>
-    </div>
-
-    <!-- Location -->
-    <div class="bp-info-card" id="bpLocationCard" style="display:none">
-      <h4>📍 Location</h4>
-      <p id="bpAddrFull" style="font-size:.85rem;margin-bottom:10px;color:var(--text-muted,#6b7280);"></p>
-      <div class="bp-map-placeholder" id="bpMapLink">📍 Open in Maps</div>
-      <a id="bpDirections2" href="#" class="btn btn-outline btn-sm" style="display:block;text-align:center;margin-top:8px;">Get Directions</a>
-    </div>
-
-    <!-- Tags -->
-    <div class="bp-info-card" id="bpTagsCard" style="display:none">
-      <h4>🏷️ Also Found In</h4>
-      <div class="bp-tag-wrap" id="bpTags"></div>
-    </div>
-
-  </div><!-- end sidebar -->
-
-</div><!-- end bp-wrap -->
-
-<!-- MOBILE STICKY BOOK BAR -->
-<div class="bp-mobile-book" id="bpMobileBook" style="display:none">
-  <div class="bp-mobile-price">
-    <div id="bpMobilePrice"></div>
-    <small id="bpMobileSub"></small>
   </div>
-  <button class="bp-mobile-btn" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
-</div>
 
-<!-- FOOTER -->
+  <!-- TABS -->
+  <div class="bp-tabs">
+    <button class="bp-tab active" onclick="scrollTo({top:0,behavior:'smooth'})">Overview</button>
+    <button class="bp-tab" onclick="document.getElementById('bpMenuSection').style.display!='none'&&document.getElementById('bpMenuSection').scrollIntoView({behavior:'smooth'})">Menu</button>
+    <button class="bp-tab" onclick="document.getElementById('bpGallerySection').scrollIntoView({behavior:'smooth'})">Photos</button>
+    <button class="bp-tab" onclick="document.getElementById('bpReviewsSection').scrollIntoView({behavior:'smooth'})">Reviews</button>
+    <button class="bp-tab" onclick="document.getElementById('bpEventsSection').scrollIntoView({behavior:'smooth'})">Events</button>
+    <button class="bp-tab" onclick="document.getElementById('bpHoursCard').scrollIntoView({behavior:'smooth'})">Hours</button>
+  </div>
+
+  <!-- MENU (restaurants / coffee) -->
+  <div class="bp-section" id="bpMenuSection" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Menu</h2>
+        <div id="bpMenuContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLEET / PRICING (activities / things-to-do) -->
+  <div class="bp-section" id="bpPricingSection" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Rentals &amp; Pricing</h2>
+        <div id="bpFleetGrid"></div>
+        <div id="bpGroupRate" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD-ONS -->
+  <div class="bp-section" id="bpAddonsSection" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Add-Ons</h2>
+        <div id="bpAddons" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT'S INCLUDED -->
+  <div class="bp-section" id="bpIncludedSection" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">What's Included</h2>
+        <div id="bpIncluded"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING WIDGET (hidden, populated by JS) -->
+  <div id="bpBookWidget" style="display:none;padding:16px">
+    <div id="bpBookPrice" style="font-size:22px;font-weight:900;color:var(--teal);"></div>
+    <div id="bpBookSub" style="font-size:13px;color:var(--muted);margin-top:2px;margin-bottom:12px;"></div>
+    <a id="bpBookPhone" href="#" style="display:none;background:var(--teal);color:#fff;padding:12px 18px;border-radius:16px;font-weight:800;font-size:14px;text-align:center;text-decoration:none;display:none;"></a>
+  </div>
+
+  <!-- HOURS -->
+  <div class="bp-section" id="bpHoursCard" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Hours</h2>
+        <div class="hours-list" id="bpHours"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY / PHOTOS -->
+  <div class="bp-section" id="bpGallerySection" style="display:none">
+    <h2 class="bp-subhead" style="padding:0 2px 10px;">Photos</h2>
+    <div class="bp-photo-grid" id="bpGallery"></div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="bp-section" id="bpEventsSection" style="display:none">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Events &amp; Live Music</h2>
+        <div id="bpEvents"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="bp-section" id="bpReviewsSection" style="display:none;padding-bottom:18px;">
+    <h2 class="bp-subhead" style="padding:0 2px 10px;" id="bpReviewsTitle">Reviews</h2>
+    <div class="review-list" id="bpReviews"></div>
+  </div>
+
+  <!-- LOCATION -->
+  <div class="bp-section" id="bpLocationCard" style="display:none">
+    <div class="bp-card bp-location-body">
+      <h2 class="bp-subhead">Location</h2>
+      <div class="bp-addr-text" id="bpAddrFull"></div>
+      <button class="bp-btn bp-btn-secondary" id="bpMapLink" style="width:100%;">📍 Get Directions</button>
+      <a id="bpDirections2" href="#" target="_blank" style="display:none;"></a>
+    </div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bp-bottom-bar">
+    <div class="bp-bottom-grid">
+      <a class="bp-icon-btn" id="bpPhoneBar" href="#" onclick="var p=document.getElementById('bpPhone');if(p&&p.href&&p.href!='#'){location.href=p.href;}return false;">
+        <span class="bp-icon">📞</span><span>Call</span>
+      </a>
+      <a class="bp-icon-btn" id="bpDirBar" href="#" onclick="var d=document.getElementById('bpDirections');if(d&&d.href&&d.href!='#'){window.open(d.href,'_blank');}return false;">
+        <span class="bp-icon">🗺️</span><span>Directions</span>
+      </a>
+      <button class="bp-icon-btn" onclick="alert('Saved to My Radar')">
+        <span class="bp-icon">❤️</span><span>Save</span>
+      </button>
+      <button class="bp-icon-btn" onclick="openBookingModal && openBookingModal(new URLSearchParams(location.search).get('id'))">
+        <span class="bp-icon">📅</span><span>Book</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MOBILE BOOKING BAR -->
+  <div id="bpMobileBook">
+    <div>
+      <div id="bpMobilePrice" style="font-size:18px;font-weight:900;"></div>
+      <small id="bpMobileSub" style="opacity:.8;font-size:12px;"></small>
+    </div>
+    <button class="bp-btn bp-btn-primary" style="padding:12px 20px;font-size:14px;" onclick="openBookingModal && openBookingModal(new URLSearchParams(location.search).get('id'))">Book Now</button>
+  </div>
+
+  <!-- OVERLAY -->
+  <div class="bp-overlay" id="bpOverlay" onclick="closeAllModals()"></div>
+
+  <!-- SPECIALS MODAL -->
+  <div class="bp-modal" id="specialsModal">
+    <div class="bp-modal-head">
+      <div class="bp-modal-title">Today's Specials</div>
+      <button class="bp-close" onclick="closeAllModals()">&times;</button>
+    </div>
+    <div class="bp-modal-body bp-item-list" id="bpSpecialsModal"></div>
+  </div>
+
+  <!-- EVENTS MODAL -->
+  <div class="bp-modal" id="eventsModal">
+    <div class="bp-modal-head">
+      <div class="bp-modal-title">Events &amp; Live Music</div>
+      <button class="bp-close" onclick="closeAllModals()">&times;</button>
+    </div>
+    <div class="bp-modal-body" id="bpEventsModal"></div>
+  </div>
+
+  <!-- BOOKING MODAL -->
+  <div class="bp-modal" id="bookingModal">
+    <div class="bp-modal-head">
+      <div class="bp-modal-title">Book / Reserve</div>
+      <button class="bp-close" onclick="closeAllModals()">&times;</button>
+    </div>
+    <div class="bp-modal-body">
+      <input class="bp-field" placeholder="Name" />
+      <input class="bp-field" placeholder="Phone" />
+      <input class="bp-field" placeholder="Party size / date / time" />
+      <button class="bp-btn bp-btn-primary" style="width:100%;margin-top:6px;" onclick="alert('Booking request captured'); closeAllModals();">Submit Request</button>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
 <footer class="site-footer">
   <div class="container">
     <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+      <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
       <p>Powered by <span class="powered">CyberCheck</span></p>
     </div>
   </div>
@@ -597,6 +679,23 @@
 <script src="js/gcr-api.js"></script>
 <script src="js/app.js"></script>
 <script>
+
+  const BP_MODALS = ['specialsModal','eventsModal','bookingModal'];
+
+  function closeAllModals(){
+    document.getElementById('bpOverlay').classList.remove('open');
+    BP_MODALS.forEach(id => { const el = document.getElementById(id); if(el) el.classList.remove('open'); });
+  }
+
+  function openBookingModal(id){
+    closeAllModals();
+    document.getElementById('bpOverlay').classList.add('open');
+    document.getElementById('bookingModal').classList.add('open');
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeAllModals();
+  });
 
   /* ══════════════════════════════════════════════
      renderProfilePage(biz)
@@ -682,9 +781,12 @@
 
       if (stats.length) {
         const grid = document.getElementById('bpStats');
-        if (grid) grid.innerHTML = stats.map(s =>
-          `<div class="bp-stat"><div class="bp-stat-label">${s.label}</div><div class="bp-stat-value">${s.val}</div></div>`
-        ).join('');
+        if (grid) {
+          grid.innerHTML = stats.map(s =>
+            `<div class="bp-stat"><div class="bp-stat-label">${s.label}</div><div class="bp-stat-value">${s.val}</div></div>`
+          ).join('');
+          show('bpStatsSection');
+        }
       }
     }
 
@@ -846,11 +948,11 @@
       if (revEl) {
         const r = biz.rating || biz.rating_avg;
         const rv = biz.review_count || biz.reviewCount || 0;
-        if (r) setEl('bpReviewsTitle', `Reviews · ★ ${r} <span style="font-weight:400;font-size:.85rem;color:var(--text-muted,#6b7280)">(${rv})</span>`);
+        if (r) setEl('bpReviewsTitle', `Reviews · ★ ${r} <span style="font-weight:400;font-size:.85rem;color:var(--muted)">(${rv})</span>`);
         revEl.innerHTML = biz.reviews.map(r => {
           const init  = (r.reviewer || r.customer_name || 'G').charAt(0).toUpperCase();
           const stars = Math.round(r.rating || 5);
-          return `<div class="bp-review">
+          return `<div class="bp-review bp-card">
             <div class="bp-review-head">
               <div class="bp-review-avatar">${esc(init)}</div>
               <div>
@@ -866,7 +968,7 @@
       }
     }
 
-    /* ── SIDEBAR: Booking widget ── */
+    /* ── Booking widget ── */
     if (canBook) {
       const startPrice = pricing.length ? Math.min(...pricing.map(p => p.price).filter(Boolean)) : null;
       if (startPrice) {
@@ -884,9 +986,9 @@
       const bw = document.getElementById('bpBookWidget');
       if (bw) {
         const phone = biz.phone || '';
-        bw.innerHTML = `<h4 style="margin-bottom:12px;color:#0096c7;">📞 Contact</h4>
-          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="bp-book-btn" style="background:#0096c7;color:#fff;">${phone}</a>` : ''}
-          ${biz.website ? `<a href="${biz.website}" class="bp-book-phone" target="_blank" style="margin-top:8px;display:block;">🌐 Visit Website</a>` : ''}`;
+        bw.innerHTML = `<h4 style="margin-bottom:12px;color:var(--teal);">📞 Contact</h4>
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="bp-book-btn">${phone}</a>` : ''}
+          ${biz.website ? `<a href="${biz.website}" class="bp-book-phone" target="_blank">🌐 Visit Website</a>` : ''}`;
       }
     }
     if (biz.phone) {
@@ -894,7 +996,7 @@
       if (bp) { bp.href = 'tel:' + biz.phone.replace(/\D/g,''); bp.textContent = `📞 ${biz.phone}`; bp.style.display = ''; }
     }
 
-    /* ── SIDEBAR: Hours ── */
+    /* ── Hours ── */
     if (biz.hours) {
       const hEl = document.getElementById('bpHours');
       if (hEl) {
@@ -914,7 +1016,6 @@
           hEl.innerHTML = days.map(d => {
             const val = biz.hours[d] || biz.hours[d.toLowerCase()];
             if (!val) return '';
-            const isOpen = typeof val === 'object' ? !val.closed : true;
             const display = typeof val === 'object'
               ? (val.closed ? 'Closed' : `${val.open || ''} – ${val.close || ''}`)
               : val;
@@ -925,7 +1026,7 @@
       }
     }
 
-    /* ── SIDEBAR: Location ── */
+    /* ── Location ── */
     if (biz.address) {
       setEl('bpAddrFull', biz.address);
       const mapsUrl = `https://maps.google.com?q=${encodeURIComponent(biz.address)}`;
@@ -936,7 +1037,7 @@
       show('bpLocationCard');
     }
 
-    /* ── SIDEBAR: Tags ── */
+    /* ── Tags ── */
     if (biz.tags && biz.tags.length) {
       const tagPages = { seafood:'restaurants.html','happy-hour':'happy-hours.html','live-music':'events.html','boat-rentals':'things-to-do.html', fishing:'things-to-do.html' };
       const tEl = document.getElementById('bpTags');
