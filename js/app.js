@@ -583,55 +583,160 @@ function filterListings(filter) {
    HAPPY HOURS PAGE — expandable listings
 ══════════════════════════════════════════ */
 function renderHappyHourPage() {
-  const grid = document.getElementById('hhGrid');
-  if (!grid || typeof GCR === 'undefined') return;
+  const nowGrid   = document.getElementById('hhNowGrid');
+  const soonGrid  = document.getElementById('hhSoonGrid');
+  const laterGrid = document.getElementById('hhLaterGrid');
+  const grid      = document.getElementById('hhGrid');
+  if (!nowGrid && !grid) return;
+  if (typeof GCR === 'undefined') return;
 
   const businesses = GCR.getHappyHours();
-  if (!businesses.length) {
-    grid.innerHTML = '<p class="text-muted text-center" style="padding:40px">No happy hours listed yet.</p>';
+
+  // Old layout fallback
+  if (!nowGrid) {
+    if (!businesses.length) {
+      grid.innerHTML = '<p class="text-muted text-center" style="padding:40px">No happy hours listed yet.</p>';
+      return;
+    }
+    grid.innerHTML = businesses.map(biz => {
+      const slug    = biz.slug || biz.site_id || biz.id;
+      const cardId  = 'hh-' + slug;
+      const hhText  = biz.happy_hour || biz.happyHour || '';
+      const tags    = (biz.tags || []).join(' ');
+      const hhSpecials = GCR.specials.filter(s =>
+        (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
+      );
+      const detailsHtml = hhSpecials.length
+        ? hhSpecials.map(s => `
+            <div class="expand-item-row">
+              <div>
+                <div class="expand-item-name">${escGcr(s.name || 'Special')}</div>
+                ${s.description ? `<div class="expand-item-desc">${escGcr(s.description)}</div>` : ''}
+              </div>
+              ${s.discount ? `<div class="expand-item-price">${escGcr(s.discount)}</div>` : ''}
+            </div>`).join('')
+        : `<div class="expand-item-row"><div class="expand-item-desc" style="font-style:italic">Happy hour details not yet added — call to confirm</div></div>`;
+      return `
+      <div class="listing-expand-card" id="${cardId}" data-tags="${tags}">
+        <div class="listing-expand-header">
+          <span class="listing-expand-emoji">${biz.emoji || '🍻'}</span>
+          <div class="listing-expand-info">
+            <h4>${escGcr(biz.name)}</h4>
+            <p>${escGcr(hhText)}${biz.address ? ` · ${escGcr(biz.address)}` : ''}</p>
+          </div>
+          <div class="listing-expand-actions">
+            <a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
+            <button class="expand-btn btn btn-sm" onclick="toggleExpand('${cardId}')">Details ▼</button>
+          </div>
+        </div>
+        <div class="listing-expand-details" id="${cardId}-details">${detailsHtml}</div>
+      </div>`;
+    }).join('');
     return;
   }
 
-  grid.innerHTML = businesses.map(biz => {
-    const slug    = biz.slug || biz.site_id || biz.id;
-    const cardId  = 'hh-' + slug;
-    const hhText  = biz.happy_hour || biz.happyHour || '';
-    const tags    = (biz.tags || []).join(' ');
+  // New mockup layout — categorize by current time
+  function parseHHTime(text) {
+    if (!text) return null;
+    const m = text.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+    if (!m) return null;
+    let sh = parseInt(m[1]), sm = parseInt(m[2]||0), sap = (m[3]||'').toLowerCase();
+    let eh = parseInt(m[4]), em = parseInt(m[5]||0), eap = (m[6]||'').toLowerCase();
+    if (eap === 'pm' && eh < 12) eh += 12;
+    if (eap === 'am' && eh === 12) eh = 0;
+    if (sap === 'pm' && sh < 12) sh += 12;
+    if (sap === 'am' && sh === 12) sh = 0;
+    return { startMin: sh * 60 + sm, endMin: eh * 60 + em };
+  }
 
-    /* Check if this business has specials related to happy hour */
+  function hhStatus(biz) {
+    const parsed = parseHHTime(biz.happy_hour || biz.happyHour || '');
+    const now = new Date();
+    const cur = now.getHours() * 60 + now.getMinutes();
+    if (!parsed) return 'later';
+    if (cur >= parsed.startMin && cur < parsed.endMin) return 'now';
+    if (parsed.startMin > cur && parsed.startMin - cur <= 120) return 'soon';
+    return 'later';
+  }
+
+  function hhFullCard(biz) {
+    const slug = biz.slug || biz.site_id || biz.id;
+    const hhText = biz.happy_hour || biz.happyHour || '';
+    const photo = biz.photo || biz.cover_photo || '';
     const hhSpecials = GCR.specials.filter(s =>
       (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
     );
-
-    const detailsHtml = hhSpecials.length
-      ? hhSpecials.map(s => `
-          <div class="expand-item-row">
-            <div>
-              <div class="expand-item-name">${escGcr(s.name || 'Special')}</div>
-              ${s.description ? `<div class="expand-item-desc">${escGcr(s.description)}</div>` : ''}
-            </div>
-            ${s.discount ? `<div class="expand-item-price">${escGcr(s.discount)}</div>` : ''}
-          </div>`).join('')
-      : `<div class="expand-item-row"><div class="expand-item-desc" style="font-style:italic">Happy hour details not yet added — call to confirm</div></div>`;
-
+    const dealsHtml = hhSpecials.length
+      ? hhSpecials.slice(0,3).map(s => `<div class="deal">${escGcr(s.name||'Special')}${s.discount ? ' — '+escGcr(s.discount) : ''}</div>`).join('')
+      : `<div class="deal">Happy hour specials — call to confirm</div>`;
+    const chips = (biz.tags||[]).slice(0,3).map(t=>`<span class="chip">${escGcr(t)}</span>`).join('');
+    const stars = biz.rating ? '★'.repeat(Math.round(biz.rating))+'☆'.repeat(5-Math.round(biz.rating)) : '';
     return `
-    <div class="listing-expand-card" id="${cardId}" data-tags="${tags}">
-      <div class="listing-expand-header">
-        <span class="listing-expand-emoji">${biz.emoji || '🍻'}</span>
-        <div class="listing-expand-info">
-          <h4>${escGcr(biz.name)}</h4>
-          <p>${escGcr(hhText)}${biz.address ? ` · ${escGcr(biz.address)}` : ''}</p>
-        </div>
-        <div class="listing-expand-actions">
-          <a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
-          <button class="expand-btn btn btn-sm" onclick="toggleExpand('${cardId}')">Details ▼</button>
-        </div>
+    <div class="hh-card">
+      <div class="hh-image" style="background-image:url('${escGcr(photo)}');background-color:#d9edf5">
+        <div class="image-badge">🍻 Happy Hour</div>
       </div>
-      <div class="listing-expand-details" id="${cardId}-details">
-        ${detailsHtml}
+      <div class="hh-body">
+        <div class="title-row">
+          <div class="name">${escGcr(biz.name)}</div>
+          <div class="status">● Live Now</div>
+        </div>
+        <div class="subline">${escGcr(biz.area||biz.city||'')}${biz.cuisine?' · '+escGcr(biz.cuisine):''}</div>
+        ${stars?`<div class="rating"><span class="stars">${stars}</span> ${biz.rating}</div>`:''}
+        <div class="timepill">🕒 ${escGcr(hhText)}</div>
+        <div class="deals">${dealsHtml}</div>
+        ${chips?`<div class="chips">${chips}</div>`:''}
+        <div class="bottom-row">
+          <div class="address">${escGcr(biz.address||'')}</div>
+          <div class="actions">
+            <a href="business.html?id=${slug}" class="action">Details</a>
+            <a href="business.html?id=${slug}" class="action primary">View Specials</a>
+          </div>
+        </div>
       </div>
     </div>`;
-  }).join('');
+  }
+
+  function hhCompactCard(biz) {
+    const slug = biz.slug || biz.site_id || biz.id;
+    const hhText = biz.happy_hour || biz.happyHour || '';
+    const parsed = parseHHTime(hhText);
+    const cur = new Date().getHours()*60 + new Date().getMinutes();
+    const minsUntil = parsed && parsed.startMin > cur ? parsed.startMin - cur : null;
+    const countdown = minsUntil
+      ? `<span class="countdown">In ${minsUntil>=60?Math.floor(minsUntil/60)+'h ':''}${minsUntil%60}m</span>` : '';
+    const hhSpecials = GCR.specials.filter(s =>
+      (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
+    );
+    const deal = hhSpecials[0]
+      ? escGcr(hhSpecials[0].name+(hhSpecials[0].discount?' — '+hhSpecials[0].discount:''))
+      : 'Specials available';
+    return `
+    <div class="compact-card">
+      <h4>${escGcr(biz.name)}</h4>
+      ${countdown}
+      <div class="compact-meta">${escGcr(hhText)}${biz.area?' · '+escGcr(biz.area):''}</div>
+      <div class="compact-deal">${deal}</div>
+      <div class="compact-actions">
+        <a href="business.html?id=${slug}">Details</a>
+        <a href="business.html?id=${slug}">View Specials</a>
+      </div>
+    </div>`;
+  }
+
+  const nowBiz   = businesses.filter(b => hhStatus(b) === 'now');
+  const soonBiz  = businesses.filter(b => hhStatus(b) === 'soon');
+  const laterBiz = businesses.filter(b => hhStatus(b) === 'later');
+
+  nowGrid.innerHTML = nowBiz.length
+    ? nowBiz.map(hhFullCard).join('')
+    : '<div class="empty">No happy hours happening right now. Check "Starting Soon" below.</div>';
+  soonGrid.innerHTML = soonBiz.length
+    ? soonBiz.map(hhCompactCard).join('')
+    : '<div class="empty" style="grid-column:1/-1">None starting in the next 2 hours.</div>';
+  laterGrid.innerHTML = laterBiz.length
+    ? laterBiz.map(hhCompactCard).join('')
+    : '<div class="empty" style="grid-column:1/-1">No more happy hours scheduled today.</div>';
 }
 
 /* ══════════════════════════════════════════
