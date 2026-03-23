@@ -1,0 +1,91 @@
+{
+  "slug": "brick-and-spoon",
+  "menus": {
+    "brunch": {
+      "available_days": ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+      "available_start": "07:00",
+      "available_end": "15:00",
+      "sections": [
+        {
+          "section": "Benedicts",
+          "section_order": 1,
+          "items": [
+            { "name": "Classic Eggs Benedict", "description": "Canadian bacon, poached eggs, hollandaise on an English muffin", "price": "14.99", "price_variants": [], "tags": ["popular"], "active": true },
+            { "name": "Gulf Crab Cake Benedict", "description": "House-made Gulf crab cake, poached eggs, Old Bay hollandaise", "price": "17.99", "price_variants": [], "tags": ["seafood","popular"], "active": true },
+            { "name": "Shrimp & Bacon Benedict", "description": "Gulf shrimp, applewood bacon, poached eggs, Cajun hollandaise", "price": "16.99", "price_variants": [], "tags": ["seafood","spicy"], "active": true },
+            { "name": "Veggie Benedict", "description": "Sautéed spinach, roasted tomato, avocado, poached eggs, herb hollandaise", "price": "14.99", "price_variants": [], "tags": ["vegetarian"], "active": true },
+            { "name": "Southern Benedict", "description": "Fried chicken, poached eggs, sausage gravy on a biscuit", "price": "15.99", "price_variants": [], "tags": ["popular","southern"], "active": true }
+          ]
+        },
+        {
+          "section": "Plates & Skillets",
+          "section_order": 2,
+          "items": [
+            { "name": "Gulf Shrimp & Grits", "description": "Gulf shrimp, stone-ground grits, tasso ham gravy, green onions", "price": "16.99", "price_variants": [], "tags": ["seafood","southern","popular"], "active": true },
+            { "name": "Breakfast Skillet", "description": "Eggs your way, roasted potatoes, peppers, onions, cheddar, choice of meat", "price": "13.99", "price_variants": [], "tags": ["popular"], "active": true },
+            { "name": "Biscuits & Gravy", "description": "House biscuits smothered in sausage gravy, two eggs any style", "price": "12.99", "price_variants": [], "tags": ["southern"], "active": true },
+            { "name": "Steak & Eggs", "description": "6oz sirloin, two eggs any style, roasted potatoes, toast", "price": "19.99", "price_variants": [], "tags": [], "active": true }
+          ]
+        },
+        {
+          "section": "French Toast & Pancakes",
+          "section_order": 3,
+          "items": [
+            { "name": "Bananas Foster French Toast", "description": "Thick-cut brioche, caramelized bananas, brown sugar rum sauce, whipped cream", "price": "13.99", "price_variants": [], "tags": ["popular","sweet"], "active": true },
+            { "name": "Stuffed French Toast", "description": "Cream cheese filled brioche, fresh berries, powdered sugar", "price": "13.99", "price_variants": [], "tags": ["sweet"], "active": true },
+            { "name": "Short Stack Pancakes", "description": "Two fluffy buttermilk pancakes, butter, maple syrup", "price": "9.99", "price_variants": [], "tags": [], "active": true },
+            { "name": "Full Stack Pancakes", "description": "Three fluffy buttermilk pancakes, butter, maple syrup", "price": "11.99", "price_variants": [], "tags": [], "active": true },
+            { "name": "Blueberry Pancakes", "description": "Three buttermilk pancakes loaded with fresh blueberries, lemon glaze", "price": "12.99", "price_variants": [], "tags": ["popular"], "active": true }
+          ]
+        },
+        {
+          "section": "Sandwiches & Wraps",
+          "section_order": 4,
+          "items": [
+            { "name": "Gulf Shrimp Po'Boy", "description": "Fried Gulf shrimp, lettuce, tomato, remoulade on a toasted hoagie", "price": "15.99", "price_variants": [], "tags": ["seafood","southern"], "active": true },
+            { "name": "Chicken Biscuit Sandwich", "description": "Fried chicken breast, honey butter, pickles on a house biscuit", "price": "13.99", "price_variants": [], "tags": ["popular","southern"], "active": true },
+            { "name": "BLT Wrap", "description": "Applewood bacon, lettuce, tomato, avocado, herb mayo in a flour tortilla", "price": "12.99", "price_variants": [], "tags": [], "active": true }
+          ]
+        },
+        {
+          "section": "Sides",
+          "section_order": 5,
+          "items": [
+            { "name": "Stone-Ground Grits", "description": "Creamy stone-ground grits, butter", "price": "4.99", "price_variants": [], "tags": ["southern"], "active": true },
+            { "name": "Roasted Potatoes", "description": "Seasoned roasted potatoes with peppers and onions", "price": "3.99", "price_variants": [], "tags": [], "active": true },
+            { "name": "House Biscuit", "description": "Fresh-baked buttermilk biscuit with honey butter", "price": "2.99", "price_variants": [], "tags": ["southern"], "active": true },
+            { "name": "Fresh Fruit Cup", "description": "Seasonal fresh fruit", "price": "4.99", "price_variants": [], "tags": ["vegetarian"], "active": true },
+            { "name": "Bacon or Sausage", "description": "Choice of applewood bacon strips or house sausage patties", "price": "3.99", "price_variants": [], "tags": [], "active": true }
+          ]
+        },
+        {
+          "section": "Drinks",
+          "section_order": 6,
+          "items": [
+            { "name": "Mimosa", "description": "Champagne and fresh orange juice", "price": "8.99", "price_variants": [{"label":"Bottle","price":"28.00"}], "tags": ["popular"], "active": true },
+            { "name": "Bloody Mary", "description": "House-made Bloody Mary mix, vodka, garnished Gulf Coast style", "price": "9.99", "price_variants": [], "tags": ["popular"], "active": true },
+            { "name": "Fresh-Squeezed OJ", "description": "Fresh squeezed orange juice", "price": "4.99", "price_variants": [], "tags": [], "active": true },
+            { "name": "Coffee", "description": "Freshly brewed coffee, bottomless", "price": "3.99", "price_variants": [], "tags": [], "active": true },
+            { "name": "Cold Brew", "description": "House cold brew over ice", "price": "4.99", "price_variants": [], "tags": [], "active": true }
+          ]
+        }
+      ]
+    },
+    "happy_hour": {
+      "available_days": ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+      "available_start": "14:00",
+      "available_end": "17:30",
+      "sections": [
+        {
+          "section": "Happy Hour Deals",
+          "section_order": 1,
+          "items": [
+            { "name": "Oysters on the Half Shell", "description": "$1 each — freshest deal on the coast", "price": "1.00", "price_variants": [], "tags": ["seafood","popular"], "active": true },
+            { "name": "Mimosa", "description": "Happy hour pricing on mimosas", "price": "6.00", "price_variants": [], "tags": ["popular"], "active": true },
+            { "name": "Bloody Mary", "description": "Happy hour pricing on Bloody Marys", "price": "7.00", "price_variants": [], "tags": ["popular"], "active": true }
+          ]
+        }
+      ]
+    }
+  }
+}

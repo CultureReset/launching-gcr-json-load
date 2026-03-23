@@ -1,0 +1,39 @@
+{
+  "name": "Ducks Diner",
+  "slug": "ducks-diner",
+  "subdomain": "ducks-diner",
+  "type": "restaurants",
+  "category": "restaurants",
+  "tagline": "TODO: short tagline for Ducks Diner",
+  "description": "TODO: 1–2 sentence description of Ducks Diner.",
+  "area": "Gulf Shores",
+  "address": "TODO: street address, Gulf Shores, AL",
+  "phone": "TODO: (251) xxx-xxxx",
+  "website": "TODO: https://",
+  "hours": {
+    "monday": "TODO: 9am–9pm or closed",
+    "tuesday": "TODO: 9am–9pm or closed",
+    "wednesday": "TODO: 9am–9pm or closed",
+    "thursday": "TODO: 9am–9pm or closed",
+    "friday": "TODO: 9am–9pm or closed",
+    "saturday": "TODO: 9am–9pm or closed",
+    "sunday": "TODO: 9am–9pm or closed"
+  },
+  "tags": [
+    "TODO: tag1",
+    "TODO: tag2"
+  ],
+  "featured": false,
+  "live_music": false,
+  "happy_hour": false,
+  "happy_hour_days": [],
+  "happy_hour_start": null,
+  "happy_hour_end": null,
+  "images": [],
+  "social": {
+    "facebook": "",
+    "instagram": "",
+    "tiktok": ""
+  },
+  "_notes": "Fill in all TODO fields. Delete this _notes key before uploading."
+}

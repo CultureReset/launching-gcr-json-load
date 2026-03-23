@@ -1,0 +1,35 @@
+{
+  "name": "Brick & Spoon",
+  "slug": "brick-and-spoon",
+  "subdomain": "brick-and-spoon",
+  "type": "restaurants",
+  "category": "restaurants",
+  "tagline": "Southern brunch done right on the Gulf Coast",
+  "description": "Brick & Spoon serves creative Southern-inspired breakfast and brunch in Orange Beach. Known for loaded Benedicts, Gulf shrimp & grits, and $1 oyster happy hour daily from 2–5:30pm.",
+  "area": "Orange Beach",
+  "address": "27267 Canal Rd, Orange Beach, AL 36561",
+  "phone": "(251) 981-8600",
+  "website": "https://brickandspoon.com",
+  "hours": {
+    "monday": "7am–3pm",
+    "tuesday": "7am–3pm",
+    "wednesday": "7am–3pm",
+    "thursday": "7am–3pm",
+    "friday": "7am–3pm",
+    "saturday": "7am–3pm",
+    "sunday": "7am–3pm"
+  },
+  "tags": ["brunch", "breakfast", "southern", "oysters", "happy-hour", "shrimp-grits", "benedicts", "mimosa", "bloody-mary"],
+  "featured": true,
+  "live_music": false,
+  "happy_hour": true,
+  "happy_hour_days": ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+  "happy_hour_start": "14:00",
+  "happy_hour_end": "17:30",
+  "images": [],
+  "social": {
+    "facebook": "https://facebook.com/brickandspoon",
+    "instagram": "@brickandspoon",
+    "tiktok": ""
+  }
+}

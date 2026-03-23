@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "brick-and-spoon",
+    "name": "$1 Oyster Happy Hour",
+    "type": "happy_hour",
+    "description": "$1 oysters on the half shell every day 2pm–5:30pm. Best deal on the coast.",
+    "days": ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"],
+    "start_time": "14:00",
+    "end_time": "17:30",
+    "active": true,
+    "discount_text": "$1 oysters",
+    "drink_specials": [
+      { "name": "Oysters on the Half Shell", "note": "$1 each during happy hour", "price": "$1 each" },
+      { "name": "Mimosas", "note": "Happy hour pricing", "price": "Discounted" },
+      { "name": "Bloody Marys", "note": "Happy hour pricing", "price": "Discounted" }
+    ]
+  }
+]

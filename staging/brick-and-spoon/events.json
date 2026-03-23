@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "brick-and-spoon",
+    "title": "TODO: Event / Band Name",
+    "description": "TODO: short description",
+    "event_date": "TODO: 2026-04-05",
+    "start_time": "TODO: 20:00",
+    "end_time": "TODO: 23:00",
+    "event_type": "TODO: live_music | festival | trivia | karaoke | special_event",
+    "cover_charge": "TODO: 0 or dollar amount",
+    "recurring": false,
+    "recurrence": "TODO: none | weekly | biweekly (if recurring=true)",
+    "active": true,
+    "_notes": "Add one object per event. Delete _notes before uploading. Leave array empty [] if no events."
+  }
+]

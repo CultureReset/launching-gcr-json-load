@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "ruby-slipper-cafe",
+    "name": "TODO: Special Name (e.g. Happy Hour)",
+    "type": "TODO: happy_hour | daily_special | weekend_special | after_8pm",
+    "description": "TODO: describe the deal",
+    "days": [
+      "TODO: monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday"
+    ],
+    "start_time": "TODO: 15:00",
+    "end_time": "TODO: 18:00",
+    "active": true,
+    "discount_text": "TODO: e.g. $1 oysters | BOGO | Half-price drafts",
+    "drink_specials": [
+      {
+        "name": "TODO: Item name",
+        "note": "TODO: detail about the deal",
+        "price": "TODO: $X | X% off | BOGO | half price"
+      }
+    ],
+    "_notes": "Add one object per distinct special/deal. Delete _notes before uploading."
+  }
+]

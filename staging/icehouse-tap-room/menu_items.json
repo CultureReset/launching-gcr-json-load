@@ -1,0 +1,91 @@
+{
+  "slug": "icehouse-tap-room",
+  "_notes": [
+    "Add one key per menu type your restaurant serves.",
+    "Menu types: main | breakfast | brunch | lunch | dinner | happy_hour | after_8pm | bar | kids | seasonal",
+    "Each menu type has: available_days, available_start, available_end, sections[]",
+    "Each section has: section (name), section_order (integer), items[]",
+    "Each item has: name, description, price, price_variants?, tags[], active",
+    "price_variants example: [{label:'Small',price:'8.99'},{label:'Large',price:'12.99'}]",
+    "tags: popular | new | seafood | vegetarian | vegan | gluten-free | spicy | southern | kids-friendly",
+    "Delete this _notes key before uploading."
+  ],
+  "menus": {
+    "TODO_menu_type_1 (e.g. brunch)": {
+      "available_days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ],
+      "available_start": "TODO: 07:00",
+      "available_end": "TODO: 15:00",
+      "sections": [
+        {
+          "section": "TODO: Section Name (e.g. Benedicts, Appetizers, Entrees)",
+          "section_order": 1,
+          "items": [
+            {
+              "name": "TODO: Item Name",
+              "description": "TODO: what's in it (can be empty string)",
+              "price": "TODO: 12.99",
+              "price_variants": [],
+              "tags": [
+                "TODO: popular | seafood | vegetarian | spicy | etc"
+              ],
+              "active": true
+            }
+          ]
+        },
+        {
+          "section": "TODO: Section 2 Name",
+          "section_order": 2,
+          "items": [
+            {
+              "name": "TODO: Item Name",
+              "description": "TODO: description",
+              "price": "TODO: 14.99",
+              "price_variants": [],
+              "tags": [],
+              "active": true
+            }
+          ]
+        }
+      ]
+    },
+    "TODO_menu_type_2 (e.g. happy_hour)": {
+      "available_days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ],
+      "available_start": "TODO: 14:00",
+      "available_end": "TODO: 17:00",
+      "sections": [
+        {
+          "section": "TODO: Happy Hour Deals",
+          "section_order": 1,
+          "items": [
+            {
+              "name": "TODO: Item Name",
+              "description": "TODO: the deal",
+              "price": "TODO: 1.00",
+              "price_variants": [],
+              "tags": [
+                "popular"
+              ],
+              "active": true
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
