@@ -988,6 +988,36 @@ function wirePublicSpotsFilters() {
    date shown prominently at top of each row
 ══════════════════════════════════════════ */
 function renderEventsPage() {
+  const grid = document.getElementById('listingsGrid');
+  if (grid && grid.dataset.category === 'events' && typeof GCR !== 'undefined') {
+    const events = GCR.getUpcomingEvents();
+    if (!events.length) {
+      grid.innerHTML = '<p class="text-muted text-center" style="padding:40px">No upcoming events.</p>';
+      return;
+    }
+    grid.innerHTML = events.map(ev => {
+      const dateStr = ev.date || ev.event_date || '';
+      const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+      const bizSlug = ev.site_id;
+      const biz = GCR.businesses.find(b => b.site_id === ev.site_id || b.id === ev.site_id);
+      const photo = ev.photo || ev.cover_image || (biz && biz.photo) || '';
+      const category = (ev.category || '').replace(/-/g, ' ');
+      const chips = [category, ev.cover].filter(Boolean).map(c => `<span class="chip">${escGcr(c)}</span>`).join('');
+      return `
+      <article class="event-card" data-tags="${ev.category || ''}">
+        <div class="event-image" style="background-image:url('${escGcr(photo)}');background-color:#e0f2fe"><div class="image-badge">${escGcr(category)}</div></div>
+        <div class="event-body">
+          <div class="title-row"><div><div class="name">${escGcr(ev.title || ev.name || 'Event')}</div><div class="subline"><span>${escGcr(ev.venue || (biz && biz.name) || 'Orange Beach')}</span></div></div><div class="status">● Coming</div></div>
+          <div class="timepill">🕐 ${escGcr(dateStr)}${ev.time ? ' • ' + escGcr(ev.time) : ''}</div>
+          <div class="event-copy">${escGcr((ev.description || ev.descr || 'Event details — check details for more info.').substring(0, 180))}</div>
+          ${chips ? `<div class="chips">${chips}</div>` : ''}
+          <div class="bottom-row"><div class="venue">📍 ${escGcr(ev.venue || (biz && biz.address) || '')}</div><div class="actions"><a href="business.html?id=${bizSlug}" class="action">Details</a><a href="business.html?id=${bizSlug}" class="action primary">Save</a></div></div>
+        </div>
+      </article>`;
+    }).join('');
+    return;
+  }
+
   const cardContainer = document.getElementById('eventsCardView');
   const listContainer = document.getElementById('eventsListView');
   const fullList      = document.getElementById('eventsFullList'); // legacy fallback
