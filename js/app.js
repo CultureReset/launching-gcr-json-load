@@ -750,7 +750,9 @@ function renderSpecialsPage() {
   if (!activeGrid && !grid) return;
   if (typeof GCR === 'undefined') return;
 
-  const specials = GCR.getSpecials();
+  let specials = GCR.getSpecials();
+  // Exclude happy hour specials — show only daily/food/AYCE specials
+  specials = specials.filter(s => !s.type || s.type !== 'happy_hour');
 
   // New mockup layout
   if (activeGrid) {
