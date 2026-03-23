@@ -446,7 +446,9 @@ function onGCRLoaded() {
   renderPageListings();    // category pages (restaurants, things-to-do, etc.)
   renderSpecialsPage();    // specials.html
   renderHappyHourPage();   // happy-hours.html
+  renderDealsPage();       // deals.html (combined happy hours + specials)
   renderEventsPage();      // events.html
+  renderPublicSpotsPage(); // public-spots.html
   renderCalendar();        // events.html calendar widget
   runSearch();             // search.html
 }
@@ -569,6 +571,12 @@ function filterListings(filter) {
     const tags = (card.dataset.tags || '').toLowerCase();
     card.style.display = tags.includes(filter.toLowerCase()) ? '' : 'none';
   });
+  /* also filter deal-cards */
+  document.querySelectorAll('.deal-card').forEach(card => {
+    if (!filter || filter === 'all') { card.style.display = ''; return; }
+    const tags = (card.dataset.tags || '').toLowerCase();
+    card.style.display = tags.includes(filter.toLowerCase()) ? '' : 'none';
+  });
 }
 
 /* ══════════════════════════════════════════
@@ -683,6 +691,190 @@ function renderSpecialsPage() {
   });
 
   grid.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════
+   DEALS PAGE — restaurant-style cards with expandable details
+══════════════════════════════════════════ */
+function renderDealsPage() {
+  const grid = document.getElementById('listingsGrid');
+  if (!grid || typeof GCR === 'undefined' || grid.dataset.category !== 'deals') return;
+
+  // Get both happy hour and regular specials
+  const happyHours = (GCR.specials || []).filter(s => s.active !== false && (s.type === 'happy_hour' || (s.name || '').toLowerCase().includes('happy hour')));
+  const specials = (GCR.specials || []).filter(s => s.active !== false && (!s.type || s.type !== 'happy_hour'));
+  const allDeals = [...happyHours, ...specials];
+
+  if (!allDeals.length) {
+    grid.innerHTML = '<p style="padding:40px;text-align:center;color:#888;">No deals found right now. Check back soon!</p>';
+    return;
+  }
+
+  // Group by business
+  const byBiz = {};
+  allDeals.forEach(deal => {
+    const key = deal.site_id || 'unknown';
+    if (!byBiz[key]) byBiz[key] = { biz: null, deals: [] };
+    byBiz[key].deals.push(deal);
+  });
+
+  // Enrich with business info
+  (GCR.businesses || []).forEach(biz => {
+    const key = biz.site_id || biz.id;
+    if (byBiz[key]) byBiz[key].biz = biz;
+  });
+
+  let html = '';
+  Object.entries(byBiz).forEach(([siteId, { biz, deals }]) => {
+    const name = biz ? biz.name : 'Local Business';
+    const emoji = biz ? (biz.emoji || '🏪') : '🏪';
+    const image = biz ? (biz.logo_url || biz.logo || biz.image || '') : '';
+    const slug = biz ? (biz.slug || biz.site_id || biz.id) : siteId;
+    const tags = biz ? (biz.tags || []).join(' ') : '';
+    const cardId = 'deal-' + siteId.replace(/[^a-z0-9]/gi, '-');
+    const location = biz ? (biz.location || '') : '';
+
+    html += `
+    <div class="deal-item-wrapper">
+      <article class="deal-card" id="${cardId}" data-tags="${tags}">
+        <div class="deal-image" style="background-image: url('${escGcr(image)}'); background-size: cover; background-position: center;">
+          ${emoji ? `<div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;opacity:.3">${emoji}</div>` : ''}
+        </div>
+        <div class="deal-body">
+          <div class="title-row">
+            <div>
+              <div class="deal-name">${escGcr(name)}</div>
+              <div class="deal-subline">
+                <span>${location || 'See details'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="deal-summary">
+            <strong>${deals.length} deal${deals.length > 1 ? 's' : ''} available</strong>
+          </div>
+          <div class="deal-actions">
+            <a href="business.html?id=${slug}" class="deal-btn">View Profile</a>
+            <button class="deal-btn deal-btn-primary" onclick="toggleDealExpand('${cardId}')">View Details ▼</button>
+          </div>
+        </div>
+      </article>
+      <div class="deal-details" id="${cardId}-details">
+        <div style="padding:16px 20px;border-top:1px solid var(--line);">
+          ${deals.map(d => `
+            <div class="deal-item-row">
+              <div>
+                <div class="deal-item-name">${escGcr(d.name || 'Deal')}</div>
+                ${d.description ? `<div class="deal-item-desc">${escGcr(d.description)}</div>` : ''}
+                ${d.time ? `<div class="deal-item-desc">⏰ ${escGcr(d.time)}</div>` : ''}
+                ${d.days ? `<div class="deal-item-desc">📅 ${Array.isArray(d.days) ? d.days.join(', ') : escGcr(d.days)}</div>` : ''}
+              </div>
+              ${d.discount || d.price ? `<div class="deal-item-price">${escGcr(d.discount || d.price)}</div>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+
+  grid.innerHTML = html;
+  wireDealsFilters();
+}
+
+/* ──────────────────────────────────────────── */
+function toggleDealExpand(cardId) {
+  const el = document.getElementById(cardId + '-details');
+  if (!el) return;
+  el.classList.toggle('open');
+  const btn = event?.target;
+  if (btn) btn.textContent = el.classList.contains('open') ? 'Hide Details ▲' : 'View Details ▼';
+}
+
+function wireDealsFilters() {
+  document.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.deal-card').forEach(card => {
+        if (!filter || filter === 'all') {
+          card.style.display = '';
+        } else {
+          const tags = (card.dataset.tags || '').toLowerCase();
+          card.style.display = tags.includes(filter.toLowerCase()) ? '' : 'none';
+        }
+      });
+    });
+  });
+}
+
+/* ══════════════════════════════════════════
+   PUBLIC SPOTS PAGE — beach access, boats, parks
+══════════════════════════════════════════ */
+function renderPublicSpotsPage() {
+  const container = document.getElementById('spotsContainer');
+  if (!container || typeof GCR === 'undefined') return;
+
+  // Sample public spots data structure
+  const publicSpots = [
+    { name: 'Gulf Place Beach Access', location: 'Orange Beach', type: 'beach-access', tags: ['beach-access', 'showers', 'restrooms'], description: 'Popular public beach entry with wide sandy beach and strong visitor access.', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', features: ['Showers', 'Restrooms', 'Free Parking', 'Family Friendly'] },
+    { name: 'Romar Beach Access', location: 'Orange Beach', type: 'beach-access', tags: ['beach-access', 'parking'], description: 'Simpler beach entry with less buildup than main public beach zones.', image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80', features: ['Beach Access', 'Free', 'Parking Nearby'] },
+    { name: 'Gulf Shores Public Beach', location: 'Gulf Shores', type: 'beach-access', tags: ['beach-access', 'lifeguards', 'restrooms'], description: 'Main public beach with lifeguards, restrooms, showers, and central tourist setup.', image: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?auto=format&fit=crop&w=1200&q=80', features: ['Lifeguards', 'Restrooms', 'Showers', 'Paid Parking'] },
+    { name: 'Gulf State Park Beach', location: 'Gulf State Park', type: 'beach-access', tags: ['beach-access', 'ada'], description: 'State park beach with better facilities and more organized setup.', image: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&q=80', features: ['Park Fee', 'Restrooms', 'Showers', 'Snorkeling'] },
+    { name: 'Boggy Point Boat Launch', location: 'Orange Beach', type: 'boat-launch', tags: ['boat-launch', 'parking'], description: 'Popular public launch with trailer parking and convenient water access.', image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80', features: ['Boat Ramp', 'Trailer Parking', 'Fishing Access'] },
+    { name: 'Cotton Bayou Boat Launch', location: 'Orange Beach', type: 'boat-launch', tags: ['boat-launch'], description: 'Direct water access without going through private marinas.', image: 'https://images.unsplash.com/photo-1468581264429-2548ef9eb732?auto=format&fit=crop&w=1200&q=80', features: ['Boat Ramp', 'Parking', 'Water Access'] },
+    { name: 'Gulf State Park Pier', location: 'Gulf Shores', type: 'pier-fishing', tags: ['pier-fishing'], description: 'Large public pier with bait shop and no fishing license required.', image: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80', features: ['No License Needed', 'Bait Shop', 'Small Fee'] },
+    { name: 'Bon Secour National Wildlife Refuge', location: 'Fort Morgan', type: 'parks', tags: ['parks'], description: 'Nature-focused area for trails, quiet spaces, and wildlife viewing.', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80', features: ['Nature Trails', 'Wildlife', 'Free'] },
+    { name: 'Gulf Shores Public Beach Pavilion', location: 'Gulf Shores', type: 'restrooms', tags: ['restrooms', 'ada'], description: 'Main facility stop with bathrooms, showers, and convenience.', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', features: ['Restrooms', 'Showers', 'ADA Accessible'] },
+    { name: 'Orange Beach Waterfront Park', location: 'Orange Beach', type: 'restrooms', tags: ['restrooms', 'parks'], description: 'Park facilities for restrooms and family convenience.', image: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=80', features: ['Restrooms', 'Family Friendly', 'Park Access'] },
+  ];
+
+  let html = '';
+  publicSpots.forEach(spot => {
+    const typePill = spot.type === 'beach-access' ? 'Beach Access' :
+                     spot.type === 'boat-launch' ? 'Boat Launch' :
+                     spot.type === 'pier-fishing' ? 'Pier & Fishing' :
+                     spot.type === 'parks' ? 'Park' : 'Restrooms';
+    const typeEmoji = spot.type === 'beach-access' ? '🏖️' :
+                      spot.type === 'boat-launch' ? '🚤' :
+                      spot.type === 'pier-fishing' ? '🎣' :
+                      spot.type === 'parks' ? '🌳' : '🚽';
+
+    html += `
+    <div class="section">
+      <div class="cards utility-card-section">
+        <article class="utility-card" data-tags="${spot.tags.join(' ')}">
+          <div class="utility-image" style="background-image:url('${spot.image}')"><div class="utility-image-badge">${typeEmoji} ${typePill}</div></div>
+          <div class="title-row"><div><div class="name">${escGcr(spot.name)}</div><div class="subline">${escGcr(spot.location)} • ${typePill}</div></div><div class="type-pill">${typePill}</div></div>
+          <div class="copy">${escGcr(spot.description)}</div>
+          <div class="chips">${spot.features.map(f => `<span class="chip">${escGcr(f)}</span>`).join('')}</div>
+          <div class="bottom-row"><div class="location">📍 ${escGcr(spot.location)}</div><div class="actions"><a href="#" class="action primary">Get Directions</a></div></div>
+        </article>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+  wirePublicSpotsFilters();
+}
+
+function wirePublicSpotsFilters() {
+  const toolbar = document.querySelector('.toolbar-top')?.parentElement?.querySelector('.tag-row');
+  if (!toolbar) return;
+
+  toolbar.querySelectorAll('.tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      toolbar.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      document.querySelectorAll('.utility-card').forEach(card => {
+        if (!filter || filter === 'all') {
+          card.style.display = '';
+        } else {
+          const tags = (card.dataset.tags || '').toLowerCase();
+          card.style.display = tags.includes(filter.toLowerCase()) ? '' : 'none';
+        }
+      });
+    });
+  });
 }
 
 /* ══════════════════════════════════════════

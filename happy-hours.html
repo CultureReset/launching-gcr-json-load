@@ -1,316 +1,454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Happy Hours — Gulf Coast Radar</title>
+  <meta name="description" content="Find the best happy hour deals and specials across Orange Beach and Gulf Shores.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    .listing-expand-card {
-      background:#fff; border-radius:var(--radius); box-shadow:var(--shadow-sm);
-      margin-bottom:12px; overflow:hidden; border:1.5px solid var(--gray-200);
-      transition:box-shadow .15s;
+    :root{
+      --bg:#f4f7fb;--card:#ffffff;--text:#12263a;--muted:#66788a;--line:#e2e8f0;
+      --nav:#0f2233;--brand:#0f7c90;--brand-dark:#0b6475;--brand-soft:#e8f7fa;
+      --gold:#f4b400;--green:#2e9b55;--orange:#f97316;--shadow:0 10px 28px rgba(15,34,51,.08);--radius:20px;
     }
-    .listing-expand-card:hover { box-shadow:var(--shadow); }
-    .listing-expand-header {
-      display:flex; align-items:center; gap:14px; padding:16px 20px; flex-wrap:wrap;
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
-    .listing-expand-emoji { font-size:2rem; flex-shrink:0; }
-    .listing-expand-info  { flex:1; min-width:0; }
-    .listing-expand-info h4 { font-size:.95rem; font-weight:700; margin:0 0 2px; }
-    .listing-expand-info p  { font-size:.82rem; color:var(--text-muted); margin:0; }
-    .listing-expand-actions { display:flex; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-    .expand-btn { background:var(--teal); color:#fff; border:none; cursor:pointer; }
-    .expand-btn:hover { background:var(--teal-dark); }
-    .listing-expand-details {
-      display:none; padding:0 20px 16px; border-top:1px solid var(--gray-100);
+    a{text-decoration:none;color:inherit}
+    button,input,select{font:inherit}
+    .page{max-width:1280px;margin:0 auto;padding-bottom:32px}
+    .header{
+      margin:18px 18px 0;
+      background:linear-gradient(135deg,#0f7c90,#115b75);
+      color:#fff;border-radius:28px;padding:24px 24px 20px;
+      box-shadow:var(--shadow);
     }
-    .listing-expand-details.open { display:block; }
-    .expand-item-row {
-      display:flex; justify-content:space-between; align-items:flex-start;
-      padding:10px 0; border-bottom:1px solid var(--gray-100); gap:12px;
+    .header-top{
+      display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;
     }
-    .expand-item-row:last-child { border-bottom:none; }
-    .expand-item-name  { font-weight:600; font-size:.88rem; }
-    .expand-item-desc  { font-size:.8rem; color:var(--text-muted); margin-top:2px; }
-    .expand-item-price { font-size:.9rem; font-weight:700; color:var(--teal); white-space:nowrap; flex-shrink:0; }
+    .header h1{margin:0;font-size:52px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .header p{margin:10px 0 0;font-size:18px;line-height:1.5;color:rgba(255,255,255,.92);max-width:720px}
+    .livebox{
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
+      padding:14px 16px;border-radius:18px;min-width:240px
+    }
+    .livebox strong{display:block;font-size:18px}
+    .livebox span{display:block;margin-top:6px;color:rgba(255,255,255,.9);font-weight:600}
+    .controls{
+      margin-top:16px;
+      display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+    }
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border-radius:999px;padding:10px 14px;font-weight:800;
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18)
+    }
+    .toolbar{
+      position:sticky;top:66px;z-index:30;
+      margin:14px 18px 0;
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      border-radius:18px;padding:12px;
+    }
+    .toolbar-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .toolbar-title{font-size:20px;font-weight:900}
+    .toolbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .ctrl{
+      border:1px solid var(--line);background:#fff;color:#37556a;
+      padding:10px 12px;border-radius:12px;font-weight:700;
+    }
+    .tag-row{
+      display:flex;gap:10px;overflow-x:auto;padding-top:12px;
+    }
+    .tag-btn{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);color:#446072;
+      padding:11px 16px;border-radius:999px;font-weight:700;
+      transition:.18s ease;
+    }
+    .tag-btn.active,.tag-btn:hover{
+      background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark);
+    }
 
-    .date-hero {
-      background: linear-gradient(135deg,#c9831f,#a0621a);
-      color:#fff; padding:20px 16px; text-align:center;
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;
+      padding:18px;
     }
-    .date-hero .day-name { font-size:1.8rem; font-weight:800; letter-spacing:-.5px; }
-    .date-hero .full-date { font-size:.9rem; opacity:.85; margin-top:2px; }
-    .date-hero .live-clock { font-size:1.1rem; font-weight:700; margin-top:4px; color:#ffe0a0; }
+    .section{margin-bottom:18px}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .section-title{font-size:32px;font-weight:900;letter-spacing:-.03em;margin:0}
+    .section-sub{color:var(--muted);font-weight:700}
 
-    .hh-status-badge {
-      display:inline-flex; align-items:center; gap:5px;
-      padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:700;
+    .cards{display:flex;flex-direction:column;gap:14px}
+    .hh-card{
+      display:grid;grid-template-columns:250px minmax(0,1fr);
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);overflow:hidden;
+      transition:transform .14s ease, box-shadow .14s ease;
     }
-    .hh-live  { background:#d1fae5; color:#065f46; }
-    .hh-soon  { background:#fef3c7; color:#92400e; }
-    .hh-later { background:#f3f4f6; color:#6b7280; }
+    .hh-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .hh-image{
+      min-height:210px;background-size:cover;background-position:center;position:relative;
+    }
+    .image-badge{
+      position:absolute;left:14px;bottom:14px;
+      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.94);
+      color:#21485d;font-weight:800;font-size:13px;
+    }
+    .hh-body{padding:16px 18px}
+    .title-row{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+    }
+    .name{font-size:28px;font-weight:900;letter-spacing:-.03em}
+    .status{
+      background:#e9f9ef;color:var(--green);
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap
+    }
+    .subline{
+      margin-top:4px;color:var(--muted);font-size:15px;font-weight:600;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    }
+    .rating{
+      margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      font-size:15px;font-weight:700;color:#384f61;
+    }
+    .stars{color:var(--gold);letter-spacing:1px}
+    .timepill{
+      display:inline-flex;align-items:center;gap:6px;
+      margin-top:12px;background:#eef8fb;color:var(--brand-dark);
+      border:1px solid #d3eef3;border-radius:999px;padding:8px 12px;font-weight:800;font-size:14px;
+    }
+    .deals{margin-top:12px;display:grid;gap:8px}
+    .deal{
+      background:#f8fafc;border:1px solid #ecf1f6;border-radius:14px;padding:10px 12px;
+      color:#42596c;font-weight:700
+    }
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{
+      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700
+    }
+    .bottom-row{
+      margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
+      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+    }
+    .address{color:#425b70;font-weight:700;font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action{
+      border:1px solid var(--line);background:#fff;color:#25465b;
+      padding:10px 14px;border-radius:12px;font-weight:800;
+    }
+    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
 
-    .section-label-bar {
-      padding:10px 0 6px;
-      font-size:.75rem; font-weight:800; letter-spacing:1px;
-      text-transform:uppercase; color:var(--text-muted);
-      border-bottom:2px solid var(--gray-200); margin-bottom:12px;
+    .compact-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:12px;
     }
-    .empty-state { text-align:center; padding:48px 24px; color:#888; }
-    .empty-state .empty-icon { font-size:3rem; margin-bottom:12px; }
+    .compact-card{
+      background:var(--card);border:1px solid var(--line);border-radius:18px;
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .compact-card h4{margin:0;font-size:20px;font-weight:900}
+    .countdown{
+      display:inline-block;margin-top:8px;background:#fff3e9;color:var(--orange);
+      border:1px solid #ffd9bf;border-radius:999px;padding:7px 10px;font-weight:800;font-size:13px;
+    }
+    .compact-meta{margin-top:6px;color:var(--muted);font-weight:700}
+    .compact-deal{margin-top:10px;color:#41596d;font-weight:700}
+    .compact-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .compact-actions a{
+      background:#f7fafc;border:1px solid var(--line);padding:8px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mini-card{
+      display:flex;gap:12px;padding:10px 0;border-top:1px solid #edf2f7;
+    }
+    .mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-thumb{
+      width:90px;height:76px;border-radius:14px;flex:0 0 90px;background-size:cover;background-position:center;
+    }
+    .mini-name{font-weight:800;font-size:17px}
+    .mini-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .mini-links a{
+      background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+    .mapbox{
+      height:170px;border-radius:16px;background:
+        linear-gradient(90deg, rgba(255,255,255,.60), rgba(255,255,255,.60)),
+        repeating-linear-gradient(0deg,#d9e6f3 0 2px, transparent 2px 28px),
+        repeating-linear-gradient(90deg,#d9e6f3 0 2px, transparent 2px 28px),
+        linear-gradient(135deg,#eef5fd,#d9ecff);
+      position:relative;overflow:hidden
+    }
+    .river{
+      position:absolute;left:-10%;right:-10%;top:48%;
+      height:30px;background:#7dc2fb;border-radius:99px;transform:rotate(-12deg)
+    }
+    .pin{
+      position:absolute;right:34%;top:32%;
+      width:24px;height:24px;border-radius:50% 50% 50% 0;background:#ea5b4e;transform:rotate(-45deg)
+    }
+    .pin:after{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}
+    .cta{
+      background:linear-gradient(135deg,#0f7c90,#115b75);
+      color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;text-align:center;display:block
+    }
+    .empty{
+      background:#fff;border:1px dashed #cdd8e5;border-radius:18px;padding:18px;color:#4f667a;font-weight:700
+    }
+
+    @media (max-width:1080px){.layout{grid-template-columns:1fr}.sidebar{order:2}}
+    @media (max-width:760px){
+      .header{margin-left:12px;margin-right:12px}
+      .header h1{font-size:38px}
+      .header p{font-size:16px}
+      .toolbar{margin-left:12px;margin-right:12px}
+      .layout{padding:12px}
+      .hh-card{grid-template-columns:1fr}
+      .hh-image{min-height:190px}
+      .compact-grid{grid-template-columns:1fr}
+      .section-title{font-size:26px}
+    }
   </style>
 </head>
 <body>
 
-<div class="gcr-header">
-  <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
-      <img src="gcr-logo.png" alt="Gulf Coast Radar">
-      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-    </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
-  </div>
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
+    </div>
     <div class="gcr-cat-tabs" id="gcrCatTabs">
-    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
-    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
-    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
-    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
-    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="happy-hours.html" class="gcr-cat-tab active">🍻 Happy Hours</a>
+      <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
   </div>
-  <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
-  </div>
-</div>
 
-<!-- DATE HERO -->
-<div class="date-hero">
-  <div class="day-name" id="hhDayName">—</div>
-  <div class="full-date" id="hhFullDate">—</div>
-  <div class="live-clock" id="hhClock">—</div>
-</div>
+  <div class="page">
+    <section class="header">
+      <div class="header-top">
+        <div>
+          <h1>Happy Hours</h1>
+          <p>Best food and drink specials happening now across Orange Beach and Gulf Shores.</p>
+        </div>
+        <div class="livebox">
+          <strong id="hh-time">Tuesday • 4:18 PM</strong>
+          <span>18 active specials today</span>
+          <span>7 starting soon</span>
+        </div>
+      </div>
+      <div class="controls">
+        <span class="pill">🔥 Happening Now</span>
+        <span class="pill">🕒 Starting Soon</span>
+        <span class="pill">🌊 Waterfront</span>
+      </div>
+    </section>
 
-<!-- FILTERS -->
-<div class="filters-bar"><div class="container"><div class="filters-inner">
-  <button class="filter-chip active" data-filter="all">All</button>
-  <button class="filter-chip" data-filter="bar">🍺 Bars</button>
-  <button class="filter-chip" data-filter="beach-bar">🏖️ Beach Bars</button>
-  <button class="filter-chip" data-filter="sports-bar">📺 Sports Bars</button>
-  <button class="filter-chip" data-filter="waterfront">⚓ Waterfront</button>
-  <button class="filter-chip" data-filter="live-music">🎸 Live Music</button>
-  <button class="filter-chip" data-filter="food-specials">🍔 Food Specials</button>
-</div></div></div>
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Happy Hours</div>
+        <div class="toolbar-actions">
+          <button class="ctrl">List View</button>
+          <button class="ctrl">Map View</button>
+          <select class="ctrl">
+            <option>Sort: Happening Now</option>
+            <option>Nearest</option>
+            <option>Best Rated</option>
+            <option>Start Time</option>
+          </select>
+        </div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active">Happening Now</button>
+        <button class="tag-btn">Starting Soon</button>
+        <button class="tag-btn">Later Today</button>
+        <button class="tag-btn">Waterfront</button>
+        <button class="tag-btn">Drink Specials</button>
+        <button class="tag-btn">Orange Beach</button>
+        <button class="tag-btn">Gulf Shores</button>
+        <button class="tag-btn">Family Friendly</button>
+      </div>
+    </section>
 
-<section class="section"><div class="container">
-  <div id="hhNowSection" style="display:none;">
-    <div class="section-label-bar">🟢 Happening Right Now</div>
-    <div id="hhNowGrid"></div>
-  </div>
-  <div id="hhSoonSection" style="display:none;">
-    <div class="section-label-bar">🟡 Starting Soon</div>
-    <div id="hhSoonGrid"></div>
-  </div>
-  <div id="hhLaterSection" style="display:none;">
-    <div class="section-label-bar">🕐 Later Today</div>
-    <div id="hhLaterGrid"></div>
-  </div>
-  <div id="hhLoading" style="text-align:center;padding:48px 0;color:#888;">
-    <div style="font-size:2rem;margin-bottom:8px;">🍻</div>
-    Loading today's happy hours…
-  </div>
-  <div id="hhEmpty" style="display:none;" class="empty-state">
-    <div class="empty-icon">🍻</div>
-    <div style="font-weight:600;font-size:1.1rem;">No happy hours found for today</div>
-    <p style="margin-top:8px;font-size:.9rem;">Check back later or browse all restaurants.</p>
-  </div>
-</div></section>
-
-<section class="section-sm" style="background:var(--gray-100);"><div class="container">
-  <div class="claim-cta"><h4>Run Happy Hour Specials?</h4>
-  <p>Get in front of tourists looking for deals right now. Free to list.</p>
-  <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
-</div></section>
-
-<footer class="site-footer"><div class="container">
-  <div class="footer-bottom" style="border-top:none;padding-top:0">
-    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
-    <p>Powered by <span class="powered">CyberCheck</span></p>
-  </div>
-</div></footer>
-
-<script src="js/gcr-api.js"></script>
-<script src="js/app.js"></script>
-<script>
-  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const SHORT_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-  // ── Date / clock display ──
-  function updateClock() {
-    const now = new Date();
-    document.getElementById('hhDayName').textContent  = DAYS[now.getDay()];
-    document.getElementById('hhFullDate').textContent = now.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-    document.getElementById('hhClock').textContent    = now.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit', hour12:true });
-  }
-  updateClock(); setInterval(updateClock, 30000);
-
-  // ── Parse "3:00 PM" → minutes since midnight ──
-  function toMinutes(timeStr) {
-    if (!timeStr) return null;
-    const m = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!m) return null;
-    let h = parseInt(m[1]), min = parseInt(m[2]), ampm = m[3].toUpperCase();
-    if (ampm === 'PM' && h !== 12) h += 12;
-    if (ampm === 'AM' && h === 12) h = 0;
-    return h * 60 + min;
-  }
-
-  const todayLower = DAYS[new Date().getDay()].toLowerCase(); // e.g. "monday"
-
-  // ── Check if a special runs today ──
-  function runsToday(sp) {
-    const days = sp.days || [];
-    if (!days.length) return true; // no days = every day
-    return days.map(d => d.toLowerCase()).includes(todayLower);
-  }
-
-  // ── Determine HH status ──
-  function hhStatus(startStr, endStr) {
-    const n = new Date(), nowMin = n.getHours()*60+n.getMinutes();
-    const start = toMinutes(startStr), end = toMinutes(endStr);
-    if (start === null) return 'later';
-    if (end !== null && nowMin >= end) return null; // ended
-    if (nowMin >= start) return 'live';
-    if (start - nowMin <= 60) return 'soon';
-    return 'later';
-  }
-
-  // ── Build card from specials data ──
-  function buildCard(bizName, bizEmoji, bizSlug, bizTags, specials, idx) {
-    const id = `hh-${idx}`;
-    // Use first HH special for time display
-    const sp = specials[0];
-    const startStr = sp.start_time || sp.description?.match(/(\d+:\d+\s*(?:AM|PM))/i)?.[1] || '';
-    const endStr   = sp.end_time   || sp.description?.match(/.*-\s*(\d+:\d+\s*(?:AM|PM))/i)?.[1] || '';
-    const status   = hhStatus(startStr, endStr);
-    const timeStr  = startStr && endStr ? `${startStr} – ${endStr}` : sp.description || 'Happy Hour Today';
-
-    const badgeHtml = status === 'live'  ? `<span class="hh-status-badge hh-live">🟢 Live Now</span>` :
-                      status === 'soon'  ? `<span class="hh-status-badge hh-soon">🟡 Starting Soon</span>` :
-                                           `<span class="hh-status-badge hh-later">🕐 Later</span>`;
-
-    const bTags = (bizTags || []).join(' ').toLowerCase();
-
-    // Build deals from drink_specials + items
-    let dealsHtml = '';
-    specials.forEach(s => {
-      (s.drink_specials || []).forEach(d => {
-        dealsHtml += `<div class="expand-item-row">
-          <div><div class="expand-item-name">${d.name}</div>${d.note ? `<div class="expand-item-desc">${d.note}</div>` : ''}</div>
-          <div class="expand-item-price">$${typeof d.price === 'number' ? d.price.toFixed(2) : d.price}</div>
-        </div>`;
-      });
-      (s.items || s.items_list || []).forEach(item => {
-        dealsHtml += `<div class="expand-item-row">
-          <div><div class="expand-item-name">${item.name || item}</div>${item.desc ? `<div class="expand-item-desc">${item.desc}</div>` : ''}</div>
-          <div class="expand-item-price">${item.price || ''}</div>
-        </div>`;
-      });
-    });
-    if (!dealsHtml) dealsHtml = `<div style="padding:12px 0;color:#888;font-size:.85rem;">Call to confirm today's specials.</div>`;
-
-    return { status, startMin: toMinutes(startStr) || 999, html: `
-      <div class="listing-expand-card" data-tags="${bTags}" data-status="${status || 'later'}">
-        <div class="listing-expand-header">
-          <span class="listing-expand-emoji">${bizEmoji || '🍻'}</span>
-          <div class="listing-expand-info">
-            <h4>${bizName}</h4>
-            <p>${timeStr} &nbsp;${badgeHtml}</p>
+    <section class="layout">
+      <main>
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Happening Right Now</h2>
+            <div class="section-sub">8 live specials</div>
           </div>
-          <div class="listing-expand-actions">
-            <a href="business.html?id=${bizSlug}" class="btn btn-outline btn-sm">View Profile</a>
-            <button class="expand-btn btn btn-sm" onclick="toggleExpand('${id}')">See Specials ▼</button>
+          <div class="cards" id="hhNowGrid"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Starting Soon</h2>
+            <div class="section-sub">Starts within the next 2 hours</div>
+          </div>
+          <div class="compact-grid" id="hhSoonGrid"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">Later Today</h2>
+            <div class="section-sub">Plan ahead</div>
+          </div>
+          <div class="compact-grid" id="hhLaterGrid"></div>
+        </section>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Map View</h3>
+          <div class="mapbox">
+            <div class="river"></div>
+            <div class="pin"></div>
+          </div>
+          <div class="mini-meta" style="margin-top:10px">Use list, map, or split view so people can choose based on where they are.</div>
+        </div>
+
+        <div class="panel">
+          <h3>Featured Happy Hour</h3>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Cobalt</div>
+              <div class="mini-meta">Starts at 4:00 PM • Waterfront</div>
+              <div class="mini-links">
+                <a href="#">Save</a>
+                <a href="#">Details</a>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="listing-expand-details" id="${id}">${dealsHtml}</div>
-      </div>`
-    };
-  }
 
-  // ── Render all HH from specials table ──
-  function renderHH(specials, businesses) {
-    const bizMap = {};
-    (businesses || []).forEach(b => { bizMap[b.id] = b; bizMap[b.site_id] = b; bizMap[b.slug] = b; });
+        <div class="panel">
+          <h3>Nearby Live Music</h3>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Anchor Bar & Grill</div>
+              <div class="mini-meta">Band starts at 7:00 PM</div>
+              <div class="mini-links">
+                <a href="#">See Event</a>
+                <a href="#">Directions</a>
+              </div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">GTs on the Bay</div>
+              <div class="mini-meta">Acoustic set at 6:30 PM</div>
+              <div class="mini-links">
+                <a href="#">See Event</a>
+                <a href="#">Directions</a>
+              </div>
+            </div>
+          </div>
+        </div>
 
-    // Filter: type=happy_hour, active, runs today
-    const hhToday = (specials || []).filter(sp =>
-      sp.active !== false &&
-      (sp.type === 'happy_hour' || (sp.name || '').toLowerCase().includes('happy hour')) &&
-      runsToday(sp)
-    );
+        <div class="panel">
+          <h3>Run Happy Hour Specials?</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">
+            Claim your listing and get your specials in front of locals and tourists looking right now.
+          </p>
+          <a href="claim.html" class="cta">Claim Your Listing Free</a>
+        </div>
+      </aside>
+    </section>
+  </div>
 
-    // Group by business
-    const byBiz = {};
-    hhToday.forEach(sp => {
-      const key = sp.site_id || sp.business_id || sp.slug || 'unknown';
-      if (!byBiz[key]) byBiz[key] = { biz: bizMap[key] || { name: sp.businessName, emoji: sp.businessEmoji, slug: sp.slug, tags:[] }, specials: [] };
-      byBiz[key].specials.push(sp);
-    });
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="specials.html">Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
 
-    const now = [], soon = [], later = [];
-    let idx = 0;
-    Object.values(byBiz).forEach(({ biz, specials }) => {
-      const card = buildCard(biz.name, biz.emoji, biz.slug || biz.id, biz.tags, specials, idx++);
-      if (card.status === null) return; // ended
-      if (card.status === 'live')  now.push(card);
-      else if (card.status === 'soon') soon.push(card);
-      else later.push(card);
-    });
-
-    const sortByTime = arr => arr.sort((a,b) => a.startMin - b.startMin).map(x => x.html).join('');
-
-    document.getElementById('hhLoading').style.display = 'none';
-
-    if (now.length + soon.length + later.length === 0) {
-      document.getElementById('hhEmpty').style.display = 'block';
-      return;
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Update time
+    function updateTime() {
+      const now = new Date();
+      const day = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now.getDay()];
+      const time = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+      document.getElementById('hh-time').textContent = day + ' • ' + time;
     }
-
-    if (now.length)  { document.getElementById('hhNowSection').style.display = 'block';   document.getElementById('hhNowGrid').innerHTML  = sortByTime(now);   }
-    if (soon.length) { document.getElementById('hhSoonSection').style.display = 'block';  document.getElementById('hhSoonGrid').innerHTML  = sortByTime(soon);  }
-    if (later.length){ document.getElementById('hhLaterSection').style.display = 'block'; document.getElementById('hhLaterGrid').innerHTML = sortByTime(later); }
-
-    wireFilters();
-  }
-
-  // ── Filter chips ──
-  function wireFilters() {
-    document.querySelectorAll('.filter-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const f = btn.dataset.filter;
-        document.querySelectorAll('.listing-expand-card').forEach(card => {
-          card.style.display = (f === 'all' || card.dataset.tags.includes(f)) ? '' : 'none';
-        });
-      });
-    });
-  }
-
-  function toggleExpand(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.toggle('open');
-    event.target.textContent = el.classList.contains('open') ? 'Hide Specials ▲' : 'See Specials ▼';
-  }
-
-  document.addEventListener('gcr:loaded', e => renderHH(e.detail.specials || [], e.detail.businesses || []));
-</script>
-</body></html>
+    updateTime();
+    setInterval(updateTime, 30000);
+  </script>
+</body>
+</html>

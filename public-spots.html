@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beach Access & Public Spots — Gulf Coast Radar</title>
+  <meta name="description" content="Find beach accesses, boat launches, parks, fishing spots, and public facilities on the Gulf Coast.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{
+      --bg:#f5f7fb;--card:#ffffff;--text:#12263a;--muted:#66788a;--line:#e2e8f0;
+      --nav:#0f2233;--brand:#0f7c90;--brand-dark:#0b6475;--brand-soft:#e8f7fa;
+      --gold:#f4b400;--green:#2e9b55;--shadow:0 10px 28px rgba(15,34,51,.08);--radius:20px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body.public-spots-page{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{text-decoration:none;color:inherit}
+    button,input,select{font:inherit}
+    .page{max-width:1240px;margin:0 auto;padding-bottom:32px}
+    .hero{
+      margin:16px 18px 0;
+      border-radius:28px;overflow:hidden;position:relative;min-height:280px;
+      background:linear-gradient(135deg,#0f2233,#0f7c90);
+      display:flex;align-items:flex-end;color:#fff;
+    }
+    .hero-content{padding:28px;max-width:760px}
+    .hero h1{margin:0;font-size:56px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .hero p{margin:10px 0 0;font-size:20px;line-height:1.45;color:rgba(255,255,255,.92)}
+    .livebox{
+      background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);
+      padding:14px 16px;border-radius:18px;min-width:260px;
+      position:absolute;right:28px;bottom:28px;
+    }
+    .livebox strong{display:block;font-size:16px;margin-bottom:6px}
+    .livebox span{display:block;color:rgba(255,255,255,.9);font-weight:600;font-size:14px;line-height:1.6}
+    .toolbar{
+      margin:14px 18px 0;
+      background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+      border-radius:18px;padding:12px;
+    }
+    .toolbar-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .toolbar-title{font-size:20px;font-weight:800}
+    .toolbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .ctrl{border:1px solid var(--line);background:#fff;color:#37556a;padding:10px 12px;border-radius:12px;font-weight:700;cursor:pointer;font-size:.85rem}
+    .ctrl:hover{background:#f7fafc}
+    .tag-row{
+      display:flex;gap:10px;overflow-x:auto;padding-top:12px;
+    }
+    .tag-btn{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);color:#446072;
+      padding:11px 16px;border-radius:999px;font-weight:700;
+      transition:.18s ease;
+      flex-shrink:0;
+    }
+    .tag-btn.active,.tag-btn:hover{
+      background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark);
+    }
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;
+      padding:18px;
+    }
+    .section{margin-bottom:20px}
+    .section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .section-title{font-size:30px;font-weight:900;letter-spacing:-.03em;margin:0}
+    .section-sub{color:var(--muted);font-weight:700;font-size:.95rem}
+    .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .utility-card{
+      background:var(--card);border:1px solid var(--line);border-radius:18px;
+      box-shadow:var(--shadow);padding:16px;transition:transform .14s ease,box-shadow .14s ease;
+    }
+    .utility-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .utility-image{
+      height:180px;border-radius:14px;background-size:cover;background-position:center;
+      margin-bottom:14px;position:relative;overflow:hidden;
+    }
+    .utility-image-badge{
+      position:absolute;left:12px;bottom:12px;
+      padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.94);
+      color:#21485d;font-weight:800;font-size:12px;
+    }
+    .title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .name{font-size:24px;font-weight:900;letter-spacing:-.03em;line-height:1.1}
+    .type-pill{
+      background:#eef8fb;color:var(--brand-dark);
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap;
+    }
+    .subline{margin-top:6px;color:var(--muted);font-size:15px;font-weight:700}
+    .copy{margin-top:10px;color:#42596c;line-height:1.6;font-weight:700;font-size:14px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{
+      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
+      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700
+    }
+    .bottom-row{
+      margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
+      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+    }
+    .location{color:#425b70;font-weight:700;font-size:14px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .action{
+      border:1px solid var(--line);background:#fff;color:#25465b;
+      padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer;
+    }
+    .action:hover{background:#f7fafc}
+    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .action.primary:hover{background:var(--brand-dark)}
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mapbox{
+      height:180px;border-radius:16px;
+      background:linear-gradient(90deg,rgba(255,255,255,.60),rgba(255,255,255,.60)),repeating-linear-gradient(0deg,#d9e6f3 0 2px,transparent 2px 28px),repeating-linear-gradient(90deg,#d9e6f3 0 2px,transparent 2px 28px),linear-gradient(135deg,#eef5fd,#d9ecff);
+      position:relative;overflow:hidden;
+    }
+    .river{position:absolute;left:-10%;right:-10%;top:48%;height:30px;background:#7dc2fb;border-radius:99px;transform:rotate(-12deg)}
+    .pin{position:absolute;width:22px;height:22px;border-radius:50% 50% 50% 0;background:#ea5b4e;transform:rotate(-45deg)}
+    .pin:after{content:"";position:absolute;inset:6px;background:#fff;border-radius:50%}
+    .pin.one{left:28%;top:34%}.pin.two{left:54%;top:48%}.pin.three{left:68%;top:28%}
+    .mini-card{padding:10px 0;border-top:1px solid #edf2f7}
+    .mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-name{font-weight:800;font-size:17px}
+    .mini-meta{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .mini-links a{
+      background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+    .mini-links a:hover{background:#eef8fb}
+    .notice{
+      background:#fff8ef;border:1px solid #ffe0bf;color:#8a5b18;
+      border-radius:14px;padding:12px 14px;font-weight:700;line-height:1.5;
+    }
+    .cta{
+      background:linear-gradient(135deg,#0f7c90,#115b75);
+      color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;
+      text-align:center;display:block;cursor:pointer;
+    }
+    .cta:hover{opacity:.95}
+    @media (max-width:1080px){.layout{grid-template-columns:1fr}.sidebar{order:2}}
+    @media (max-width:760px){
+      .hero{margin-left:12px;margin-right:12px;min-height:220px}
+      .hero h1{font-size:38px}
+      .hero p{font-size:16px}
+      .livebox{position:static;min-width:unset;margin-top:12px}
+      .toolbar{margin-left:12px;margin-right:12px}
+      .layout{padding:12px}
+      .cards{grid-template-columns:1fr}
+      .section-title{font-size:26px}
+      .utility-image{height:170px}
+    }
+  </style>
+</head>
+<body class="public-spots-page">
+
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+        📲 Install App
+      </button>
+    </div>
+    <div class="gcr-cat-tabs" id="gcrCatTabs">
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="deals.html" class="gcr-cat-tab">🏷️ Deals</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="public-spots.html" class="gcr-cat-tab active">🏖️ Public Spots</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Beach Access & Public Spots</h1>
+        <p>Find beach accesses, boat launches, fishing spots, public restrooms, parking, parks, and other useful public amenities across the Gulf Coast.</p>
+      </div>
+      <div class="livebox">
+        <strong>Today's Highlights</strong>
+        <span id="spotCount">28 public spots listed</span>
+        <span id="beachCount">12 beach accesses</span>
+        <span id="facilityCount">8 facilities with restrooms</span>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Public Spots</div>
+        <div class="toolbar-actions">
+          <button class="ctrl">List View</button>
+          <button class="ctrl">Map View</button>
+          <select class="ctrl">
+            <option>Sort: Most Useful</option>
+            <option>Nearest</option>
+            <option>Beach Access</option>
+            <option>Boat Launches</option>
+          </select>
+        </div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active" data-filter="all">All</button>
+        <button class="tag-btn" data-filter="beach-access">🏖️ Beach Access</button>
+        <button class="tag-btn" data-filter="boat-launch">🚤 Boat Launches</button>
+        <button class="tag-btn" data-filter="parks">🌳 Parks</button>
+        <button class="tag-btn" data-filter="pier-fishing">🎣 Piers & Fishing</button>
+        <button class="tag-btn" data-filter="restrooms">🚽 Restrooms</button>
+        <button class="tag-btn" data-filter="parking">🅿️ Parking</button>
+        <button class="tag-btn" data-filter="ada">♿ ADA Accessible</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <main>
+        <div id="spotsContainer">
+          <!-- Spots rendered by JavaScript -->
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Map View</h3>
+          <div class="mapbox">
+            <div class="river"></div>
+            <div class="pin one"></div>
+            <div class="pin two"></div>
+            <div class="pin three"></div>
+          </div>
+          <div class="mini-meta" style="margin-top:10px">Use map pins later for beach access, launches, parks, and restrooms.</div>
+        </div>
+
+        <div class="panel">
+          <h3>Quick Links</h3>
+          <div class="mini-card">
+            <div class="mini-name">Beach Accesses</div>
+            <div class="mini-meta">Jump straight to public beach entry points and facility info.</div>
+            <div class="mini-links"><a href="#">Browse</a></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-name">Boat Launches</div>
+            <div class="mini-meta">Find launch spots with parking and water access details.</div>
+            <div class="mini-links"><a href="#">Browse</a></div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-name">Piers & Fishing</div>
+            <div class="mini-meta">Quick fishing access and public pier info.</div>
+            <div class="mini-links"><a href="#">Browse</a></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Beach Notes</h3>
+          <div class="notice">
+            Check seasonal parking rules, beach flag conditions, and any posted swim advisories before heading out.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Add a Public Spot</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Submit or suggest a useful public access point, facility, park, or ramp to improve the local guide.</p>
+          <a href="claim.html" class="cta">Suggest a Spot</a>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="deals.html">Deals & Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+          <a href="public-spots.html">Public Spots</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

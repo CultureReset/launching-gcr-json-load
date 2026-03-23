@@ -109,6 +109,9 @@ const GCR = {
   getBusiness(slugOrId) {
     return this.businesses.find(b => b.slug === slugOrId || b.id === slugOrId || b.site_id === slugOrId || b.subdomain === slugOrId);
   },
+  getSpecialsByBusiness(slug) {
+    return this.specials.filter(s => s.slug === slug || s.subdomain === slug);
+  },
 
   /* ── Fetch full profile (fleet, pricing, addons, reviews, etc.) ── */
   async loadProfile(slug) {

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deals — Gulf Coast Radar</title>
+  <meta name="description" content="Find happy hour deals and specials in Orange Beach and Gulf Shores.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#12263a;
+      --muted:#66788a;
+      --line:#e2e8f0;
+      --nav:#0f2233;
+      --brand:#0f7c90;
+      --brand-dark:#0b6475;
+      --brand-soft:#e8f7fa;
+      --gold:#f4b400;
+      --green:#2e9b55;
+      --shadow:0 10px 28px rgba(15,34,51,.08);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body.deals-page{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    a{text-decoration:none;color:inherit}
+    button,input{font:inherit}
+    .page{max-width:1240px;margin:0 auto;padding-bottom:32px}
+    .hero{
+      margin:16px 18px 0;
+      border-radius:28px;overflow:hidden;position:relative;min-height:280px;
+      background:
+        linear-gradient(rgba(0,0,0,.24), rgba(0,0,0,.44)),
+        url('https://images.unsplash.com/photo-1552521881-721bd4c75dac?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      display:flex;align-items:flex-end;
+    }
+    .hero-content{padding:28px;color:#fff;max-width:760px}
+    .hero h1{margin:0;font-size:56px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .hero p{margin:10px 0 0;font-size:20px;line-height:1.45;color:rgba(255,255,255,.92)}
+    .toolbar{
+      margin:14px 18px 0;
+      background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+      border-radius:18px;padding:12px;
+    }
+    .toolbar-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .toolbar-title{font-size:20px;font-weight:800}
+    .toolbar-meta{color:var(--muted);font-weight:600}
+    .tag-row{
+      display:flex;gap:10px;overflow-x:auto;padding-top:12px;
+    }
+    .tag-btn{
+      border:none;cursor:pointer;white-space:nowrap;
+      background:#fff;border:1px solid var(--line);color:#446072;
+      padding:11px 16px;border-radius:999px;font-weight:700;
+      transition:.18s ease;
+      flex-shrink:0;
+    }
+    .tag-btn.active,.tag-btn:hover{
+      background:var(--brand-soft);border-color:#b9e7ef;color:var(--brand-dark);
+    }
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;
+      padding:18px;
+    }
+    .results-title{font-size:34px;font-weight:900;letter-spacing:-.03em;margin:2px 0 14px}
+    .list{display:flex;flex-direction:column;gap:14px}
+    .deal-item-wrapper{display:flex;flex-direction:column}
+    .deal-card{
+      display:grid;grid-template-columns:260px 1fr;
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0;
+      box-shadow:var(--shadow);overflow:hidden;
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .deal-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .deal-image{
+      min-height:208px;background-size:cover;background-position:center;position:relative;
+    }
+    .deal-body{padding:16px 18px}
+    .deal-name{font-size:22px;font-weight:900;letter-spacing:-.03em}
+    .deal-subline{
+      margin-top:4px;color:var(--muted);font-size:14px;font-weight:600;
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+    }
+    .deal-summary{
+      margin-top:10px;font-size:14px;font-weight:700;color:#384f61;
+    }
+    .deal-actions{
+      margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;
+    }
+    .deal-btn{
+      border:1px solid var(--line);background:#fff;color:#25465b;
+      padding:10px 14px;border-radius:12px;font-weight:800;font-size:.85rem;cursor:pointer;text-decoration:none;transition:.15s;
+    }
+    .deal-btn:hover{background:#f7fafc}
+    .deal-btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+    .deal-btn-primary:hover{background:var(--brand-dark)}
+    .deal-details{
+      display:none;background:var(--card);border:1px solid var(--line);border-top:none;
+      border-radius:0 0 var(--radius) var(--radius);overflow:hidden;
+      margin:0;box-shadow:0 10px 28px rgba(15,34,51,.08);
+    }
+    .deal-details.open{display:block}
+    .deal-item-row{
+      display:flex;justify-content:space-between;align-items:flex-start;
+      padding:12px 0;border-bottom:1px solid var(--line);gap:12px;
+    }
+    .deal-item-row:last-child{border-bottom:none}
+    .deal-item-name{font-weight:600;font-size:.9rem}
+    .deal-item-desc{font-size:.8rem;color:var(--text-muted);margin-top:2px}
+    .deal-item-price{font-size:.9rem;font-weight:700;color:var(--brand);white-space:nowrap;flex-shrink:0}
+    .sidebar{display:flex;flex-direction:column;gap:14px}
+    .panel{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .panel h3{margin:0 0 12px;font-size:20px;font-weight:900}
+    .mini-card{
+      display:flex;gap:12px;padding:10px 0;border-top:1px solid #edf2f7;
+    }
+    .mini-card:first-of-type{border-top:none;padding-top:0}
+    .mini-thumb{
+      width:90px;height:76px;border-radius:14px;flex:0 0 90px;background-size:cover;background-position:center;
+    }
+    .mini-name{font-weight:800;font-size:17px}
+    .mini-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .mini-links{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    .mini-links a{
+      background:#f7fafc;border:1px solid var(--line);padding:7px 10px;border-radius:10px;
+      font-size:12px;font-weight:800;color:#36566b;
+    }
+    .cta{
+      background:linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;
+      text-align:center;display:block;text-decoration:none;cursor:pointer;
+    }
+    @media (max-width: 1080px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{order:2}
+    }
+    @media (max-width: 760px){
+      .hero{min-height:220px}
+      .hero h1{font-size:38px}
+      .hero p{font-size:16px}
+      .layout{padding:12px}
+      .toolbar,.hero{margin-left:12px;margin-right:12px}
+      .deal-card{grid-template-columns:1fr}
+      .deal-image{min-height:190px}
+      .results-title{font-size:28px}
+      .deal-name{font-size:18px}
+    }
+  </style>
+</head>
+<body class="deals-page">
+
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+        📲 Install App
+      </button>
+    </div>
+    <div class="gcr-cat-tabs" id="gcrCatTabs">
+      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="deals.html" class="gcr-cat-tab active">🏷️ Deals</a>
+      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="public-spots.html" class="gcr-cat-tab">🏖️ Public Spots</a>
+      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Deals & Specials</h1>
+        <p>Find the best happy hour deals and limited-time specials across Orange Beach and Gulf Shores. Use tags to filter by deal type.</p>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Filter Deals</div>
+        <div class="toolbar-meta">Browse all</div>
+      </div>
+      <div class="tag-row">
+        <button class="tag-btn active" data-filter="all">All</button>
+        <button class="tag-btn" data-filter="bar">🍺 Bars</button>
+        <button class="tag-btn" data-filter="beach-bar">🏖️ Beach Bars</button>
+        <button class="tag-btn" data-filter="sports-bar">📺 Sports Bars</button>
+        <button class="tag-btn" data-filter="waterfront">⚓ Waterfront</button>
+        <button class="tag-btn" data-filter="live-music">🎸 Live Music</button>
+        <button class="tag-btn" data-filter="food-specials">🍔 Food Specials</button>
+        <button class="tag-btn" data-filter="ayce">🦀 All You Can Eat</button>
+        <button class="tag-btn" data-filter="daily">📅 Daily Specials</button>
+        <button class="tag-btn" data-filter="lunch">🥗 Lunch Specials</button>
+        <button class="tag-btn" data-filter="family">👨‍👩‍👧 Family Deals</button>
+        <button class="tag-btn" data-filter="early-bird">🌅 Early Bird</button>
+        <button class="tag-btn" data-filter="kids">👶 Kids Eat Free</button>
+        <button class="tag-btn" data-filter="weekend">🎉 Weekend Deals</button>
+      </div>
+    </section>
+
+    <section class="layout">
+      <main>
+        <div class="results-title">Deals & Specials</div>
+
+        <div class="list" id="listingsGrid" data-category="deals">
+          <!-- Cards rendered by JavaScript -->
+        </div>
+      </main>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Popular Deals</h3>
+
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514432324607-2e467f4af3fb?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">HH Specials</div>
+              <div class="mini-meta">4-6 PM • Orange Beach</div>
+              <div class="mini-links">
+                <a href="#">Details</a>
+                <a href="#">Call</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="mini-card">
+            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80')"></div>
+            <div>
+              <div class="mini-name">Weekend Deals</div>
+              <div class="mini-meta">All day • Gulf Shores</div>
+              <div class="mini-links">
+                <a href="#">Details</a>
+                <a href="#">Call</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Add Your Deal</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Promote your happy hour, specials, and limited-time offers to reach hungry customers fast.</p>
+          <a href="claim.html" class="cta">Post Your Deal Free</a>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="deals.html">Deals & Specials</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+          <a href="owa.html">OWA</a>
+          <a href="artists.html">Local Artists</a>
+          <a href="shopping.html">Shopping</a>
+          <a href="other.html">Other</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="trip.html">Trip Links</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
