@@ -8,163 +8,418 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* ── Menu Sections — horizontal scroll tabs ── */
+
+    /* ═══════════════════════════════════════════════
+       HERO COVER
+    ═══════════════════════════════════════════════ */
+    .bp-hero {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: linear-gradient(160deg, #0a2233 0%, #0e3a54 50%, #1a6e8a 100%);
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+    .bp-hero-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .bp-hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(10,34,51,.15) 0%, rgba(10,34,51,.7) 100%);
+    }
+    /* Business name + rating overlaid on hero */
+    .bp-hero-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 28px 32px;
+      color: #fff;
+    }
+    .bp-hero-info h1 {
+      font-size: 2rem; font-weight: 800;
+      color: #fff; margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+    .bp-hero-info .bp-hero-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+      font-size: .88rem; color: rgba(255,255,255,.85);
+    }
+    .bp-hero-info .bp-hero-rating { color: #FFD700; font-weight: 700; }
+    .bp-hero-badge {
+      background: rgba(255,255,255,.18);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.3);
+      padding: 3px 12px; border-radius: 20px;
+      font-size: .75rem; font-weight: 600;
+    }
+    /* Back link overlay */
+    .bp-back {
+      position: absolute; top: 14px; left: 20px; z-index: 10;
+      background: rgba(0,0,0,.35); backdrop-filter: blur(6px);
+      color: #fff; text-decoration: none;
+      padding: 7px 14px; border-radius: 20px; font-size: .8rem; font-weight: 600;
+    }
+    /* Photo grid toggle — bottom-right of hero */
+    .bp-photo-btn {
+      position: absolute; bottom: 20px; right: 20px; z-index: 10;
+      background: rgba(255,255,255,.9); backdrop-filter: blur(6px);
+      color: var(--text, #0d2233); border: none; cursor: pointer;
+      padding: 8px 16px; border-radius: 8px; font-size: .8rem; font-weight: 700;
+      transition: background .15s;
+    }
+    .bp-photo-btn:hover { background: #fff; }
+
+    @media (max-width: 600px) {
+      .bp-hero { height: 260px; }
+      .bp-hero-info { padding: 20px 16px; }
+      .bp-hero-info h1 { font-size: 1.45rem; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       BODY LAYOUT
+    ═══════════════════════════════════════════════ */
+    .bp-wrap {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 36px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .bp-wrap { grid-template-columns: 1fr; gap: 24px; padding: 20px 14px 60px; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       IDENTITY ROW (logo + name + actions)
+    ═══════════════════════════════════════════════ */
+    .bp-identity {
+      display: flex; gap: 20px; align-items: flex-start;
+      margin-bottom: 28px;
+    }
+    .bp-logo {
+      width: 88px; height: 88px; border-radius: 16px;
+      border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,.14);
+      background: #eaf4f8; overflow: hidden; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem; margin-top: -48px; position: relative; z-index: 5;
+    }
+    .bp-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 13px; }
+    .bp-identity-text { flex: 1; padding-top: 4px; }
+    .bp-tagline { font-size: .92rem; color: var(--text-muted, #6b7280); margin-bottom: 10px; }
+    .bp-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .bp-actions .btn { font-size: .82rem; padding: 8px 16px; }
+
+    /* ═══════════════════════════════════════════════
+       SECTION BLOCKS
+    ═══════════════════════════════════════════════ */
+    .bp-section {
+      margin-bottom: 36px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--gray-200, #e5e7eb);
+    }
+    .bp-section:last-child { border-bottom: none; }
+    .bp-section-title {
+      font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 16px; color: var(--text, #0d2233);
+    }
+
+    /* ═══════════════════════════════════════════════
+       PHOTO GALLERY
+    ═══════════════════════════════════════════════ */
+    .bp-gallery {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .bp-gallery-item {
+      aspect-ratio: 4/3;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #eaf4f8;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .bp-gallery-item:hover { opacity: .88; }
+    .bp-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* First photo spans 2 cols */
+    .bp-gallery-item:first-child {
+      grid-column: span 2;
+      aspect-ratio: 16/9;
+    }
+    @media (max-width: 500px) {
+      .bp-gallery { grid-template-columns: 1fr 1fr; }
+      .bp-gallery-item:first-child { grid-column: span 2; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       ABOUT / QUICK STATS
+    ═══════════════════════════════════════════════ */
+    .bp-desc {
+      font-size: .95rem; line-height: 1.8;
+      color: var(--text, #0d2233); margin-bottom: 20px;
+    }
+    .bp-quick-stats {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .bp-stat {
+      background: #eaf4f8; border-radius: 10px;
+      padding: 12px 18px; min-width: 120px;
+    }
+    .bp-stat-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0096c7; margin-bottom: 3px; }
+    .bp-stat-value { font-size: .92rem; font-weight: 600; color: var(--text, #0d2233); }
+
+    /* ═══════════════════════════════════════════════
+       FLEET / PRICING CARDS
+    ═══════════════════════════════════════════════ */
+    .bp-fleet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .bp-fleet-card {
+      border: 1.5px solid var(--gray-200, #e5e7eb);
+      border-radius: 12px; overflow: hidden;
+      background: #fff; transition: box-shadow .15s;
+    }
+    .bp-fleet-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+    .bp-fleet-img {
+      width: 100%; height: 160px;
+      background: #eaf4f8; overflow: hidden;
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .bp-fleet-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bp-fleet-body { padding: 16px; }
+    .bp-fleet-name { font-weight: 700; font-size: .98rem; margin-bottom: 4px; }
+    .bp-fleet-desc { font-size: .82rem; color: var(--text-muted, #6b7280); margin-bottom: 4px; }
+    .bp-fleet-specs { font-size: .75rem; color: #0096c7; font-weight: 600; margin-bottom: 12px; }
+    .bp-fleet-prices { border-top: 1px solid var(--gray-200, #e5e7eb); padding-top: 10px; }
+    .bp-price-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .85rem; padding: 3px 0;
+    }
+    .bp-price-row .bp-price { font-weight: 800; color: #0096c7; font-size: .95rem; }
+
+    /* Add-ons */
+    .bp-addons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .bp-addon-pill {
+      background: #eaf4f8; border-radius: 8px;
+      padding: 8px 14px; font-size: .82rem; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .bp-addon-pill .price { color: #0096c7; }
+
+    /* What's included */
+    .bp-included {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px; margin-top: 16px;
+    }
+    .bp-included-item {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .85rem; color: var(--text, #0d2233);
+    }
+    .bp-included-item .check { color: #0096c7; font-size: 1rem; }
+
+    /* ═══════════════════════════════════════════════
+       MENU
+    ═══════════════════════════════════════════════ */
     .menu-section-nav {
       display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
-      border-bottom: 2px solid var(--gray-200); margin-bottom: 24px;
+      border-bottom: 2px solid var(--gray-200, #e5e7eb); margin-bottom: 20px;
     }
     .menu-section-nav::-webkit-scrollbar { display: none; }
     .menu-sec-tab {
       padding: 10px 20px; white-space: nowrap;
-      font-size: .83rem; font-weight: 600; color: var(--text-muted);
+      font-size: .83rem; font-weight: 600; color: var(--text-muted, #6b7280);
       border-bottom: 3px solid transparent; margin-bottom: -2px;
       cursor: pointer; transition: all .15s;
     }
-    .menu-sec-tab:hover  { color: var(--teal); }
-    .menu-sec-tab.active { color: var(--teal); border-color: var(--teal); }
-
+    .menu-sec-tab:hover  { color: #0096c7; }
+    .menu-sec-tab.active { color: #0096c7; border-color: #0096c7; }
     .menu-panel { display: none; }
     .menu-panel.active { display: block; }
-
-    /* ── Menu sub-category filter ── */
-    .menu-subcats {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
-    }
-    .menu-subcat {
-      padding: 5px 14px; border-radius: 20px; font-size: .78rem; font-weight: 600;
-      border: 1.5px solid var(--gray-200); background: #fff; cursor: pointer;
-      color: var(--text-muted); transition: all .15s;
-    }
-    .menu-subcat:hover  { border-color: var(--teal); color: var(--teal); }
-    .menu-subcat.active { background: var(--teal); border-color: var(--teal); color: #fff; }
-
-    /* ── Menu items ── */
-    .menu-category-title {
-      font-size: .8rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1px; color: var(--text-muted); padding: 12px 0 8px;
-      border-bottom: 1px solid var(--gray-200); margin-bottom: 4px;
-    }
     .menu-item-row {
       display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 12px 0; border-bottom: 1px solid var(--gray-100); gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--gray-100, #f3f4f6); gap: 12px;
     }
     .menu-item-name { font-weight: 600; font-size: .9rem; }
-    .menu-item-desc { font-size: .8rem; color: var(--text-muted); margin-top: 2px; }
-    .menu-item-price {
-      font-size: .88rem; font-weight: 700; color: var(--teal);
-      white-space: nowrap; flex-shrink: 0;
+    .menu-item-desc { font-size: .8rem; color: var(--text-muted, #6b7280); margin-top: 2px; }
+    .menu-item-price { font-size: .9rem; font-weight: 800; color: #0096c7; white-space: nowrap; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════
+       REVIEWS
+    ═══════════════════════════════════════════════ */
+    .bp-reviews-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .bp-review {
+      background: var(--gray-100, #f9fafb);
+      border-radius: 12px; padding: 16px;
+    }
+    .bp-review-head { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .bp-review-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #0096c7; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: .9rem; flex-shrink: 0;
+    }
+    .bp-review-name { font-weight: 700; font-size: .88rem; }
+    .bp-review-date { font-size: .72rem; color: var(--text-muted, #6b7280); }
+    .bp-review-stars { color: #f59e0b; margin-bottom: 6px; font-size: .9rem; }
+    .bp-review-text { font-size: .85rem; line-height: 1.6; color: var(--text, #0d2233); }
+
+    /* ═══════════════════════════════════════════════
+       SPECIALS + EVENTS
+    ═══════════════════════════════════════════════ */
+    .bp-specials-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;
+    }
+    .bp-special-card {
+      background: linear-gradient(135deg, #0e3a54, #1a6e8a);
+      color: #fff; border-radius: 12px; padding: 18px;
+    }
+    .bp-special-card h4 { color: #fff; margin-bottom: 6px; }
+    .bp-special-card p { font-size: .85rem; color: rgba(255,255,255,.8); margin-bottom: 8px; }
+    .bp-special-card .bp-discount {
+      background: rgba(255,255,255,.2); display: inline-block;
+      padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700;
+    }
+    .bp-event-card {
+      border: 1.5px solid var(--gray-200, #e5e7eb);
+      border-radius: 12px; padding: 16px;
+      display: flex; gap: 14px; align-items: flex-start;
+    }
+    .bp-event-date-box {
+      background: #0096c7; color: #fff; border-radius: 8px;
+      width: 50px; flex-shrink: 0; text-align: center; padding: 8px 4px;
+    }
+    .bp-event-date-box .month { font-size: .65rem; font-weight: 700; text-transform: uppercase; }
+    .bp-event-date-box .day   { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+    .bp-event-title { font-weight: 700; font-size: .92rem; margin-bottom: 4px; }
+    .bp-event-desc  { font-size: .82rem; color: var(--text-muted, #6b7280); }
+
+    /* ═══════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════ */
+    .bp-sidebar {
+      display: flex; flex-direction: column; gap: 16px;
+      position: sticky; top: calc(var(--header-h, 56px) + 20px);
+    }
+    @media (max-width: 860px) {
+      .bp-sidebar { position: static; order: -1; }
     }
 
-    /* ── Reviews ── */
-    .review-card {
-      background: var(--gray-100); border-radius: var(--radius-sm);
-      padding: 16px; margin-bottom: 12px;
+    /* Booking widget */
+    .bp-book-widget {
+      background: #fff;
+      border: 2px solid #0096c7;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 4px 24px rgba(0,150,199,.12);
     }
-    .review-header { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
-    .review-avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--teal);
-      color: #fff; display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: .9rem; flex-shrink: 0;
+    .bp-book-price {
+      font-size: 1.5rem; font-weight: 800; color: var(--text, #0d2233);
+      margin-bottom: 4px;
     }
-    .review-meta-name { font-weight: 600; font-size: .88rem; }
-    .review-meta-date { font-size: .72rem; color: var(--text-muted); }
-    .review-stars { color: #f59e0b; font-size: .9rem; margin-bottom: 4px; }
-    .review-text { font-size: .85rem; color: var(--text); }
-
-    /* ── Booking panel ── */
-    .booking-card {
-      background: var(--white); border-radius: var(--radius);
-      padding: 20px; box-shadow: var(--shadow);
-      border: 2px solid var(--teal); position: sticky; top: calc(var(--header-h) + 16px);
+    .bp-book-price span { font-size: .88rem; font-weight: 400; color: var(--text-muted, #6b7280); }
+    .bp-book-sub { font-size: .82rem; color: var(--text-muted, #6b7280); margin-bottom: 16px; }
+    .bp-book-btn {
+      display: block; width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #FFD700, #FFC200);
+      color: #1a1a1a; font-weight: 800; font-size: 1rem;
+      border: none; border-radius: 10px; cursor: pointer;
+      text-align: center; text-decoration: none;
+      transition: opacity .15s; margin-bottom: 10px;
     }
-    @media (max-width: 800px) {
-      .booking-card { position: static; }
+    .bp-book-btn:hover { opacity: .88; }
+    .bp-book-phone {
+      display: block; width: 100%; padding: 11px;
+      border: 1.5px solid var(--gray-200, #e5e7eb);
+      border-radius: 10px; text-align: center;
+      font-size: .88rem; font-weight: 600; color: var(--text, #0d2233);
+      text-decoration: none; transition: border-color .15s;
     }
-    .booking-card h4 { margin-bottom: 16px; color: var(--teal); font-size: 1rem; }
-    .booking-field { margin-bottom: 12px; }
-    .booking-field label { display: block; font-size: .78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
-    .booking-field input,
-    .booking-field select {
-      width: 100%; padding: 9px 12px; border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius-sm); font-family: var(--font); font-size: .88rem;
-      color: var(--text); outline: none; transition: border .15s;
-    }
-    .booking-field input:focus,
-    .booking-field select:focus { border-color: var(--teal); }
-    .pricing-row { display: flex; justify-content: space-between; font-size: .85rem; padding: 4px 0; }
-    .pricing-row .price { font-weight: 700; color: var(--teal); }
-
-    /* ── Gallery ── */
-    .gallery-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px;
-    }
-    .gallery-item {
-      aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden;
-      background: var(--gray-100); display: flex; align-items: center;
-      justify-content: center; font-size: 2rem; cursor: pointer;
-      transition: opacity .15s;
-    }
-    .gallery-item:hover { opacity: .85; }
-
-    /* Claim bar */
-    .claim-bar {
-      background: var(--gray-100); border-top: 1px solid var(--gray-200);
-      padding: 10px 0; text-align: center;
-    }
-    .claim-bar p { font-size: .82rem; color: var(--text-muted); }
-    .claim-bar a { color: var(--teal); font-weight: 600; }
-
-    /* ── Business profile mobile ── */
-    @media (max-width: 768px) {
-      /* Hero stacks emoji above info */
-      .profile-hero-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
-      #profileEmoji { width: 100px !important; height: 100px !important; font-size: 3.2rem !important; }
-      /* Rating/price inline with name on mobile */
-      .profile-hero-inner > div:last-child { display: none; }
-      /* Actions wrap */
-      .profile-actions { flex-wrap: wrap; gap: 8px; }
-      .profile-actions .btn { font-size: .8rem; padding: 8px 12px; }
+    .bp-book-phone:hover { border-color: #0096c7; color: #0096c7; }
+    .bp-book-note {
+      text-align: center; font-size: .75rem;
+      color: var(--text-muted, #6b7280); margin-top: 10px;
     }
 
-    @media (max-width: 480px) {
-      #profileEmoji { width: 80px !important; height: 80px !important; font-size: 2.6rem !important; }
-      /* Tabs full-width scroll */
-      .profile-tabs { gap: 0; }
-      .profile-tab { padding: 10px 12px; font-size: .78rem; }
-      /* Tab panel content */
-      #tab-overview > div[style*="grid-template-columns"] {
-        grid-template-columns: 1fr 1fr !important;
-      }
-      /* Menu section nav tighter */
-      .menu-sec-tab { padding: 8px 14px; font-size: .78rem; }
-      /* Menu items */
-      .menu-item-row { flex-direction: column; gap: 4px; }
-      .menu-item-price { align-self: flex-start; }
-      /* Review cards */
-      .review-card { padding: 12px; }
-      /* Booking card full width, no sticky */
-      .booking-card { padding: 16px; }
-      .booking-field input, .booking-field select { font-size: .85rem; padding: 8px 10px; }
-      /* Gallery 2 col */
-      .gallery-grid { grid-template-columns: repeat(2,1fr) !important; gap: 6px; }
-      /* Pricing packages stack */
-      .pricing-package { flex-direction: column !important; }
+    /* Sidebar info cards */
+    .bp-info-card {
+      background: #fff; border-radius: 12px;
+      border: 1.5px solid var(--gray-200, #e5e7eb);
+      padding: 18px;
     }
+    .bp-info-card h4 {
+      font-size: .88rem; font-weight: 700;
+      margin-bottom: 12px; color: var(--text, #0d2233);
+    }
+    .hours-row {
+      display: flex; justify-content: space-between;
+      font-size: .83rem; padding: 4px 0;
+      border-bottom: 1px solid var(--gray-100, #f3f4f6);
+      color: var(--text, #0d2233);
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row.today { font-weight: 700; color: #0096c7; }
+    .bp-map-placeholder {
+      background: linear-gradient(135deg, #eaf4f8, #cce9f5);
+      border-radius: 8px; height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; color: #0096c7; font-weight: 600;
+      margin-bottom: 10px; cursor: pointer;
+    }
+    .bp-tag-wrap {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .bp-tag-link {
+      background: #eaf4f8; color: #0096c7;
+      font-size: .75rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 20px;
+      text-decoration: none; transition: background .15s;
+    }
+    .bp-tag-link:hover { background: #cce9f5; }
+
+    /* ═══════════════════════════════════════════════
+       MOBILE BOOK BAR
+    ═══════════════════════════════════════════════ */
+    .bp-mobile-book {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      background: #fff; border-top: 1px solid var(--gray-200, #e5e7eb);
+      padding: 12px 16px; gap: 10px; align-items: center;
+    }
+    @media (max-width: 860px) {
+      .bp-mobile-book { display: flex; }
+    }
+    .bp-mobile-price { font-size: 1rem; font-weight: 800; flex: 1; }
+    .bp-mobile-price small { font-weight: 400; font-size: .78rem; color: var(--text-muted, #6b7280); }
+    .bp-mobile-btn {
+      padding: 12px 28px; border-radius: 10px;
+      background: linear-gradient(135deg, #FFD700, #FFC200);
+      color: #1a1a1a; font-weight: 800; font-size: .9rem;
+      border: none; cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
 
+<!-- GCR HEADER -->
 <div class="gcr-header">
   <div class="gcr-header-top">
     <a href="index3.html" class="gcr-logo-row">
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
   </div>
-    <div class="gcr-cat-tabs" id="gcrCatTabs">
+  <div class="gcr-cat-tabs" id="gcrCatTabs">
     <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
     <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
     <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
@@ -183,598 +438,598 @@
   </div>
 </div>
 
-
-  <!-- BACK BAR -->
-  <div style="background:var(--navy);padding:8px 0;">
-    <div class="container" style="display:flex;align-items:center;gap:8px;">
-      <a href="javascript:history.back()" style="color:rgba(255,255,255,.6);font-size:.8rem;">← Back</a>
-      <span style="color:rgba(255,255,255,.3);font-size:.8rem;">/</span>
-      <span id="breadcrumbCat" style="color:rgba(255,255,255,.6);font-size:.8rem;">Restaurants</span>
-      <span style="color:rgba(255,255,255,.3);font-size:.8rem;">/</span>
-      <span id="breadcrumbName" style="color:#fff;font-size:.8rem;">Business Name</span>
+<!-- HERO COVER IMAGE -->
+<div class="bp-hero" id="bpHero">
+  <a href="javascript:history.back()" class="bp-back">← Back</a>
+  <img id="bpHeroImg" class="bp-hero-img" src="" alt="" style="display:none;">
+  <div class="bp-hero-overlay"></div>
+  <div class="bp-hero-info">
+    <h1 id="bpHeroName">Loading…</h1>
+    <div class="bp-hero-meta">
+      <span class="bp-hero-rating" id="bpHeroRating"></span>
+      <span id="bpHeroAddr"></span>
+      <span class="bp-hero-badge" id="bpHeroCat"></span>
     </div>
   </div>
+  <button class="bp-photo-btn" id="bpPhotoBtn" style="display:none" onclick="document.getElementById('bpGallerySection').scrollIntoView({behavior:'smooth'})">📷 See all photos</button>
+</div>
 
-  <!-- PROFILE HERO -->
-  <div class="profile-hero">
-    <div class="container">
-      <div class="profile-hero-inner" style="flex-direction:column;align-items:center;text-align:center;">
-        <div class="profile-logo" id="profileEmoji" style="width:200px;height:200px;font-size:6rem;margin:0 auto 20px;">🍽️</div>
-        <div class="profile-info" style="flex:1;text-align:center;">
-          <h1 id="profileName">Business Name</h1>
-          <p id="profileTagline" style="margin-top:4px;">Tagline goes here</p>
-          <div id="profileAddress" style="font-size:.88rem;color:rgba(255,255,255,.75);margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;">📍 Orange Beach, AL</div>
-          <div id="profileBadges" class="profile-badges" style="margin-top:10px;justify-content:center;"></div>
-          <div style="font-size:.95rem;font-weight:700;color:#f59e0b;margin-top:8px;" id="profileRating">★ 4.7 (312)</div>
-          <div style="font-size:.8rem;color:rgba(255,255,255,.6);margin-top:2px;" id="profilePriceRange">$$</div>
-          <div class="profile-actions" style="margin-top:14px;justify-content:center;">
-            <a id="profileDirections" href="#" class="btn btn-ghost btn-sm">📍 Get Directions</a>
-            <a id="profilePhone"      href="#" class="btn btn-ghost btn-sm">📞 Call</a>
-            <button class="btn btn-secondary btn-sm" id="profileBookBtn" style="display:none" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
-          </div>
+<!-- MAIN BODY -->
+<div class="bp-wrap">
+
+  <!-- ── LEFT COLUMN ── -->
+  <div>
+
+    <!-- Identity: logo + tagline + action buttons -->
+    <div class="bp-identity">
+      <div class="bp-logo" id="bpLogo">🏖️</div>
+      <div class="bp-identity-text">
+        <p class="bp-tagline" id="bpTagline"></p>
+        <div class="bp-actions">
+          <a id="bpDirections" href="#" class="btn btn-outline btn-sm" style="display:none">📍 Directions</a>
+          <a id="bpPhone"      href="#" class="btn btn-outline btn-sm" style="display:none">📞 Call</a>
+          <a id="bpWebsite"    href="#" class="btn btn-outline btn-sm" target="_blank" style="display:none">🌐 Website</a>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- MAIN CONTENT -->
-  <div class="container" style="padding-top:16px;padding-bottom:32px;">
-    <div class="profile-body">
+    <!-- ABOUT -->
+    <div class="bp-section" id="bpAboutSection" style="display:none">
+      <div class="bp-section-title">About</div>
+      <p class="bp-desc" id="bpDesc"></p>
+      <div class="bp-quick-stats" id="bpStats"></div>
+    </div>
 
-      <!-- LEFT: tabs content -->
-      <div>
-        <div class="profile-tabs" id="profileTabs">
-          <div class="profile-tab active" data-panel="tab-overview">Overview</div>
-          <div class="profile-tab" data-panel="tab-menu" id="tabMenu">Menu</div>
-          <div class="profile-tab" data-panel="tab-pricing" id="tabPricing" style="display:none">Pricing</div>
-          <div class="profile-tab" data-panel="tab-specials">Specials</div>
-          <div class="profile-tab" data-panel="tab-gallery">Photos</div>
-          <div class="profile-tab" data-panel="tab-reviews">Reviews</div>
-          <div class="profile-tab" data-panel="tab-events">Events</div>
-          <div class="profile-tab" data-panel="tab-inside" id="tabInside" style="display:none">Inside →</div>
-        </div>
+    <!-- PHOTO GALLERY -->
+    <div class="bp-section" id="bpGallerySection" style="display:none">
+      <div class="bp-section-title">Photos</div>
+      <div class="bp-gallery" id="bpGallery"></div>
+    </div>
 
-        <!-- OVERVIEW TAB -->
-        <div class="tab-panel" id="tab-overview" style="display:block;">
-          <p id="profileDesc" style="font-size:.95rem;color:var(--text);line-height:1.8;margin-bottom:24px;"></p>
-
-          <!-- Quick info grid -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px;">
-            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
-              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Happy Hour</div>
-              <div id="profileHHour" style="font-size:.9rem;font-weight:600;">—</div>
-            </div>
-            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
-              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Price Range</div>
-              <div id="profilePrice" style="font-size:.9rem;font-weight:600;">—</div>
-            </div>
-            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
-              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Kids Friendly</div>
-              <div id="profileKids" style="font-size:.9rem;font-weight:600;">—</div>
-            </div>
-            <div style="background:var(--sky);border-radius:var(--radius-sm);padding:14px;">
-              <div style="font-size:.7rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Outdoor Seating</div>
-              <div id="profileOutdoor" style="font-size:.9rem;font-weight:600;">—</div>
-            </div>
-          </div>
-
-          <!-- Menu highlights -->
-          <div style="margin-bottom:24px;">
-            <h3 style="margin-bottom:12px;">Menu Highlights</h3>
-            <div id="profileMenuHighlights" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-          </div>
-        </div>
-
-        <!-- MENU TAB — rendered dynamically by renderMenuTabs() -->
-        <div class="tab-panel" id="tab-menu">
-          <div id="menuContent"></div>
-        </div>
-
-        <!-- INSIDE TAB (venues/complexes — sub-businesses) -->
-        <div class="tab-panel" id="tab-inside">
-          <div id="venueHighlights" style="margin-bottom:24px;"></div>
-          <div id="venueSubListings"></div>
-        </div>
-
-        <!-- PRICING TAB (activities, tours, amenities) -->
-        <div class="tab-panel" id="tab-pricing">
-          <div id="pricingPackages"></div>
-          <div id="pricingAddons" style="margin-top:24px;"></div>
-          <div id="pricingIncluded" style="margin-top:24px;"></div>
-        </div>
-
-        <!-- SPECIALS TAB -->
-        <div class="tab-panel" id="tab-specials">
-          <div id="profileSpecials"></div>
-        </div>
-
-        <!-- GALLERY TAB -->
-        <div class="tab-panel" id="tab-gallery">
-          <div class="gallery-grid">
-            <div class="gallery-item">🦞</div>
-            <div class="gallery-item">🍹</div>
-            <div class="gallery-item">🌊</div>
-            <div class="gallery-item">🍤</div>
-            <div class="gallery-item">🎸</div>
-            <div class="gallery-item">🦀</div>
-          </div>
-          <p class="text-muted text-center" style="font-size:.82rem;">Claim this listing to upload real photos</p>
-        </div>
-
-        <!-- REVIEWS TAB -->
-        <div class="tab-panel" id="tab-reviews">
-          <div id="profileRatingDisplay" style="margin-bottom:20px;"></div>
-          <div id="profileReviewsList"></div>
-          <div style="text-align:center;margin-top:16px;">
-            <a href="#" class="btn btn-outline btn-sm">Write a Review</a>
-          </div>
-        </div>
-
-        <!-- EVENTS TAB -->
-        <div class="tab-panel" id="tab-events">
-          <div id="profileEvents"></div>
-        </div>
-
-      </div><!-- end left -->
-
-      <!-- RIGHT: sidebar -->
-      <div class="profile-sidebar">
-
-        <!-- Booking card — rendered dynamically by renderBookingPanel() -->
-        <div id="bookingPanel"></div>
-
-        <!-- Hours -->
-        <div class="sidebar-card">
-          <h4>🕐 Hours</h4>
-          <div class="hours-list" id="profileHours"></div>
-        </div>
-
-        <!-- Location -->
-        <div class="sidebar-card">
-          <h4>📍 Location</h4>
-          <p id="profileAddressFull" style="font-size:.85rem;margin-bottom:12px;"></p>
-          <!-- Map placeholder -->
-          <div style="background:var(--sky);border-radius:var(--radius-sm);height:140px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--teal);font-weight:600;">
-            📍 Map View
-          </div>
-          <a id="profileDirectionsLink" href="#" class="btn btn-outline btn-sm" style="display:block;text-align:center;margin-top:10px;">Get Directions</a>
-        </div>
-
-        <!-- Tags -->
-        <div class="sidebar-card">
-          <h4>🏷️ Also Found In</h4>
-          <div id="profileTagLinks" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
-        </div>
-
-      </div><!-- end sidebar -->
-    </div><!-- end profile-body -->
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="site-footer">
-    <div class="container">
-      <div class="footer-bottom" style="border-top:none;padding-top:0">
-        <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
-        <p>Powered by <span class="powered">CyberCheck</span></p>
+    <!-- FLEET / PRICING (things-to-do) -->
+    <div class="bp-section" id="bpPricingSection" style="display:none">
+      <div class="bp-section-title" id="bpPricingTitle">Rentals &amp; Pricing</div>
+      <div class="bp-fleet-grid" id="bpFleetGrid"></div>
+      <!-- Group rate -->
+      <div id="bpGroupRate" style="display:none;margin-top:14px;"></div>
+      <!-- Add-ons -->
+      <div id="bpAddonsSection" style="display:none;margin-top:24px;">
+        <div style="font-size:.88rem;font-weight:700;margin-bottom:10px;">Add-Ons</div>
+        <div class="bp-addons" id="bpAddons"></div>
+      </div>
+      <!-- What's included -->
+      <div id="bpIncludedSection" style="display:none;margin-top:24px;">
+        <div style="font-size:.88rem;font-weight:700;margin-bottom:10px;">What's Included</div>
+        <div class="bp-included" id="bpIncluded"></div>
       </div>
     </div>
-  </footer>
 
-  <script src="js/gcr-api.js"></script>
-  <script src="js/app.js"></script>
-  <script>
-    /* ══════════════════════════════════════════════
-       renderBookingPanel(biz)
-       Generates the correct booking/reservation form
-       based on profileType + bookingType
-    ══════════════════════════════════════════════ */
-    function renderBookingPanel(biz) {
-      const panel = document.getElementById('bookingPanel');
-      if (!panel || !biz) return;
+    <!-- MENU (restaurants) -->
+    <div class="bp-section" id="bpMenuSection" style="display:none">
+      <div class="bp-section-title">Menu</div>
+      <div id="bpMenuContent"></div>
+    </div>
 
-      const pt    = biz.profileType || 'restaurant';
-      const cat   = biz.category || '';
-      const phone = biz.phone || '';
+    <!-- SPECIALS -->
+    <div class="bp-section" id="bpSpecialsSection" style="display:none">
+      <div class="bp-section-title">🏷️ Specials</div>
+      <div class="bp-specials-grid" id="bpSpecials"></div>
+    </div>
 
-      // ── Bookable: show "Book Now" button → popup modal ──
-      if (biz.bookingRequired) {
-        const heroBtn = document.getElementById('profileBookBtn');
-        if (heroBtn) heroBtn.style.display = '';
-        panel.innerHTML = `<div class="booking-card">
-          <h4>📅 Book Now</h4>
-          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">${biz.tagline || 'Check availability and reserve your spot.'}</p>
-          <button onclick="openBookingModal('${biz.slug||biz.id}')" class="btn btn-primary" style="width:100%;justify-content:center;background:linear-gradient(135deg,#FFD700,#FFC200);color:#1a1a1a;border:none;font-weight:700;">📅 Book Now</button>
-          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;margin-top:8px;">📞 ${phone}</a>` : ''}
-        </div>`;
-        return;
-      }
+    <!-- EVENTS -->
+    <div class="bp-section" id="bpEventsSection" style="display:none">
+      <div class="bp-section-title">🎉 Events</div>
+      <div id="bpEvents"></div>
+    </div>
 
-      // ── Amenity: no panel ──
-      if (pt === 'amenity') { panel.innerHTML = ''; return; }
+    <!-- REVIEWS -->
+    <div class="bp-section" id="bpReviewsSection" style="display:none">
+      <div class="bp-section-title" id="bpReviewsTitle">Reviews</div>
+      <div class="bp-reviews-grid" id="bpReviews"></div>
+      <div style="margin-top:16px;">
+        <a href="#" class="btn btn-outline btn-sm">Write a Review</a>
+      </div>
+    </div>
 
-      // ── Walk-in only ──
-      if ((cat === 'coffee-sweets' || cat === 'shopping') && !biz.bookingType) {
-        panel.innerHTML = `<div class="booking-card">
-          <h4>ℹ️ Visit Info</h4>
-          <p style="font-size:.85rem;margin-bottom:12px;">Walk-ins welcome — no reservation needed.</p>
-          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">📞 ${phone}</a>` : ''}
-        </div>`;
-        return;
-      }
+    <!-- Claim -->
+    <div style="background:#f9fafb;border-radius:12px;padding:20px;text-align:center;margin-top:8px;">
+      <p style="font-size:.85rem;color:var(--text-muted,#6b7280);margin-bottom:10px;">Is this your business? Claim it to add photos, update info, and enable bookings.</p>
+      <a href="claim.html" class="btn btn-outline btn-sm">Claim &amp; Manage Free →</a>
+    </div>
 
-      // ── Venue: plan your visit ──
-      if (pt === 'venue') {
-        panel.innerHTML = `<div class="booking-card">
-          <h4>📍 Plan Your Visit</h4>
-          <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">${biz.priceRange === 'Free to visit' ? 'Free to visit — open daily. Parking is free.' : 'Admission required for some attractions.'}</p>
-          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;">📞 ${phone}</a>` : ''}
-        </div>`;
-        return;
-      }
+  </div><!-- end left col -->
 
-      // ── Default: contact info ──
-      panel.innerHTML = `<div class="booking-card">
-        <h4>📞 Contact</h4>
-        ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="btn btn-outline btn-sm" style="width:100%;text-align:center;display:block;margin-bottom:8px;">📞 ${phone}</a>` : ''}
-      </div>`;
+  <!-- ── RIGHT SIDEBAR ── -->
+  <div class="bp-sidebar">
+
+    <!-- Booking widget -->
+    <div class="bp-book-widget" id="bpBookWidget">
+      <div class="bp-book-price" id="bpBookPrice"></div>
+      <div class="bp-book-sub"  id="bpBookSub"></div>
+      <button class="bp-book-btn" id="bpBookBtn" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
+      <a id="bpBookPhone" href="#" class="bp-book-phone" style="display:none">📞 Call to Reserve</a>
+      <div class="bp-book-note">No booking fees · Instant confirmation</div>
+    </div>
+
+    <!-- Hours -->
+    <div class="bp-info-card" id="bpHoursCard" style="display:none">
+      <h4>🕐 Hours</h4>
+      <div id="bpHours"></div>
+    </div>
+
+    <!-- Location -->
+    <div class="bp-info-card" id="bpLocationCard" style="display:none">
+      <h4>📍 Location</h4>
+      <p id="bpAddrFull" style="font-size:.85rem;margin-bottom:10px;color:var(--text-muted,#6b7280);"></p>
+      <div class="bp-map-placeholder" id="bpMapLink">📍 Open in Maps</div>
+      <a id="bpDirections2" href="#" class="btn btn-outline btn-sm" style="display:block;text-align:center;margin-top:8px;">Get Directions</a>
+    </div>
+
+    <!-- Tags -->
+    <div class="bp-info-card" id="bpTagsCard" style="display:none">
+      <h4>🏷️ Also Found In</h4>
+      <div class="bp-tag-wrap" id="bpTags"></div>
+    </div>
+
+  </div><!-- end sidebar -->
+
+</div><!-- end bp-wrap -->
+
+<!-- MOBILE STICKY BOOK BAR -->
+<div class="bp-mobile-book" id="bpMobileBook" style="display:none">
+  <div class="bp-mobile-price">
+    <div id="bpMobilePrice"></div>
+    <small id="bpMobileSub"></small>
+  </div>
+  <button class="bp-mobile-btn" onclick="openBookingModal(new URLSearchParams(location.search).get('id'))">📅 Book Now</button>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none;padding-top:0">
+      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+      <p>Powered by <span class="powered">CyberCheck</span></p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+
+  /* ══════════════════════════════════════════════
+     renderProfilePage(biz)
+     Central renderer — called once full profile loads.
+     Populates every section, hides sections with no data.
+  ══════════════════════════════════════════════ */
+  function renderProfilePage(biz) {
+    if (!biz) return;
+
+    const slug    = biz.slug || biz.subdomain || biz.id || '';
+    const cat     = biz.type || biz.category || '';
+    const isActivity    = cat === 'things-to-do' || cat === 'services' || cat === 'rental' ||
+                          cat === 'rentals' || cat === 'tours' || cat === 'activities' ||
+                          (biz.fleet && biz.fleet.length) || (biz.pricing && biz.pricing.length);
+    const isRestaurant  = cat === 'restaurants' || cat === 'coffee-sweets' || cat === 'nightlife';
+    const canBook       = biz.booking_required || biz.bookingRequired;
+
+    /* First fleet image — used as cover/logo fallback when no direct URL uploaded */
+    const firstFleetImg = (biz.fleet && biz.fleet.length)
+      ? (biz.fleet[0].image_url || biz.fleet[0].image || '')
+      : '';
+
+    const logoUrl  = biz.logo_url  || biz.logo  || biz.image || biz.cover_url  || biz.hero_image || firstFleetImg || '';
+    const coverUrl = biz.cover_url || biz.hero_image || biz.cover_image || biz.logo_url || biz.image || firstFleetImg || '';
+
+    /* ── Page title ── */
+    document.title = `${biz.name || 'Business'} — Gulf Coast Radar`;
+
+    /* ── HERO ── */
+    const heroImg = document.getElementById('bpHeroImg');
+    if (heroImg && coverUrl) {
+      heroImg.src = coverUrl;
+      heroImg.alt = biz.name || '';
+      heroImg.style.display = '';
+    } else if (coverUrl) {
+      document.getElementById('bpHero').style.backgroundImage = `url('${coverUrl}')`;
     }
-    /* ══════════════════════════════════════════════
-       renderMenuTabs(biz)
-       Renders the full menu from biz.menu data,
-       or shows a "claim to add menu" CTA if no data
-    ══════════════════════════════════════════════ */
-    function renderMenuTabs(biz) {
-      const container = document.getElementById('menuContent');
-      if (!container) return;
+    setEl('bpHeroName', biz.name || '');
+    if (biz.rating || biz.rating_avg) {
+      const r = biz.rating || biz.rating_avg;
+      const rv = biz.review_count || biz.reviewCount || 0;
+      setEl('bpHeroRating', `★ ${r}${rv ? ` (${rv})` : ''}`);
+    }
+    if (biz.address) setEl('bpHeroAddr', `📍 ${biz.address}`);
+    const catLabels = { 'things-to-do':'Things To Do', restaurants:'Restaurant', nightlife:'Nightlife', 'coffee-sweets':'Coffee & Sweets', shopping:'Shopping', services:'Services' };
+    if (cat) setEl('bpHeroCat', catLabels[cat] || cat);
 
-      if (!biz.menu) {
-        // No menu data — show claim CTA
-        container.innerHTML = `
-          <div style="text-align:center;padding:48px 24px;color:#666;">
-            <div style="font-size:3rem;margin-bottom:16px;">🍽️</div>
-            <div style="font-size:1.1rem;font-weight:600;margin-bottom:8px;">Menu not yet added</div>
-            <div style="font-size:.9rem;color:#888;margin-bottom:20px;">Is this your business? Claim your profile to add your full menu.</div>
-            <a href="claim.html" style="display:inline-block;background:var(--teal);color:#fff;padding:12px 28px;border-radius:8px;font-weight:600;text-decoration:none;">Claim This Business</a>
-          </div>`;
-        return;
+    /* ── LOGO / IDENTITY ── */
+    const logoEl = document.getElementById('bpLogo');
+    if (logoEl) {
+      if (logoUrl) {
+        logoEl.innerHTML = `<img src="${logoUrl}" alt="${esc(biz.name)}" onerror="this.parentElement.textContent='${biz.emoji||'🏖️'}'">`;
+      } else {
+        logoEl.textContent = biz.emoji || '🏖️';
       }
+    }
+    setEl('bpTagline', biz.tagline || '');
+    if (biz.phone) {
+      const ph = document.getElementById('bpPhone');
+      if (ph) { ph.href = 'tel:' + biz.phone.replace(/\D/g,''); ph.textContent = `📞 ${biz.phone}`; ph.style.display = ''; }
+    }
+    if (biz.address) {
+      const d = document.getElementById('bpDirections');
+      if (d) { d.href = `https://maps.google.com?q=${encodeURIComponent(biz.address)}`; d.style.display = ''; }
+    }
+    if (biz.website) {
+      const w = document.getElementById('bpWebsite');
+      if (w) { w.href = biz.website; w.style.display = ''; }
+    }
 
-      // Known section labels/icons — any key NOT in here still works, just gets auto-labeled
-      const knownSections = {
-        breakfast:    { label:'Breakfast',      icon:'🌅' },
-        brunch:       { label:'Brunch',         icon:'🥂' },
-        lunch:        { label:'Lunch',          icon:'☀️' },
-        dinner:       { label:'Dinner',         icon:'🌙' },
-        late_night:   { label:'Late Night',     icon:'🌃' },
-        apps:         { label:'Appetizers',     icon:'🍴' },
-        appetizers:   { label:'Appetizers',     icon:'🍴' },
-        kids:         { label:'Kids Menu',      icon:'👧' },
-        drinks:       { label:'Drinks & Bar',   icon:'🍹' },
-        cocktails:    { label:'Cocktails',      icon:'🍸' },
-        beer_wine:    { label:'Beer & Wine',    icon:'🍺' },
-        desserts:     { label:'Desserts',       icon:'🍰' },
-        specials:     { label:'Daily Specials', icon:'📅' },
-        catering:     { label:'Catering',       icon:'🎉' },
-        happy_hour:   { label:'Happy Hour',     icon:'🍻' },
-      };
+    /* ── ABOUT ── */
+    if (biz.description || biz.tagline) {
+      setEl('bpDesc', biz.description || biz.tagline || '');
+      show('bpAboutSection');
 
-      // Dynamically build from whatever keys the business actually has
-      const available = Object.keys(biz.menu)
-        .filter(key => Array.isArray(biz.menu[key]) && biz.menu[key].length > 0)
-        .map(key => ({
-          key,
-          label: knownSections[key]?.label || key.replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase()),
-          icon:  knownSections[key]?.icon  || '🍽️'
-        }));
+      /* Quick stats */
+      const stats = [];
+      if (biz.price_range)  stats.push({ label:'Price Range',    val: biz.price_range });
+      if (biz.kids_friendly || biz.kidsFriendly) stats.push({ label:'Kids Friendly', val: '✅ Yes' });
+      if (biz.outdoor)      stats.push({ label:'Outdoor',        val: '✅ Yes' });
+      if (biz.happy_hour || biz.happyHour) stats.push({ label:'Happy Hour', val: biz.happy_hour || biz.happyHour });
+      if (biz.waterfront)   stats.push({ label:'Waterfront',     val: '✅ Yes' });
 
-      if (available.length === 0) {
-        container.innerHTML = `<div style="padding:24px;text-align:center;color:#888;">No menu items available.</div>`;
-        return;
+      if (stats.length) {
+        const grid = document.getElementById('bpStats');
+        if (grid) grid.innerHTML = stats.map(s =>
+          `<div class="bp-stat"><div class="bp-stat-label">${s.label}</div><div class="bp-stat-value">${s.val}</div></div>`
+        ).join('');
       }
+    }
 
-      // Build nav tabs
-      let navHtml = `<div class="menu-section-nav" id="menuSectionNav">`;
-      available.forEach((s, i) => {
-        navHtml += `<div class="menu-sec-tab${i===0?' active':''}" data-menu="${s.key}">${s.icon} ${s.label}</div>`;
+    /* ── GALLERY ── */
+    const gallery = biz.gallery || biz.images || [];
+    const allImgs = [...gallery];
+    /* If no gallery, seed with logo/cover */
+    if (!allImgs.length && coverUrl) allImgs.push(coverUrl);
+    if (!allImgs.length && logoUrl)  allImgs.push(logoUrl);
+    if (allImgs.length) {
+      const galEl = document.getElementById('bpGallery');
+      if (galEl) {
+        galEl.innerHTML = allImgs.slice(0, 9).map(img => {
+          const src = typeof img === 'string' ? img : (img.url || img.src || '');
+          return src ? `<div class="bp-gallery-item"><img src="${src}" alt="${esc(biz.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>` : '';
+        }).join('');
+        show('bpGallerySection');
+        if (allImgs.length > 1) document.getElementById('bpPhotoBtn').style.display = '';
+      }
+    }
+
+    /* ── FLEET / PRICING (activities) ── */
+    const fleet   = biz.fleet   || [];
+    const pricing = biz.pricing || [];
+    const packages = biz.packages || [];
+
+    if (isActivity && (fleet.length || packages.length)) {
+      /* Build price map: fleet_type_id → { slot_label: price } */
+      const priceMap = {};
+      pricing.forEach(p => {
+        if (!priceMap[p.fleet_type_id]) priceMap[p.fleet_type_id] = {};
+        priceMap[p.fleet_type_id][p.slot_label] = p.price;
       });
-      navHtml += `</div>`;
 
-      // Build panels — with dietary/food-type tag filters per section
-      let panelsHtml = '';
-      available.forEach((s, i) => {
-        const items = biz.menu[s.key];
+      const fleetEl = document.getElementById('bpFleetGrid');
+      if (fleetEl) {
+        const items = fleet.length ? fleet : packages;
+        fleetEl.innerHTML = items.map(ft => {
+          const ftImg  = ft.image_url || ft.image || ft.img || ft.photo || '';
+          const prices = priceMap[ft.fleet_type_id || ft.id] || {};
+          const priceRows = Object.entries(prices).length
+            ? Object.entries(prices).map(([label, price]) =>
+                `<div class="bp-price-row"><span>${esc(label)}</span><span class="bp-price">$${price}</span></div>`
+              ).join('')
+            : ft.price ? `<div class="bp-price-row"><span>Rate</span><span class="bp-price">${esc(ft.price)}</span></div>` : '';
 
-        // Collect all unique tags across items in this section
-        const allTags = [...new Set(items.flatMap(item => item.tags || []))];
-        const filterTags = allTags.filter(t => t); // remove empty
-
-        const filterHtml = filterTags.length > 1 ? `
-          <div class="menu-subcats" data-section="${s.key}">
-            <button class="menu-subcat active" data-tag="all">All</button>
-            ${filterTags.map(t => `<button class="menu-subcat" data-tag="${t}">${tagLabel(t)}</button>`).join('')}
-          </div>` : '';
-
-        panelsHtml += `<div class="menu-panel${i===0?' active':''}" id="menu-${s.key}">`;
-        panelsHtml += filterHtml;
-        panelsHtml += `<div class="menu-items-list" data-section="${s.key}">`;
-        items.forEach(item => {
-          const tagAttr = item.tags ? item.tags.join(' ') : '';
-          const tagBadges = item.tags?.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">${item.tags.map(t=>`<span style="font-size:.7rem;background:#f0fafa;color:#0b7a75;border-radius:10px;padding:2px 8px;font-weight:600;">${tagLabel(t)}</span>`).join('')}</div>` : '';
-          panelsHtml += `<div class="menu-item-row" data-tags="${tagAttr}">
-            <div style="flex:1;">
-              <div class="menu-item-name">${item.name}</div>
-              ${item.desc ? `<div class="menu-item-desc">${item.desc}</div>` : ''}
-              ${tagBadges}
+          return `<div class="bp-fleet-card">
+            <div class="bp-fleet-img">
+              ${ftImg ? `<img src="${ftImg}" alt="${esc(ft.name)}" loading="lazy" onerror="this.style.display='none'">` : `<span>🚤</span>`}
             </div>
-            <div class="menu-item-price">${item.price || ''}</div>
+            <div class="bp-fleet-body">
+              <div class="bp-fleet-name">${esc(ft.name)}</div>
+              ${ft.description ? `<div class="bp-fleet-desc">${esc(ft.description)}</div>` : ''}
+              ${ft.specs ? `<div class="bp-fleet-specs">📐 ${esc(ft.specs)}</div>` : ''}
+              ${priceRows ? `<div class="bp-fleet-prices">${priceRows}</div>` : ''}
+            </div>
           </div>`;
-        });
-        panelsHtml += `</div></div>`;
-      });
+        }).join('');
+      }
 
-      container.innerHTML = navHtml + panelsHtml;
+      /* Group rate */
+      const gr = biz.group_rates && biz.group_rates[0];
+      if (gr) {
+        const grEl = document.getElementById('bpGroupRate');
+        if (grEl) {
+          grEl.innerHTML = `<div style="background:#eaf4f8;border-radius:12px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:700;">${esc(gr.title || 'Group Rate')}</div>
+              ${gr.description ? `<div style="font-size:.82rem;color:var(--text-muted,#6b7280);margin-top:2px;">${esc(gr.description)}</div>` : ''}
+            </div>
+            <div style="font-size:1.2rem;font-weight:800;color:#0096c7;">$${gr.price_per_unit || gr.price || ''} <span style="font-size:.72rem;font-weight:400;">${gr.min_qty ? `min ${gr.min_qty} boats` : esc(gr.price_label||'')}</span></div>
+          </div>`;
+          grEl.style.display = '';
+        }
+      }
 
-      // Wire up section tab clicks
-      container.querySelectorAll('.menu-sec-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          container.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
-          container.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
-          tab.classList.add('active');
-          const panel = container.querySelector(`#menu-${tab.dataset.menu}`);
-          if (panel) panel.classList.add('active');
-        });
-      });
+      /* Add-ons */
+      const allAddons = biz.addons || biz.rental_addons || [];
+      if (allAddons.length) {
+        const addEl = document.getElementById('bpAddons');
+        if (addEl) {
+          addEl.innerHTML = allAddons.map(a =>
+            `<div class="bp-addon-pill">
+              ${a.icon ? `<span>${a.icon}</span>` : ''}
+              <span>${esc(a.name)}</span>
+              ${a.price ? `<span class="price">$${a.price}${a.unit ? `/${esc(a.unit)}` : ''}</span>` : ''}
+            </div>`
+          ).join('');
+          show('bpAddonsSection');
+        }
+      }
 
-      // Wire up dietary/food-type tag filter clicks
-      container.querySelectorAll('.menu-subcat').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const section = btn.closest('.menu-panel');
-          section.querySelectorAll('.menu-subcat').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const tag = btn.dataset.tag;
-          section.querySelectorAll('.menu-item-row').forEach(row => {
-            if (tag === 'all') { row.style.display = ''; return; }
-            row.style.display = row.dataset.tags.includes(tag) ? '' : 'none';
-          });
-        });
-      });
+      /* What's included */
+      const svc = biz.services && biz.services[0];
+      const included = (svc && svc.whats_included) || biz.whats_included || biz.included || [];
+      if (included.length) {
+        const inclEl = document.getElementById('bpIncluded');
+        if (inclEl) {
+          inclEl.innerHTML = included.map(i =>
+            `<div class="bp-included-item"><span class="check">✓</span><span>${esc(i)}</span></div>`
+          ).join('');
+          show('bpIncludedSection');
+        }
+      }
+
+      show('bpPricingSection');
     }
 
-    // Human-readable tag labels
-    function tagLabel(t) {
-      const map = {
-        vegan:'🌱 Vegan', vegetarian:'🥦 Vegetarian', 'gluten-free':'🌾 GF',
-        seafood:'🦐 Seafood', burger:'🍔 Burger', burgers:'🍔 Burgers',
-        pizza:'🍕 Pizza', pasta:'🍝 Pasta', salad:'🥗 Salad',
-        spicy:'🌶️ Spicy', 'nut-free':'🥜 Nut Free', halal:'☪️ Halal',
-        'fan-fav':'⭐ Fan Fav', new:'✨ New', seasonal:'🌿 Seasonal',
-      };
-      return map[t] || t.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    /* ── MENU (restaurants) ── */
+    if (isRestaurant && biz.menu) {
+      renderMenuContent(biz);
+      show('bpMenuSection');
     }
-    /* ═══════════════════════════════════════════ */
 
-    /* ══════════════════════════════════════════════
-       renderPricingTab(biz)
-       For things-to-do / boat-rentals / activities
-       Renders: fleet packages, addons, what's included
-       Restaurants use renderMenuTabs() instead
-    ══════════════════════════════════════════════ */
-    function renderPricingTab(biz) {
-      const cat = biz.type || biz.category || '';
-      const sub = biz.subcategory || '';
-      const isActivity = cat === 'things-to-do' || cat === 'services' ||
-                         (biz.fleet && biz.fleet.length > 0) ||
-                         (biz.pricing && biz.pricing.length > 0);
-      if (!isActivity) return;
+    /* ── SPECIALS ── */
+    const bizSpecials = biz.specials && biz.specials.length
+      ? biz.specials
+      : (typeof GCR !== 'undefined' ? GCR.specials.filter(s => s.site_id === biz.site_id || s.site_id === biz.id) : []);
+    if (bizSpecials.length) {
+      const specEl = document.getElementById('bpSpecials');
+      if (specEl) {
+        specEl.innerHTML = bizSpecials.map(s => `
+          <div class="bp-special-card">
+            <h4>${esc(s.name || 'Special')}</h4>
+            ${s.description ? `<p>${esc(s.description)}</p>` : ''}
+            ${s.discount ? `<span class="bp-discount">${esc(s.discount)}</span>` : ''}
+          </div>`).join('');
+        show('bpSpecialsSection');
+      }
+    }
 
-      /* Show Pricing tab, hide Menu tab */
-      const tabMenu    = document.getElementById('tabMenu');
-      const tabPricing = document.getElementById('tabPricing');
-      if (tabMenu)    tabMenu.style.display    = 'none';
-      if (tabPricing) tabPricing.style.display = '';
+    /* ── EVENTS ── */
+    const bizEvents = biz.events && biz.events.length
+      ? biz.events.sort((a,b) => (a.event_date||a.date||'').localeCompare(b.event_date||b.date||''))
+      : (typeof GCR !== 'undefined' ? GCR.events.filter(e => e.site_id === biz.site_id || e.site_id === biz.id) : []);
+    if (bizEvents.length) {
+      const evEl = document.getElementById('bpEvents');
+      if (evEl) {
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        evEl.innerHTML = bizEvents.map(ev => {
+          const dateStr = ev.event_date || ev.date || '';
+          const d = dateStr ? new Date(dateStr + 'T12:00:00') : null;
+          return `<div class="bp-event-card">
+            ${d ? `<div class="bp-event-date-box"><div class="month">${months[d.getMonth()]}</div><div class="day">${d.getDate()}</div></div>` : ''}
+            <div>
+              <div class="bp-event-title">${esc(ev.title || ev.name || '')}</div>
+              ${ev.time ? `<div style="font-size:.78rem;color:#0096c7;font-weight:600;margin-bottom:4px;">🕐 ${esc(ev.time)}</div>` : ''}
+              ${ev.description ? `<div class="bp-event-desc">${esc(ev.description)}</div>` : ''}
+            </div>
+          </div>`;
+        }).join('');
+        show('bpEventsSection');
+      }
+    }
 
-      /* ── Fleet packages with pricing table ── */
-      const pkgEl = document.getElementById('pricingPackages');
-      if (pkgEl) {
-        const fleet   = biz.fleet   || [];
-        const pricing = biz.pricing || [];
-
-        if (fleet.length) {
-          // Build a map: fleet_type_id → { slot_label: price }
-          const priceMap = {};
-          pricing.forEach(p => {
-            if (!priceMap[p.fleet_type_id]) priceMap[p.fleet_type_id] = {};
-            priceMap[p.fleet_type_id][p.slot_label] = p.price;
-          });
-
-          pkgEl.innerHTML = `<h3 style="margin-bottom:16px;">Rentals & Pricing</h3>` +
-            fleet.map(ft => {
-              const prices = priceMap[ft.fleet_type_id || ft.id] || {};
-              const priceRows = Object.entries(prices).map(([label, price]) =>
-                `<div class="pricing-row"><span>${escGcr(label)}</span><span class="price">$${price}</span></div>`
-              ).join('');
-              return `<div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
-                  <div style="flex:1;">
-                    <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${escGcr(ft.name)}</div>
-                    <div style="font-size:.85rem;color:var(--text-muted);margin-bottom:8px;">${escGcr(ft.description || '')}</div>
-                    ${ft.specs ? `<div style="font-size:.75rem;color:var(--teal);font-weight:600;">${escGcr(ft.specs)}</div>` : ''}
-                  </div>
-                  <div style="min-width:160px;">${priceRows}</div>
-                </div>
-              </div>`;
-            }).join('');
-
-          /* Group rates */
-          const gr = biz.group_rates && biz.group_rates[0];
-          if (gr) {
-            pkgEl.innerHTML += `<div style="background:var(--sky);border-radius:var(--radius-sm);padding:16px;margin-top:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    /* ── REVIEWS ── */
+    if (biz.reviews && biz.reviews.length) {
+      const revEl = document.getElementById('bpReviews');
+      if (revEl) {
+        const r = biz.rating || biz.rating_avg;
+        const rv = biz.review_count || biz.reviewCount || 0;
+        if (r) setEl('bpReviewsTitle', `Reviews · ★ ${r} <span style="font-weight:400;font-size:.85rem;color:var(--text-muted,#6b7280)">(${rv})</span>`);
+        revEl.innerHTML = biz.reviews.map(r => {
+          const init  = (r.reviewer || r.customer_name || 'G').charAt(0).toUpperCase();
+          const stars = Math.round(r.rating || 5);
+          return `<div class="bp-review">
+            <div class="bp-review-head">
+              <div class="bp-review-avatar">${esc(init)}</div>
               <div>
-                <div style="font-weight:700;font-size:.95rem;">${escGcr(gr.title || 'Group Rate')}</div>
-                <div style="font-size:.82rem;color:var(--text-muted);">${escGcr(gr.description || '')}</div>
+                <div class="bp-review-name">${esc(r.reviewer || r.customer_name || 'Guest')}</div>
+                <div class="bp-review-date">${esc(r.time_ago || r.source || '')}</div>
               </div>
-              <div style="font-size:1.1rem;font-weight:800;color:var(--teal);">$${gr.price} <span style="font-size:.72rem;font-weight:500;">${escGcr(gr.price_label || '')}</span></div>
-            </div>`;
-          }
-        } else if (biz.packages) {
-          /* Fallback: legacy packages array */
-          pkgEl.innerHTML = `<h3 style="margin-bottom:16px;">Packages & Rates</h3>` +
-            biz.packages.map(p => `
-            <div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
-              <div>
-                <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${escGcr(p.name)}</div>
-                <div style="font-size:.85rem;color:var(--text-muted);">${escGcr(p.desc || '')}</div>
-              </div>
-              <div style="font-size:1.2rem;font-weight:800;color:var(--teal);white-space:nowrap;">${escGcr(p.price)}</div>
-            </div>`).join('');
-        }
-      }
-
-      /* ── Add-ons: docks + accessories ── */
-      const addonEl = document.getElementById('pricingAddons');
-      if (addonEl) {
-        const allAddons = biz.addons || biz.rental_addons || [];
-        if (allAddons.length) {
-          const docks = allAddons.filter(a => a.category === 'dock');
-          const accessories = allAddons.filter(a => a.category !== 'dock');
-
-          let html = '<h3 style="margin-bottom:12px;">Add-Ons</h3>';
-
-          if (docks.length) {
-            html += `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">Docks</div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;">` +
-              docks.map(d => `<div style="background:#fff;border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow-sm);">
-                <div style="font-weight:600;font-size:.9rem;margin-bottom:4px;">${escGcr(d.name)}${d.badge ? ` <span style="background:var(--coral);color:#fff;font-size:.6rem;padding:1px 6px;border-radius:4px;font-weight:700;">${escGcr(d.badge)}</span>` : ''}</div>
-                ${d.specs ? `<div style="font-size:.72rem;color:var(--text-muted);margin-bottom:6px;">${escGcr(d.specs)}</div>` : ''}
-                <div style="display:flex;gap:8px;">
-                  ${d.price_half ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">½ day $${d.price_half}</span>` : ''}
-                  ${d.price_full ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">all day $${d.price_full}</span>` : ''}
-                  ${(!d.price_half && !d.price_full && d.price) ? `<span style="font-size:.8rem;color:var(--teal);font-weight:700;">$${d.price} ${escGcr(d.per_unit||'')}</span>` : ''}
-                </div>
-              </div>`).join('') + '</div>';
-          }
-
-          if (accessories.length) {
-            html += `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px;">Accessories</div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">` +
-              accessories.map(a => `<div style="background:var(--sky);padding:10px 14px;border-radius:var(--radius-sm);display:flex;gap:8px;align-items:center;">
-                ${a.icon ? `<span>${a.icon}</span>` : ''}
-                <span style="font-size:.85rem;font-weight:600;">${escGcr(a.name)}</span>
-                <span style="font-size:.85rem;color:var(--teal);font-weight:700;">$${a.price}</span>
-                ${a.unit ? `<span style="font-size:.72rem;color:var(--text-muted);">${escGcr(a.unit)}</span>` : ''}
-              </div>`).join('') + '</div>';
-          }
-
-          addonEl.innerHTML = html;
-        } else if (biz.addons) {
-          /* Legacy addons array */
-          addonEl.innerHTML = `<h3 style="margin-bottom:12px;">Add-Ons</h3>
-            <div style="display:flex;flex-wrap:wrap;gap:10px;">` +
-            biz.addons.map(a => `<div style="background:var(--sky);padding:10px 16px;border-radius:var(--radius-sm);display:flex;gap:10px;align-items:center;">
-              <span style="font-size:.88rem;font-weight:600;">${escGcr(a.name)}</span>
-              <span style="font-size:.85rem;color:var(--teal);font-weight:700;">${escGcr(a.price)}</span>
-            </div>`).join('') + '</div>';
-        }
-      }
-
-      /* ── What's Included ── */
-      const inclEl = document.getElementById('pricingIncluded');
-      if (inclEl) {
-        // From services[0].whats_included or legacy biz.included
-        const svc = biz.services && biz.services[0];
-        const included = (svc && svc.whats_included) || biz.whats_included || biz.included || [];
-        if (included.length) {
-          inclEl.innerHTML = `<h3 style="margin-bottom:12px;">What's Included</h3>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;">` +
-            included.map(item => `<div style="display:flex;align-items:center;gap:8px;font-size:.85rem;">
-              <span style="color:var(--teal);font-size:1rem;">✓</span>
-              <span>${escGcr(item)}</span>
-            </div>`).join('') + '</div>';
-        }
+            </div>
+            <div class="bp-review-stars">${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div>
+            <div class="bp-review-text">${esc(r.text || '')}</div>
+          </div>`;
+        }).join('');
+        show('bpReviewsSection');
       }
     }
 
-    /* ── Init once GCR data is ready ── */
-    function initBusinessPage() {
-      loadBusinessProfile(); // async: fetches full profile, calls renderBookingPanel/renderMenuTabs/renderPricingTab
-
-      const params2 = new URLSearchParams(window.location.search);
-      const bizId2  = params2.get('id');
-      if (bizId2 && typeof GCR !== 'undefined') {
-        const biz2 = GCR.getBusiness(bizId2);
-
-        // ── VENUE (page within a page) ──
-        if (biz2 && biz2.profileType === 'venue') {
-          const tabInside = document.getElementById('tabInside');
-          const tabMenu   = document.getElementById('tabMenu');
-          if (tabInside) tabInside.style.display = '';
-          if (tabMenu)   tabMenu.style.display   = 'none';
-          document.getElementById('tab-menu').style.display = 'none';
-
-          // Highlights strip
-          const hlEl = document.getElementById('venueHighlights');
-          if (hlEl && biz2.highlights) {
-            hlEl.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">` +
-              biz2.highlights.map(h => `<span style="background:var(--sky);color:var(--teal);padding:6px 14px;border-radius:20px;font-size:.82rem;font-weight:600;">✓ ${h}</span>`).join('') +
-              `</div>`;
-          }
-
-          // Sub-businesses
-          const subEl = document.getElementById('venueSubListings');
-          if (subEl && biz2.venueSubTag) {
-            const subs = GCR.getByTag(biz2.venueSubTag).filter(b => b.id !== biz2.id);
-            subEl.innerHTML = subs.length
-              ? `<h3 style="margin-bottom:16px;">What's Inside</h3><div class="listings-grid">${subs.map(b => renderBizCard(b, 'search')).join('')}</div>`
-              : `<p class="text-muted">More listings coming soon. <a href="claim.html">Claim yours.</a></p>`;
-          }
-
-          // Packages (if venue has ticket pricing like OWA)
-          const pkgEl2 = document.getElementById('pricingPackages');
-          if (pkgEl2 && biz2.packages) {
-            document.getElementById('tabPricing').style.display = '';
-            pkgEl2.innerHTML = `<h3 style="margin-bottom:16px;">Admission & Pricing</h3>` +
-              biz2.packages.map(p => `
-              <div style="background:#fff;border-radius:var(--radius-sm);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;">
-                <div>
-                  <div style="font-weight:700;font-size:1rem;margin-bottom:4px;">${p.name}</div>
-                  <div style="font-size:.85rem;color:var(--text-muted);">${p.desc}</div>
-                  ${p.note ? `<div style="font-size:.72rem;color:var(--gray-600);margin-top:4px;">* ${p.note}</div>` : ''}
-                </div>
-                <div style="font-size:1rem;font-weight:800;color:var(--teal);white-space:nowrap;flex-shrink:0;">${p.price}</div>
-              </div>`).join('');
-          }
-        }
-
+    /* ── SIDEBAR: Booking widget ── */
+    if (canBook) {
+      const startPrice = pricing.length ? Math.min(...pricing.map(p => p.price).filter(Boolean)) : null;
+      if (startPrice) {
+        setEl('bpBookPrice', `From $${startPrice} <span>/ rental</span>`);
+        setEl('bpBookSub', 'Select your boat and time slot');
+        setEl('bpMobilePrice', `From $${startPrice}`);
+        setEl('bpMobileSub', 'per rental');
+      } else if (biz.price_range) {
+        setEl('bpBookPrice', biz.price_range);
+        setEl('bpBookSub', biz.tagline || 'Check availability below');
       }
-
-      /* ── Menu section tabs ── */
-      document.querySelectorAll('.menu-sec-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
-          tab.classList.add('active');
-          const panel = document.getElementById('menu-' + tab.dataset.menu);
-          if (panel) panel.classList.add('active');
-        });
-      });
-
-      /* ── Menu sub-category filter ── */
-      document.querySelectorAll('.menu-subcat').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.menu-subcat').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          // Future: filter menu items by data-sub attribute
-        });
-      });
-
-    }
-
-    /* ── Fire init when GCR is ready ── */
-    if (typeof GCR !== 'undefined' && GCR.loaded) {
-      document.addEventListener('DOMContentLoaded', initBusinessPage);
+      document.getElementById('bpMobileBook').style.display = 'flex';
     } else {
-      document.addEventListener('gcr:loaded', initBusinessPage, { once: true });
+      /* No booking — show contact widget instead */
+      const bw = document.getElementById('bpBookWidget');
+      if (bw) {
+        const phone = biz.phone || '';
+        bw.innerHTML = `<h4 style="margin-bottom:12px;color:#0096c7;">📞 Contact</h4>
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="bp-book-btn" style="background:#0096c7;color:#fff;">${phone}</a>` : ''}
+          ${biz.website ? `<a href="${biz.website}" class="bp-book-phone" target="_blank" style="margin-top:8px;display:block;">🌐 Visit Website</a>` : ''}`;
+      }
     }
-  </script>
+    if (biz.phone) {
+      const bp = document.getElementById('bpBookPhone');
+      if (bp) { bp.href = 'tel:' + biz.phone.replace(/\D/g,''); bp.textContent = `📞 ${biz.phone}`; bp.style.display = ''; }
+    }
+
+    /* ── SIDEBAR: Hours ── */
+    if (biz.hours) {
+      const hEl = document.getElementById('bpHours');
+      if (hEl) {
+        if (typeof biz.hours === 'string') {
+          let h = biz.hours.replace(/\b(\d{1,2}):(\d{2})\b/g, (_, hr, min) => {
+            hr = parseInt(hr);
+            const ap = hr >= 12 ? 'PM' : 'AM';
+            if (hr > 12) hr -= 12; if (hr === 0) hr = 12;
+            return hr + ':' + min + ' ' + ap;
+          });
+          let lines = h.split('\n').map(l=>l.trim()).filter(Boolean);
+          if (lines.length <= 1) lines = h.split(',').map(l=>l.trim()).filter(Boolean);
+          hEl.innerHTML = lines.map(l => `<div class="hours-row"><span>${esc(l)}</span></div>`).join('');
+        } else {
+          const days  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+          const today = days[new Date().getDay() === 0 ? 6 : new Date().getDay()-1];
+          hEl.innerHTML = days.map(d => {
+            const val = biz.hours[d] || biz.hours[d.toLowerCase()];
+            if (!val) return '';
+            const isOpen = typeof val === 'object' ? !val.closed : true;
+            const display = typeof val === 'object'
+              ? (val.closed ? 'Closed' : `${val.open || ''} – ${val.close || ''}`)
+              : val;
+            return `<div class="hours-row ${d===today?'today':''}"><span>${d}</span><span>${esc(display)}</span></div>`;
+          }).join('');
+        }
+        show('bpHoursCard');
+      }
+    }
+
+    /* ── SIDEBAR: Location ── */
+    if (biz.address) {
+      setEl('bpAddrFull', biz.address);
+      const mapsUrl = `https://maps.google.com?q=${encodeURIComponent(biz.address)}`;
+      const mapLink = document.getElementById('bpMapLink');
+      if (mapLink) { mapLink.onclick = () => window.open(mapsUrl, '_blank'); }
+      const d2 = document.getElementById('bpDirections2');
+      if (d2) d2.href = mapsUrl;
+      show('bpLocationCard');
+    }
+
+    /* ── SIDEBAR: Tags ── */
+    if (biz.tags && biz.tags.length) {
+      const tagPages = { seafood:'restaurants.html','happy-hour':'happy-hours.html','live-music':'events.html','boat-rentals':'things-to-do.html', fishing:'things-to-do.html' };
+      const tEl = document.getElementById('bpTags');
+      if (tEl) {
+        tEl.innerHTML = biz.tags.slice(0, 8).map(t => {
+          const href = tagPages[t] || `search.html?q=${encodeURIComponent(t)}`;
+          return `<a href="${href}" class="bp-tag-link">${t.replace(/-/g,' ')}</a>`;
+        }).join('');
+        show('bpTagsCard');
+      }
+    }
+  }
+
+  /* ── Menu content renderer ── */
+  function renderMenuContent(biz) {
+    const container = document.getElementById('bpMenuContent');
+    if (!container || !biz.menu) return;
+
+    const knownSections = {
+      breakfast:{label:'Breakfast',icon:'🌅'}, brunch:{label:'Brunch',icon:'🥂'},
+      lunch:{label:'Lunch',icon:'☀️'}, dinner:{label:'Dinner',icon:'🌙'},
+      apps:{label:'Appetizers',icon:'🍴'}, appetizers:{label:'Appetizers',icon:'🍴'},
+      drinks:{label:'Drinks',icon:'🍹'}, cocktails:{label:'Cocktails',icon:'🍸'},
+      desserts:{label:'Desserts',icon:'🍰'}, happy_hour:{label:'Happy Hour',icon:'🍻'},
+    };
+    const available = Object.keys(biz.menu)
+      .filter(k => Array.isArray(biz.menu[k]) && biz.menu[k].length)
+      .map(k => ({ key:k, label:knownSections[k]?.label||k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), icon:knownSections[k]?.icon||'🍽️' }));
+
+    if (!available.length) return;
+
+    let html = `<div class="menu-section-nav">` +
+      available.map((s,i) => `<div class="menu-sec-tab${i===0?' active':''}" data-menu="${s.key}">${s.icon} ${s.label}</div>`).join('') +
+      `</div>`;
+
+    available.forEach((s,i) => {
+      html += `<div class="menu-panel${i===0?' active':''}" id="bpMenu-${s.key}">`;
+      biz.menu[s.key].forEach(item => {
+        html += `<div class="menu-item-row">
+          <div style="flex:1"><div class="menu-item-name">${esc(item.name)}</div>${item.desc?`<div class="menu-item-desc">${esc(item.desc)}</div>`:''}</div>
+          <div class="menu-item-price">${esc(item.price||'')}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.menu-sec-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        container.querySelectorAll('.menu-sec-tab').forEach(t => t.classList.remove('active'));
+        container.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        const p = container.querySelector(`#bpMenu-${tab.dataset.menu}`);
+        if (p) p.classList.add('active');
+      });
+    });
+  }
+
+  /* ── Helpers ── */
+  function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
+  function setEl(id, val) { const el = document.getElementById(id); if (el) el.innerHTML = val; }
+  function esc(s) { return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  /* ── Init ── */
+  function initPage() {
+    const id = new URLSearchParams(location.search).get('id');
+    if (!id) return;
+
+    /* Quick render from in-memory data while full profile loads */
+    if (typeof GCR !== 'undefined') {
+      const basic = GCR.getBusiness(id);
+      if (basic) renderProfilePage(basic);
+    }
+
+    /* Then fetch full profile (fleet, pricing, gallery, reviews, etc.) */
+    if (typeof GCR !== 'undefined' && typeof GCR.loadProfile === 'function') {
+      GCR.loadProfile(id).then(profile => {
+        if (profile) renderProfilePage(profile);
+      });
+    }
+  }
+
+  if (typeof GCR !== 'undefined' && GCR.loaded) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  } else {
+    document.addEventListener('gcr:loaded', initPage, { once: true });
+  }
+
+</script>
 </body>
 </html>

@@ -75,14 +75,14 @@
     }
     .results-title{font-size:34px;font-weight:900;letter-spacing:-.03em;margin:2px 0 14px}
     .list{display:flex;flex-direction:column;gap:14px}
-    .cafe-card{
+    .restaurant-card, .cafe-card{
       display:grid;grid-template-columns:290px minmax(0,1fr);
       background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
       box-shadow:var(--shadow);overflow:hidden;
       transition:transform .14s ease, box-shadow .14s ease;
     }
-    .cafe-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
-    .cafe-image{
+    .restaurant-card:hover, .cafe-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
+    .restaurant-image, .cafe-image{
       min-height:208px;background-size:cover;background-position:center;position:relative;
     }
     .image-badge{
@@ -90,7 +90,7 @@
       padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.92);
       color:#21485d;font-weight:800;font-size:13px;
     }
-    .cafe-body{padding:16px 18px}
+    .restaurant-body, .cafe-body{padding:16px 18px}
     .title-row{
       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
     }
@@ -120,7 +120,7 @@
       margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
       display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
     }
-    .address{color:#425b70;font-weight:700;font-size:14px}
+    .address, .venue{color:#425b70;font-weight:700;font-size:14px}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
     .action{
       border:1px solid var(--line);background:#fff;color:#25465b;
@@ -204,6 +204,7 @@
       <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
       <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
       <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="public-spots.html" class="gcr-cat-tab">🏖️ Public Spots</a>
       <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
       <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
       <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>

@@ -997,7 +997,7 @@
       <input type="text" id="heroSearch"
         placeholder='Try "crab legs", "happy hour", "boat rental", "live music"...'
         autocomplete="off">
-      <button class="hero-search-submit" onclick="doHeroSearch()">🔍</button>
+      <button class="hero-search-submit" id="heroSearchBtn" onclick="doHeroSearch()">🔍</button>
       <button class="hero-mic-btn" id="micBtn" onclick="startVoiceChat()" title="Ask AI with your voice">🎙️</button>
       <div class="hero-search-dropdown" id="heroDropdown"></div>
     </div>
@@ -1611,6 +1611,18 @@ window.doHeroSearch = function() {
   const q = document.getElementById('heroSearch').value.trim();
   if (q) window.location.href = `search.html?q=${encodeURIComponent(q)}`;
 };
+
+// Disable hero search until data is ready, show placeholder feedback
+(function() {
+  const btn = document.getElementById('heroSearchBtn');
+  const input = document.getElementById('heroSearch');
+  if (btn && typeof GCR !== 'undefined' && !GCR.loaded) {
+    input.placeholder = 'Loading Gulf Coast data…';
+    document.addEventListener('gcr:loaded', () => {
+      input.placeholder = 'Try "crab legs", "happy hour", "boat rental", "live music"...';
+    });
+  }
+})();
 window.doTagSearch = function(q) {
   window.location.href = `search.html?q=${encodeURIComponent(q)}`;
 };

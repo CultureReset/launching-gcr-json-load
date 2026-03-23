@@ -186,6 +186,13 @@
     </div>
   </div>
 
+  <!-- LOADING SPINNER -->
+  <div id="gcrLoadingOverlay" style="display:none;text-align:center;padding:60px 20px;">
+    <div style="display:inline-block;width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:var(--teal,#0b7a75);border-radius:50%;animation:gcr-spin 0.7s linear infinite;"></div>
+    <p style="margin-top:16px;color:#6b7280;font-size:.9rem;">Loading Gulf Coast data…</p>
+  </div>
+  <style>@keyframes gcr-spin{to{transform:rotate(360deg)}}</style>
+
   <!-- RESULTS -->
   <section class="section">
     <div class="container">
@@ -247,23 +254,27 @@
     let currentCatFilter = 'all';
     let lastResults = [];
 
-    const FOOD_MENU_DATA = {
-      'lunas-eat-drink': [
-        { name:'Seafood Gumbo',          desc:'Rich Gulf seafood gumbo',                     price:'Cup $6 · Bowl $10', tags:['seafood','soup'] },
-        { name:'Crab Claws',             desc:'Gulf blue crab claws, lightly fried',          price:'Market',           tags:['seafood','crab'] },
-        { name:'Crab & Artichoke Dip',   desc:'Baked with Swiss & Parmesan, grilled pita',   price:'$14',              tags:['seafood','crab','dip'] },
-        { name:'Creole BBQ Gulf Shrimp', desc:'Herb-scented Worcestershire butter, shell-on', price:'$17',             tags:['seafood','shrimp'] },
-        { name:'Shrimp & Grits',         desc:'Creole Gulf shrimp over stone-ground grits',   price:'$22',             tags:['seafood','shrimp'] },
-        { name:'All You Can Eat Crab',   desc:'Fridays from 6pm — snow crab legs',            price:'$48',             tags:['crab','ayce','crab legs'] },
-        { name:'Happy Hour Drafts',      desc:'All 32 taps half price · Daily 3–5pm',         price:'$3–$5',           tags:['happy hour','drinks','beer'] },
-      ],
-      'angry-crab-shack': [
-        { name:'Snow Crab Legs',         desc:'Cajun boil with your choice of seasoning',     price:'Market',          tags:['crab','crab legs','seafood'] },
-        { name:'All You Can Eat Crab',   desc:'AYCE snow crab — ask your server for current pricing', price:'Market', tags:['ayce','crab legs','crab'] },
-        { name:'Shrimp Boil',            desc:'Gulf shrimp, corn, potatoes, sausage',         price:'$18',             tags:['seafood','shrimp','boil'] },
-        { name:'Lobster',                desc:'Whole Maine lobster',                           price:'Market',          tags:['seafood','lobster'] },
-      ],
-    };
+    // Build menu/specials data dynamically from GCR.specials (loaded from API)
+    function getMenuData(bizSlug) {
+      if (typeof GCR === 'undefined') return [];
+      return (GCR.getSpecialsByBusiness(bizSlug) || []).map(s => {
+        const tags = [s.type || ''];
+        if (s.type === 'happy_hour') tags.push('happy hour', 'drinks');
+        if (s.type === 'daily_special') tags.push('special', 'food');
+        if ((s.name || '').toLowerCase().includes('crab')) tags.push('crab', 'seafood');
+        if ((s.name || '').toLowerCase().includes('shrimp')) tags.push('shrimp', 'seafood');
+        if ((s.name || '').toLowerCase().includes('seafood')) tags.push('seafood');
+        if ((s.name || '').toLowerCase().includes('all you can eat') || (s.name || '').toLowerCase().includes('ayce')) tags.push('ayce', 'all you can eat');
+        // include drink specials as individual items
+        const drinkItems = (s.drink_specials || []).map(d => ({
+          name: d.name ? d.name.charAt(0).toUpperCase() + d.name.slice(1) + ' Special' : 'Drink Special',
+          desc: d.note || 'Happy hour drink special',
+          price: d.price ? `$${d.price}` : '',
+          tags: ['happy hour', 'drinks', d.name || ''],
+        }));
+        return [{ name: s.name, desc: s.description || '', price: s.discount_text || '', tags }, ...drinkItems];
+      }).flat();
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       // Mode button switching
@@ -321,8 +332,20 @@
       }
     });
 
+    let _pendingQuery = null;
+    document.addEventListener('gcr:loaded', () => {
+      if (_pendingQuery) { doSearch(_pendingQuery); _pendingQuery = null; }
+    });
+
     function doSearch(q) {
-      if (!q || typeof GCR === 'undefined') return;
+      if (!q) return;
+      if (typeof GCR === 'undefined' || !GCR.loaded) {
+        _pendingQuery = q;
+        document.getElementById('defaultState').style.display = 'none';
+        document.getElementById('gcrLoadingOverlay').style.display = '';
+        return;
+      }
+      document.getElementById('gcrLoadingOverlay').style.display = 'none';
       document.getElementById('defaultState').style.display = 'none';
       document.getElementById('resultTypeBar').style.display = '';
 
@@ -374,7 +397,7 @@
         foodEl.style.display = '';
         foodEl.innerHTML = filtered.map(biz => {
           const term    = q.toLowerCase();
-          const menuData = FOOD_MENU_DATA[biz.id] || [];
+          const menuData = getMenuData(biz.slug || biz.id);
           const matching = menuData.filter(item =>
             item.name.toLowerCase().includes(term) ||
             (item.desc && item.desc.toLowerCase().includes(term)) ||
