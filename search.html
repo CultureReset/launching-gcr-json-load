@@ -122,22 +122,22 @@
       📲 Install App
     </button>
   </div>
-    <div class="gcr-cat-tabs" id="gcrCatTabs">
-    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
-    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
-    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
-    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
-    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
-    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
-    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
-    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
-    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
-    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
-  </div>
-  <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
+        <div class="gcr-cat-tabs" id="gcrCatTabs">
+      <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
+      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+      <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
+      <a href="specials.html"     class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
+      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+      <a href="nightlife.html"    class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html"      class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html"     class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html"        class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
+    </div>
+    <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
   </div>
 </div>
 
@@ -349,30 +349,34 @@
       document.getElementById('defaultState').style.display = 'none';
       document.getElementById('resultTypeBar').style.display = '';
 
+      // Helper: get the category/type of a business (API uses 'type', some records use 'category')
+      const bcat = b => b.type || b.category || '';
+
       // Filter by mode
       let results = GCR.search(q);
-      if (currentMode === 'food')   results = results.filter(b => ['restaurants','coffee-sweets','specials','happy-hours'].includes(b.category));
-      if (currentMode === 'todo')   results = results.filter(b => b.category === 'things-to-do');
-      if (currentMode === 'events') results = results.filter(b => b.category === 'events');
+      if (currentMode === 'food')   results = results.filter(b => ['restaurants','coffee-sweets','specials','happy-hours'].includes(bcat(b)));
+      if (currentMode === 'todo')   results = results.filter(b => bcat(b) === 'things-to-do');
+      if (currentMode === 'events') results = results.filter(b => bcat(b) === 'events');
 
       lastResults = results;
 
       // Update count badges
       const allR = GCR.search(q);
-      document.getElementById('countAll').textContent        = allR.length;
-      document.getElementById('countRestaurants').textContent = allR.filter(b=>b.category==='restaurants').length;
-      document.getElementById('countTodo').textContent        = allR.filter(b=>b.category==='things-to-do').length;
-      document.getElementById('countEvents').textContent      = allR.filter(b=>b.category==='events').length;
-      document.getElementById('countCoffee').textContent      = allR.filter(b=>b.category==='coffee-sweets').length;
-      document.getElementById('countShopping').textContent    = allR.filter(b=>b.category==='shopping').length;
-      document.getElementById('countOther').textContent       = allR.filter(b=>b.category==='other').length;
+      document.getElementById('countAll').textContent         = allR.length;
+      document.getElementById('countRestaurants').textContent = allR.filter(b=>bcat(b)==='restaurants').length;
+      document.getElementById('countTodo').textContent        = allR.filter(b=>bcat(b)==='things-to-do').length;
+      document.getElementById('countEvents').textContent      = allR.filter(b=>bcat(b)==='events').length;
+      document.getElementById('countCoffee').textContent      = allR.filter(b=>bcat(b)==='coffee-sweets').length;
+      document.getElementById('countShopping').textContent    = allR.filter(b=>bcat(b)==='shopping').length;
+      document.getElementById('countOther').textContent       = allR.filter(b=>bcat(b)==='other').length;
 
       renderResults(results, q);
     }
 
     function renderResults(results, q) {
+      const bcat = b => b.type || b.category || '';
       // Apply category filter
-      let filtered = currentCatFilter === 'all' ? results : results.filter(b => b.category === currentCatFilter);
+      let filtered = currentCatFilter === 'all' ? results : results.filter(b => bcat(b) === currentCatFilter);
 
       const headingEl     = document.getElementById('searchHeading');
       const subEl         = document.getElementById('searchSubheading');
@@ -392,7 +396,7 @@
       noEl.style.display = 'none';
 
       // FOOD mode: compact cards with matching menu items inline
-      if (currentMode === 'food' || currentCatFilter === 'restaurants') {
+      if (currentMode === 'food' || currentCatFilter === 'restaurants' || currentCatFilter === 'coffee-sweets') {
         gridEl.style.display = 'none';
         foodEl.style.display = '';
         foodEl.innerHTML = filtered.map(biz => {

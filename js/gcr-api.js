@@ -57,15 +57,31 @@ const GCR = {
 
   /* ── HELPERS (same interface as data.js) ── */
   getByCategory(cat) {
+    const aliases = {
+      'restaurants':    ['restaurants','restaurant','food','dining'],
+      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity'],
+      'nightlife':     ['nightlife','bar','bars','club','clubs'],
+      'coffee-sweets': ['coffee-sweets','coffee','cafe','sweets','desserts','bakery'],
+      'shopping':      ['shopping','shop','retail','boutique'],
+      'services':      ['services','service'],
+      'other':         ['other','misc','miscellaneous'],
+    };
+    const valid = aliases[cat] || [cat];
     return this.businesses.filter(b =>
-      b.type === cat || b.category === cat
+      valid.includes(b.type) || valid.includes(b.category)
     );
   },
   getFeatured() {
     return this.businesses.filter(b => b.featured);
   },
   getHappyHours() {
-    return this.businesses.filter(b => b.happyHour || b.happy_hour);
+    return this.businesses.filter(b => {
+      const hh = b.happyHour || b.happy_hour;
+      if (!hh) return false;
+      if (hh === true) return true;
+      if (typeof hh === 'string' && hh.trim().length > 0) return true;
+      return false;
+    });
   },
   getSpecials() {
     return this.specials.filter(s => s.active !== false);
@@ -92,6 +108,15 @@ const GCR = {
   },
   search(q) {
     const term = q.toLowerCase();
+    // Build a set of business slugs that have matching specials/menu items
+    const specialMatches = new Set();
+    this.specials.forEach(s => {
+      if ((s.name || '').toLowerCase().includes(term) ||
+          (s.description || '').toLowerCase().includes(term) ||
+          (s.discount || '').toLowerCase().includes(term)) {
+        specialMatches.add(s.slug || s.subdomain);
+      }
+    });
     return this.businesses.filter(b => {
       if ((b.name        || '').toLowerCase().includes(term)) return true;
       if ((b.tagline     || '').toLowerCase().includes(term)) return true;
@@ -99,6 +124,7 @@ const GCR = {
       if ((b.area        || '').toLowerCase().includes(term)) return true;
       if ((b.type        || '').toLowerCase().includes(term)) return true;
       if (b.tags && b.tags.some(t => t.toLowerCase().includes(term))) return true;
+      if (specialMatches.has(b.slug) || specialMatches.has(b.subdomain)) return true;
       return false;
     }).sort((a, b) => {
       const aTop = (a.name || '').toLowerCase().startsWith(term) ? 1 : 0;

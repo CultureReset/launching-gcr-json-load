@@ -492,18 +492,30 @@ function renderBizCard(biz, context) {
 
   const useHorizontalLayout = isRestaurantCtx || isCoffeeCtx || isActivityCtx;
 
+  const _tags = [
+    ...(biz.tags||[]),
+    category,
+    biz.subcategory||'',
+    (biz.subcategory||'').replace(/-/g,' '),
+    (biz.waterfront||biz.beachfront) ? 'waterfront' : '',
+    (biz.liveMusic||biz.live_music)  ? 'live-music'  : '',
+    (biz.happyHour||biz.happy_hour)  ? 'happy-hour'  : '',
+    biz.kidsFriendly ? 'family'  : '',
+    biz.outdoor      ? 'outdoor' : '',
+  ].filter(Boolean).join(' ');
+
   return `
-  <article class="${cardClass}" data-tags="${(biz.tags||[]).join(' ')} ${category}">
+  <article class="${cardClass}" data-tags="${_tags}" onclick="window.location.href='business.html?id=${slug}'" style="cursor:pointer">
     <div class="${imageClass}" ${!useHorizontalLayout ? '' : 'style="background-image:url(' + (imgUrl ? `'${imgUrl}'` : '') + ')"'}>
       ${featured}
       ${!useHorizontalLayout && imgUrl ? `<img src="${imgUrl}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
       ${!useHorizontalLayout && !imgUrl ? `<span>${biz.emoji || '🏖️'}</span>` : ''}
-      ${useHorizontalLayout ? '<div class="image-badge">Featured</div>' : ''}
+      ${useHorizontalLayout && biz.featured ? '<div class="image-badge">Featured</div>' : ''}
     </div>
     <div class="${bodyClass}">
       ${useHorizontalLayout ? `<div class="title-row"><div><div class="${nameClass}">${escGcr(biz.name)}</div>` : `<h4>${escGcr(biz.name)}</h4>`}
-      ${useHorizontalLayout ? `<div class="${sublineClass}"><span>${biz.location || 'Location'}</span><span>${priceRange || '$$'}</span></div></div>` : ''}
-      ${useHorizontalLayout ? `<div class="status">Featured</div></div>` : ''}
+      ${useHorizontalLayout ? `<div class="${sublineClass}"><span>${biz.city || biz.location || 'Gulf Coast'}</span>${priceRange ? `<span>${priceRange}</span>` : ''}</div></div>` : ''}
+      ${useHorizontalLayout && biz.featured ? `<div class="status">Featured</div></div>` : (useHorizontalLayout ? `</div>` : '')}
 
       ${rating ? `<div class="rating"><span class="stars">${stars}</span> ${rating} <span style="color:var(--gray-400)">(${reviews})</span></div>` : `${!useHorizontalLayout ? `<div class="biz-rating"><span class="stars">${stars}</span> ${rating} <span style="color:var(--gray-400)">(${reviews})</span></div>` : ''}`}
 
@@ -518,11 +530,11 @@ function renderBizCard(biz, context) {
       <p class="${descClass}">${escGcr((biz.description || biz.tagline || '').substring(0, 180))}${(biz.description || biz.tagline || '').length > 180 ? '... <a href="business.html?id=' + slug + '" style="color:var(--brand);font-weight:800;text-decoration:underline;cursor:pointer">More</a>' : ''}</p>
 
       ${useHorizontalLayout ? `<div class="bottom-row">
-        <div class="venue">📍 ${biz.address || biz.location || 'See details for address'}</div>
+        <div class="venue">📍 ${biz.address || biz.city || biz.location || 'See details for address'}</div>
         <div class="actions">
-          <a href="business.html?id=${slug}" class="${actionClass}">Details</a>
-          <a href="#" class="${actionClass}">Directions</a>
-          <a href="business.html?id=${slug}" class="${actionPrimaryClass}">Book Now</a>
+          ${biz.phone ? `<a href="tel:${(biz.phone||'').replace(/\D/g,'')}" class="${actionClass}" onclick="event.stopPropagation()">Call</a>` : ''}
+          ${biz.address ? `<a href="https://maps.google.com?q=${encodeURIComponent(biz.address)}" target="_blank" class="${actionClass}" onclick="event.stopPropagation()">Directions</a>` : ''}
+          <a href="business.html?id=${slug}" class="${actionPrimaryClass}">View Page</a>
         </div>
       </div>` : `<div class="biz-card-actions">
         <a href="business.html?id=${slug}" class="${actionClass}">View Profile</a>
@@ -560,7 +572,7 @@ function renderPageListings() {
 
 /* ── Filter visible cards ── */
 function filterListings(filter) {
-  document.querySelectorAll('.biz-card').forEach(card => {
+  document.querySelectorAll('.biz-card, .restaurant-card, .activity-card, .cafe-card').forEach(card => {
     if (!filter || filter === 'all') { card.style.display = ''; return; }
     const tags = (card.dataset.tags || '').toLowerCase();
     card.style.display = tags.includes(filter.toLowerCase()) ? '' : 'none';
@@ -727,6 +739,29 @@ function renderHappyHourPage() {
   const nowBiz   = businesses.filter(b => hhStatus(b) === 'now');
   const soonBiz  = businesses.filter(b => hhStatus(b) === 'soon');
   const laterBiz = businesses.filter(b => hhStatus(b) === 'later');
+
+  // Update livebox stats
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+  const hhTimeEl = document.getElementById('hh-time');
+  if (hhTimeEl) hhTimeEl.textContent = days[now.getDay()] + ' • ' + timeStr;
+  const hhActiveEl = document.getElementById('hh-active-count');
+  if (hhActiveEl) hhActiveEl.textContent = nowBiz.length + ' active now';
+  const hhSoonEl = document.getElementById('hh-soon-count');
+  if (hhSoonEl) hhSoonEl.textContent = soonBiz.length + ' starting soon';
+  const hhNowSub = document.getElementById('hh-now-sub');
+  if (hhNowSub) hhNowSub.textContent = nowBiz.length
+    ? nowBiz.length + ' live special' + (nowBiz.length !== 1 ? 's' : '')
+    : 'None right now — check back later';
+
+  if (!businesses.length) {
+    const ctaHtml = '<div class="empty" style="grid-column:1/-1;text-align:center;padding:40px 20px"><p style="font-size:1.1em;margin-bottom:12px">No happy hours listed yet.</p><a href="mailto:hello@gulfcoastranked.com" class="btn btn-primary">Add Your Happy Hour →</a></div>';
+    nowGrid.innerHTML = ctaHtml;
+    if (soonGrid) soonGrid.innerHTML = '';
+    if (laterGrid) laterGrid.innerHTML = '';
+    return;
+  }
 
   nowGrid.innerHTML = nowBiz.length
     ? nowBiz.map(hhFullCard).join('')

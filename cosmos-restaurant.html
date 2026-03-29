@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Cosmo's Restaurant & Bar — Gulf Coast Radar</title>
+  <meta name="description" content="Off the beaten path on Canal Road in Orange Beach. Fresh and eclectic food — hand-cut steaks, local seafood, pasta, and award-winning dishes. Happy Hour daily 3–5pm.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{
+      --bg:#f4fbfb;--bg2:#eef7fb;--card:#ffffff;--text:#0f172a;--muted:#5b677a;
+      --line:#dbe7ec;--teal:#0f766e;--teal-2:#14b8a6;--cyan:#0891b2;
+      --navy:#0b1f33;--gold:#f59e0b;--green:#22c55e;--danger:#f97316;
+      --shadow:0 10px 28px rgba(2,12,27,.10);--shadow-soft:0 6px 18px rgba(2,12,27,.07);
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:linear-gradient(180deg,var(--bg),var(--bg2));}
+    a{text-decoration:none;color:inherit}
+    .app{max-width:680px;margin:0 auto;background:transparent;min-height:100vh;padding-bottom:100px;}
+
+    /* HERO */
+    .bp-hero{position:relative;height:340px;overflow:hidden;background:linear-gradient(135deg,#0b3d5e,#0b7a75);}
+    .bp-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .bp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(8,18,31,.85) 0%,rgba(8,18,31,.35) 44%,transparent 70%);pointer-events:none;}
+    .bp-hero-actions{position:absolute;top:14px;right:14px;z-index:3;display:flex;gap:8px;}
+    .glass-btn{border:none;border-radius:999px;padding:10px 14px;background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.24);font-size:13px;font-weight:700;cursor:pointer;}
+    .bp-hero-copy{position:absolute;left:18px;right:18px;bottom:20px;z-index:3;color:#fff;}
+    .bp-hero-title{margin:0;font-size:32px;line-height:1.05;font-weight:900;letter-spacing:-.04em;}
+    .bp-hero-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:10px;}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;}
+    .pill-open{background:rgba(34,197,94,.95);color:#fff;}
+    .pill-cat{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.22)}
+    .bp-hero-addr{margin-top:8px;font-size:14px;color:rgba(255,255,255,.9);}
+
+    /* SECTION */
+    .bp-section{padding:14px 16px 0;}
+
+    /* CARD */
+    .bp-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-soft);}
+
+    /* BADGE ROW */
+    .bp-badge-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-ms-overflow-style:none;}
+    .bp-badge-row::-webkit-scrollbar{display:none}
+    .bp-badge{flex:0 0 auto;border-radius:999px;padding:11px 15px;font-size:13px;font-weight:700;border:1px solid var(--line);background:#fff;color:#183243;cursor:default;white-space:nowrap;box-shadow:var(--shadow-soft);}
+    .bp-badge.teal{border-color:#b7ece7;background:#f0fdfa}
+    .bp-badge.gold{border-color:#fde7ba;background:#fff8eb}
+    .bp-badge.pink{border-color:#fce7f3;background:#fdf2f8}
+
+    /* BIO */
+    .bp-bio{padding:18px;font-size:15px;line-height:1.6;color:#334155;}
+
+    /* ACTIONS */
+    .bp-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .bp-btn{border:none;border-radius:22px;padding:15px 16px;font-size:15px;font-weight:800;cursor:pointer;box-shadow:var(--shadow-soft);display:block;text-align:center;}
+    .bp-btn:hover{transform:translateY(-1px)}
+    .bp-btn-primary{background:linear-gradient(135deg,var(--teal),var(--cyan));color:#fff;}
+    .bp-btn-secondary{background:#fff;border:1px solid #bae6e0;color:var(--teal);}
+    .bp-btn-dark{width:100%;background:var(--navy);color:#fff;margin-top:10px;}
+
+    /* HAPPY HOUR CALLOUT */
+    .hh-callout{padding:18px;}
+    .hh-callout-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+    .hh-callout-title{font-size:17px;font-weight:900;letter-spacing:-.02em;}
+    .hh-badge{flex:0 0 auto;font-size:12px;font-weight:800;color:#b45309;background:#fff7ed;border-radius:999px;padding:7px 10px;}
+    .hh-items{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+    .hh-item{background:#f0fdfa;color:#0f766e;border:1px solid #b7ece7;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:700;}
+
+    /* TABS */
+    .bp-tabs{position:sticky;top:59px;z-index:45;margin-top:14px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;gap:24px;overflow-x:auto;padding:12px 16px;scrollbar-width:none;-ms-overflow-style:none;}
+    .bp-tabs::-webkit-scrollbar{display:none}
+    .bp-tab{border:none;background:none;padding:0 0 8px;font-size:14px;font-weight:800;color:#334155;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;}
+    .bp-tab.active,.bp-tab:hover{color:var(--teal);border-bottom-color:var(--teal);}
+
+    /* SUBHEAD */
+    .bp-subhead{font-size:20px;font-weight:900;letter-spacing:-.03em;margin:0 0 12px;}
+
+    /* MENU */
+    .menu-cat{margin-bottom:22px;}
+    .menu-cat-label{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--teal);margin-bottom:10px;}
+    .menu-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #edf2f7;}
+    .menu-item:last-child{border-bottom:none;}
+    .menu-item-name{font-size:15px;font-weight:700;line-height:1.3;}
+    .menu-item-desc{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4;}
+    .menu-item-price{flex:0 0 auto;font-size:15px;font-weight:900;color:var(--teal);}
+
+    /* HOURS */
+    .hours-list{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+    .hours-row{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:#334155;padding-bottom:10px;border-bottom:1px solid #edf2f7;}
+    .hours-row:last-child{border-bottom:none;}
+    .hours-day{font-weight:600;}
+    .hours-row.today{font-weight:700;color:var(--teal);}
+
+    /* PHOTO GRID */
+    .bp-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .bp-gallery-item img{width:100%;height:160px;object-fit:cover;border-radius:22px;box-shadow:var(--shadow-soft);border:1px solid #e6eef2;display:block;}
+
+    /* AWARD CALLOUT */
+    .award-callout{background:linear-gradient(135deg,#1e3a5f,#0b7a75);border-radius:22px;padding:20px;color:#fff;margin-bottom:16px;}
+    .award-callout-label{font-size:.7rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#7dd3fc;margin-bottom:6px;}
+    .award-callout-text{font-size:15px;line-height:1.5;color:rgba(255,255,255,.9);}
+
+    /* LOCATION */
+    .bp-addr-text{color:#334155;font-size:15px;line-height:1.5;margin-bottom:14px;}
+    .map-placeholder{width:100%;height:180px;border-radius:18px;background:#e8f4f8;border:1px solid #dbe7ec;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;}
+
+    @media(max-width:480px){.bp-hero-title{font-size:26px;}.bp-photo-grid{grid-template-columns:1fr 1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- GCR HEADER -->
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
+  </div>
+  <div class="gcr-cat-tabs" id="gcrCatTabs">
+    <a href="restaurants.html"   class="gcr-cat-tab gcr-cat-tab--active">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Nightlife</a>
+    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal ? openSignupModal() : null">⭐ Join Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal ? openCalendarModal() : null">📅 Events Calendar 🎉</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- HERO -->
+  <section class="bp-hero">
+    <img class="bp-hero-img" src="https://cosmosrestaurantandbar.com/wp-content/uploads/2021/07/cosmos-tall.jpg" alt="Cosmo's Restaurant & Bar" onerror="this.style.display='none'">
+    <div class="bp-hero-actions">
+      <a class="glass-btn" href="restaurants.html">← Back</a>
+      <button class="glass-btn" onclick="navigator.share ? navigator.share({title:\"Cosmo's Restaurant & Bar\",url:location.href}) : null">↗ Share</button>
+    </div>
+    <div class="bp-hero-copy">
+      <h1 class="bp-hero-title">Cosmo's Restaurant &amp; Bar</h1>
+      <div class="bp-hero-meta">
+        <span class="pill pill-open">⏰ Open Now</span>
+        <span class="pill pill-cat">🍽️ Restaurant &amp; Bar</span>
+      </div>
+      <div class="bp-hero-addr">📍 25753 Canal Rd, Orange Beach, AL</div>
+    </div>
+  </section>
+
+  <!-- BADGE ROW -->
+  <div class="bp-section" style="padding-top:16px;">
+    <div class="bp-badge-row">
+      <span class="bp-badge teal">🦞 Seafood</span>
+      <span class="bp-badge teal">🥩 Hand-Cut Steaks</span>
+      <span class="bp-badge teal">🍣 Sushi</span>
+      <span class="bp-badge gold">🍻 Happy Hour Daily</span>
+      <span class="bp-badge">🎵 Live Music</span>
+      <span class="bp-badge">🍝 Pasta</span>
+      <span class="bp-badge pink">🏆 Award Winning</span>
+    </div>
+  </div>
+
+  <!-- AWARD CALLOUT -->
+  <div class="bp-section" style="padding-top:14px;">
+    <div class="award-callout">
+      <div class="award-callout-label">🏆 Year of Alabama Food Award</div>
+      <div class="award-callout-text">Their <strong>Banana Leaf Wrapped Fish</strong> was named one of <em>"the top 100 dishes to eat before you die."</em></div>
+    </div>
+  </div>
+
+  <!-- ABOUT / BIO -->
+  <div class="bp-section">
+    <div class="bp-card bp-bio">
+      Off the beaten path on Canal Road in Orange Beach, Cosmo's Restaurant &amp; Bar is far from ordinary. Serving fresh and eclectic food since day one, Cosmo's features a wide range of dining, enticing even the most discriminate palate. Using chef-inspired ingredients, you can enjoy everything from hand-cut steaks to local seafood and pasta.
+      <br><br>
+      This neighborhood favorite on the Gulf Coast has taken cuisine to the cutting edge. Culinary greats such as the chicken roulade, sesame seared tuna salad, and traditional crab cakes done with a twist will have you wanting more.
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="bp-section">
+    <div class="bp-actions">
+      <a class="bp-btn bp-btn-primary" href="https://maps.google.com/?q=25753+Canal+Rd+Orange+Beach+AL" target="_blank">🗺️ Directions</a>
+      <a class="bp-btn bp-btn-secondary" href="http://www.cosmosrestaurantandbar.com/" target="_blank">🌐 Website</a>
+    </div>
+    <a class="bp-btn bp-btn-dark" href="tel:+12519489663" style="display:block;margin-top:10px;">📞 Call (251) 948-9663</a>
+  </div>
+
+  <!-- HAPPY HOUR CALLOUT -->
+  <div class="bp-section">
+    <div class="bp-card">
+      <div class="hh-callout">
+        <div class="hh-callout-head">
+          <div>
+            <div class="hh-callout-title">🍻 Happy Hour</div>
+            <div style="font-size:13px;color:var(--muted);margin-top:4px;">The best on the Island!</div>
+          </div>
+          <div class="hh-badge">Daily 3–5 PM</div>
+        </div>
+        <div class="hh-items">
+          <span class="hh-item">🍺 Draft Beer Specials</span>
+          <span class="hh-item">🍷 House Wine Deals</span>
+          <span class="hh-item">🍤 Appetizer Deals</span>
+          <span class="hh-item">🍣 $2 Off All Sushi Rolls</span>
+          <span class="hh-item">🔥 Firecracker Shrimp</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="bp-tabs">
+    <button class="bp-tab active" onclick="scrollTo({top:0,behavior:'smooth'})">Overview</button>
+    <button class="bp-tab" onclick="document.getElementById('menuSection').scrollIntoView({behavior:'smooth'})">Menu</button>
+    <button class="bp-tab" onclick="document.getElementById('photosSection').scrollIntoView({behavior:'smooth'})">Photos</button>
+    <button class="bp-tab" onclick="document.getElementById('hoursSection').scrollIntoView({behavior:'smooth'})">Hours</button>
+    <button class="bp-tab" onclick="document.getElementById('locationSection').scrollIntoView({behavior:'smooth'})">Location</button>
+  </div>
+
+  <!-- MENU -->
+  <div class="bp-section" id="menuSection">
+    <div class="bp-card">
+      <div style="padding:18px">
+        <h2 class="bp-subhead">Menu Highlights</h2>
+
+        <div class="menu-cat">
+          <div class="menu-cat-label">Starters</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Crab Cakes</div>
+              <div class="menu-item-desc">Traditional crab cakes with a twist — a Cosmo's signature</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Tuna Poke Nachos</div>
+              <div class="menu-item-desc">Fresh tuna poke over crispy chips — a Gulf Coast favorite</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Sesame Seared Tuna Salad</div>
+              <div class="menu-item-desc">Chef-inspired salad with sesame crusted fresh tuna</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-label">Entrées</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Banana Leaf Wrapped Fish</div>
+              <div class="menu-item-desc">🏆 Named one of "the top 100 dishes to eat before you die" — Year of Alabama Food</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Chicken Roulade</div>
+              <div class="menu-item-desc">A Cosmo's culinary signature — elegantly stuffed and rolled</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Seafood Pasta</div>
+              <div class="menu-item-desc">Fresh local Gulf seafood tossed with housemade pasta</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Asian Glazed Tuna</div>
+              <div class="menu-item-desc">Premium tuna with a sweet and savory Asian glaze</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Pork Chop</div>
+              <div class="menu-item-desc">Hand-cut pork chop prepared with chef-inspired seasonings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-cat">
+          <div class="menu-cat-label">Desserts</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Key Lime Pie</div>
+              <div class="menu-item-desc">Classic Florida-style key lime pie — cool, tart, and creamy</div>
+            </div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Banana Fritters</div>
+              <div class="menu-item-desc">Golden fried bananas — a sweet Gulf Coast finish</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="http://www.cosmosrestaurantandbar.com/menu/" target="_blank" style="display:block;text-align:center;padding:12px;background:#f0fdfa;color:var(--teal);font-weight:800;font-size:14px;border-radius:14px;border:1px solid #b7ece7;">View Full Menu →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="bp-section" id="photosSection">
+    <div class="bp-card" style="padding:18px;">
+      <h2 class="bp-subhead">Photos</h2>
+      <div class="bp-photo-grid">
+        <div class="bp-gallery-item">
+          <img src="https://cosmosrestaurantandbar.com/wp-content/uploads/2021/07/cosmos-tall.jpg" alt="Cosmo's Restaurant" loading="lazy">
+        </div>
+        <div class="bp-gallery-item">
+          <img src="https://cosmosrestaurantandbar.com/wp-content/uploads/2021/07/grilled-shrimp-6.jpg" alt="Grilled Shrimp" loading="lazy">
+        </div>
+        <div class="bp-gallery-item">
+          <img src="https://cosmosrestaurantandbar.com/wp-content/uploads/2021/08/0250.jpg" alt="Cosmo's Interior" loading="lazy">
+        </div>
+        <div class="bp-gallery-item">
+          <img src="https://cosmosrestaurantandbar.com/wp-content/uploads/2020/03/cosmos.jpg" alt="Cosmo's Dining" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOURS -->
+  <div class="bp-section" id="hoursSection">
+    <div class="bp-card" style="padding:18px;">
+      <h2 class="bp-subhead">Hours</h2>
+      <div class="hours-list">
+        <div class="hours-row">
+          <span class="hours-day">Sunday</span>
+          <span>11:00 AM – 9:30 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Monday</span>
+          <span>11:00 AM – 9:30 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Tuesday</span>
+          <span>11:00 AM – 9:30 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Wednesday</span>
+          <span>11:00 AM – 9:30 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Thursday</span>
+          <span>11:00 AM – 9:30 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Friday</span>
+          <span>11:00 AM – 10:00 PM</span>
+        </div>
+        <div class="hours-row">
+          <span class="hours-day">Saturday</span>
+          <span>11:00 AM – 10:00 PM</span>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding:12px;background:#f0fdfa;border-radius:14px;border:1px solid #b7ece7;font-size:14px;font-weight:700;color:var(--teal);">
+        🍻 Happy Hour every day 3:00 – 5:00 PM
+      </div>
+    </div>
+  </div>
+
+  <!-- LOCATION -->
+  <div class="bp-section" id="locationSection">
+    <div class="bp-card" style="padding:18px;">
+      <h2 class="bp-subhead">Location</h2>
+      <div class="bp-addr-text">
+        📍 25753 Canal Rd<br>
+        Orange Beach, AL 36561
+      </div>
+      <a href="https://maps.google.com/?q=25753+Canal+Rd+Orange+Beach+AL" target="_blank" class="map-placeholder">
+        🗺️
+      </a>
+      <a href="https://maps.google.com/?q=25753+Canal+Rd+Orange+Beach+AL" target="_blank" style="display:block;text-align:center;margin-top:12px;padding:13px;background:linear-gradient(135deg,var(--teal),var(--cyan));color:#fff;font-weight:800;font-size:15px;border-radius:18px;">
+        🗺️ Open in Google Maps
+      </a>
+    </div>
+  </div>
+
+  <!-- ALSO AT COSMO'S -->
+  <div class="bp-section">
+    <div class="bp-card" style="padding:18px;">
+      <h2 class="bp-subhead">More at Cosmo's</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <a href="http://www.cosmosrestaurantandbar.com/catering/" target="_blank" style="background:#f0fdfa;color:#0f766e;border:1px solid #b7ece7;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;">🍽️ Catering</a>
+        <a href="http://www.cosmosrestaurantandbar.com/live-music-events/" target="_blank" style="background:#fff8eb;color:#b45309;border:1px solid #fde7ba;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;">🎵 Live Music & Events</a>
+        <span style="background:#f0f9ff;color:#0e7490;border:1px solid #cceff6;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;">🛍️ Maggie's Gift Shop</span>
+        <a href="http://www.cosmosrestaurantandbar.com/happy-hour/" target="_blank" style="background:#f0fdfa;color:#0f766e;border:1px solid #b7ece7;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;">🍻 Happy Hour Menu</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACK TO RESTAURANTS -->
+  <div class="bp-section" style="padding-bottom:24px;">
+    <a href="restaurants.html" style="display:block;text-align:center;padding:14px;background:#fff;border:1px solid var(--line);border-radius:18px;font-weight:700;color:var(--muted);font-size:14px;">
+      ← Back to All Restaurants
+    </a>
+  </div>
+
+</div><!-- /.app -->
+
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a> · <a href="restaurants.html" style="color:var(--teal-light)">Restaurants</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
+
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // Highlight today's hours
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const today = days[new Date().getDay()];
+  document.querySelectorAll('.hours-row').forEach(row => {
+    if (row.querySelector('.hours-day')?.textContent === today) {
+      row.classList.add('today');
+    }
+  });
+</script>
+</body>
+</html>

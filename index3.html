@@ -1366,6 +1366,148 @@
 <script src="js/gcr-api.js"></script>
 <script src="js/app.js"></script>
 <script>
+/* ══ HOME PAGE — live data rendering ══
+   Waits for gcr:loaded event from gcr-api.js (async fetch).
+   Populates stats, category counts, featured row, and calendar.
+*/
+(function() {
+  function initHome() {
+    if (typeof GCR === 'undefined') return;
+
+    /* ── Stats bar ── */
+    var bizCount = GCR.businesses.length;
+    var evCount  = GCR.getUpcomingEvents().length;
+    var el;
+    el = document.getElementById('statBiz');    if (el) el.textContent = bizCount ? bizCount + '+' : '—';
+    el = document.getElementById('statEvents'); if (el) el.textContent = evCount  ? evCount  + '+' : '—';
+
+    /* ── Category counts ── */
+    function count(type) { return GCR.getByCategory(type).length || ''; }
+    var setCount = function(id, val) { var e = document.getElementById(id); if (e && val) e.textContent = val + ' →'; };
+    setCount('countRestaurants', count('restaurants'));
+    setCount('countCoffee',      count('coffee-sweets'));
+    setCount('countHappy',       GCR.getHappyHours().length || '');
+    setCount('countSpecials',    GCR.getSpecials().length || '');
+    setCount('eventsCount',      evCount ? evCount + ' this month' : '');
+    setCount('countThingsToDo',  count('things-to-do'));
+    setCount('countShopping',    count('shopping'));
+    setCount('countNightlife',   count('nightlife'));
+    setCount('countOther',       count('other'));
+    var artists = GCR.businesses.filter(function(b){ return b.tags && b.tags.includes('local-artist'); }).length;
+    setCount('countArtists', artists || '');
+
+    /* ── Featured row ── */
+    var featRow = document.getElementById('featuredRow');
+    if (featRow) {
+      var featured = GCR.getFeatured();
+      if (featured.length) {
+        var colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a',nightlife:'#4a235a',hotels:'#1a5276' };
+        featRow.innerHTML = featured.map(function(biz) {
+          var bg  = colors[biz.category || biz.type] || '#0b7a75';
+          var cat = (biz.category || biz.type || '').replace(/-/g,' ');
+          return '<a href="business.html?id=' + (biz.slug||biz.id) + '" class="feat-card">' +
+            '<div class="feat-card-top" style="background:linear-gradient(135deg,' + bg + ',' + bg + 'cc);">' +
+              '<span style="font-size:3rem;">' + (biz.emoji||'🏪') + '</span>' +
+              '<span class="feat-badge">Featured</span>' +
+            '</div>' +
+            '<div class="feat-card-body">' +
+              '<div class="feat-card-name">' + (biz.name||'') + '</div>' +
+              '<div class="feat-card-cat">' + cat + '</div>' +
+              '<div class="feat-card-desc">' + (biz.tagline||biz.description||'') + '</div>' +
+              '<div class="feat-card-meta">' +
+                '<span>' + (biz.city||biz.address||'') + '</span>' +
+                (biz.rating ? '<span class="feat-card-rating">★ ' + biz.rating + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+          '</a>';
+        }).join('');
+      }
+    }
+
+    /* ── Calendar + Events ── */
+    var calYear  = new Date().getFullYear();
+    var calMonth = new Date().getMonth() + 1;
+    var selDate  = new Date().toISOString().split('T')[0];
+
+    function buildCal(y, m) {
+      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var lblEl = document.getElementById('calMonthLbl');
+      if (lblEl) lblEl.textContent = months[m-1] + ' ' + y;
+      var evts = GCR.getEventsByMonth(y, m);
+      var eventDates = {};
+      evts.forEach(function(e){ eventDates[e.date||e.event_date] = true; });
+      var firstDay    = new Date(y, m-1, 1).getDay();
+      var daysInMonth = new Date(y, m, 0).getDate();
+      var today = new Date().toISOString().split('T')[0];
+      var html  = '';
+      for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"></div>';
+      for (var d = 1; d <= daysInMonth; d++) {
+        var ds = y + '-' + String(m).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        var cls = 'cal-day' + (eventDates[ds]?' has-event':'') + (ds===today?' today':'') + (ds===selDate?' selected':'');
+        html += '<div class="' + cls + '" onclick="window._gcrSelectDay(\'' + ds + '\')">' + d + (eventDates[ds]?'<span class="cal-dot"></span>':'') + '</div>';
+      }
+      var calDays = document.getElementById('calDays');
+      if (calDays) calDays.innerHTML = html;
+      renderEventsList(selDate, y, m);
+    }
+
+    function renderEventsList(ds) {
+      var list    = document.getElementById('eventsList');
+      var titleEl = document.getElementById('eventsTitle');
+      if (!list) return;
+      var events = ds ? GCR.getEventsByDate(ds) : [];
+      if (events.length && titleEl) {
+        var d = new Date(ds + 'T12:00:00');
+        titleEl.textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      } else {
+        events = GCR.getUpcomingEvents(6);
+        if (titleEl) titleEl.textContent = 'Upcoming Events';
+      }
+      if (!events.length) {
+        list.innerHTML = '<div style="padding:20px;text-align:center;color:#aaa;font-size:.85rem;">No upcoming events.</div>';
+        return;
+      }
+      list.innerHTML = events.map(function(e) {
+        var name  = e.name  || 'Event';
+        var emoji = e.businessEmoji || '🎉';
+        var time  = e.time  || e.event_time || '';
+        var venue = e.businessName  || '';
+        var cat   = (e.category || '').replace(/-/g,' ');
+        var link  = e.slug  || e.site_id  || '';
+        return '<div class="event-row"' + (link ? ' onclick="window.location=\'business.html?id=' + link + '\'"' : '') + ' style="cursor:' + (link?'pointer':'default') + '">' +
+          '<div class="event-emoji-wrap">' + emoji + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div class="event-row-title">' + name + '</div>' +
+            '<div class="event-row-meta">' + [time, venue].filter(Boolean).join(' · ') + '</div>' +
+          '</div>' +
+          (cat ? '<span class="event-row-badge">' + cat + '</span>' : '') +
+        '</div>';
+      }).join('');
+    }
+
+    window._gcrSelectDay = function(ds) { selDate = ds; buildCal(calYear, calMonth); };
+
+    var prevBtn = document.getElementById('calPrev');
+    var nextBtn = document.getElementById('calNext');
+    if (prevBtn) prevBtn.addEventListener('click', function() {
+      calMonth--; if (calMonth < 1) { calMonth = 12; calYear--; } selDate = null; buildCal(calYear, calMonth);
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function() {
+      calMonth++; if (calMonth > 12) { calMonth = 1; calYear++; } selDate = null; buildCal(calYear, calMonth);
+    });
+
+    buildCal(calYear, calMonth);
+  }
+
+  /* Fire when GCR data is ready */
+  if (typeof GCR !== 'undefined' && GCR.loaded) {
+    initHome();
+  } else {
+    document.addEventListener('gcr:loaded', initHome, { once: true });
+  }
+})();
+</script>
+<script>
 /* ══ LOYALTY SIGNUP MODAL ══ */
 window.openSignupModal = function() {
   document.getElementById('lmOverlay').classList.add('open');

@@ -244,23 +244,23 @@
       </a>
       <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">📲 Install App</button>
     </div>
-    <div class="gcr-cat-tabs" id="gcrCatTabs">
-      <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+        <div class="gcr-cat-tabs" id="gcrCatTabs">
+      <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
       <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-      <a href="happy-hours.html" class="gcr-cat-tab active">🍻 Happy Hours</a>
-      <a href="specials.html" class="gcr-cat-tab">🏷️ Specials</a>
-      <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+      <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
+      <a href="specials.html"     class="gcr-cat-tab">🏷️ Specials</a>
+      <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
       <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
-      <a href="nightlife.html" class="gcr-cat-tab">🎶 Nightlife</a>
-      <a href="artists.html" class="gcr-cat-tab">🎸 Artists</a>
-      <a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a>
-      <a href="other.html" class="gcr-cat-tab">✨ Other</a>
-      <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+      <a href="nightlife.html"    class="gcr-cat-tab">🎶 Nightlife</a>
+      <a href="artists.html"      class="gcr-cat-tab">🎸 Artists</a>
+      <a href="shopping.html"     class="gcr-cat-tab">🛍️ Shopping</a>
+      <a href="other.html"        class="gcr-cat-tab">✨ Other</a>
+      <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
     </div>
-    <div class="gcr-action-strip">
-      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Loyalty Program 🎁</button>
-      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Events Calendar 🎉</button>
-    </div>
+      <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
+  </div>
   </div>
 
   <div class="page">
@@ -271,9 +271,9 @@
           <p>Best food and drink specials happening now across Orange Beach and Gulf Shores.</p>
         </div>
         <div class="livebox">
-          <strong id="hh-time">Tuesday • 4:18 PM</strong>
-          <span>18 active specials today</span>
-          <span>7 starting soon</span>
+          <strong id="hh-time">Loading…</strong>
+          <span id="hh-active-count">— active now</span>
+          <span id="hh-soon-count">— starting soon</span>
         </div>
       </div>
       <div class="controls">
@@ -298,14 +298,13 @@
         </div>
       </div>
       <div class="tag-row">
-        <button class="tag-btn active">Happening Now</button>
-        <button class="tag-btn">Starting Soon</button>
-        <button class="tag-btn">Later Today</button>
-        <button class="tag-btn">Waterfront</button>
-        <button class="tag-btn">Drink Specials</button>
-        <button class="tag-btn">Orange Beach</button>
-        <button class="tag-btn">Gulf Shores</button>
-        <button class="tag-btn">Family Friendly</button>
+        <button class="tag-btn active" data-filter="all">All</button>
+        <button class="tag-btn" data-filter="waterfront">🌊 Waterfront</button>
+        <button class="tag-btn" data-filter="seafood">🐟 Seafood</button>
+        <button class="tag-btn" data-filter="bar-grill">🍺 Bar & Grill</button>
+        <button class="tag-btn" data-filter="orange beach">📍 Orange Beach</button>
+        <button class="tag-btn" data-filter="gulf shores">📍 Gulf Shores</button>
+        <button class="tag-btn" data-filter="kids">👨‍👩‍👧 Family</button>
       </div>
     </section>
 
@@ -314,7 +313,7 @@
         <section class="section">
           <div class="section-head">
             <h2 class="section-title">Happening Right Now</h2>
-            <div class="section-sub">8 live specials</div>
+            <div class="section-sub" id="hh-now-sub"></div>
           </div>
           <div class="cards" id="hhNowGrid"></div>
         </section>
