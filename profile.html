@@ -283,7 +283,7 @@
     .social-btn svg { width:17px; height:17px; fill:var(--muted); }
 
     /* Sticky nav */
-    .sticky-wrap { position:sticky; top:0; z-index:999; }
+    .sticky-wrap { position:sticky; top:var(--header-h,0px); z-index:999; }
     .sticky-nav { background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); box-shadow:var(--shadow); }
     .tabs { display:flex; overflow:auto; gap:8px; padding:10px 12px; scroll-snap-type:x mandatory; scrollbar-width:none; }
     .tabs::-webkit-scrollbar { display:none; }
@@ -512,6 +512,10 @@
 function renderPage() {
   const B = window.BUSINESS_DATA;
   if (!B) { document.body.innerHTML = '<p style="padding:40px;color:red">No business data loaded.</p>'; return; }
+
+  // Set CSS var so sticky section tabs sit right below the header
+  const hdr = document.querySelector('.gcr-header');
+  if (hdr) document.documentElement.style.setProperty('--header-h', hdr.offsetHeight + 'px');
 
   // ── Page meta ──
   document.getElementById('page-title').textContent = B.name + ' – Gulf Coast Radar';
