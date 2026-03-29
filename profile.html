@@ -39,6 +39,10 @@
       if (d.events?.length)               s.push({ id: 'events',       label: 'Events',       icon: '📅' });
       if (d.restrictions?.length)         s.push({ id: 'restrictions', label: 'Guest Info',   icon: '📋' });
       if (d.whatToBring?.length)          s.push({ id: 'whatToBring',  label: 'What to Bring',icon: '🎒' });
+      if (d.packages?.length)             s.push({ id: 'packages',     label: 'Packages',     icon: '🎟️' });
+      if (d.games?.length)                s.push({ id: 'games',        label: 'Games',        icon: '🎮' });
+      if (d.bookABay)                     s.push({ id: 'book-a-bay',   label: 'Book a Bay',   icon: '🏌️' });
+      if (d.league)                       s.push({ id: 'league',       label: 'League',       icon: '🏆' });
       // food menu sections — one tab per unique meal grouping
       const _foodMenu = Array.isArray(d.menu) ? d.menu : mapFoodMenu(d.menu);
       if (_foodMenu.length) {
@@ -49,9 +53,7 @@
           const m = cat.meal || 'other';
           if (!seen.has(m)) {
             seen.add(m);
-            // For 'other' meal, use category name as tab label if there's only one meal group
-            const useCatLabel = m === 'other' && _foodMenu.filter(c => (c.meal||'other') === 'other').length <= 3;
-            s.push({ id: m, label: mealLabels[m] || m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), icon: mealIcons[m] || '🍽️' });
+            s.push({ id: 'meal-'+m, mealId: m, label: mealLabels[m] || m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), icon: mealIcons[m] || '🍽️' });
           }
         });
         // If all items are 'other' meal, collapse into single "Menu" tab
@@ -208,6 +210,11 @@
       highlights:   _highlights,
       restrictions: _restrictions,
       whatToBring:  raw.whatToBring || raw.what_to_bring || [],
+      packages:     raw.packages    || [],
+      games:        raw.games       || [],
+      bookABay:     raw.bookABay    || null,
+      league:       raw.league      || null,
+      faq:          raw.faq         || [],
       foodMenu:     mapFoodMenuSafe(raw),
       barMenu:      raw.barMenu     || null,
       sections:     buildSections({ ...raw, schedules: _schedules, highlights: _highlights, restrictions: _restrictions }),
@@ -613,6 +620,17 @@ function renderPage() {
     el.id = 'sec-' + sec.id;
     let html = `<div class="card"><h2>${sec.icon ? sec.icon + ' ' : ''}${sec.label}</h2>`;
 
+    // ── mealId sections — render all food categories matching that meal group ──
+    if (sec.mealId && B.foodMenu) {
+      const cats = B.foodMenu.filter(c => (c.meal || 'other') === sec.mealId);
+      if (cats.length) {
+        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
+        cats.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
+        container.appendChild(el);
+        return;
+      }
+    }
+
     // ── barCat sections — render a single bar menu category ──
     if (sec.barCat && B.barMenu) {
       const cat = B.barMenu.find(c => c.category === sec.barCat);
@@ -886,7 +904,7 @@ function renderPage() {
 
       // ── Generic: any sec.id that matches foodMenu cat.meal renders those categories ──
       default: {
-        const mealCats = (B.foodMenu || []).filter(cat => cat.meal === sec.id);
+        const mealCats = (B.foodMenu || []).filter(cat => cat.meal === (sec.mealId || sec.id));
         if (mealCats.length > 0) {
           html += '</div>';
           el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;

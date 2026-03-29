@@ -124,6 +124,10 @@ p  { color: var(--text-muted); }
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  position: sticky;
+  top: 60px;
+  z-index: 900;
+  background: var(--bg, #0b1220);
 }
 .gcr-cat-tabs::-webkit-scrollbar { display: none; }
 .gcr-cat-tab {
