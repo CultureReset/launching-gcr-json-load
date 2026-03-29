@@ -142,12 +142,19 @@
         });
         return Object.values(slots);
       }
-      // 3. packages[] where each package is a cruise/tour time slot
-      //    desc format: "Adult (Ages 13–59): $33 · Child (Ages 4–12): $26.40 · ..."
+      // 3. packages[] — structured tickets array (pre-parsed by import script)
+      if (raw.packages?.length && raw.packages[0]?.tickets?.length) {
+        return raw.packages.map(p => ({
+          time: p.name || '',
+          name: [p.badge, p.duration].filter(Boolean).join(' · '),
+          tickets: p.tickets,
+        }));
+      }
+      // 3b. legacy: packages with prices buried in desc string
       if (raw.packages?.length && raw.packages[0]?.desc?.includes(':')) {
         return raw.packages.map(p => {
           const tickets = (p.desc || '').split('·').map(part => {
-            const match = part.match(/^(.+?):\s*\$?([\d.]+)/);
+            const match = part.trim().match(/^(.+?):\s*\$?([\d.]+)/);
             if (match) return { name: match[1].trim(), price: match[2].trim() };
             return null;
           }).filter(Boolean);
