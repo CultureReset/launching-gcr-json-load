@@ -39,7 +39,9 @@
       if (d.events?.length)               s.push({ id: 'events',       label: 'Events',       icon: '📅' });
       if (d.restrictions?.length)         s.push({ id: 'restrictions', label: 'Guest Info',   icon: '📋' });
       if (d.whatToBring?.length)          s.push({ id: 'whatToBring',  label: 'What to Bring',icon: '🎒' });
-      if (d.packages?.length)             s.push({ id: 'packages',     label: 'Packages',     icon: '🎟️' });
+      // Don't show Packages tab if packages are cruise/tour time slots (already shown as Times & Tickets)
+      const _pkgsAreSlots = d.packages?.length && d.packages[0]?.desc?.includes(':');
+      if (d.packages?.length && !_pkgsAreSlots) s.push({ id: 'packages', label: 'Packages', icon: '🎟️' });
       if (d.games?.length)                s.push({ id: 'games',        label: 'Games',        icon: '🎮' });
       if (d.bookABay)                     s.push({ id: 'book-a-bay',   label: 'Book a Bay',   icon: '🏌️' });
       if (d.league)                       s.push({ id: 'league',       label: 'League',       icon: '🏆' });
@@ -140,7 +142,23 @@
         });
         return Object.values(slots);
       }
-      // 3. menu.packages (simple pricing list)
+      // 3. packages[] where each package is a cruise/tour time slot
+      //    desc format: "Adult (Ages 13–59): $33 · Child (Ages 4–12): $26.40 · ..."
+      if (raw.packages?.length && raw.packages[0]?.desc?.includes(':')) {
+        return raw.packages.map(p => {
+          const tickets = (p.desc || '').split('·').map(part => {
+            const match = part.match(/^(.+?):\s*\$?([\d.]+)/);
+            if (match) return { name: match[1].trim(), price: match[2].trim() };
+            return null;
+          }).filter(Boolean);
+          return {
+            time: p.name || '',
+            name: [p.badge, p.duration].filter(Boolean).join(' · '),
+            tickets: tickets.length ? tickets : [{ name: 'From', price: (p.price||'').replace(/[^0-9.]/g,'') }],
+          };
+        });
+      }
+      // 4. menu.packages (simple pricing list)
       if (raw.menu?.packages?.length) {
         return [{ name: 'Ticket Pricing', time: '', tickets: raw.menu.packages.map(p => ({ name: p.name, price: p.price })) }];
       }
@@ -753,9 +771,11 @@ function renderPage() {
 
       case 'events':
         if (B.events) B.events.forEach(e => {
+          const evtName = e.name || e.title || '';
+          const evtDesc = e.desc || e.description || '';
           html += `${e.badge?`<div class="evt-badge">${e.badge}</div>`:''}
-            <div class="evt-name">${e.name}</div>
-            <div class="evt-desc">${e.desc}</div>
+            <div class="evt-name">${evtName}</div>
+            <div class="evt-desc">${evtDesc}</div>
             ${e.note?`<div class="evt-note">📌 ${e.note}</div>`:''}`;
         });
         break;
@@ -867,7 +887,10 @@ function renderPage() {
       case 'restrictions':
         if (B.restrictions?.length) {
           html += `<ul style="margin:0;padding-left:18px;display:grid;gap:8px">
-            ${B.restrictions.map(r=>`<li style="font-size:13px;color:var(--muted);line-height:1.5">${r}</li>`).join('')}
+            ${B.restrictions.map(r=>{
+              const text = typeof r === 'string' ? r : (r.q || r.text || r.rule || JSON.stringify(r));
+              return `<li style="font-size:13px;color:var(--muted);line-height:1.5">${text}</li>`;
+            }).join('')}
           </ul>`;
         }
         break;
