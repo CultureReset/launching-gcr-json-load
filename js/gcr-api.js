@@ -30,14 +30,14 @@ const GCR = {
   async load() {
     try {
       const [bizRes, evRes, spRes] = await Promise.all([
-        fetch(GCR_API + '/businesses?limit=500').catch(() => null),
+        fetch(GCR_API + '/entities?limit=500').catch(() => null),
         fetch(GCR_API + '/events').catch(() => null),
         fetch(GCR_API + '/specials').catch(() => null),
       ]);
 
       if (bizRes && bizRes.ok) {
         const data = await bizRes.json();
-        this.businesses = data.businesses || [];
+        this.businesses = data.entities || data.businesses || [];
       }
       if (evRes && evRes.ok) {
         this.events = await evRes.json();
@@ -142,7 +142,7 @@ const GCR = {
   /* ── Fetch full profile (fleet, pricing, addons, reviews, etc.) ── */
   async loadProfile(slug) {
     try {
-      const res = await fetch(`${GCR_API}/businesses/${encodeURIComponent(slug)}`);
+      const res = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`);
       if (!res.ok) return null;
       return await res.json();
     } catch(e) {
