@@ -7,248 +7,6 @@
   <meta id="page-desc" name="description" content="">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
-
-  <script>
-  // ── Load business data from GCR API ──
-  (async function () {
-    const slug = new URLSearchParams(location.search).get('id') || window.GCR_SLUG;
-    if (!slug) { document.body.innerHTML = '<p style="padding:40px;color:red">No business slug in URL (?id=your-slug)</p>'; return; }
-
-    const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr/businesses/';
-    let raw;
-    try {
-      const res = await fetch(GCR_API + encodeURIComponent(slug));
-      if (!res.ok) throw new Error('Not found');
-      raw = await res.json();
-    } catch (e) {
-      document.body.innerHTML = `<p style="padding:40px;color:red">Could not load business: ${slug}</p>`;
-      return;
-    }
-
-    // ── Map API response → BUSINESS_DATA format ──
-    function buildSections(d) {
-      const s = [];
-      s.push({ id: 'about', label: 'About', icon: 'ℹ️' });
-      if (d.happyHour)                    s.push({ id: 'happy-hour',   label: 'Happy Hour',   icon: '🍺' });
-      if (d.highlights?.length)           s.push({ id: 'highlights',   label: 'Highlights',   icon: '✦'  });
-      if (d.schedules?.length)            s.push({ id: 'schedules',    label: 'Times & Tickets', icon: '🎟️' });
-      if (d.fleet?.length)                s.push({ id: 'fleet',        label: 'Fleet',        icon: '⛵' });
-      if (d.addons?.length)               s.push({ id: 'addons',       label: 'Add-Ons',      icon: '🎒' });
-      if (d.specials?.length)             s.push({ id: 'specials',     label: 'Specials',     icon: '⭐' });
-      if (d.events?.length)               s.push({ id: 'events',       label: 'Events',       icon: '📅' });
-      if (d.restrictions?.length)         s.push({ id: 'restrictions', label: 'Guest Info',   icon: '📋' });
-      if (d.whatToBring?.length)          s.push({ id: 'whatToBring',  label: 'What to Bring',icon: '🎒' });
-      // Don't show Packages tab if packages are cruise/tour time slots (already shown as Times & Tickets)
-      const _pkgsAreSlots = d.packages?.length && d.packages[0]?.desc?.includes(':');
-      if (d.packages?.length && !_pkgsAreSlots) s.push({ id: 'packages', label: 'Packages', icon: '🎟️' });
-      if (d.games?.length)                s.push({ id: 'games',        label: 'Games',        icon: '🎮' });
-      if (d.bookABay)                     s.push({ id: 'book-a-bay',   label: 'Book a Bay',   icon: '🏌️' });
-      if (d.league)                       s.push({ id: 'league',       label: 'League',       icon: '🏆' });
-      // food menu sections — one tab per unique meal grouping
-      const _foodMenu = Array.isArray(d.menu) ? d.menu : mapFoodMenu(d.menu);
-      if (_foodMenu.length) {
-        const mealLabels = { brunch:'Sunday Brunch', lunch:'Lunch', dinner:'Dinner', kids:'Kids Menu', 'gluten-free':'Gluten-Free', other:'Menu' };
-        const mealIcons  = { brunch:'🥂', lunch:'🍽️', dinner:'🌙', kids:'👶', 'gluten-free':'🌿', other:'🍽️' };
-        const seen = new Set();
-        _foodMenu.forEach(cat => {
-          const m = cat.meal || 'other';
-          if (!seen.has(m)) {
-            seen.add(m);
-            s.push({ id: 'meal-'+m, mealId: m, label: mealLabels[m] || m.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()), icon: mealIcons[m] || '🍽️' });
-          }
-        });
-        // If all items are 'other' meal, collapse into single "Menu" tab
-        if (seen.size === 1 && seen.has('other')) {
-          const idx = s.findIndex(x => x.id === 'other');
-          if (idx !== -1) s[idx].label = 'Menu';
-        }
-      }
-      // bar menu sections
-      if (d.barMenu) {
-        d.barMenu.forEach(cat => {
-          const id = cat.category.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-          s.push({ id, label: cat.category, icon: '🍹', barCat: cat.category });
-        });
-      }
-      s.push({ id: 'gallery',  label: 'Photos',   icon: '📸' });
-      s.push({ id: 'reviews',  label: 'Reviews',  icon: '⭐' });
-      s.push({ id: 'hours',    label: 'Hours',    icon: '🕐' });
-      s.push({ id: 'location', label: 'Location', icon: '📍' });
-      return s;
-    }
-
-    // Map hours object/string from API to array format the template expects
-    function mapHours(h) {
-      if (Array.isArray(h)) return h;
-      if (typeof h === 'object' && h !== null) {
-        const dayMap = { mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday', fri:'Friday', sat:'Saturday', sun:'Sunday',
-                         monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday' };
-        return Object.entries(h).map(([k, v]) => {
-          const day = dayMap[k.toLowerCase()] || k;
-          if (typeof v === 'string') {
-            const parts = v.split(/[-–]/);
-            return { day, open: parts[0]?.trim() || v, close: parts[1]?.trim() || '' };
-          }
-          return { day, open: v.open || '', close: v.close || '', closed: v.closed || false };
-        });
-      }
-      return [];
-    }
-
-    // Map gallery — API returns array of URLs or objects with url property
-    function mapGallery(g) {
-      if (!Array.isArray(g)) return [];
-      return g.map(item => typeof item === 'string' ? { url: item, caption: '' } : item);
-    }
-
-    // Build foodMenu — handles API array format, legacy object format, and template format
-    function mapFoodMenu(menu) {
-      if (!menu) return [];
-      // New API format: array of {category, meal, items[]}
-      if (Array.isArray(menu)) return menu;
-      // Legacy object format with packages only — skip
-      if (menu.packages && Object.keys(menu).length === 1) return [];
-      // Old object format: { categoryKey: [{name,desc,price}] } or { meal: [{category,items[]}] }
-      const MEAL_KEYS = ['brunch','lunch','dinner','kids','gluten-free','other'];
-      return Object.entries(menu)
-        .filter(([key]) => key !== 'packages')
-        .flatMap(([key, val]) => {
-          if (!Array.isArray(val) || !val.length) return [];
-          if (val[0] && val[0].items) return val.map(cat => ({ ...cat, meal: key }));
-          const meal = MEAL_KEYS.includes(key) ? key : 'other';
-          const label = key.replace(/-/g,' ').replace(/_/g,' ').replace(/\b\w/g, c => c.toUpperCase());
-          return [{ meal, category: label, items: val }];
-        });
-    }
-
-    // ── Normalize features: handle both string[] and {icon,label,value}[] ──
-    function mapFeatures(f) {
-      if (!Array.isArray(f)) return [];
-      return f.map(item => typeof item === 'string' ? item : [item.label, item.value].filter(Boolean).join(': '));
-    }
-
-    // ── Map schedules from multiple sources ──
-    function mapSchedules(raw) {
-      // 1. Explicit schedules JSONB field (most structured)
-      if (raw.schedules?.length) return raw.schedules;
-      // 2. rental_pricing table rows → group by time slot
-      if (raw.pricing?.length) {
-        const slots = {};
-        raw.pricing.forEach(p => {
-          const key = p.slot_label || p.name || 'Pricing';
-          if (!slots[key]) slots[key] = { name: key, time: p.time || '', tickets: [] };
-          slots[key].tickets.push({ name: p.name || p.description || '', price: p.price || p.rate || '' });
-        });
-        return Object.values(slots);
-      }
-      // 3. packages[] — structured tickets array (pre-parsed by import script)
-      if (raw.packages?.length && raw.packages[0]?.tickets?.length) {
-        return raw.packages.map(p => ({
-          time: p.name || '',
-          name: [p.badge, p.duration].filter(Boolean).join(' · '),
-          tickets: p.tickets,
-        }));
-      }
-      // 3b. legacy: packages with prices buried in desc string
-      if (raw.packages?.length && raw.packages[0]?.desc?.includes(':')) {
-        return raw.packages.map(p => {
-          const tickets = (p.desc || '').split('·').map(part => {
-            const match = part.trim().match(/^(.+?):\s*\$?([\d.]+)/);
-            if (match) return { name: match[1].trim(), price: match[2].trim() };
-            return null;
-          }).filter(Boolean);
-          return {
-            time: p.name || '',
-            name: [p.badge, p.duration].filter(Boolean).join(' · '),
-            tickets: tickets.length ? tickets : [{ name: 'From', price: (p.price||'').replace(/[^0-9.]/g,'') }],
-          };
-        });
-      }
-      // 4. menu.packages (simple pricing list)
-      if (raw.menu?.packages?.length) {
-        return [{ name: 'Ticket Pricing', time: '', tickets: raw.menu.packages.map(p => ({ name: p.name, price: p.price })) }];
-      }
-      return [];
-    }
-
-    // ── Map highlights from multiple possible sources ──
-    function mapHighlights(raw) {
-      if (raw.highlights?.length) return raw.highlights;
-      if (raw.whats_included?.length) return raw.whats_included;
-      return [];
-    }
-
-    // ── Map restrictions/guest info from multiple sources ──
-    function mapRestrictions(raw) {
-      if (raw.restrictions?.length) return raw.restrictions;
-      if (raw.qna?.length) return raw.qna.map(q => q.question ? `${q.question} ${q.answer || ''}`.trim() : String(q));
-      return [];
-    }
-
-    // ── Map food menu (only for actual food businesses, not pricing) ──
-    function mapFoodMenuSafe(raw) {
-      if (!raw.menu) return [];
-      if (Array.isArray(raw.menu)) return raw.menu; // new API array format
-      if (raw.menu.packages && Object.keys(raw.menu).length === 1) return []; // pricing only
-      return mapFoodMenu(raw.menu);
-    }
-
-    const _schedules    = mapSchedules(raw);
-    const _highlights   = mapHighlights(raw);
-    const _restrictions = mapRestrictions(raw);
-
-    window.BUSINESS_DATA = {
-      name:         raw.name        || '',
-      slug:         raw.slug        || slug,
-      tagline:      raw.tagline     || '',
-      category:     raw.type        || '',
-      emoji:        raw.emoji       || '🏢',
-      phone:        raw.phone       || '',
-      phoneDisplay: raw.phone       || '',
-      address:      raw.address     || '',
-      city:         raw.city        || '',
-      state:        raw.state       || '',
-      zip:          raw.zip         || '',
-      website:      raw.website     || '',
-      googleMaps:   raw.social?.google_maps || '',
-      instagram:    raw.social?.instagram   || '',
-      facebook:     raw.social?.facebook    || '',
-      rating:       raw.rating      || null,
-      reviewCount:  raw.review_count|| 0,
-      coverImages:  mapGallery(raw.gallery).slice(0,5).map(g => g.url || g),
-      gallery:      mapGallery(raw.gallery),
-      reviews:      raw.reviews     || [],
-      hours:        mapHours(raw.hours),
-      about: {
-        description: raw.description || '',
-        features:    mapFeatures(raw.features),
-        perfectFor:  raw.perfectFor  || [],
-        included:    raw.whats_included || [],
-      },
-      happyHour:    raw.happyHour   || raw.happy_hour || null,
-      fleet:        raw.fleet       || [],
-      addons:       raw.addons      || [],
-      specials:     raw.specials    || [],
-      events:       raw.events      || [],
-      schedules:    _schedules,
-      highlights:   _highlights,
-      restrictions: _restrictions,
-      whatToBring:  raw.whatToBring || raw.what_to_bring || [],
-      packages:     raw.packages    || [],
-      games:        raw.games       || [],
-      bookABay:     raw.bookABay    || null,
-      league:       raw.league      || null,
-      faq:          raw.faq         || [],
-      foodMenu:     mapFoodMenuSafe(raw),
-      barMenu:      raw.barMenu     || null,
-      sections:     buildSections({ ...raw, schedules: _schedules, highlights: _highlights, restrictions: _restrictions }),
-    };
-
-    // Fire the render — defined below in the main script block
-    if (typeof renderPage === 'function') renderPage();
-  })();
-  </script>
 
   <style>
     :root {
@@ -262,10 +20,9 @@
       --shadow: 0 2px 8px rgba(0,0,0,.08);
     }
     * { box-sizing: border-box; }
-    html, body { margin:0; padding:0; background:#f6f8fb; color:var(--ink); font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    html, body { margin:0; padding:0; background:#f6f8fb; color:var(--ink); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     a { color:var(--accent); text-decoration:none; }
 
-    /* Wrap */
     .wrap { max-width:980px; margin:0 auto; padding-bottom:64px; }
 
     /* Cover Slideshow */
@@ -308,7 +65,7 @@
     .social-btn svg { width:17px; height:17px; fill:var(--muted); }
 
     /* Sticky nav */
-    .sticky-wrap { position:sticky; top:var(--header-h,0px); z-index:999; }
+    .sticky-wrap { position:sticky; top:0; z-index:999; }
     .sticky-nav { background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); box-shadow:var(--shadow); }
     .tabs { display:flex; overflow:auto; gap:8px; padding:10px 12px; scroll-snap-type:x mandatory; scrollbar-width:none; }
     .tabs::-webkit-scrollbar { display:none; }
@@ -322,7 +79,7 @@
     h2 { font-size:20px; margin:0 0 8px 0; }
     h3 { font-size:15px; color:var(--accent); margin:16px 0 8px 0; border-bottom:1px solid var(--border); padding-bottom:6px; }
 
-    /* Menu grid — 1 col → 2 col → 3 col */
+    /* Menu grid */
     .menu-grid { display:grid; grid-template-columns:repeat(1, minmax(0,1fr)); gap:12px; }
     @media (min-width:640px)  { .menu-grid { grid-template-columns:repeat(2, minmax(0,1fr)); } }
     @media (min-width:900px)  { .menu-grid { grid-template-columns:repeat(3, minmax(0,1fr)); } }
@@ -331,7 +88,7 @@
     .item .desc { color:var(--muted); font-size:13px; margin-top:4px; line-height:1.4; }
     .item .price { font-size:14px; font-weight:700; color:var(--accent); margin-top:6px; }
 
-    /* Spirits chips */
+    /* Chips */
     .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
     .chip { background:var(--chip); border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:13px; color:var(--ink); }
 
@@ -349,7 +106,7 @@
     .special-name { font-weight:700; font-size:15px; margin-bottom:4px; }
     .special-desc { font-size:13px; color:var(--muted); line-height:1.5; }
 
-    /* Packages */
+    /* Packages/Cards */
     .pkg-grid { display:grid; grid-template-columns:repeat(1,1fr); gap:16px; }
     @media (min-width:640px) { .pkg-grid { grid-template-columns:repeat(3,1fr); } }
     .pkg { border:2px solid var(--border); border-radius:12px; padding:20px; background:#fff; transition:all .2s; }
@@ -393,14 +150,12 @@
     .tag { background:var(--chip); border:1px solid var(--border); border-radius:999px; padding:5px 12px; font-size:13px; }
     .sub-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:14px 0 8px; }
     .about-p { font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:14px; }
-
-    /* Card note */
     .note { font-size:12px; color:var(--muted); font-style:italic; margin-bottom:10px; }
 
     /* Location */
     .loc-addr { font-size:15px; font-weight:600; line-height:1.6; margin-bottom:14px; }
 
-    /* ── Popup Modal ── */
+    /* Popup Modal */
     .popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2000; overflow-y:auto; padding:20px; }
     .popup-overlay.open { display:flex; align-items:flex-start; justify-content:center; }
     .popup-box { background:#fff; border-radius:16px; width:100%; max-width:780px; padding:28px; position:relative; margin:auto; }
@@ -435,45 +190,12 @@
     .section-btn:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
     .section-btn-arrow { font-size:18px; }
 
-    @media (max-width:480px) {
-      .bay { flex-direction:column; gap:10px; }
-    }
+    @media (max-width:480px) { .bay { flex-direction:column; gap:10px; } }
   </style>
 </head>
 <body>
-
-  <div class="gcr-header">
-    <div class="gcr-header-top">
-      <a href="index3.html" class="gcr-logo-row">
-        <img src="gcr-logo.png" alt="Gulf Coast Radar">
-        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-      </a>
-      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-        📲 Install App
-      </button>
-    </div>
-        <div class="gcr-cat-tabs" id="gcrCatTabs">
-      <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
-      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-      <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
-      <a href="specials.html"     class="gcr-cat-tab">🏷️ Specials</a>
-      <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
-      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
-      <a href="nightlife.html"    class="gcr-cat-tab">🎶 Nightlife</a>
-      <a href="artists.html"      class="gcr-cat-tab">🎸 Artists</a>
-      <a href="shopping.html"     class="gcr-cat-tab">🛍️ Shopping</a>
-      <a href="other.html"        class="gcr-cat-tab">✨ Other</a>
-      <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
-    </div>
-      <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
-  </div>
-  </div>
-
 <div class="wrap">
 
-  <!-- Cover Slideshow -->
   <div class="cover" id="js-cover">
     <div class="cover-slides" id="js-slides"></div>
     <button class="cover-arrow cover-prev" id="js-prev">&#8249;</button>
@@ -481,7 +203,6 @@
     <div class="cover-dots" id="js-dots"></div>
   </div>
 
-  <!-- Gallery Popup -->
   <div class="popup-overlay" id="gallery-popup">
     <div class="popup-box">
       <button class="popup-close" onclick="closePopup('gallery-popup')">&#215;</button>
@@ -495,7 +216,6 @@
     </div>
   </div>
 
-  <!-- Reviews Popup -->
   <div class="popup-overlay" id="reviews-popup">
     <div class="popup-box">
       <button class="popup-close" onclick="closePopup('reviews-popup')">&#215;</button>
@@ -509,7 +229,6 @@
     </div>
   </div>
 
-  <!-- Header -->
   <div class="header">
     <div class="title">
       <span id="js-emoji" style="font-size:40px"></span>
@@ -521,46 +240,249 @@
     <div class="social-row" id="js-social"></div>
   </div>
 
-  <!-- Sticky Nav -->
   <div class="sticky-wrap">
     <div class="sticky-nav">
       <div class="tabs" id="js-tabs"></div>
     </div>
   </div>
 
-  <!-- Sections injected here -->
   <div id="js-sections"></div>
 
-</div><!-- /wrap -->
+</div>
 
 <script>
-function renderPage() {
-  const B = window.BUSINESS_DATA;
-  if (!B) { document.body.innerHTML = '<p style="padding:40px;color:red">No business data loaded.</p>'; return; }
+(async function () {
+  const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+  const slug = new URLSearchParams(location.search).get('id') || window.GCR_SLUG;
+  if (!slug) {
+    document.body.innerHTML = '<p style="padding:40px;color:red">No business slug in URL (?id=your-slug)</p>';
+    return;
+  }
 
-  // Set CSS var so sticky section tabs sit right below the header
-  const hdr = document.querySelector('.gcr-header');
-  if (hdr) document.documentElement.style.setProperty('--header-h', hdr.offsetHeight + 'px');
+  // ── Fetch from new entity API ──────────────────────────────
+  let entityData = null;
+  try {
+    const res = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`);
+    if (res.ok) entityData = await res.json();
+  } catch(e) {}
 
-  // ── Page meta ──
+  if (!entityData || !entityData.entity) {
+    document.body.innerHTML = `<p style="padding:40px;color:red">Could not load: ${slug}</p>`;
+    return;
+  }
+
+  // ── Map entity API → BUSINESS_DATA ────────────────────────
+  const B = mapEntityToBusinessData(entityData);
+  window.BUSINESS_DATA = B;
+
+  function mapEntityToBusinessData(data) {
+    const e = data.entity;
+    const sections = data.sections || [];
+
+    const B = {
+      name: e.name,
+      slug: e.slug,
+      tagline: e.subtitle,
+      emoji: e.icon || '🏢',
+      phone: (e.phone || '').replace(/\D/g, ''),
+      phoneDisplay: e.phone,
+      address: e.address_line_1,
+      city: e.city,
+      state: e.state,
+      zip: e.zip,
+      website: e.website_url,
+      googleMaps: e.directions_url,
+      rating: e.rating,
+      reviewCount: e.review_count,
+      coverImages: e.hero_image_url ? [e.hero_image_url] : [],
+      about: {
+        description: '',
+        features: (data.features || []).map(f => f.label),
+        perfectFor: (data.perfect_for || []).map(p => p.label),
+      },
+      tags: (data.tags || []).map(t => t.tag),
+      highlights: [],
+      restrictions: [],
+      schedules: [],
+      gallery: [],
+      reviews: [],
+      hours: null,
+      sections: [],
+      foodMenu: [],
+      barMenu: [],
+      happyHour: null,
+      games: [],
+      packages: [],
+      specials: [],
+      events: [],
+      league: null,
+      bookABay: null,
+    };
+
+    const DRINK_TYPES = new Set(['drink_item','beer_item','wine_item','spirit_item']);
+
+    const ICONS = {
+      about:'ℹ️', highlights:'✦', schedules:'🎟️', cruise_times:'🎟️',
+      guest_info:'📋', restrictions:'📋', gallery:'📸', reviews:'⭐',
+      hours:'🕐', location:'📍', happy_hour:'🍺', food:'🍽️',
+      lunch:'🍽️', dinner:'🌙', brunch:'🥂', kids:'👶', gluten_free:'🌿',
+      games:'🎮', packages:'🎟️', league:'🏆', book_a_bay:'🏌️',
+      specials:'⭐', events:'📅', cocktails:'🍹', beer:'🍺', wine:'🍷',
+      draft_beer:'🍺', bottles_cans:'🍾', craft_beer:'🍺', wine_glass:'🍷',
+      wine_bottle:'🍾', na_drinks:'🥤', whiskey:'🥃', scotch:'🥃',
+      vodka:'🍸', tequila_mezcal:'🍹', tequila:'🍹', rum:'🍹', gin:'🍸',
+      bitters_aperitifs:'🍸', frozen:'🧊', chardonnay:'🍷', pinot_gris:'🍷',
+      sauv_blanc:'🍷', riesling:'🍷', rose:'🌹', sparkling:'🥂',
+      other_whites:'🍷', pinot_noir:'🍷', cab_sauv:'🍷', merlot:'🍷',
+      malbec:'🍷', zinfandel:'🍷', other_reds:'🍷', reserve:'🍾',
+    };
+
+    sections.forEach(sec => {
+      const key  = sec.section_key;
+      const type = sec.section_type;
+      const icon = ICONS[key] || '';
+      const label = sec.section_label;
+
+      if (type === 'rich_text') {
+        B.about.description = sec.content?.body_text || '';
+        B.sections.push({ id: 'about', label, icon });
+
+      } else if (type === 'bullets') {
+        const bullets = (sec.bullets || []).map(b => b.bullet_text);
+        if (key === 'highlights') {
+          B.highlights = bullets;
+          if (bullets.length) B.sections.push({ id: 'highlights', label, icon });
+        } else if (key === 'guest_info' || key === 'restrictions') {
+          B.restrictions = bullets;
+          if (bullets.length) B.sections.push({ id: 'restrictions', label, icon });
+        } else if (key === 'specials') {
+          B.specials = bullets.map(b => ({ name: b, desc: '', badge: '★' }));
+          if (bullets.length) B.sections.push({ id: 'specials', label, icon });
+        } else {
+          if (bullets.length) B.sections.push({ id: key, label, icon });
+        }
+
+      } else if (type === 'grouped_items') {
+        const groups = sec.groups || [];
+        const allItems = groups.flatMap(g => g.items || []);
+        const isTicket = allItems.some(i => i.item_type === 'ticket');
+        const isDrink  = allItems.some(i => DRINK_TYPES.has(i.item_type));
+
+        // ── Tickets / schedules ──
+        if (key === 'schedules' || key === 'cruise_times' || isTicket) {
+          B.schedules = groups.map(g => ({
+            time: g.title,
+            name: g.subtitle,
+            tickets: (g.items || []).map(i => ({ name: i.item_name, price: i.price_numeric || parseFloat((i.price_text||'').replace(/[^0-9.]/g,'')) || 0 }))
+          }));
+          if (B.schedules.length) B.sections.push({ id: 'schedules', label, icon: '🎟️' });
+
+        // ── Happy Hour (special HH rendering) ──
+        } else if (key === 'happy_hour') {
+          const schedText = groups.length ? (groups[0].title || '') + (groups[0].subtitle ? ' · ' + groups[0].subtitle : '') : '';
+          B.happyHour = { schedule: schedText, deals: allItems.map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text })) };
+          B.sections.push({ id: 'happy-hour', label, icon: '🍺' });
+
+        // ── Everything else — universal: each group = its own tab ──
+        // Works for: dinner, lunch, breakfast, brunch, kids, gluten_free, vegan,
+        // raw_bar, cocktails, whiskey, wine, beer, games, packages — ANY key
+        } else {
+          const renderIcon = isDrink ? (icon || '🍹') : (icon || '🍽️');
+
+          if (groups.length <= 1) {
+            // Single group — one tab, label from section_label
+            const g = groups[0];
+            const mealId = key;
+            B.foodMenu.push({ category: g?.title || label, meal: mealId, note: g?.note_text, isDrink, items: (g?.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text })) });
+            B.sections.push({ id: 'meal-' + mealId, mealId, label, icon: renderIcon });
+          } else {
+            // Multiple groups — each group gets its own nav tab
+            groups.forEach(g => {
+              const groupId = key + '-' + (g.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+              B.foodMenu.push({ category: g.title || label, meal: groupId, note: g.note_text, isDrink, items: (g.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text })) });
+              B.sections.push({ id: 'meal-' + groupId, mealId: groupId, label: g.title || label, icon: renderIcon });
+            });
+          }
+        }
+
+      } else if (type === 'cards') {
+        const cards = sec.cards || [];
+        if (key === 'packages') {
+          B.packages = cards.map(c => ({ name: c.title, price: c.price_text, duration: c.subtitle, desc: c.description, badge: c.badge_text }));
+          if (B.packages.length) B.sections.push({ id: 'packages', label, icon: '🎟️' });
+        } else if (key === 'league') {
+          const c = cards[0] || {};
+          B.league = { price: c.price_text, schedule: c.subtitle, format: c.badge_text, desc: c.description, perks: cards.slice(1).map(x => x.title).filter(Boolean) };
+          B.sections.push({ id: 'league', label, icon: '🏆' });
+        } else if (key === 'book_a_bay') {
+          const c = cards[0] || {};
+          B.bookABay = { name: c.title, price: c.price_text, capacity: c.subtitle, desc: c.description };
+          B.sections.push({ id: 'book-a-bay', label, icon: '🏌️' });
+        } else if (key === 'events') {
+          B.events = cards.map(c => ({ name: c.title, desc: c.description, badge: c.badge_text, note: c.subtitle }));
+          if (B.events.length) B.sections.push({ id: 'events', label, icon: '📅' });
+        } else {
+          // Generic cards → packages view
+          B.packages = cards.map(c => ({ name: c.title, price: c.price_text, duration: c.subtitle, desc: c.description, badge: c.badge_text }));
+          if (B.packages.length) B.sections.push({ id: key, label, icon });
+        }
+
+      } else if (type === 'gallery') {
+        B.gallery = (sec.photos || []).map(p => ({ url: p.image_url, caption: p.caption }));
+        B.sections.push({ id: 'gallery', label, icon: '📸' });
+
+      } else if (type === 'reviews') {
+        B.reviews = (sec.reviews || []).map(r => ({ author: r.author_name, rating: r.rating, text: r.review_text, date: r.review_date }));
+        B.sections.push({ id: 'reviews', label, icon: '⭐' });
+
+      } else if (type === 'hours') {
+        B.hours = (sec.hours || []).map(h => ({
+          day: h.day_of_week,
+          open: h.open_time ? h.open_time.slice(0,5) : null,
+          close: h.close_time ? h.close_time.slice(0,5) : null,
+          closed: h.is_closed
+        }));
+        if (B.hours.length) B.sections.push({ id: 'hours', label, icon: '🕐' });
+
+      } else if (type === 'location') {
+        const loc = sec.location || {};
+        if (loc.address_line_1) B.address = loc.address_line_1;
+        if (loc.city)           B.city    = loc.city;
+        if (loc.state)          B.state   = loc.state;
+        if (loc.zip)            B.zip     = loc.zip;
+        if (loc.directions_url) B.googleMaps   = loc.directions_url;
+        if (loc.phone)          { B.phoneDisplay = loc.phone; B.phone = loc.phone.replace(/\D/g,''); }
+        if (loc.website_url)    B.website = loc.website_url;
+        B.sections.push({ id: 'location', label, icon: '📍' });
+      }
+    });
+
+    // Add gallery images to cover slides
+    if (B.gallery.length > 0) {
+      B.coverImages = B.coverImages.concat(B.gallery.slice(0, 3).map(g => g.url));
+    }
+
+    return B;
+  }
+
+  // ── Page meta ──────────────────────────────────────────────
   document.getElementById('page-title').textContent = B.name + ' – Gulf Coast Radar';
-  if (B.tagline) document.getElementById('page-desc').content = B.tagline;
+  if (B.tagline) document.getElementById('page-desc').setAttribute('content', B.tagline);
 
-  // ── Cover Slideshow ──
+  // ── Cover Slideshow ────────────────────────────────────────
   const slides = B.coverImages || [];
   const slidesEl = document.getElementById('js-slides');
   const dotsEl   = document.getElementById('js-dots');
   let currentSlide = 0;
 
   if (slides.length === 0) {
-    // default gradient placeholder
     slidesEl.innerHTML = `<div class="cover-slide"></div>`;
     document.getElementById('js-prev').style.display = 'none';
     document.getElementById('js-next').style.display = 'none';
   } else {
     slides.forEach((src, i) => {
-      slidesEl.innerHTML += `<div class="cover-slide"><img src="${src}" alt="${B.name} photo ${i+1}" onerror="this.parentElement.style.background='linear-gradient(135deg,#cfe9ff,#e9f3ff)'"></div>`;
-      dotsEl.innerHTML += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
+      slidesEl.innerHTML += `<div class="cover-slide"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#cfe9ff,#e9f3ff)'"></div>`;
+      dotsEl.innerHTML  += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
     });
     if (slides.length === 1) {
       document.getElementById('js-prev').style.display = 'none';
@@ -577,36 +499,25 @@ function renderPage() {
   document.getElementById('js-next').onclick = () => goSlide(currentSlide + 1);
   if (slides.length > 1) setInterval(() => goSlide(currentSlide + 1), 5000);
 
-  // ── Emoji + Name ──
-  document.getElementById('js-emoji').textContent = B.emoji || '🏢';
-  document.getElementById('js-name').textContent = B.name;
+  // ── Header ─────────────────────────────────────────────────
+  document.getElementById('js-emoji').textContent = B.emoji;
+  document.getElementById('js-name').textContent  = B.name;
 
-  // ── Meta row ──
   const meta = document.getElementById('js-meta');
-  const addMeta = (icon, text) => meta.innerHTML += `<span class="meta-item">${icon} ${text}</span>`;
-  if (B.tagline)      addMeta('', `<em>${B.tagline}</em>`);
-  if (B.city)         addMeta('📍', `${B.city}, ${B.state}`);
-  if (B.phoneDisplay) addMeta('📞', B.phoneDisplay);
-  if (B.rating)       addMeta('⭐', `${B.rating} (${B.reviewCount} reviews)`);
+  if (B.tagline)      meta.innerHTML += `<span class="meta-item"><em>${B.tagline}</em></span>`;
+  if (B.city)         meta.innerHTML += `<span class="meta-item">📍 ${B.city}, ${B.state}</span>`;
+  if (B.phoneDisplay) meta.innerHTML += `<span class="meta-item">📞 ${B.phoneDisplay}</span>`;
+  if (B.rating)       meta.innerHTML += `<span class="meta-item">⭐ ${B.rating}${B.reviewCount ? ' (' + B.reviewCount.toLocaleString() + ' reviews)' : ''}</span>`;
 
-  // ── Badges ──
   const badges = document.getElementById('js-badges');
-  (B.about?.features || []).forEach(f => {
-    badges.innerHTML += `<span class="badge">${f}</span>`;
-  });
+  (B.about.features || []).forEach(f => { badges.innerHTML += `<span class="badge">${f}</span>`; });
 
-  // ── CTA ──
   const cta = document.getElementById('js-cta');
   if (B.phone)      cta.innerHTML += `<a href="tel:${B.phone}" class="btn btn-call">📞 Call Now</a>`;
   if (B.googleMaps) cta.innerHTML += `<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
   if (B.website)    cta.innerHTML += `<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`;
 
-  // ── Socials ──
-  const social = document.getElementById('js-social');
-  if (B.instagram) social.innerHTML += `<a href="${B.instagram}" target="_blank" class="social-btn" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>`;
-  if (B.facebook)  social.innerHTML += `<a href="${B.facebook}" target="_blank" class="social-btn" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>`;
-
-  // ── Tabs ──
+  // ── Tabs ───────────────────────────────────────────────────
   const tabsEl = document.getElementById('js-tabs');
   B.sections.forEach(sec => {
     const btn = document.createElement('button');
@@ -614,15 +525,13 @@ function renderPage() {
     btn.dataset.id = sec.id;
     btn.textContent = (sec.icon ? sec.icon + ' ' : '') + sec.label;
     btn.onclick = () => {
-      if (sec.id === 'gallery')  { openGallery();  return; }
-      if (sec.id === 'reviews')  { openReviews();  return; }
       const target = sec.scrollTo || sec.id;
       document.getElementById('sec-' + target)?.scrollIntoView({ behavior:'smooth', block:'start' });
     };
     tabsEl.appendChild(btn);
   });
 
-  // ── Helper: menu category block ──
+  // ── Helper: menu category block ────────────────────────────
   function menuCatHTML(cat) {
     const isChips = cat.items.every(i => !i.price && !i.desc);
     let html = `<h3>${cat.category}</h3>`;
@@ -640,27 +549,16 @@ function renderPage() {
     return html;
   }
 
-  // ── Build Sections ──
+  // ── Build Sections ─────────────────────────────────────────
   const container = document.getElementById('js-sections');
 
   B.sections.forEach(sec => {
-    if (sec.scrollTo) return; // shortcut tab only — no section to render
+    if (sec.scrollTo) return;
     const el = document.createElement('section');
     el.id = 'sec-' + sec.id;
     let html = `<div class="card"><h2>${sec.icon ? sec.icon + ' ' : ''}${sec.label}</h2>`;
 
-    // ── mealId sections — render all food categories matching that meal group ──
-    if (sec.mealId && B.foodMenu) {
-      const cats = B.foodMenu.filter(c => (c.meal || 'other') === sec.mealId);
-      if (cats.length) {
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        cats.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
-        container.appendChild(el);
-        return;
-      }
-    }
-
-    // ── barCat sections — render a single bar menu category ──
+    // barCat sections
     if (sec.barCat && B.barMenu) {
       const cat = B.barMenu.find(c => c.category === sec.barCat);
       if (cat) {
@@ -674,12 +572,15 @@ function renderPage() {
 
       case 'about':
         if (B.about) {
-          html += `<p class="about-p">${B.about.description}</p>`;
+          if (B.about.description) html += `<p class="about-p">${B.about.description}</p>`;
           if (B.about.features?.length) {
             html += `<div class="sub-label">Features</div><div class="tag-row">${B.about.features.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
           }
           if (B.about.perfectFor?.length) {
             html += `<div class="sub-label">Perfect For</div><div class="tag-row">${B.about.perfectFor.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
+          }
+          if (B.tags?.length) {
+            html += `<div class="sub-label">Categories</div><div class="tag-row">${B.tags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t}</span>`).join('')}</div>`;
           }
         }
         break;
@@ -687,26 +588,13 @@ function renderPage() {
       case 'food':
         html += '</div>';
         el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.foodMenu) B.foodMenu.forEach(cat => {
-          el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'bar':
-        // fallback — renders all bar categories (not normally hit with barCat sections)
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.barMenu) B.barMenu.forEach(cat => {
-          el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`;
-        });
-        container.appendChild(el);
-        return;
+        if (B.foodMenu) B.foodMenu.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
+        container.appendChild(el); return;
 
       case 'happy-hour':
         if (B.happyHour) {
-          html += `<div class="hh-time">🍺 ${B.happyHour.schedule}</div>`;
-          B.happyHour.deals.forEach(d => {
+          if (B.happyHour.schedule) html += `<div class="hh-time">🍺 ${B.happyHour.schedule}</div>`;
+          (B.happyHour.deals || []).forEach(d => {
             html += `<div class="hh-row">
               <div><div class="hh-name">${d.name}</div>${d.desc?`<div class="hh-desc">${d.desc}</div>`:''}</div>
               ${d.price?`<div class="hh-price">${d.price}</div>`:''}
@@ -714,158 +602,6 @@ function renderPage() {
           });
         }
         break;
-
-      case 'specials':
-        html += '</div>';
-        if (B.specials) B.specials.forEach(s => {
-          el.innerHTML += `<div class="special">
-            ${s.badge?`<div class="special-badge">${s.badge}</div>`:''}
-            <div><div class="special-name">${s.name}</div><div class="special-desc">${s.desc}</div></div>
-          </div>`;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'games':
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.games) B.games.forEach(cat => {
-          let catHTML = `<div class="card"><h3>${cat.category}</h3><div class="menu-grid">`;
-          cat.items.forEach(i => {
-            catHTML += `<div class="item"><div class="name">${i.name}</div>${i.desc?`<div class="desc">${i.desc}</div>`:''}</div>`;
-          });
-          catHTML += '</div></div>';
-          el.innerHTML += catHTML;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'packages':
-        html += `</div><div class="pkg-grid">`;
-        if (B.packages) B.packages.forEach(p => {
-          html += `<div class="pkg">
-            ${p.badge?`<div class="pkg-tag">${p.badge}</div>`:''}
-            <div class="pkg-name">${p.name}</div>
-            <div class="pkg-price">${p.price}</div>
-            <div class="pkg-dur">⏱ ${p.duration}</div>
-            <div class="pkg-desc">${p.desc}</div>
-          </div>`;
-        });
-        html += `</div>`;
-        el.innerHTML = html;
-        container.appendChild(el);
-        return;
-
-      case 'league':
-        if (B.league) {
-          const l = B.league;
-          html += `<div class="league-price">${l.price}</div>
-            <div class="league-sched">📅 ${l.schedule} · ${l.format}</div>
-            <div class="league-desc">${l.desc}</div>
-            <div class="perks">${(l.perks||[]).map(p=>`<span class="perk">✓ ${p}</span>`).join('')}</div>`;
-        }
-        break;
-
-      case 'book-a-bay':
-        if (B.bookABay) {
-          const bay = B.bookABay;
-          html += `<div class="bay">
-            <div class="bay-price">${bay.price}</div>
-            <div><div class="bay-name">${bay.name}</div><div class="bay-cap">👥 ${bay.capacity}</div><div class="bay-desc">${bay.desc}</div></div>
-          </div>`;
-        }
-        break;
-
-      case 'events':
-        if (B.events) B.events.forEach(e => {
-          const evtName = e.name || e.title || '';
-          const evtDesc = e.desc || e.description || '';
-          html += `${e.badge?`<div class="evt-badge">${e.badge}</div>`:''}
-            <div class="evt-name">${evtName}</div>
-            <div class="evt-desc">${evtDesc}</div>
-            ${e.note?`<div class="evt-note">📌 ${e.note}</div>`:''}`;
-        });
-        break;
-
-      case 'fleet':
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.fleet) B.fleet.forEach(f => {
-          el.innerHTML += `<div class="card" style="margin-bottom:12px">
-            ${f.image?`<img src="${f.image}" style="width:100%;border-radius:8px;margin-bottom:10px;max-height:200px;object-fit:cover" alt="${f.name}">`:''}
-            ${f.badge?`<div class="pkg-tag">${f.badge}</div>`:''}
-            <div style="font-size:18px;font-weight:800;margin:4px 0">${f.name}</div>
-            ${f.description?`<div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.5">${f.description}</div>`:''}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              ${f.halfDay?`<div style="background:var(--chip);border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Half Day</div><div style="font-size:18px;font-weight:800;color:var(--accent)">${f.halfDay}</div></div>`:''}
-              ${f.allDay?`<div style="background:var(--chip);border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:2px">All Day</div><div style="font-size:18px;font-weight:800;color:var(--accent)">${f.allDay}</div></div>`:''}
-            </div>
-            ${f.qty?`<div style="font-size:12px;color:var(--muted);margin-top:8px">Fleet: ${f.qty} available</div>`:''}
-          </div>`;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'docks':
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.docks) B.docks.forEach(d => {
-          el.innerHTML += `<div class="card" style="margin-bottom:12px">
-            <div style="font-size:16px;font-weight:800;margin-bottom:4px">${d.name}</div>
-            ${d.specs?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${d.specs}</div>`:''}
-            ${d.desc?`<div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.5">${d.desc}</div>`:''}
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              ${d.halfDay?`<div style="background:var(--chip);border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Half Day</div><div style="font-size:18px;font-weight:800;color:var(--accent)">${d.halfDay}</div></div>`:''}
-              ${d.allDay?`<div style="background:var(--chip);border-radius:8px;padding:10px;text-align:center"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:2px">All Day</div><div style="font-size:18px;font-weight:800;color:var(--accent)">${d.allDay}</div></div>`:''}
-            </div>
-          </div>`;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'addons':
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.addons) B.addons.forEach(a => {
-          el.innerHTML += `<div class="card" style="margin-bottom:12px;display:flex;gap:12px;align-items:flex-start">
-            ${a.image?`<img src="${a.image}" style="width:72px;height:72px;border-radius:8px;object-fit:cover;flex-shrink:0" alt="${a.name}">`:''}
-            <div style="flex:1;min-width:0">
-              <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-                ${a.icon?`<span style="font-size:18px">${a.icon}</span>`:''}
-                <span style="font-size:16px;font-weight:800">${a.name}</span>
-              </div>
-              ${a.desc?`<div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:6px">${a.desc}</div>`:''}
-              <div style="font-size:16px;font-weight:800;color:var(--accent)">${a.price} <span style="font-size:11px;font-weight:600;color:var(--muted)">${a.perUnit||''}</span></div>
-            </div>
-          </div>`;
-        });
-        container.appendChild(el);
-        return;
-
-      case 'schedules': {
-        let schedHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.schedules) B.schedules.forEach(s => {
-          schedHTML += `<div class="card" style="margin-bottom:12px">
-            <div style="margin-bottom:12px">
-              <div style="font-size:18px;font-weight:800">${s.time}</div>
-              ${s.name ? `<div style="font-size:13px;color:var(--muted);margin-top:2px">${s.name}</div>` : ''}
-            </div>
-            <div style="display:grid;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
-              <div style="display:grid;grid-template-columns:1fr auto;padding:8px 12px;background:var(--chip);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">
-                <span>Ticket Type</span><span>Price</span>
-              </div>
-              ${s.tickets.map(t=>`
-              <div style="display:grid;grid-template-columns:1fr auto;padding:10px 12px;border-top:1px solid var(--border);background:#fff;font-size:14px">
-                <span style="font-weight:600">${t.name}</span>
-                <span style="font-weight:800;color:var(--accent)">$${t.price}</span>
-              </div>`).join('')}
-            </div>
-          </div>`;
-        });
-        el.innerHTML = schedHTML;
-        container.appendChild(el);
-        return;
-      }
 
       case 'highlights':
         if (B.highlights?.length) {
@@ -875,32 +611,107 @@ function renderPage() {
         }
         break;
 
-      case 'included':
-        if (B.included?.length) {
-          html += `<ul style="margin:0;padding-left:0;display:grid;gap:8px;list-style:none">
-            ${B.included.map(i=>`<li style="display:flex;gap:10px;font-size:14px"><span style="color:#22c55e;font-weight:700;flex-shrink:0">✓</span><span>${i}</span></li>`).join('')}
-          </ul>`;
-        }
-        break;
-
-      case 'whatToBring':
-        if (B.whatToBring?.length) {
-          html += `<ul style="margin:0;padding-left:0;display:grid;gap:8px;list-style:none">
-            ${B.whatToBring.map(i=>`<li style="display:flex;gap:10px;font-size:14px"><span style="color:var(--accent);font-weight:700;flex-shrink:0">→</span><span>${i}</span></li>`).join('')}
-          </ul>`;
-        }
-        break;
-
       case 'restrictions':
         if (B.restrictions?.length) {
           html += `<ul style="margin:0;padding-left:18px;display:grid;gap:8px">
-            ${B.restrictions.map(r=>{
-              const text = typeof r === 'string' ? r : (r.q || r.text || r.rule || JSON.stringify(r));
-              return `<li style="font-size:13px;color:var(--muted);line-height:1.5">${text}</li>`;
-            }).join('')}
+            ${B.restrictions.map(r=>`<li style="font-size:13px;color:var(--muted);line-height:1.5">${r}</li>`).join('')}
           </ul>`;
         }
         break;
+
+      case 'specials':
+        html += '</div>';
+        (B.specials || []).forEach(s => {
+          el.innerHTML += `<div class="special">
+            ${s.badge?`<div class="special-badge">${s.badge}</div>`:''}
+            <div><div class="special-name">${s.name}</div><div class="special-desc">${s.desc||''}</div></div>
+          </div>`;
+        });
+        container.appendChild(el); return;
+
+      case 'games':
+        html += '</div>';
+        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
+        (B.games || []).forEach(cat => {
+          let catHTML = `<div class="card"><h3>${cat.category}</h3><div class="menu-grid">`;
+          cat.items.forEach(i => { catHTML += `<div class="item"><div class="name">${i.name}</div>${i.desc?`<div class="desc">${i.desc}</div>`:''}</div>`; });
+          catHTML += '</div></div>';
+          el.innerHTML += catHTML;
+        });
+        container.appendChild(el); return;
+
+      case 'packages':
+        html += `</div><div class="pkg-grid">`;
+        (B.packages || []).forEach(p => {
+          html += `<div class="pkg">
+            ${p.badge?`<div class="pkg-tag">${p.badge}</div>`:''}
+            <div class="pkg-name">${p.name}</div>
+            ${p.price?`<div class="pkg-price">${p.price}</div>`:''}
+            ${p.duration?`<div class="pkg-dur">⏱ ${p.duration}</div>`:''}
+            ${p.desc?`<div class="pkg-desc">${p.desc}</div>`:''}
+          </div>`;
+        });
+        html += `</div>`;
+        el.innerHTML = html;
+        container.appendChild(el); return;
+
+      case 'league':
+        if (B.league) {
+          const l = B.league;
+          html += `${l.price?`<div class="league-price">${l.price}</div>`:''}
+            ${l.schedule||l.format?`<div class="league-sched">📅 ${[l.schedule,l.format].filter(Boolean).join(' · ')}</div>`:''}
+            ${l.desc?`<div class="league-desc">${l.desc}</div>`:''}
+            <div class="perks">${(l.perks||[]).map(p=>`<span class="perk">✓ ${p}</span>`).join('')}</div>`;
+        }
+        break;
+
+      case 'book-a-bay':
+        if (B.bookABay) {
+          const bay = B.bookABay;
+          html += `<div class="bay">
+            ${bay.price?`<div class="bay-price">${bay.price}</div>`:''}
+            <div>
+              ${bay.name?`<div class="bay-name">${bay.name}</div>`:''}
+              ${bay.capacity?`<div class="bay-cap">👥 ${bay.capacity}</div>`:''}
+              ${bay.desc?`<div class="bay-desc">${bay.desc}</div>`:''}
+            </div>
+          </div>`;
+        }
+        break;
+
+      case 'events':
+        (B.events || []).forEach(e => {
+          html += `${e.badge?`<div class="evt-badge">${e.badge}</div>`:''}
+            <div class="evt-name">${e.name}</div>
+            ${e.desc?`<div class="evt-desc">${e.desc}</div>`:''}
+            ${e.note?`<div class="evt-note">📌 ${e.note}</div>`:''}`;
+        });
+        break;
+
+      case 'schedules': {
+        html += '</div>';
+        let schedHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
+        (B.schedules || []).forEach(s => {
+          schedHTML += `<div class="card" style="margin-bottom:12px">
+            <div style="margin-bottom:12px">
+              <div style="font-size:18px;font-weight:800">${s.time}</div>
+              ${s.name?`<div style="font-size:13px;color:var(--muted);margin-top:2px">${s.name}</div>`:''}
+            </div>
+            <div style="display:grid;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+              <div style="display:grid;grid-template-columns:1fr auto;padding:8px 12px;background:var(--chip);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">
+                <span>Ticket Type</span><span>Price</span>
+              </div>
+              ${(s.tickets||[]).map(t=>`
+              <div style="display:grid;grid-template-columns:1fr auto;padding:10px 12px;border-top:1px solid var(--border);background:#fff;font-size:14px">
+                <span style="font-weight:600">${t.name}</span>
+                <span style="font-weight:800;color:var(--accent)">$${t.price}</span>
+              </div>`).join('')}
+            </div>
+          </div>`;
+        });
+        el.innerHTML = schedHTML;
+        container.appendChild(el); return;
+      }
 
       case 'gallery':
         html += `<button class="section-btn" onclick="openGallery()">
@@ -917,36 +728,39 @@ function renderPage() {
         break;
 
       case 'hours':
-        if (B.hours) {
+        if (B.hours?.length) {
           const today = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
           html += `<ul class="hours">${B.hours.map(h=>`
             <li class="${h.day===today?'today':''}">
               <span class="day">${h.day}</span>
-              <span class="time">${h.open} – ${h.close}</span>
+              <span class="time">${h.closed ? 'Closed' : (h.open||'')+(h.close?' – '+h.close:'')}</span>
             </li>`).join('')}</ul>`;
         }
         break;
 
       case 'location':
-        html += `<div class="loc-addr">📍 ${B.address}<br>${B.city}, ${B.state} ${B.zip}</div>
+        html += `<div class="loc-addr">📍 ${B.address||''}<br>${[B.city,B.state,B.zip].filter(Boolean).join(', ')}</div>
           <div class="cta-row">
             ${B.googleMaps?`<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Get Directions</a>`:''}
-            ${B.phone?`<a href="tel:${B.phone}" class="btn btn-call">📞 ${B.phoneDisplay}</a>`:''}
+            ${B.phone?`<a href="tel:${B.phone}" class="btn btn-call">📞 ${B.phoneDisplay||B.phone}</a>`:''}
             ${B.website?`<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`:''}
           </div>`;
         break;
 
-      // ── Generic: any sec.id that matches foodMenu cat.meal renders those categories ──
       default: {
-        const mealCats = (B.foodMenu || []).filter(cat => cat.meal === (sec.mealId || sec.id));
+        // Universal: any section key with grouped_items renders here
+        const mealId = sec.mealId || sec.id.replace('meal-','');
+        const mealCats = (B.foodMenu || []).filter(cat => cat.meal === mealId);
         if (mealCats.length > 0) {
           html += '</div>';
           el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-          mealCats.forEach(cat => {
-            el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`;
-          });
-          container.appendChild(el);
-          return;
+          mealCats.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
+          container.appendChild(el); return;
+        }
+        // barCat fallback
+        if (sec.barCat && B.barMenu) {
+          const cat = B.barMenu.find(c => c.category === sec.barCat);
+          if (cat) { el.innerHTML = `<div class="card"><h2>${sec.icon||''} ${sec.label}</h2>${menuCatHTML(cat)}</div>`; container.appendChild(el); return; }
         }
         break;
       }
@@ -957,7 +771,7 @@ function renderPage() {
     container.appendChild(el);
   });
 
-  // ── Scroll spy ──
+  // ── Scroll spy ─────────────────────────────────────────────
   const tabs = document.querySelectorAll('.tab');
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
@@ -972,83 +786,61 @@ function renderPage() {
   document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
   if (tabs[0]) tabs[0].classList.add('active');
 
-  // ── Gallery Popup ──
+  // ── Gallery Popup ──────────────────────────────────────────
   const GALLERY_PER_PAGE = 10;
   let galleryCurrentPage = 0;
   const galleryImages = B.gallery || [];
 
   window.openGallery = function() {
-    galleryCurrentPage = 0;
-    renderGallery();
+    galleryCurrentPage = 0; renderGallery();
     document.getElementById('gallery-popup').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
-  window.galleryPage = function(dir) {
-    galleryCurrentPage += dir;
-    renderGallery();
-  };
+  window.galleryPage = function(dir) { galleryCurrentPage += dir; renderGallery(); };
   function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     const total = galleryImages.length;
     const totalPages = Math.max(1, Math.ceil(total / GALLERY_PER_PAGE));
     galleryCurrentPage = Math.max(0, Math.min(galleryCurrentPage, totalPages - 1));
-    const start = galleryCurrentPage * GALLERY_PER_PAGE;
-    const page = galleryImages.slice(start, start + GALLERY_PER_PAGE);
-    if (page.length === 0) {
-      grid.innerHTML = `<div class="no-content" style="grid-column:1/-1">No photos added yet.</div>`;
-    } else {
-      grid.innerHTML = page.map(img => `
-        <div>
-          <img class="gallery-img" src="${img.url}" alt="${img.caption||''}" onerror="this.style.background='#ddd'">
-          ${img.caption ? `<div class="gallery-caption">${img.caption}</div>` : ''}
-        </div>`).join('');
-    }
+    const page = galleryImages.slice(galleryCurrentPage * GALLERY_PER_PAGE, (galleryCurrentPage + 1) * GALLERY_PER_PAGE);
+    grid.innerHTML = page.length === 0
+      ? `<div class="no-content" style="grid-column:1/-1">No photos added yet.</div>`
+      : page.map(img=>`<div><img class="gallery-img" src="${img.url}" alt="${img.caption||''}" loading="lazy" onerror="this.style.background='#ddd'">${img.caption?`<div class="gallery-caption">${img.caption}</div>`:''}</div>`).join('');
     document.getElementById('gallery-page-info').textContent = total > 0 ? `Page ${galleryCurrentPage+1} of ${totalPages}` : '';
     document.getElementById('gallery-prev-btn').disabled = galleryCurrentPage === 0;
     document.getElementById('gallery-next-btn').disabled = galleryCurrentPage >= totalPages - 1;
   }
 
-  // ── Reviews Popup ──
+  // ── Reviews Popup ──────────────────────────────────────────
   const REVIEWS_PER_PAGE = 10;
   let reviewsCurrentPage = 0;
   const allReviews = B.reviews || [];
 
   window.openReviews = function() {
-    reviewsCurrentPage = 0;
-    renderReviews();
+    reviewsCurrentPage = 0; renderReviews();
     document.getElementById('reviews-popup').classList.add('open');
     document.body.style.overflow = 'hidden';
   };
-  window.reviewsPage = function(dir) {
-    reviewsCurrentPage += dir;
-    renderReviews();
-  };
+  window.reviewsPage = function(dir) { reviewsCurrentPage += dir; renderReviews(); };
   function renderReviews() {
     const list = document.getElementById('reviews-list');
     const total = allReviews.length;
     const totalPages = Math.max(1, Math.ceil(total / REVIEWS_PER_PAGE));
     reviewsCurrentPage = Math.max(0, Math.min(reviewsCurrentPage, totalPages - 1));
-    const start = reviewsCurrentPage * REVIEWS_PER_PAGE;
-    const page = allReviews.slice(start, start + REVIEWS_PER_PAGE);
-    if (page.length === 0) {
-      list.innerHTML = `<div class="no-content">No reviews added yet.</div>`;
-    } else {
-      list.innerHTML = page.map(r => `
-        <div class="review-card">
-          <div class="review-top">
-            <span class="review-author">${r.author}</span>
-            <span class="review-date">${r.date||''}</span>
-          </div>
+    const page = allReviews.slice(reviewsCurrentPage * REVIEWS_PER_PAGE, (reviewsCurrentPage + 1) * REVIEWS_PER_PAGE);
+    list.innerHTML = page.length === 0
+      ? `<div class="no-content">No reviews added yet.</div>`
+      : page.map(r=>`<div class="review-card">
+          <div class="review-top"><span class="review-author">${r.author||'Guest'}</span><span class="review-date">${r.date||''}</span></div>
           <div class="review-stars">${'★'.repeat(r.rating||5)}${'☆'.repeat(5-(r.rating||5))}</div>
-          <div class="review-text">${r.text}</div>
+          <div class="review-text">${r.text||''}</div>
         </div>`).join('');
-    }
     document.getElementById('reviews-page-info').textContent = total > 0 ? `Page ${reviewsCurrentPage+1} of ${totalPages}` : '';
     document.getElementById('reviews-prev-btn').disabled = reviewsCurrentPage === 0;
     document.getElementById('reviews-next-btn').disabled = reviewsCurrentPage >= totalPages - 1;
   }
 
-  // ── Close popups ──
+  // ── Close popups ───────────────────────────────────────────
   window.closePopup = function(id) {
     document.getElementById(id).classList.remove('open');
     document.body.style.overflow = '';
@@ -1057,9 +849,7 @@ function renderPage() {
     overlay.addEventListener('click', e => { if (e.target === overlay) closePopup(overlay.id); });
   });
 
-}
+})();
 </script>
-<script src="js/gcr-api.js"></script>
-<script src="js/app.js"></script>
 </body>
 </html>
