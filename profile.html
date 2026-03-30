@@ -7,6 +7,7 @@
   <meta id="page-desc" name="description" content="">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
 
   <style>
     :root {
@@ -195,6 +196,38 @@
   </style>
 </head>
 <body>
+
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="/index.html" class="gcr-logo-row">
+      <img src="/gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+      📲 Install App
+    </button>
+  </div>
+  <div class="gcr-cat-tabs">
+    <a href="/restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="/coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="/happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="/specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="/events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="/things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="/shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="/other.html"         class="gcr-cat-tab">✨ Other</a>
+    <a href="/feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">
+      ⭐ Join Our Loyalty Program 🎁
+    </button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">
+      📅 Master Calendar 🎉
+    </button>
+  </div>
+</div>
+
 <div class="wrap">
 
   <div class="cover" id="js-cover">
