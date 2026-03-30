@@ -27,8 +27,9 @@
 
     /* Cover Slideshow */
     .cover { position:relative; width:100%; aspect-ratio:16/9; background:#0c2d48; overflow:hidden; }
-    .cover-slides { display:flex; width:100%; height:100%; transition:transform .5s ease; }
-    .cover-slide { min-width:100%; height:100%; background:linear-gradient(135deg,#cfe9ff,#e9f3ff); flex-shrink:0; }
+    .cover-slides { position:relative; width:100%; height:100%; }
+    .cover-slide { position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#cfe9ff,#e9f3ff); opacity:0; transition:opacity .5s ease; pointer-events:none; }
+    .cover-slide.active { opacity:1; pointer-events:auto; }
     .cover-slide img { width:100%; height:100%; object-fit:cover; object-position:center bottom; display:block; }
     .cover-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:none; color:#fff; font-size:22px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
     .cover-arrow:hover { background:rgba(0,0,0,.7); }
@@ -481,7 +482,7 @@
     document.getElementById('js-next').style.display = 'none';
   } else {
     slides.forEach((src, i) => {
-      slidesEl.innerHTML += `<div class="cover-slide"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#cfe9ff,#e9f3ff)'"></div>`;
+      slidesEl.innerHTML += `<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#cfe9ff,#e9f3ff)'"></div>`;
       dotsEl.innerHTML  += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
     });
     if (slides.length === 1) {
@@ -492,7 +493,7 @@
 
   function goSlide(n) {
     currentSlide = (n + slides.length) % slides.length;
-    slidesEl.style.transform = `translateX(-${currentSlide * 100}%)`;
+    document.querySelectorAll('.cover-slide').forEach((s,i) => s.classList.toggle('active', i === currentSlide));
     document.querySelectorAll('.cover-dot').forEach((d,i) => d.classList.toggle('active', i === currentSlide));
   }
   document.getElementById('js-prev').onclick = () => goSlide(currentSlide - 1);
@@ -515,7 +516,6 @@
   const cta = document.getElementById('js-cta');
   if (B.phone)      cta.innerHTML += `<a href="tel:${B.phone}" class="btn btn-call">📞 Call Now</a>`;
   if (B.googleMaps) cta.innerHTML += `<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
-  if (B.website)    cta.innerHTML += `<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`;
 
   // ── Tabs ───────────────────────────────────────────────────
   const tabsEl = document.getElementById('js-tabs');
