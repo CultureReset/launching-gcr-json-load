@@ -137,8 +137,19 @@ const TAG_TO_PAGE = {
 };
 
 function tagToPage(tag) {
-  const key = (tag || '').toLowerCase().replace(/ /g, '_');
-  return TAG_TO_PAGE[key] || TAG_TO_PAGE[tag.toLowerCase()] || `search.html?q=${encodeURIComponent(tag)}`;
+  const lower = (tag || '').toLowerCase();
+  const key = lower.replace(/ /g, '_');
+  if (TAG_TO_PAGE[key]) return TAG_TO_PAGE[key];
+  if (TAG_TO_PAGE[lower]) return TAG_TO_PAGE[lower];
+  // Fuzzy match — check if tag contains a known keyword
+  if (/happy.?hour/.test(lower)) return 'happy-hours.html';
+  if (/live.?music/.test(lower)) return 'events.html';
+  if (/waterfront/.test(lower)) return 'restaurants.html';
+  if (/seafood/.test(lower))    return 'restaurants.html';
+  if (/parasail/.test(lower))   return 'things-to-do.html';
+  if (/fishing/.test(lower))    return 'things-to-do.html';
+  if (/coffee/.test(lower))     return 'coffee-sweets.html';
+  return `search.html?q=${encodeURIComponent(tag)}`;
 }
 
 function tagLabel(tag) {
