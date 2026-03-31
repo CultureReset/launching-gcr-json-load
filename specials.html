@@ -450,18 +450,13 @@
     updateTime();
     setInterval(updateTime, 30000);
 
-    /* ── Specials: render all specials from GCR.specials ── */
+    /* ── Specials: ONLY daily deals/food specials — NO happy hours ── */
     function renderSpecials() {
-      const specials = (GCR.specials || []).filter(s => s.active !== false);
-      const activeGrid = document.getElementById('spActiveGrid');
-      const soonGrid = document.getElementById('spSoonGrid');
-      const laterGrid = document.getElementById('spLaterGrid');
+      const all = (GCR.specials || []).filter(s => s.active !== false);
       const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
 
-      if (!specials.length) {
-        if (activeGrid) activeGrid.innerHTML = '<div class="empty">No specials found yet. Check back soon!</div>';
-        return;
-      }
+      // EXCLUDE happy hours — those belong on happy-hours.html
+      const specials = all.filter(s => !(s.name || '').toLowerCase().includes('happy hour'));
 
       // Dedupe by slug+name
       const seen = new Set();
@@ -472,68 +467,71 @@
         return true;
       });
 
-      // Separate: HH specials vs food/other specials
-      const hhSpecials = unique.filter(s => (s.name || '').toLowerCase().includes('happy hour'));
-      const otherSpecials = unique.filter(s => !(s.name || '').toLowerCase().includes('happy hour'));
+      const activeGrid = document.getElementById('spActiveGrid');
+      if (!unique.length) {
+        if (activeGrid) activeGrid.innerHTML = '<div class="empty" style="padding:40px;text-align:center;color:#66788a;">No daily specials found yet. Check back soon!</div>';
+        return;
+      }
 
-      function buildSpecialCard(s) {
+      // Sort: specials with descriptions first, then alphabetical by business
+      unique.sort((a, b) => {
+        const aHas = (a.description || '').length;
+        const bHas = (b.description || '').length;
+        if (bHas !== aHas) return bHas - aHas;
+        return (a.businessName || '').localeCompare(b.businessName || '');
+      });
+
+      activeGrid.innerHTML = unique.map(s => {
         const biz = GCR.getBusiness(s.slug);
         const hero = (biz && (biz.hero_image_url || biz.cover_url)) || FALLBACK;
         const emoji = s.businessEmoji || '🏷️';
         const bizName = s.businessName || (biz && biz.name) || '';
         const city = biz && biz.city || '';
+        const rating = biz && biz.rating;
         const phone = biz && biz.phone || '';
         const dir = biz && biz.directions_url || '';
-        const desc = (s.description || '').slice(0, 120);
+        const desc = (s.description || '').slice(0, 150);
         const days = s.days || '';
-        const dirBtn = dir ? `<a href="${dir}" target="_blank" class="action" onclick="event.stopPropagation();event.preventDefault();window.open('${dir}')">📍 Directions</a>` : '';
-        const callBtn = phone ? `<a href="tel:${phone.replace(/\\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : '';
+        const stars = rating ? '★'.repeat(Math.floor(rating)) + '☆'.repeat(5 - Math.floor(rating)) : '';
 
         return `
-          <a href="profile.html?id=${encodeURIComponent(s.slug || '')}" style="text-decoration:none;color:inherit;display:block;"
-             data-slug="${s.slug || ''}" data-tags="${(days || '').toLowerCase()}">
+          <a href="profile.html?id=${encodeURIComponent(s.slug || '')}" style="text-decoration:none;color:inherit;display:block;margin-bottom:14px;"
+             data-slug="${s.slug || ''}" data-tags="${(s.name || '').toLowerCase()} ${(days || '').toLowerCase()} ${(desc || '').toLowerCase().slice(0,40)}">
             <div class="sp-card">
               <div class="sp-image" style="background-image:url('${hero}')">
-                <div class="image-badge">${emoji} ${s.name || 'Special'}</div>
+                <div class="image-badge">${emoji} ${(s.type || 'Special').replace(/_/g,' ')}</div>
               </div>
               <div class="sp-body">
                 <div class="title-row">
-                  <div class="name">${bizName}</div>
-                  <div class="status">🏷️ Deal</div>
+                  <div class="name" style="font-size:22px;">${s.name || 'Daily Special'}</div>
                 </div>
+                <div style="font-size:15px;color:#0f7c90;font-weight:700;margin-top:3px;">${bizName}</div>
                 <div class="subline">${city}</div>
-                ${desc ? `<div style="margin-top:8px;color:#42596c;font-size:14px;line-height:1.5;font-weight:600;">${desc}</div>` : ''}
-                ${days ? `<div class="timepill">📅 ${days}</div>` : ''}
+                ${rating ? `<div class="rating"><span class="stars">${stars}</span> ${Number(rating).toFixed(1)}</div>` : ''}
+                ${desc ? `<div style="margin-top:10px;color:#42596c;font-size:14px;line-height:1.55;font-weight:600;">${desc}</div>` : ''}
+                ${days ? `<div class="timepill" style="margin-top:10px;">📅 ${days}</div>` : ''}
                 <div class="bottom-row">
-                  <div class="address">${s.name || ''}</div>
-                  <div class="actions">${dirBtn}${callBtn}</div>
+                  <div class="address">${biz && (biz.address_line_1 || biz.address) || city}</div>
+                  <div class="actions">
+                    ${dir ? `<a href="${dir}" target="_blank" class="action" onclick="event.stopPropagation();event.preventDefault();window.open('${dir}')">📍 Directions</a>` : ''}
+                    ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : ''}
+                    <span class="action primary" style="pointer-events:none;">View Details →</span>
+                  </div>
                 </div>
               </div>
             </div>
           </a>`;
-      }
+      }).join('');
 
-      function buildCompactSpecial(s) {
-        const emoji = s.businessEmoji || '🏷️';
-        return `
-          <a href="profile.html?id=${encodeURIComponent(s.slug || '')}" style="text-decoration:none;color:inherit;">
-            <div class="compact-card">
-              <h4>${emoji} ${s.businessName || ''}</h4>
-              <div class="compact-meta">${s.name || 'Special'}</div>
-              <div class="compact-deal">${(s.description || '').slice(0, 60)}</div>
-              ${s.days ? `<div class="countdown">📅 ${s.days}</div>` : ''}
-            </div>
-          </a>`;
-      }
-
-      // Render: main specials (non-HH) as full cards, HH as compact
-      if (activeGrid) activeGrid.innerHTML = otherSpecials.slice(0, 10).map(buildSpecialCard).join('') || '<div class="empty">No active specials right now</div>';
-      if (soonGrid) soonGrid.innerHTML = hhSpecials.slice(0, 8).map(buildCompactSpecial).join('') || '';
-      if (laterGrid) laterGrid.innerHTML = otherSpecials.slice(10).map(buildCompactSpecial).join('') || '';
+      // Hide the other sections — all specials in one list
+      const soonSec = document.getElementById('spSoonGrid')?.closest('.section');
+      const laterSec = document.getElementById('spLaterGrid')?.closest('.section');
+      if (soonSec) soonSec.style.display = 'none';
+      if (laterSec) laterSec.style.display = 'none';
 
       // Update section subtitle
       const activeSub = document.querySelector('.section-sub');
-      if (activeSub) activeSub.textContent = unique.length + ' active specials';
+      if (activeSub) activeSub.textContent = unique.length + ' daily specials';
 
       // Wire filter chips
       const chips = document.querySelectorAll('.tag-btn');
@@ -541,15 +539,18 @@
         btn.addEventListener('click', () => {
           chips.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
+          const filter = (btn.textContent || '').toLowerCase().trim();
+          document.querySelectorAll('[data-slug]').forEach(card => {
+            if (filter.includes('happening') || filter === 'all') { card.style.display = ''; return; }
+            const tags = (card.dataset.tags || '');
+            card.style.display = tags.includes(filter) ? '' : 'none';
+          });
         });
       });
     }
 
-    if (window.GCR && GCR.loaded) {
-      renderSpecials();
-    } else {
-      document.addEventListener('gcr:loaded', renderSpecials);
-    }
+    if (window.GCR && GCR.loaded) { renderSpecials(); }
+    else { document.addEventListener('gcr:loaded', renderSpecials); }
   </script>
 </body>
 </html>

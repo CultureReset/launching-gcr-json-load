@@ -449,14 +449,40 @@
     updateTime();
     setInterval(updateTime, 30000);
 
-    /* ── Happy Hours: render businesses with HH specials ── */
+    /* ── Toggle detail dropdown ── */
+    function toggleHHDetails(slug) {
+      const el = document.getElementById('hh-details-' + slug);
+      if (!el) return;
+      const isOpen = el.style.display !== 'none';
+      // Close all others
+      document.querySelectorAll('.hh-detail-panel').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.hh-toggle-btn').forEach(b => b.textContent = '🍹 View Happy Hour Menu');
+      if (!isOpen) {
+        el.style.display = 'block';
+        const btn = el.previousElementSibling?.querySelector('.hh-toggle-btn');
+        if (btn) btn.textContent = '▲ Hide Menu';
+      }
+    }
+
+    /* ── Happy Hours: business cards + expandable menu dropdown ── */
     function renderHappyHours() {
-      // Get all specials that are happy-hour related
+      // Get HH specials (these have the actual deal items)
       const hhSpecials = (GCR.specials || []).filter(s =>
         s.active !== false &&
-        ((s.name || '').toLowerCase().includes('happy hour') ||
-         (s.type || '').toLowerCase().includes('happy'))
+        (s.name || '').toLowerCase().includes('happy hour')
       );
+
+      // Get all NON-HH specials for these same businesses (drink items, appetizers under HH)
+      const allSpecials = GCR.specials || [];
+
+      // Group ALL specials by business slug
+      const specialsBySlug = {};
+      allSpecials.forEach(s => {
+        if (s.active === false) return;
+        const slug = s.slug || '';
+        if (!specialsBySlug[slug]) specialsBySlug[slug] = [];
+        specialsBySlug[slug].push(s);
+      });
 
       // Also get businesses with happy_hour tag
       const hhBusinesses = (GCR.businesses || []).filter(b => {
@@ -465,19 +491,11 @@
                b.happyHour === true || b.happy_hour === true;
       });
 
-      // Group specials by business slug
-      const specialsBySlug = {};
-      hhSpecials.forEach(s => {
-        const slug = s.slug || '';
-        if (!specialsBySlug[slug]) specialsBySlug[slug] = [];
-        specialsBySlug[slug].push(s);
-      });
-
-      // Merge: build list of HH venues with their specials
+      // Build unique venue list
       const slugSet = new Set();
       const venues = [];
 
-      // From specials (has deal details)
+      // From HH specials
       hhSpecials.forEach(s => {
         const slug = s.slug || '';
         if (slugSet.has(slug)) return;
@@ -495,7 +513,7 @@
           directions: biz && biz.directions_url || '',
           hero: biz && (biz.hero_image_url || biz.cover_url) || '',
           tags: biz && biz.tags || [],
-          specials: specialsBySlug[slug] || [s],
+          specials: specialsBySlug[slug] || [],
         });
       });
 
@@ -505,25 +523,19 @@
         if (slugSet.has(slug)) return;
         slugSet.add(slug);
         venues.push({
-          slug,
-          name: b.name,
+          slug, name: b.name,
           emoji: b.icon || b.emoji || '🍻',
           type: b.entity_subtype || b.type || '',
-          rating: b.rating,
-          city: b.city || '',
+          rating: b.rating, city: b.city || '',
           address: b.address_line_1 || b.address || '',
-          phone: b.phone || '',
-          directions: b.directions_url || '',
+          phone: b.phone || '', directions: b.directions_url || '',
           hero: b.hero_image_url || b.cover_url || '',
           tags: b.tags || [],
           specials: specialsBySlug[slug] || [],
         });
       });
 
-      // Render into grids
       const nowGrid = document.getElementById('hhNowGrid');
-      const soonGrid = document.getElementById('hhSoonGrid');
-      const laterGrid = document.getElementById('hhLaterGrid');
       const FALLBACK = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80';
 
       if (!venues.length) {
@@ -533,64 +545,77 @@
 
       // Update counts
       document.getElementById('hh-active-count').textContent = venues.length + ' happy hour venues';
-      document.getElementById('hh-soon-count').textContent = venues.filter(v => v.specials.length).length + ' with deal details';
+      document.getElementById('hh-soon-count').textContent = venues.filter(v => v.specials.length > 1).length + ' with menu details';
 
-      function buildHHCard(v) {
+      // Sort: businesses with most specials first, then by rating
+      venues.sort((a, b) => (b.specials.length || 0) - (a.specials.length || 0) || (b.rating || 0) - (a.rating || 0));
+
+      nowGrid.innerHTML = venues.map(v => {
         const hero = v.hero || FALLBACK;
         const rawTags = (v.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
-        const dealsHtml = v.specials.slice(0, 4).map(s =>
-          `<div class="deal">${s.businessEmoji || '🍹'} ${s.name || 'Special'}${s.description ? ' — ' + s.description.slice(0, 80) : ''}</div>`
+        const stars = v.rating ? '★'.repeat(Math.floor(v.rating)) + '☆'.repeat(5 - Math.floor(v.rating)) : '';
+        const chipHtml = rawTags.slice(0, 4).map(t =>
+          `<span style="background:#f0fafb;border:1px solid #d3eef3;color:#0b6475;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;">${t.replace(/_/g,' ')}</span>`
         ).join('');
-        const dirBtn = v.directions ? `<a href="${v.directions}" target="_blank" class="action" onclick="event.stopPropagation();event.preventDefault();window.open('${v.directions}')">📍 Directions</a>` : '';
-        const callBtn = v.phone ? `<a href="tel:${v.phone.replace(/\\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : '';
+
+        // Find the main HH special for time info
+        const hhMain = v.specials.find(s => (s.name || '').toLowerCase().includes('happy hour'));
+        const hhTime = hhMain && hhMain.start_time ? hhMain.start_time + (hhMain.end_time ? ' – ' + hhMain.end_time : '') : '';
+        const hhDays = hhMain && hhMain.days ? hhMain.days : '';
+
+        // Build detail menu items (all specials for this business)
+        const menuItems = v.specials.filter(s => s.name).map(s => {
+          const desc = (s.description || '').slice(0, 120);
+          const price = s.discount_text || s.price_text || '';
+          return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f0f4f8;gap:12px;">
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:14px;color:#12263a;">${s.name || 'Special'}</div>
+              ${desc ? `<div style="font-size:13px;color:#50677a;margin-top:2px;line-height:1.4;">${desc}</div>` : ''}
+            </div>
+            ${price ? `<div style="font-weight:800;font-size:14px;color:#0f7c90;white-space:nowrap;">${price}</div>` : ''}
+          </div>`;
+        }).join('');
+
+        const safeSlug = v.slug.replace(/'/g, "\\'");
 
         return `
-          <a href="profile.html?id=${encodeURIComponent(v.slug)}" style="text-decoration:none;color:inherit;display:block;"
-             data-slug="${v.slug}" data-tags="${rawTags.join(',').toLowerCase()}">
-            <div class="hh-card">
+          <div data-slug="${v.slug}" data-tags="${rawTags.join(',').toLowerCase()}" style="margin-bottom:14px;">
+            <div class="hh-card" style="cursor:default;">
               <div class="hh-image" style="background-image:url('${hero}')">
-                <div class="image-badge">${v.emoji} Happy Hour</div>
+                <div class="image-badge">🍻 Happy Hour</div>
               </div>
               <div class="hh-body">
                 <div class="title-row">
-                  <div class="name">${v.name}</div>
-                  <div class="status">🍻 HH</div>
+                  <a href="profile.html?id=${encodeURIComponent(v.slug)}" style="text-decoration:none;color:inherit;"><div class="name">${v.name}</div></a>
+                  ${hhDays ? `<div class="status" style="background:#eef8fb;color:#0b6475;">${hhDays}</div>` : ''}
                 </div>
                 <div class="subline">${[v.type.replace(/_/g,' '), v.city].filter(Boolean).join(' · ')}</div>
-                ${v.rating ? `<div class="rating"><span class="stars">${'★'.repeat(Math.floor(v.rating))}${'☆'.repeat(5-Math.floor(v.rating))}</span> ${Number(v.rating).toFixed(1)}</div>` : ''}
-                ${dealsHtml ? `<div class="deals">${dealsHtml}</div>` : ''}
+                ${v.rating ? `<div class="rating"><span class="stars">${stars}</span> ${Number(v.rating).toFixed(1)}</div>` : ''}
+                ${hhTime ? `<div class="timepill">🕒 ${hhTime}</div>` : ''}
+                ${chipHtml ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">${chipHtml}</div>` : ''}
                 <div class="bottom-row">
                   <div class="address">${v.address || v.city}</div>
-                  <div class="actions">${dirBtn}${callBtn}</div>
+                  <div class="actions">
+                    ${v.directions ? `<a href="${v.directions}" target="_blank" class="action" onclick="event.stopPropagation()">📍 Directions</a>` : ''}
+                    ${v.phone ? `<a href="tel:${v.phone.replace(/\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : ''}
+                    <a href="profile.html?id=${encodeURIComponent(v.slug)}" class="action primary">View Profile</a>
+                  </div>
                 </div>
+                ${menuItems ? `<button class="hh-toggle-btn" onclick="event.preventDefault();toggleHHDetails('${safeSlug}')" style="margin-top:12px;width:100%;padding:11px;background:linear-gradient(135deg,#0f7c90,#0b6475);color:#fff;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;">🍹 View Happy Hour Menu</button>` : ''}
               </div>
             </div>
-          </a>`;
-      }
+            ${menuItems ? `<div class="hh-detail-panel" id="hh-details-${v.slug}" style="display:none;background:#fff;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 20px 20px;padding:16px 20px;box-shadow:0 8px 20px rgba(15,34,51,.06);">
+              <div style="font-size:16px;font-weight:900;color:#0f7c90;margin-bottom:12px;">🍹 Happy Hour Menu — ${v.name}</div>
+              ${menuItems}
+            </div>` : ''}
+          </div>`;
+      }).join('');
 
-      function buildCompactCard(v) {
-        return `
-          <a href="profile.html?id=${encodeURIComponent(v.slug)}" style="text-decoration:none;color:inherit;"
-             data-slug="${v.slug}" data-tags="${(v.tags||[]).map(t=>typeof t==='string'?t:(t.tag||'')).join(',').toLowerCase()}">
-            <div class="compact-card">
-              <h4>${v.emoji} ${v.name}</h4>
-              <div class="compact-meta">${v.city || ''}</div>
-              ${v.specials[0] ? `<div class="compact-deal">${(v.specials[0].description || v.specials[0].name || '').slice(0, 60)}</div>` : ''}
-              <div class="compact-actions">
-                ${v.directions ? `<a href="${v.directions}" target="_blank" onclick="event.stopPropagation();event.preventDefault();window.open('${v.directions}')">Directions</a>` : ''}
-                <a href="profile.html?id=${encodeURIComponent(v.slug)}" onclick="event.stopPropagation()">View</a>
-              </div>
-            </div>
-          </a>`;
-      }
-
-      // Split: first 8 as full cards, rest as compact
-      const mainVenues = venues.slice(0, 8);
-      const moreVenues = venues.slice(8);
-
-      if (nowGrid) nowGrid.innerHTML = mainVenues.map(buildHHCard).join('') || '<div class="empty">No happy hours active right now</div>';
-      if (soonGrid) soonGrid.innerHTML = moreVenues.slice(0, 6).map(buildCompactCard).join('') || '';
-      if (laterGrid) laterGrid.innerHTML = moreVenues.slice(6).map(buildCompactCard).join('') || '';
+      // Hide the "Starting Soon" and "Later Today" sections — all in one grid now
+      const soonSec = document.getElementById('hhSoonGrid')?.closest('.section');
+      const laterSec = document.getElementById('hhLaterGrid')?.closest('.section');
+      if (soonSec) soonSec.style.display = 'none';
+      if (laterSec) laterSec.style.display = 'none';
 
       // Wire filter chips
       const chips = document.querySelectorAll('.tag-btn');
@@ -606,37 +631,10 @@
           });
         });
       });
-
-      // Populate "Featured Happy Hour" sidebar with real data
-      const featPanel = document.querySelector('.panel h3');
-      if (featPanel && venues.length) {
-        const top = venues.filter(v => v.hero).sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 2);
-        if (top.length) {
-          const panel = featPanel.closest('.panel');
-          if (panel) {
-            panel.innerHTML = '<h3>Top Rated Happy Hours</h3>' + top.map(v => `
-              <div class="mini-card">
-                <div class="mini-thumb" style="background-image:url('${v.hero}')"></div>
-                <div>
-                  <div class="mini-name">${v.name}</div>
-                  <div class="mini-meta">${v.city}</div>
-                  <div class="mini-links">
-                    ${v.directions ? `<a href="${v.directions}" target="_blank">Directions</a>` : ''}
-                    <a href="profile.html?id=${encodeURIComponent(v.slug)}">View</a>
-                  </div>
-                </div>
-              </div>
-            `).join('');
-          }
-        }
-      }
     }
 
-    if (window.GCR && GCR.loaded) {
-      renderHappyHours();
-    } else {
-      document.addEventListener('gcr:loaded', renderHappyHours);
-    }
+    if (window.GCR && GCR.loaded) { renderHappyHours(); }
+    else { document.addEventListener('gcr:loaded', renderHappyHours); }
   </script>
 </body>
 </html>
