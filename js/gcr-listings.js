@@ -266,6 +266,7 @@ function buildCard(entity) {
   const addr   = entity.address_line_1 || entity.address || '';
   const phone  = entity.phone || '';
   const dir    = entity.directions_url || '';
+  const website = entity.website_url || entity.website || '';
 
   const location = [city, state].filter(Boolean).join(', ');
 
@@ -274,7 +275,12 @@ function buildCard(entity) {
 
   const statusBadge = computeStatus(entity.hours || [], rawTags);
 
-  const chipLinks = rawTags.slice(0, 5).map(tag => {
+  // Price info — check priceRange or tags for price indicators
+  const priceRange = entity.priceRange || entity.price_range || '';
+  const priceTag = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
+  const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
+
+  const chipLinks = rawTags.slice(0, 4).map(tag => {
     const dest = tagToPage(tag);
     const norm = tag.toLowerCase().replace(/ /g, '_');
     return `<a href="${dest}?tag=${encodeURIComponent(norm)}" class="gcr-chip"
@@ -296,6 +302,10 @@ function buildCard(entity) {
     ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn"
         onclick="event.stopPropagation()">📞 Call</a>`
     : '';
+  const webBtn = (!dir && !phone && website)
+    ? `<a href="${website}" target="_blank" rel="noopener" class="gcr-btn"
+        onclick="event.stopPropagation()">🌐 Website</a>`
+    : '';
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -307,6 +317,7 @@ function buildCard(entity) {
         <div class="gcr-card-img" style="background-image:url('${hero}')">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
+          ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
         </div>
         <div class="gcr-card-body">
           <div class="gcr-card-name">${name}</div>
@@ -315,7 +326,7 @@ function buildCard(entity) {
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${addr}</div>
-            <div class="gcr-card-actions">${dirBtn}${callBtn}</div>
+            <div class="gcr-card-actions">${dirBtn}${callBtn}${webBtn}</div>
           </div>
         </div>
       </div>

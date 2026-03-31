@@ -101,43 +101,34 @@
   </div>
 
   <div class="page">
-    <section class="header">
-      <div class="header-top">
+    <section class="header" style="padding:20px 24px 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
         <div>
-          <h1>Things To Do</h1>
-          <p>Discover rentals, tours, family activities, fishing trips, and outdoor experiences across Orange Beach, Gulf Shores, and nearby.</p>
+          <h1 style="font-size:38px;margin:0;">Things To Do</h1>
+          <p style="margin:4px 0 0;font-size:15px;">Boat rentals, tours, fishing, water sports & family activities</p>
         </div>
-        <div class="livebox">
-          <strong>Sunday, March 22</strong>
-          <span>64 activities listed</span>
-          <span>18 family-friendly</span>
-          <span>12 water activities</span>
-        </div>
+        <div class="toolbar-meta" style="color:rgba(255,255,255,.85);font-weight:700;font-size:14px;"></div>
       </div>
     </section>
 
     <section class="toolbar">
       <div class="toolbar-top">
         <div class="toolbar-title">Filter Activities</div>
-        <div class="toolbar-actions">
-          <select class="ctrl">
-            <option>Sort: Most Popular</option>
-            <option>Nearest</option>
-            <option>Best Rated</option>
-            <option>Lowest Price</option>
-          </select>
-        </div>
       </div>
       <div class="tag-row">
         <button class="tag-btn active" data-filter="all">All</button>
-        <button class="tag-btn" data-filter="boat-rentals">🚤 Boat Rentals</button>
+        <button class="tag-btn" data-filter="boat">🚤 Boat Rentals</button>
+        <button class="tag-btn" data-filter="pontoon">⛵ Pontoons</button>
+        <button class="tag-btn" data-filter="jet_ski">🏎️ Jet Skis</button>
+        <button class="tag-btn" data-filter="parasail">🪂 Parasailing</button>
+        <button class="tag-btn" data-filter="dolphin">🐬 Dolphin Cruises</button>
+        <button class="tag-btn" data-filter="kayak">🛶 Kayak/Paddleboard</button>
         <button class="tag-btn" data-filter="fishing">🎣 Fishing</button>
-        <button class="tag-btn" data-filter="tours">🎯 Tours</button>
+        <button class="tag-btn" data-filter="tour">🎯 Tours</button>
         <button class="tag-btn" data-filter="family">👨‍👩‍👧 Family</button>
-        <button class="tag-btn" data-filter="outdoor">🏕️ Outdoor</button>
-        <button class="tag-btn" data-filter="free">Free</button>
-        <button class="tag-btn" data-filter="wharf">⚓ At The Wharf</button>
-        <button class="tag-btn" data-filter="animals">🐠 Animals</button>
+        <button class="tag-btn" data-filter="banana">🍌 Banana Boats</button>
+        <button class="tag-btn" data-filter="helicopter">🚁 Helicopter</button>
+        <button class="tag-btn" data-filter="sunset">🌅 Sunset</button>
       </div>
     </section>
 
