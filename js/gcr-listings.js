@@ -87,31 +87,54 @@
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
 
 /* ── entity_subtype → listing page ── */
+/* Keys use underscores. The lookup normalizes hyphens→underscores automatically. */
 const SUBTYPE_TO_CATEGORY = {
-  restaurant:'restaurants', bar:'restaurants', bar_grill:'restaurants',
-  hybrid_venue:'restaurants', seafood_restaurant:'restaurants',
+  // Restaurants
+  restaurant:'restaurants', restaurants:'restaurants',
+  bar:'restaurants', bar_grill:'restaurants',
+  hybrid_venue:'restaurants', seafood_restaurant:'restaurants', seafood:'restaurants',
   casual_dining:'restaurants', steakhouse:'restaurants', pizza:'restaurants',
   mexican:'restaurants', southern:'restaurants', breakfast_spot:'restaurants',
   beach_bar:'restaurants', food:'restaurants', dining:'restaurants',
 
-  coffee_shop:'coffee-sweets', cafe:'coffee-sweets', bakery:'coffee-sweets',
+  // Coffee & Sweets
+  coffee_shop:'coffee-sweets', 'coffee_sweets':'coffee-sweets',
+  cafe:'coffee-sweets', bakery:'coffee-sweets',
   ice_cream:'coffee-sweets', dessert_bar:'coffee-sweets', smoothie:'coffee-sweets',
 
-  boutique:'shopping', souvenir:'shopping', retail:'shopping',
+  // Shopping
+  boutique:'shopping', souvenir:'shopping', retail:'shopping', shopping:'shopping',
   surf_shop:'shopping', gift_shop:'shopping', clothing:'shopping',
   art_gallery:'shopping', gallery_shop:'shopping',
 
+  // Things To Do (water sports, tours, attractions, rentals)
   parasailing:'things-to-do', dolphin_cruise:'things-to-do',
+  dolphin_cruises_tours:'things-to-do',
   snorkeling:'things-to-do', kayak_rental:'things-to-do',
-  boat_rental:'things-to-do', fishing_charter:'things-to-do',
+  canoe_kayak_paddleboard:'things-to-do',
+  boat_rental:'things-to-do', boat_rentals:'things-to-do',
+  fishing_charter:'things-to-do',
   tour:'things-to-do', attraction:'things-to-do',
-  jet_ski:'things-to-do', paddleboard:'things-to-do',
+  jet_ski:'things-to-do', jet_ski_rentals_tours:'things-to-do',
+  paddleboard:'things-to-do',
+  banana_boat_rides:'things-to-do', banana_boat:'things-to-do',
+  'things_to_do':'things-to-do',
 
+  // Nightlife
+  nightlife:'nightlife',
   bar_club:'nightlife', nightclub:'nightlife', sports_bar:'nightlife',
   rooftop_bar:'nightlife', lounge:'nightlife',
 
-  salon:'other', spa:'other', photographer:'other', photography:'other',
+  // Services
+  services:'services', service:'services',
+  salon:'services', spa:'services', photographer:'services', photography:'services',
+  wellness:'services', transportation:'services',
+
+  // Other
+  other:'other',
   boat_launch:'other', parking:'other', vacation_rental:'other',
+  hotel:'other', condo:'other', resort:'other',
+  beach_access:'other', park:'other',
 };
 
 /* ── tag → destination page for clickable chips ── */
@@ -370,8 +393,12 @@ function wireFilterChips(grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    const sub = (b.entity_subtype || b.type || b.category || '').toLowerCase();
-    return SUBTYPE_TO_CATEGORY[sub] === category;
+    const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
+    // Direct match: subtype IS the category (e.g., "restaurants" on restaurants page)
+    if (raw === category) return true;
+    // Normalize hyphens → underscores for map lookup
+    const norm = raw.replace(/-/g, '_');
+    return SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
   });
 }
 
@@ -381,6 +408,21 @@ function initStandardPage() {
   if (!grid) return;
 
   const category = grid.dataset.category || '';
+
+  // Show loading state immediately
+  if (!grid.children.length) {
+    grid.innerHTML = `
+      <div style="padding:40px;text-align:center;">
+        <div style="display:inline-block;width:36px;height:36px;border:4px solid #e2e8f0;border-top-color:#0b7a75;border-radius:50%;animation:gcr-spin 0.7s linear infinite;"></div>
+        <p style="margin-top:14px;color:#66788a;font-size:.9rem;font-weight:600;">Loading Gulf Coast businesses...</p>
+      </div>`;
+    if (!document.getElementById('gcr-spin-style')) {
+      const ss = document.createElement('style');
+      ss.id = 'gcr-spin-style';
+      ss.textContent = '@keyframes gcr-spin{to{transform:rotate(360deg)}}';
+      document.head.appendChild(ss);
+    }
+  }
 
   // Pre-activate chip from URL
   const urlParams = new URLSearchParams(window.location.search);

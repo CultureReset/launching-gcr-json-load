@@ -217,6 +217,163 @@
 
   <script src="js/gcr-api.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/gcr-listings.js"></script>
+  <script>
+  /* ── Events Page: Live schedule view ── */
+  const DAYS_ORDER = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const DAY_LABELS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  function renderEvents() {
+    const events = GCR.events || [];
+    const grid = document.getElementById('listingsGrid');
+    if (!grid || !events.length) {
+      if (grid) grid.innerHTML = '<div style="padding:40px;text-align:center;color:#66788a;font-weight:700">No events found yet. Check back soon!</div>';
+      return;
+    }
+
+    const now = new Date();
+    const todayIdx = now.getDay();
+    const todayName = DAYS_ORDER[todayIdx];
+
+    // Parse day-of-week from event name (e.g., "Monday Night Karaoke" → monday)
+    function getEventDay(ev) {
+      const name = (ev.name || '').toLowerCase();
+      for (let i = 0; i < DAYS_ORDER.length; i++) {
+        if (name.includes(DAYS_ORDER[i])) return i;
+      }
+      // Check for day abbreviations
+      const abbrs = ['sun','mon','tue','wed','thu','fri','sat'];
+      for (let i = 0; i < abbrs.length; i++) {
+        if (name.includes(abbrs[i])) return i;
+      }
+      return -1; // no specific day = every day or general
+    }
+
+    // Parse time from description (e.g., "7–10 PM", "4:00 PM")
+    function getTimeFromDesc(desc) {
+      const m = (desc || '').match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[-–to]+\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)/i);
+      if (m) return m[1] + ' - ' + m[2];
+      const m2 = (desc || '').match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))/i);
+      if (m2) return m2[1];
+      return '';
+    }
+
+    // Group events by day
+    const byDay = {};
+    const general = []; // events without a specific day
+    events.forEach(ev => {
+      const dayIdx = getEventDay(ev);
+      if (dayIdx >= 0) {
+        if (!byDay[dayIdx]) byDay[dayIdx] = [];
+        byDay[dayIdx].push(ev);
+      } else {
+        general.push(ev);
+      }
+    });
+
+    // Build schedule starting from today
+    let html = '';
+
+    // Today's date header
+    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    html += `<div style="font-size:15px;font-weight:800;color:#0f7c90;margin-bottom:6px;">📅 Today — ${dateStr}</div>`;
+
+    // Render days in order starting from today
+    for (let offset = 0; offset < 7; offset++) {
+      const dayIdx = (todayIdx + offset) % 7;
+      const dayEvents = byDay[dayIdx] || [];
+      // Also add general events on every day
+      const allForDay = offset === 0 ? [...dayEvents, ...general] : dayEvents;
+      if (!allForDay.length) continue;
+
+      const label = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : DAY_LABELS[dayIdx];
+      html += `<div style="margin-top:${offset === 0 ? '12' : '24'}px;margin-bottom:10px;font-size:22px;font-weight:900;color:#12263a;">${label}</div>`;
+
+      allForDay.forEach(ev => {
+        const biz = ev.businessName || '';
+        const emoji = ev.businessEmoji || '🎵';
+        const slug = ev.slug || '';
+        const artist = ev.artist_name || '';
+        const time = getTimeFromDesc(ev.description);
+        const desc = (ev.description || '').slice(0, 100);
+        const category = ev.category || '';
+        const tags = [
+          ev.recurring ? 'recurring' : '',
+          (ev.name || '').toLowerCase().includes('music') ? 'live-music' : '',
+          (ev.name || '').toLowerCase().includes('karaoke') ? 'bar-events' : '',
+          ev.kids_friendly ? 'family' : '',
+          category,
+        ].filter(Boolean).join(',');
+
+        // Look up business for hero image
+        const bizData = GCR.getBusiness(slug);
+        const heroImg = (bizData && (bizData.hero_image_url || bizData.cover_url)) || '';
+        const FALLBACK = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80';
+        const cardImg = heroImg || FALLBACK;
+
+        html += `
+          <a href="profile.html?id=${encodeURIComponent(slug)}" style="text-decoration:none;color:inherit;display:block;"
+             data-slug="${slug}" data-tags="${tags}">
+            <div class="event-card" style="margin-bottom:10px;">
+              <div class="event-image" style="background-image:url('${cardImg}');min-height:180px;">
+                <div class="image-badge">${emoji} ${category.replace(/_/g,' ')}</div>
+              </div>
+              <div style="padding:14px 16px;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:20px;font-weight:900;color:#12263a;letter-spacing:-.02em;">${ev.name}</div>
+                    <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-top:3px;">${biz}</div>
+                  </div>
+                  ${time ? `<div class="timepill" style="margin-top:0;">${time}</div>` : ''}
+                </div>
+                ${artist ? `<div style="margin-top:8px;font-size:14px;font-weight:700;color:#5b21b6;">🎸 ${artist}</div>` : ''}
+                ${desc && desc !== ev.name ? `<div style="margin-top:6px;color:#50677a;font-size:13px;line-height:1.5;">${desc}</div>` : ''}
+                <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+                  ${ev.recurring ? '<span style="background:#eef2ff;color:#7c3aed;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>' : ''}
+                  ${ev.cover_charge ? '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>' : ''}
+                  ${ev.kids_friendly ? '<span style="background:#d4edda;color:#155724;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Family</span>' : ''}
+                </div>
+              </div>
+            </div>
+          </a>`;
+      });
+    }
+
+    grid.innerHTML = html;
+
+    // Update hero livebox
+    const todayCount = (byDay[todayIdx] || []).length + general.length;
+    const liveMusic = events.filter(e => (e.name || '').toLowerCase().includes('music')).length;
+    const familyCount = events.filter(e => e.kids_friendly).length;
+    const livebox = document.querySelector('.livebox');
+    if (livebox) {
+      livebox.innerHTML = `
+        <strong>${dateStr.split(',')[0]} • ${now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true})}</strong>
+        <span>${todayCount} events today</span>
+        <span>${liveMusic} live music venues</span>
+        <span>${familyCount} family-friendly events</span>`;
+    }
+
+    // Wire filter chips
+    const chips = document.querySelectorAll('.tag-btn');
+    chips.forEach(btn => {
+      btn.addEventListener('click', () => {
+        chips.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = (btn.dataset.filter || 'all').toLowerCase().replace(/-/g, '_');
+        document.querySelectorAll('[data-slug]').forEach(card => {
+          if (filter === 'all') { card.style.display = ''; return; }
+          const tags = (card.dataset.tags || '');
+          card.style.display = tags.includes(filter) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  if (window.GCR && GCR.loaded) {
+    renderEvents();
+  } else {
+    document.addEventListener('gcr:loaded', renderEvents);
+  }
+  </script>
 </body>
 </html>

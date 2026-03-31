@@ -37,7 +37,17 @@ const GCR = {
 
       if (bizRes && bizRes.ok) {
         const data = await bizRes.json();
-        this.businesses = data.entities || data.businesses || [];
+        const raw = data.entities || data.businesses || [];
+        // Deduplicate: remove -1 suffix duplicates (keep the base slug version)
+        const slugSet = new Set();
+        this.businesses = raw.filter(b => {
+          const s = b.slug || b.subdomain || '';
+          if (slugSet.has(s)) return false;
+          // If this is a -1 slug and the base slug exists, skip it
+          if (s.match(/-1$/) && raw.some(o => (o.slug || o.subdomain) === s.replace(/-1$/, ''))) return false;
+          slugSet.add(s);
+          return true;
+        });
       }
       if (evRes && evRes.ok) {
         this.events = await evRes.json();
@@ -58,18 +68,22 @@ const GCR = {
   /* ── HELPERS (same interface as data.js) ── */
   getByCategory(cat) {
     const aliases = {
-      'restaurants':    ['restaurants','restaurant','food','dining'],
-      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity'],
-      'nightlife':     ['nightlife','bar','bars','club','clubs'],
-      'coffee-sweets': ['coffee-sweets','coffee','cafe','sweets','desserts','bakery'],
-      'shopping':      ['shopping','shop','retail','boutique'],
-      'services':      ['services','service'],
-      'other':         ['other','misc','miscellaneous'],
+      'restaurants':    ['restaurants','restaurant','food','dining','seafood','bar_grill','steakhouse','pizza','mexican','southern','breakfast_spot','beach_bar','casual_dining','hybrid_venue','seafood_restaurant'],
+      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','kayak_rental','canoe-kayak-paddleboard','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour'],
+      'nightlife':     ['nightlife','bar','bars','club','clubs','bar_club','nightclub','sports_bar','lounge','rooftop_bar'],
+      'coffee-sweets': ['coffee-sweets','coffee','cafe','coffee_shop','sweets','desserts','bakery','ice_cream','dessert_bar','smoothie'],
+      'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery'],
+      'services':      ['services','service','salon','spa','photographer','photography','wellness','transportation'],
+      'other':         ['other','misc','miscellaneous','hotel','condo','resort','vacation_rental','parking','boat_launch','beach_access','park'],
     };
     const valid = aliases[cat] || [cat];
-    return this.businesses.filter(b =>
-      valid.includes(b.type) || valid.includes(b.category)
-    );
+    return this.businesses.filter(b => {
+      const t = (b.type || '').toLowerCase();
+      const c = (b.category || '').toLowerCase();
+      const sub = (b.entity_subtype || '').toLowerCase();
+      return valid.includes(t) || valid.includes(c) || valid.includes(sub) ||
+             valid.includes(t.replace(/-/g,'_')) || valid.includes(sub.replace(/-/g,'_'));
+    });
   },
   getFeatured() {
     return this.businesses.filter(b => b.featured);
@@ -113,18 +127,38 @@ const GCR = {
     this.specials.forEach(s => {
       if ((s.name || '').toLowerCase().includes(term) ||
           (s.description || '').toLowerCase().includes(term) ||
-          (s.discount || '').toLowerCase().includes(term)) {
+          (s.discount || '').toLowerCase().includes(term) ||
+          (s.discount_text || '').toLowerCase().includes(term) ||
+          (s.businessName || '').toLowerCase().includes(term)) {
         specialMatches.add(s.slug || s.subdomain);
+      }
+    });
+    // Also match events
+    const eventMatches = new Set();
+    this.events.forEach(e => {
+      if ((e.name || '').toLowerCase().includes(term) ||
+          (e.description || '').toLowerCase().includes(term) ||
+          (e.artist_name || '').toLowerCase().includes(term) ||
+          (e.businessName || '').toLowerCase().includes(term)) {
+        eventMatches.add(e.slug || e.subdomain);
       }
     });
     return this.businesses.filter(b => {
       if ((b.name        || '').toLowerCase().includes(term)) return true;
+      if ((b.subtitle    || '').toLowerCase().includes(term)) return true;
       if ((b.tagline     || '').toLowerCase().includes(term)) return true;
       if ((b.description || '').toLowerCase().includes(term)) return true;
       if ((b.area        || '').toLowerCase().includes(term)) return true;
       if ((b.type        || '').toLowerCase().includes(term)) return true;
-      if (b.tags && b.tags.some(t => t.toLowerCase().includes(term))) return true;
+      if ((b.entity_subtype || '').toLowerCase().replace(/_/g,' ').includes(term)) return true;
+      if ((b.city        || '').toLowerCase().includes(term)) return true;
+      // Check tags (can be strings or objects)
+      if (b.tags && b.tags.some(t => {
+        const tagStr = typeof t === 'string' ? t : (t.tag || '');
+        return tagStr.toLowerCase().replace(/_/g,' ').includes(term);
+      })) return true;
       if (specialMatches.has(b.slug) || specialMatches.has(b.subdomain)) return true;
+      if (eventMatches.has(b.slug) || eventMatches.has(b.subdomain)) return true;
       return false;
     }).sort((a, b) => {
       const aTop = (a.name || '').toLowerCase().startsWith(term) ? 1 : 0;

@@ -449,6 +449,107 @@
     }
     updateTime();
     setInterval(updateTime, 30000);
+
+    /* ── Specials: render all specials from GCR.specials ── */
+    function renderSpecials() {
+      const specials = (GCR.specials || []).filter(s => s.active !== false);
+      const activeGrid = document.getElementById('spActiveGrid');
+      const soonGrid = document.getElementById('spSoonGrid');
+      const laterGrid = document.getElementById('spLaterGrid');
+      const FALLBACK = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
+
+      if (!specials.length) {
+        if (activeGrid) activeGrid.innerHTML = '<div class="empty">No specials found yet. Check back soon!</div>';
+        return;
+      }
+
+      // Dedupe by slug+name
+      const seen = new Set();
+      const unique = specials.filter(s => {
+        const key = (s.slug || '') + '|' + (s.name || '');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      // Separate: HH specials vs food/other specials
+      const hhSpecials = unique.filter(s => (s.name || '').toLowerCase().includes('happy hour'));
+      const otherSpecials = unique.filter(s => !(s.name || '').toLowerCase().includes('happy hour'));
+
+      function buildSpecialCard(s) {
+        const biz = GCR.getBusiness(s.slug);
+        const hero = (biz && (biz.hero_image_url || biz.cover_url)) || FALLBACK;
+        const emoji = s.businessEmoji || '🏷️';
+        const bizName = s.businessName || (biz && biz.name) || '';
+        const city = biz && biz.city || '';
+        const phone = biz && biz.phone || '';
+        const dir = biz && biz.directions_url || '';
+        const desc = (s.description || '').slice(0, 120);
+        const days = s.days || '';
+        const dirBtn = dir ? `<a href="${dir}" target="_blank" class="action" onclick="event.stopPropagation();event.preventDefault();window.open('${dir}')">📍 Directions</a>` : '';
+        const callBtn = phone ? `<a href="tel:${phone.replace(/\\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : '';
+
+        return `
+          <a href="profile.html?id=${encodeURIComponent(s.slug || '')}" style="text-decoration:none;color:inherit;display:block;"
+             data-slug="${s.slug || ''}" data-tags="${(days || '').toLowerCase()}">
+            <div class="sp-card">
+              <div class="sp-image" style="background-image:url('${hero}')">
+                <div class="image-badge">${emoji} ${s.name || 'Special'}</div>
+              </div>
+              <div class="sp-body">
+                <div class="title-row">
+                  <div class="name">${bizName}</div>
+                  <div class="status">🏷️ Deal</div>
+                </div>
+                <div class="subline">${city}</div>
+                ${desc ? `<div style="margin-top:8px;color:#42596c;font-size:14px;line-height:1.5;font-weight:600;">${desc}</div>` : ''}
+                ${days ? `<div class="timepill">📅 ${days}</div>` : ''}
+                <div class="bottom-row">
+                  <div class="address">${s.name || ''}</div>
+                  <div class="actions">${dirBtn}${callBtn}</div>
+                </div>
+              </div>
+            </div>
+          </a>`;
+      }
+
+      function buildCompactSpecial(s) {
+        const emoji = s.businessEmoji || '🏷️';
+        return `
+          <a href="profile.html?id=${encodeURIComponent(s.slug || '')}" style="text-decoration:none;color:inherit;">
+            <div class="compact-card">
+              <h4>${emoji} ${s.businessName || ''}</h4>
+              <div class="compact-meta">${s.name || 'Special'}</div>
+              <div class="compact-deal">${(s.description || '').slice(0, 60)}</div>
+              ${s.days ? `<div class="countdown">📅 ${s.days}</div>` : ''}
+            </div>
+          </a>`;
+      }
+
+      // Render: main specials (non-HH) as full cards, HH as compact
+      if (activeGrid) activeGrid.innerHTML = otherSpecials.slice(0, 10).map(buildSpecialCard).join('') || '<div class="empty">No active specials right now</div>';
+      if (soonGrid) soonGrid.innerHTML = hhSpecials.slice(0, 8).map(buildCompactSpecial).join('') || '';
+      if (laterGrid) laterGrid.innerHTML = otherSpecials.slice(10).map(buildCompactSpecial).join('') || '';
+
+      // Update section subtitle
+      const activeSub = document.querySelector('.section-sub');
+      if (activeSub) activeSub.textContent = unique.length + ' active specials';
+
+      // Wire filter chips
+      const chips = document.querySelectorAll('.tag-btn');
+      chips.forEach(btn => {
+        btn.addEventListener('click', () => {
+          chips.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        });
+      });
+    }
+
+    if (window.GCR && GCR.loaded) {
+      renderSpecials();
+    } else {
+      document.addEventListener('gcr:loaded', renderSpecials);
+    }
   </script>
 </body>
 </html>

@@ -377,7 +377,7 @@
     /* ── Participating businesses ── */
     const bizList = GCR.getLoyaltyBiz();
     document.getElementById('bizCoopGrid').innerHTML = bizList.map(b => `
-      <a href="business.html?id=${b.slug||b.id}" class="biz-coop-card">
+      <a href="profile.html?id=${b.slug||b.id}" class="biz-coop-card">
         <div class="biz-coop-emoji">${b.emoji}</div>
         <div>
           <div class="biz-coop-name">${b.name}</div>

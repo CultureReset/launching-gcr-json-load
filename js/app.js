@@ -331,7 +331,7 @@ function _gcrCalRenderEvents() {
         ${item.artist_name?`<div style="font-size:.75rem;color:#be185d;font-weight:600;margin-top:3px;">🎤 ${item.artist_name}</div>`:''}
         <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
           <span style="background:${c.bdr}18;color:${c.bdr};font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:12px;">${c.lbl}</span>
-          ${slug?`<a href="business.html?id=${slug}" style="font-size:.7rem;color:#0b7a75;font-weight:600;text-decoration:none;">View →</a>`:''}
+          ${slug?`<a href="profile.html?id=${slug}" style="font-size:.7rem;color:#0b7a75;font-weight:600;text-decoration:none;">View →</a>`:''}
         </div>
       </div>
     </div>`;
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const results = GCR.search(q).slice(0, 6);
       if (!results.length) { heroDropdown.classList.remove('open'); return; }
       heroDropdown.innerHTML = results.map(b => `
-        <a href="business.html?id=${b.slug || b.site_id}" class="sri-item">
+        <a href="profile.html?id=${b.slug || b.site_id}" class="sri-item">
           <span style="font-size:1.4rem">${b.emoji || '🏖️'}</span>
           <div>
             <div style="font-weight:600;font-size:.88rem">${b.name}</div>
@@ -505,7 +505,7 @@ function renderBizCard(biz, context) {
   ].filter(Boolean).join(' ');
 
   return `
-  <article class="${cardClass}" data-tags="${_tags}" onclick="window.location.href='business.html?id=${slug}'" style="cursor:pointer">
+  <article class="${cardClass}" data-tags="${_tags}" onclick="window.location.href='profile.html?id=${slug}'" style="cursor:pointer">
     <div class="${imageClass}" ${!useHorizontalLayout ? '' : 'style="background-image:url(' + (imgUrl ? `'${imgUrl}'` : '') + ')"'}>
       ${featured}
       ${!useHorizontalLayout && imgUrl ? `<img src="${imgUrl}" alt="${escGcr(biz.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
@@ -527,17 +527,17 @@ function renderBizCard(biz, context) {
         ${showHHTag ? `<span class="biz-tag" style="background:#e6f9f0;color:#1a7a47">🍻 HH ${hhText}</span>` : ''}
       </div>`}
 
-      <p class="${descClass}">${escGcr((biz.description || biz.tagline || '').substring(0, 180))}${(biz.description || biz.tagline || '').length > 180 ? '... <a href="business.html?id=' + slug + '" style="color:var(--brand);font-weight:800;text-decoration:underline;cursor:pointer">More</a>' : ''}</p>
+      <p class="${descClass}">${escGcr((biz.description || biz.tagline || '').substring(0, 180))}${(biz.description || biz.tagline || '').length > 180 ? '... <a href="profile.html?id=' + slug + '" style="color:var(--brand);font-weight:800;text-decoration:underline;cursor:pointer">More</a>' : ''}</p>
 
       ${useHorizontalLayout ? `<div class="bottom-row">
         <div class="venue">📍 ${biz.address || biz.city || biz.location || 'See details for address'}</div>
         <div class="actions">
           ${biz.phone ? `<a href="tel:${(biz.phone||'').replace(/\D/g,'')}" class="${actionClass}" onclick="event.stopPropagation()">Call</a>` : ''}
           ${biz.address ? `<a href="https://maps.google.com?q=${encodeURIComponent(biz.address)}" target="_blank" class="${actionClass}" onclick="event.stopPropagation()">Directions</a>` : ''}
-          <a href="business.html?id=${slug}" class="${actionPrimaryClass}">View Page</a>
+          <a href="profile.html?id=${slug}" class="${actionPrimaryClass}">View Page</a>
         </div>
       </div>` : `<div class="biz-card-actions">
-        <a href="business.html?id=${slug}" class="${actionClass}">View Profile</a>
+        <a href="profile.html?id=${slug}" class="${actionClass}">View Profile</a>
         ${showBookBtn  ? `<button class="${actionPrimaryClass}" onclick="openBookingModal('${slug}')">📅 Book Now</button>` : ''}
         ${showMenuBtn  ? `<a href="${biz.links.menu}" class="biz-btn-menu">Full Menu</a>` : ''}
       </div>`}
@@ -637,7 +637,7 @@ function renderHappyHourPage() {
             <p>${escGcr(hhText)}${biz.address ? ` · ${escGcr(biz.address)}` : ''}</p>
           </div>
           <div class="listing-expand-actions">
-            <a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
+            <a href="profile.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
             <button class="expand-btn btn btn-sm" onclick="toggleExpand('${cardId}')">Details ▼</button>
           </div>
         </div>
@@ -701,8 +701,8 @@ function renderHappyHourPage() {
         <div class="bottom-row">
           <div class="address">${escGcr(biz.address||'')}</div>
           <div class="actions">
-            <a href="business.html?id=${slug}" class="action">Details</a>
-            <a href="business.html?id=${slug}" class="action primary">View Specials</a>
+            <a href="profile.html?id=${slug}" class="action">Details</a>
+            <a href="profile.html?id=${slug}" class="action primary">View Specials</a>
           </div>
         </div>
       </div>
@@ -730,8 +730,8 @@ function renderHappyHourPage() {
       <div class="compact-meta">${escGcr(hhText)}${biz.area?' · '+escGcr(biz.area):''}</div>
       <div class="compact-deal">${deal}</div>
       <div class="compact-actions">
-        <a href="business.html?id=${slug}">Details</a>
-        <a href="business.html?id=${slug}">View Specials</a>
+        <a href="profile.html?id=${slug}">Details</a>
+        <a href="profile.html?id=${slug}">View Specials</a>
       </div>
     </div>`;
   }
@@ -831,8 +831,8 @@ function renderSpecialsPage() {
           <div class="bottom-row">
             <div class="address">${escGcr(biz && biz.address || '')}</div>
             <div class="actions">
-              <a href="business.html?id=${slug}" class="action">Details</a>
-              <a href="business.html?id=${slug}" class="action primary">View</a>
+              <a href="profile.html?id=${slug}" class="action">Details</a>
+              <a href="profile.html?id=${slug}" class="action primary">View</a>
             </div>
           </div>
         </div>
@@ -856,8 +856,8 @@ function renderSpecialsPage() {
         <div class="compact-meta">${escGcr(spec.start_time || 'All day')}${biz && biz.area ? ' · ' + escGcr(biz.area) : ''}</div>
         <div class="compact-deal">${escGcr(spec.description || spec.discount || 'Special offer')}</div>
         <div class="compact-actions">
-          <a href="business.html?id=${slug}">Details</a>
-          <a href="business.html?id=${slug}">View</a>
+          <a href="profile.html?id=${slug}">Details</a>
+          <a href="profile.html?id=${slug}">View</a>
         </div>
       </div>`;
     }
@@ -907,7 +907,7 @@ function renderSpecialsPage() {
           <p>${items.length} active special${items.length > 1 ? 's' : ''}</p>
         </div>
         <div class="listing-expand-actions">
-          <a href="business.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
+          <a href="profile.html?id=${slug}" class="btn btn-outline btn-sm">View Profile</a>
           <button class="expand-btn btn btn-sm" onclick="toggleExpand('${cardId}')">See Specials ▼</button>
         </div>
       </div>
@@ -987,7 +987,7 @@ function renderDealsPage() {
             <strong>${deals.length} deal${deals.length > 1 ? 's' : ''} available</strong>
           </div>
           <div class="deal-actions">
-            <a href="business.html?id=${slug}" class="deal-btn">View Profile</a>
+            <a href="profile.html?id=${slug}" class="deal-btn">View Profile</a>
             <button class="deal-btn deal-btn-primary" onclick="toggleDealExpand('${cardId}')">View Details ▼</button>
           </div>
         </div>
@@ -1140,7 +1140,7 @@ function renderEventsPage() {
           <div class="timepill">🕐 ${escGcr(dateStr)}${ev.time ? ' • ' + escGcr(ev.time) : ''}</div>
           <div class="event-copy">${escGcr((ev.description || ev.descr || 'Event details — check details for more info.').substring(0, 180))}</div>
           ${chips ? `<div class="chips">${chips}</div>` : ''}
-          <div class="bottom-row"><div class="venue">📍 ${escGcr(ev.venue || (biz && biz.address) || '')}</div><div class="actions"><a href="business.html?id=${bizSlug}" class="action">Details</a><a href="business.html?id=${bizSlug}" class="action primary">Save</a></div></div>
+          <div class="bottom-row"><div class="venue">📍 ${escGcr(ev.venue || (biz && biz.address) || '')}</div><div class="actions"><a href="profile.html?id=${bizSlug}" class="action">Details</a><a href="profile.html?id=${bizSlug}" class="action primary">Save</a></div></div>
         </div>
       </article>`;
     }).join('');
@@ -1184,7 +1184,7 @@ function renderEventsPage() {
           </div>
         </div>
         <div class="event-actions">
-          ${bizSlug ? `<a href="business.html?id=${bizSlug}" class="btn btn-primary btn-sm">Details</a>` : '<span></span>'}
+          ${bizSlug ? `<a href="profile.html?id=${bizSlug}" class="btn btn-primary btn-sm">Details</a>` : '<span></span>'}
         </div>
       </div>`;
     }).join('');
@@ -1233,7 +1233,7 @@ function renderEventsPage() {
               </div>
             </div>
           </div>
-          ${bizSlug ? `<a href="business.html?id=${bizSlug}" class="btn btn-outline btn-sm">Details</a>` : ''}
+          ${bizSlug ? `<a href="profile.html?id=${bizSlug}" class="btn btn-outline btn-sm">Details</a>` : ''}
         </div>`;
       });
     });
@@ -1714,7 +1714,7 @@ window.openBookingModal = function(bizId) {
   } else if (biz.phone) {
     html += `<a href="tel:${biz.phone.replace(/\D/g,'')}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#0b7a75,#14B8A6);color:#fff;padding:14px;border-radius:12px;font-weight:700;text-decoration:none;font-size:.95rem;margin:16px 0 8px;">📞 Call to Book — ${escGcr(biz.phone)}</a>`;
   }
-  html += `<a href="business.html?id=${slug}" style="display:block;text-align:center;padding:10px;font-size:.82rem;color:#0b7a75;text-decoration:none;font-weight:600;">View Full Profile →</a>`;
+  html += `<a href="profile.html?id=${slug}" style="display:block;text-align:center;padding:10px;font-size:.82rem;color:#0b7a75;text-decoration:none;font-weight:600;">View Full Profile →</a>`;
 
   /* Load full profile to get fleet/pricing if not already loaded */
   document.getElementById('gcrBookingContent').innerHTML = html;

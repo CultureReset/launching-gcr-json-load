@@ -448,6 +448,195 @@
     }
     updateTime();
     setInterval(updateTime, 30000);
+
+    /* ── Happy Hours: render businesses with HH specials ── */
+    function renderHappyHours() {
+      // Get all specials that are happy-hour related
+      const hhSpecials = (GCR.specials || []).filter(s =>
+        s.active !== false &&
+        ((s.name || '').toLowerCase().includes('happy hour') ||
+         (s.type || '').toLowerCase().includes('happy'))
+      );
+
+      // Also get businesses with happy_hour tag
+      const hhBusinesses = (GCR.businesses || []).filter(b => {
+        const tags = (b.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).map(t => t.toLowerCase());
+        return tags.includes('happy_hour') || tags.includes('happy hour') ||
+               b.happyHour === true || b.happy_hour === true;
+      });
+
+      // Group specials by business slug
+      const specialsBySlug = {};
+      hhSpecials.forEach(s => {
+        const slug = s.slug || '';
+        if (!specialsBySlug[slug]) specialsBySlug[slug] = [];
+        specialsBySlug[slug].push(s);
+      });
+
+      // Merge: build list of HH venues with their specials
+      const slugSet = new Set();
+      const venues = [];
+
+      // From specials (has deal details)
+      hhSpecials.forEach(s => {
+        const slug = s.slug || '';
+        if (slugSet.has(slug)) return;
+        slugSet.add(slug);
+        const biz = GCR.getBusiness(slug);
+        venues.push({
+          slug,
+          name: s.businessName || (biz && biz.name) || slug,
+          emoji: s.businessEmoji || (biz && (biz.icon || biz.emoji)) || '🍻',
+          type: s.category || (biz && (biz.entity_subtype || biz.type)) || '',
+          rating: biz && biz.rating,
+          city: biz && biz.city || '',
+          address: biz && (biz.address_line_1 || biz.address) || '',
+          phone: biz && biz.phone || '',
+          directions: biz && biz.directions_url || '',
+          hero: biz && (biz.hero_image_url || biz.cover_url) || '',
+          tags: biz && biz.tags || [],
+          specials: specialsBySlug[slug] || [s],
+        });
+      });
+
+      // From businesses with HH tag (fill gaps)
+      hhBusinesses.forEach(b => {
+        const slug = b.slug || b.subdomain || '';
+        if (slugSet.has(slug)) return;
+        slugSet.add(slug);
+        venues.push({
+          slug,
+          name: b.name,
+          emoji: b.icon || b.emoji || '🍻',
+          type: b.entity_subtype || b.type || '',
+          rating: b.rating,
+          city: b.city || '',
+          address: b.address_line_1 || b.address || '',
+          phone: b.phone || '',
+          directions: b.directions_url || '',
+          hero: b.hero_image_url || b.cover_url || '',
+          tags: b.tags || [],
+          specials: specialsBySlug[slug] || [],
+        });
+      });
+
+      // Render into grids
+      const nowGrid = document.getElementById('hhNowGrid');
+      const soonGrid = document.getElementById('hhSoonGrid');
+      const laterGrid = document.getElementById('hhLaterGrid');
+      const FALLBACK = 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80';
+
+      if (!venues.length) {
+        if (nowGrid) nowGrid.innerHTML = '<div class="empty">No happy hours found yet. Check back soon!</div>';
+        return;
+      }
+
+      // Update counts
+      document.getElementById('hh-active-count').textContent = venues.length + ' happy hour venues';
+      document.getElementById('hh-soon-count').textContent = venues.filter(v => v.specials.length).length + ' with deal details';
+
+      function buildHHCard(v) {
+        const hero = v.hero || FALLBACK;
+        const rawTags = (v.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
+        const dealsHtml = v.specials.slice(0, 4).map(s =>
+          `<div class="deal">${s.businessEmoji || '🍹'} ${s.name || 'Special'}${s.description ? ' — ' + s.description.slice(0, 80) : ''}</div>`
+        ).join('');
+        const dirBtn = v.directions ? `<a href="${v.directions}" target="_blank" class="action" onclick="event.stopPropagation();event.preventDefault();window.open('${v.directions}')">📍 Directions</a>` : '';
+        const callBtn = v.phone ? `<a href="tel:${v.phone.replace(/\\D/g,'')}" class="action" onclick="event.stopPropagation()">📞 Call</a>` : '';
+
+        return `
+          <a href="profile.html?id=${encodeURIComponent(v.slug)}" style="text-decoration:none;color:inherit;display:block;"
+             data-slug="${v.slug}" data-tags="${rawTags.join(',').toLowerCase()}">
+            <div class="hh-card">
+              <div class="hh-image" style="background-image:url('${hero}')">
+                <div class="image-badge">${v.emoji} Happy Hour</div>
+              </div>
+              <div class="hh-body">
+                <div class="title-row">
+                  <div class="name">${v.name}</div>
+                  <div class="status">🍻 HH</div>
+                </div>
+                <div class="subline">${[v.type.replace(/_/g,' '), v.city].filter(Boolean).join(' · ')}</div>
+                ${v.rating ? `<div class="rating"><span class="stars">${'★'.repeat(Math.floor(v.rating))}${'☆'.repeat(5-Math.floor(v.rating))}</span> ${Number(v.rating).toFixed(1)}</div>` : ''}
+                ${dealsHtml ? `<div class="deals">${dealsHtml}</div>` : ''}
+                <div class="bottom-row">
+                  <div class="address">${v.address || v.city}</div>
+                  <div class="actions">${dirBtn}${callBtn}</div>
+                </div>
+              </div>
+            </div>
+          </a>`;
+      }
+
+      function buildCompactCard(v) {
+        return `
+          <a href="profile.html?id=${encodeURIComponent(v.slug)}" style="text-decoration:none;color:inherit;"
+             data-slug="${v.slug}" data-tags="${(v.tags||[]).map(t=>typeof t==='string'?t:(t.tag||'')).join(',').toLowerCase()}">
+            <div class="compact-card">
+              <h4>${v.emoji} ${v.name}</h4>
+              <div class="compact-meta">${v.city || ''}</div>
+              ${v.specials[0] ? `<div class="compact-deal">${(v.specials[0].description || v.specials[0].name || '').slice(0, 60)}</div>` : ''}
+              <div class="compact-actions">
+                ${v.directions ? `<a href="${v.directions}" target="_blank" onclick="event.stopPropagation();event.preventDefault();window.open('${v.directions}')">Directions</a>` : ''}
+                <a href="profile.html?id=${encodeURIComponent(v.slug)}" onclick="event.stopPropagation()">View</a>
+              </div>
+            </div>
+          </a>`;
+      }
+
+      // Split: first 8 as full cards, rest as compact
+      const mainVenues = venues.slice(0, 8);
+      const moreVenues = venues.slice(8);
+
+      if (nowGrid) nowGrid.innerHTML = mainVenues.map(buildHHCard).join('') || '<div class="empty">No happy hours active right now</div>';
+      if (soonGrid) soonGrid.innerHTML = moreVenues.slice(0, 6).map(buildCompactCard).join('') || '';
+      if (laterGrid) laterGrid.innerHTML = moreVenues.slice(6).map(buildCompactCard).join('') || '';
+
+      // Wire filter chips
+      const chips = document.querySelectorAll('.tag-btn');
+      chips.forEach(btn => {
+        btn.addEventListener('click', () => {
+          chips.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = (btn.dataset.filter || 'all').toLowerCase().replace(/-/g, '_');
+          document.querySelectorAll('[data-slug]').forEach(card => {
+            if (filter === 'all') { card.style.display = ''; return; }
+            const tags = (card.dataset.tags || '').split(',');
+            card.style.display = tags.some(t => t.includes(filter)) ? '' : 'none';
+          });
+        });
+      });
+
+      // Populate "Featured Happy Hour" sidebar with real data
+      const featPanel = document.querySelector('.panel h3');
+      if (featPanel && venues.length) {
+        const top = venues.filter(v => v.hero).sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 2);
+        if (top.length) {
+          const panel = featPanel.closest('.panel');
+          if (panel) {
+            panel.innerHTML = '<h3>Top Rated Happy Hours</h3>' + top.map(v => `
+              <div class="mini-card">
+                <div class="mini-thumb" style="background-image:url('${v.hero}')"></div>
+                <div>
+                  <div class="mini-name">${v.name}</div>
+                  <div class="mini-meta">${v.city}</div>
+                  <div class="mini-links">
+                    ${v.directions ? `<a href="${v.directions}" target="_blank">Directions</a>` : ''}
+                    <a href="profile.html?id=${encodeURIComponent(v.slug)}">View</a>
+                  </div>
+                </div>
+              </div>
+            `).join('');
+          }
+        }
+      }
+    }
+
+    if (window.GCR && GCR.loaded) {
+      renderHappyHours();
+    } else {
+      document.addEventListener('gcr:loaded', renderHappyHours);
+    }
   </script>
 </body>
 </html>
