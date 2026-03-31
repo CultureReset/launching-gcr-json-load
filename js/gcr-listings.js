@@ -275,22 +275,25 @@ function buildCard(entity) {
     : '';
 
   return `
-    <a href="profile.html?id=${encodeURIComponent(slug)}" class="gcr-card"
+    <a href="profile.html?id=${encodeURIComponent(slug)}"
+       style="text-decoration:none;color:inherit;display:block;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}">
-      <div class="gcr-card-img" style="background-image:url('${hero}')">
-        <div class="gcr-card-badge">${icon} ${subtype}</div>
-        ${statusBadge}
-      </div>
-      <div class="gcr-card-body">
-        <div class="gcr-card-name">${name}</div>
-        <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
-        ${ratingBlock}
-        ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-        <div class="gcr-card-bottom">
-          <div class="gcr-card-addr">${addr}</div>
-          <div class="gcr-card-actions">${dirBtn}${callBtn}</div>
+      <div class="gcr-card">
+        <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <div class="gcr-card-badge">${icon} ${subtype}</div>
+          ${statusBadge}
+        </div>
+        <div class="gcr-card-body">
+          <div class="gcr-card-name">${name}</div>
+          <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
+          ${ratingBlock}
+          ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
+          <div class="gcr-card-bottom">
+            <div class="gcr-card-addr">${addr}</div>
+            <div class="gcr-card-actions">${dirBtn}${callBtn}</div>
+          </div>
         </div>
       </div>
     </a>`;
@@ -331,7 +334,7 @@ function populateSidebar(entities) {
 
 /* ── Show/hide cards by active filter ── */
 function applyFilter(grid, filter) {
-  const cards = grid.querySelectorAll('.gcr-card');
+  const cards = grid.querySelectorAll('[data-slug]');
   let visible = 0;
   const norm = filter.toLowerCase().replace(/-/g, '_');
 
