@@ -121,7 +121,8 @@ const GCR = {
     return limit ? upcoming.slice(0, limit) : upcoming;
   },
   search(q) {
-    const term = q.toLowerCase();
+    // Strip emojis from search query so they don't interfere
+    const term = q.toLowerCase().replace(/[\u{1F300}-\u{1FAF6}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '').trim();
     // Build a set of business slugs that have matching specials/menu items
     const specialMatches = new Set();
     this.specials.forEach(s => {
@@ -143,8 +144,9 @@ const GCR = {
         eventMatches.add(e.slug || e.subdomain);
       }
     });
+    const stripEmoji = s => (s||'').replace(/[\u{1F300}-\u{1FAF6}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '');
     return this.businesses.filter(b => {
-      if ((b.name        || '').toLowerCase().includes(term)) return true;
+      if (stripEmoji(b.name).toLowerCase().includes(term)) return true;
       if ((b.subtitle    || '').toLowerCase().includes(term)) return true;
       if ((b.tagline     || '').toLowerCase().includes(term)) return true;
       if ((b.description || '').toLowerCase().includes(term)) return true;

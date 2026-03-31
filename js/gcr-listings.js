@@ -251,6 +251,21 @@ function computeStatus(hours, tags) {
   return statusHtml;
 }
 
+/* ── Today's hours one-liner for card ── */
+function computeHoursLine(hours) {
+  if (!hours || !hours.length) return '';
+  const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const todayName = DAYS[new Date().getDay()];
+  const todayRow = hours.find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
+  if (!todayRow) return '';
+  if (todayRow.is_closed) return 'Closed Today';
+  if (todayRow.open_time && todayRow.close_time) {
+    const fmt = t => { let [h,m] = t.split(':').map(Number); const ap = h>=12?'pm':'am'; h=h%12||12; return m ? `${h}:${String(m).padStart(2,'0')}${ap}` : `${h}${ap}`; };
+    return `Today ${fmt(todayRow.open_time)} – ${fmt(todayRow.close_time)}`;
+  }
+  return '';
+}
+
 /* ── Build one card ── */
 function buildCard(entity) {
   const slug   = entity.slug || entity.subdomain || entity.id || '';
@@ -302,10 +317,16 @@ function buildCard(entity) {
     ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn"
         onclick="event.stopPropagation()">📞 Call</a>`
     : '';
-  const webBtn = (!dir && !phone && website)
+  const webBtn = website
     ? `<a href="${website}" target="_blank" rel="noopener" class="gcr-btn"
         onclick="event.stopPropagation()">🌐 Website</a>`
     : '';
+
+  // Full address line
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
+
+  // Hours line for card
+  const hoursInfo = computeHoursLine(entity.hours || []);
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -324,8 +345,9 @@ function buildCard(entity) {
           <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
+          ${hoursInfo ? `<div style="margin-top:8px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : ''}
           <div class="gcr-card-bottom">
-            <div class="gcr-card-addr">${addr}</div>
+            <div class="gcr-card-addr">${fullAddr || location}</div>
             <div class="gcr-card-actions">${dirBtn}${callBtn}${webBtn}</div>
           </div>
         </div>
@@ -383,6 +405,54 @@ function applyFilter(grid, filter) {
 
   const meta = document.querySelector('.toolbar-meta');
   if (meta) meta.textContent = `${visible} result${visible !== 1 ? 's' : ''}`;
+}
+
+/* ── Build dynamic filter chips from actual entity tags ── */
+function buildDynamicFilters(entities, category) {
+  const chipContainer = document.querySelector('.tag-row, .filter-row, .chips-row');
+  if (!chipContainer) return;
+
+  // Count tags across all entities on this page
+  const tagCounts = {};
+  entities.forEach(e => {
+    const tags = (e.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
+    tags.forEach(t => {
+      const norm = t.toLowerCase().replace(/ /g, '_');
+      tagCounts[norm] = (tagCounts[norm] || 0) + 1;
+    });
+  });
+
+  // Priority tags that should be first if they exist (most useful filters)
+  const PRIORITY = [
+    'happy_hour', 'live_music', 'waterfront', 'seafood', 'family_friendly',
+    'outdoor_seating', 'pet_friendly', 'breakfast', 'brunch', 'bar_grill',
+    'southern', 'pizza', 'mexican', 'coffee', 'ice_cream', 'nightlife',
+    'parasailing', 'boat_rental', 'fishing', 'kayak', 'dolphin', 'jet_ski',
+    'boutique', 'souvenir', 'waterfront_dining', 'reservations', 'delivery', 'takeout'
+  ];
+
+  // Sort: priority tags first (in order), then by frequency
+  const sorted = Object.entries(tagCounts)
+    .sort((a, b) => {
+      const aIdx = PRIORITY.indexOf(a[0]);
+      const bIdx = PRIORITY.indexOf(b[0]);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return b[1] - a[1];
+    })
+    .slice(0, 15);
+
+  if (!sorted.length) return; // keep existing static chips
+
+  // Build new chip HTML — keep "All" as first chip
+  const allBtn = '<button class="tag-btn active" data-filter="all">All</button>';
+  const tagBtns = sorted.map(([tag, count]) => {
+    const label = tag.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return `<button class="tag-btn" data-filter="${tag}">${label}</button>`;
+  }).join('');
+
+  chipContainer.innerHTML = allBtn + tagBtns;
 }
 
 /* ── Wire filter chips (handles .tag-btn and .filter-chip) ── */
@@ -459,6 +529,9 @@ function initStandardPage() {
       if (meta) meta.textContent = '0 listed';
       return;
     }
+
+    // Build dynamic filter chips from entity tags
+    buildDynamicFilters(entities, category);
 
     grid.innerHTML = entities.map(buildCard).join('');
 
