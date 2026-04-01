@@ -494,6 +494,173 @@
       B.coverImages = B.coverImages.concat(B.gallery.slice(0, 3).map(g => g.url));
     }
 
+    // ── NEW DEDICATED TABLES ──────────────────────────────────
+
+    // Entity description
+    if (!B.about.description && e.description) B.about.description = e.description;
+
+    // Booking URLs
+    B.bookingUrl     = e.booking_url     || null;
+    B.reservationUrl = e.reservation_url || null;
+    B.orderUrl       = e.order_url       || null;
+
+    // Social
+    B.socialInstagram = e.social_instagram || null;
+    B.socialFacebook  = e.social_facebook  || null;
+    B.socialTiktok    = e.social_tiktok    || null;
+
+    // About bullets → highlights
+    if (!B.highlights.length && (data.about_bullets || []).length) {
+      B.highlights = data.about_bullets.map(b => (b.icon ? b.icon + ' ' : '') + b.text);
+      if (B.highlights.length && !B.sections.find(s => s.id === 'highlights'))
+        B.sections.unshift({ id: 'highlights', label: 'About', icon: 'ℹ️' });
+    }
+
+    // Photos from entity_photos
+    if (!B.gallery.length && (data.photos || []).length) {
+      B.gallery = data.photos.map(p => ({ url: p.image_url, caption: p.caption }));
+      B.coverImages = B.coverImages.concat(B.gallery.slice(0, 3).map(g => g.url));
+      if (!B.sections.find(s => s.id === 'gallery'))
+        B.sections.push({ id: 'gallery', label: 'Photos', icon: '📸' });
+    }
+
+    // Hours from entity_hours
+    const fmtTime = t => {
+      if (!t) return null;
+      if (t.includes('am') || t.includes('pm')) return t;
+      const [h, m] = t.split(':').map(Number);
+      const ap = h >= 12 ? 'pm' : 'am';
+      return (m ? `${h%12||12}:${String(m).padStart(2,'0')}` : `${h%12||12}`) + ap;
+    };
+    if (!B.hours && (data.hours || []).length) {
+      B.hours = data.hours.map(h => ({
+        day: h.day_of_week ? h.day_of_week.charAt(0).toUpperCase() + h.day_of_week.slice(1) : '',
+        open: fmtTime(h.open_time), close: fmtTime(h.close_time), closed: h.is_closed
+      }));
+      if (B.hours.length && !B.sections.find(s => s.id === 'hours'))
+        B.sections.push({ id: 'hours', label: 'Hours', icon: '🕐' });
+    }
+
+    // Menu sections from new tables
+    (data.menu || []).forEach(sec => {
+      const mealId = 'newmenu-' + sec.id;
+      const mapItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : '') });
+      if ((sec.items || []).length) {
+        B.foodMenu.push({ category: sec.section_name, meal: mealId, note: sec.section_note, isDrink: false, items: sec.items.map(mapItem) });
+      }
+      (sec.sub_sections || []).forEach(sub => {
+        if ((sub.items || []).length)
+          B.foodMenu.push({ category: sub.sub_section_name, meal: mealId, note: sub.section_note, isDrink: false, items: sub.items.map(mapItem) });
+      });
+      if (B.foodMenu.some(c => c.meal === mealId))
+        B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
+    });
+
+    // Drink sections from new tables
+    (data.drinks || []).forEach(sec => {
+      const drinkId = 'newdrink-' + sec.id;
+      if ((sec.items || []).length) {
+        B.foodMenu.push({ category: sec.section_name, meal: drinkId, note: sec.section_note, isDrink: true, items: sec.items.map(i => {
+          const beerParts = [i.item_style, i.abv, i.ibu, i.brewery].filter(Boolean).join(' · ');
+          return { name: i.item_name, desc: beerParts ? (i.description ? i.description + ' · ' + beerParts : beerParts) : i.description, price: i.price_text || (i.price ? '$' + i.price : '') };
+        })});
+        B.sections.push({ id: 'meal-' + drinkId, mealId: drinkId, label: sec.section_name, icon: '🍹' });
+      }
+    });
+
+    // Happy hour from new tables
+    if (!B.happyHour && (data.happy_hour || []).length) {
+      const schedule = [e.hh_days, (e.hh_start && e.hh_end) ? `${e.hh_start}–${e.hh_end}` : '', e.hh_description].filter(Boolean).join(' · ');
+      const deals = data.happy_hour.flatMap(sec => (sec.items || []).map(i => ({
+        name: i.item_name, desc: i.description,
+        price: i.price_text || (i.hh_price != null ? `$${i.hh_price}` : ''),
+      })));
+      if (deals.length) {
+        B.happyHour = { schedule, deals };
+        if (!B.sections.find(s => s.id === 'happy-hour'))
+          B.sections.push({ id: 'happy-hour', label: 'Happy Hour', icon: '🍺' });
+      }
+    }
+
+    // Events from entity_events
+    if (!B.events.length && (data.events || []).length) {
+      B.events = data.events.map(ev => ({
+        name: ev.event_name,
+        desc: ev.description || (ev.artist_name ? 'Featuring ' + ev.artist_name : ''),
+        badge: ev.event_type || (ev.recurring ? 'Every ' + ev.day_of_week : ev.event_date || ''),
+        note: [ev.start_time, ev.end_time].filter(Boolean).join('–') + (ev.venue_location ? ' · ' + ev.venue_location : ''),
+      }));
+      if (B.events.length && !B.sections.find(s => s.id === 'events'))
+        B.sections.push({ id: 'events', label: 'Events', icon: '📅' });
+    }
+
+    // Specials from entity_specials
+    if (!B.specials.length && (data.specials || []).length) {
+      B.specials = data.specials.map(s => ({
+        name: s.special_name,
+        desc: [s.description, s.days, s.start_time && s.end_time ? s.start_time + '–' + s.end_time : ''].filter(Boolean).join(' · '),
+        badge: s.discount_text || '★',
+      }));
+      if (B.specials.length && !B.sections.find(s => s.id === 'specials'))
+        B.sections.push({ id: 'specials', label: 'Specials', icon: '⭐' });
+    }
+
+    // Things To Do — pricing
+    if (!B.packages.length && (data.pricing || []).length) {
+      B.packages = data.pricing.map(p => ({
+        name: p.package_name, desc: p.description,
+        price: p.price_text || (p.price ? '$' + p.price : ''),
+        duration: [p.time_slot_start && p.time_slot_end ? p.time_slot_start + '–' + p.time_slot_end : '', p.price_unit].filter(Boolean).join(' · '),
+      }));
+      if (B.packages.length && !B.sections.find(s => s.id === 'packages'))
+        B.sections.push({ id: 'packages', label: 'Pricing', icon: '🎟️' });
+    }
+
+    // Activities
+    if ((data.activities || []).length) {
+      B._activities = data.activities;
+      B.sections.push({ id: 'activities', label: 'Activities', icon: '🎯' });
+    }
+    // Fleet
+    if ((data.fleet || []).length) {
+      B._fleet = data.fleet;
+      B.sections.push({ id: 'fleet', label: 'Fleet & Equipment', icon: '⛵' });
+    }
+    // Add-ons
+    if ((data.addons || []).length) {
+      B._addons = data.addons;
+      B.sections.push({ id: 'addons', label: 'Add-ons', icon: '➕' });
+    }
+    // What's Included
+    if ((data.whats_included || []).length) {
+      B._included = data.whats_included;
+      B.sections.push({ id: 'included', label: "What's Included", icon: '✅' });
+    }
+    // Requirements
+    if ((data.requirements || []).length) {
+      B._requirements = data.requirements;
+      B.sections.push({ id: 'requirements', label: 'Requirements', icon: '📋' });
+    }
+    // Policies
+    if ((data.policies || []).length) {
+      B._policies = data.policies;
+      B.sections.push({ id: 'policies', label: 'Policies', icon: '📄' });
+    }
+    // Meeting Point
+    if ((data.meeting_points || []).length) {
+      B._meetingPoint = data.meeting_points[0];
+      B.sections.push({ id: 'meetingpoint', label: 'Meeting Point', icon: '🗺️' });
+    }
+    // Q&A
+    if ((data.qna || []).length) {
+      B._qna = data.qna;
+      B.sections.push({ id: 'qna', label: 'FAQ', icon: '❓' });
+    }
+
+    // Ensure location section exists
+    if (!B.sections.find(s => s.id === 'location') && (B.address || B.city))
+      B.sections.push({ id: 'location', label: 'Location', icon: '📍' });
+
     return B;
   }
 
@@ -545,8 +712,17 @@
   (B.about.features || []).forEach(f => { badges.innerHTML += `<span class="badge">${f}</span>`; });
 
   const cta = document.getElementById('js-cta');
-  if (B.phone)      cta.innerHTML += `<a href="tel:${B.phone}" class="btn btn-call">📞 Call Now</a>`;
-  if (B.googleMaps) cta.innerHTML += `<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
+  if (B.phone)          cta.innerHTML += `<a href="tel:${B.phone}" class="btn btn-call">📞 Call Now</a>`;
+  if (B.googleMaps)     cta.innerHTML += `<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
+  if (B.bookingUrl)     cta.innerHTML += `<a href="${B.bookingUrl}" target="_blank" class="btn btn-dir" style="background:#7c3aed;border-color:#7c3aed;">📅 Book Now</a>`;
+  if (B.reservationUrl) cta.innerHTML += `<a href="${B.reservationUrl}" target="_blank" class="btn btn-call" style="background:#059669;border-color:#059669;">🍽️ Reserve a Table</a>`;
+  if (B.orderUrl)       cta.innerHTML += `<a href="${B.orderUrl}" target="_blank" class="btn btn-web" style="background:#d97706;color:#fff;border-color:#d97706;">🛵 Order Online</a>`;
+  if (B.website)        cta.innerHTML += `<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`;
+
+  const social = document.getElementById('js-social');
+  if (B.socialInstagram) social.innerHTML += `<a href="${B.socialInstagram.startsWith('http') ? B.socialInstagram : 'https://instagram.com/'+B.socialInstagram.replace('@','')}" target="_blank" class="social-btn" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>`;
+  if (B.socialFacebook)  social.innerHTML += `<a href="${B.socialFacebook}" target="_blank" class="social-btn" title="Facebook"><svg viewBox="0 0 24 24"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.269h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg></a>`;
+  if (B.socialTiktok)    social.innerHTML += `<a href="${B.socialTiktok.startsWith('http') ? B.socialTiktok : 'https://tiktok.com/@'+B.socialTiktok.replace('@','')}" target="_blank" class="social-btn" title="TikTok"><svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg></a>`;
 
   // ── Tabs ───────────────────────────────────────────────────
   const tabsEl = document.getElementById('js-tabs');
@@ -777,6 +953,107 @@
             ${B.website?`<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`:''}
           </div>`;
         break;
+
+      case 'activities':
+        (B._activities || []).forEach(a => {
+          html += `<div class="card" style="margin-bottom:8px">
+            <div style="font-weight:700;font-size:15px">${a.activity_name}</div>
+            ${a.activity_type ? `<div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:2px">${a.activity_type.replace(/_/g,' ')}</div>` : ''}
+            ${a.description ? `<div style="font-size:13px;color:var(--muted);margin-top:6px;line-height:1.5">${a.description}</div>` : ''}
+            <div style="display:flex;gap:16px;margin-top:8px;font-size:13px;color:var(--muted)">
+              ${a.duration ? `<span>⏱ ${a.duration}</span>` : ''}
+              ${a.min_age ? `<span>👤 Ages ${a.min_age}+</span>` : ''}
+              ${a.max_capacity ? `<span>👥 Max ${a.max_capacity}</span>` : ''}
+            </div>
+          </div>`;
+        });
+        break;
+
+      case 'fleet':
+        html += `<div class="menu-grid">`;
+        (B._fleet || []).forEach(f => {
+          html += `<div class="item">
+            <div class="name">${f.item_name}</div>
+            ${f.description ? `<div class="desc">${f.description}</div>` : ''}
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)">
+              ${f.capacity ? `<span>👥 Capacity: ${f.capacity}</span>` : ''}
+              ${f.weight ? `<span>⚖️ ${f.weight}</span>` : ''}
+              ${f.dimensions ? `<span>📐 ${f.dimensions}</span>` : ''}
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+        break;
+
+      case 'addons':
+        html += `<div class="menu-grid">`;
+        (B._addons || []).forEach(a => {
+          const price = a.price_min != null && a.price_max != null ? `$${a.price_min}–$${a.price_max}` : a.price != null ? `$${a.price}` : '';
+          html += `<div class="item">
+            <div class="name">${a.addon_name}</div>
+            ${a.description ? `<div class="desc">${a.description}</div>` : ''}
+            <div style="display:flex;justify-content:space-between;margin-top:6px">
+              ${price ? `<span class="price">${price}</span>` : ''}
+              ${a.price_type === 'included' ? `<span style="font-size:12px;background:#f0fdf4;color:#166534;border-radius:999px;padding:2px 8px;font-weight:700">Included</span>` : ''}
+            </div>
+          </div>`;
+        });
+        html += `</div>`;
+        break;
+
+      case 'included':
+        html += `<ul style="margin:0;padding-left:0;list-style:none;display:grid;gap:8px">`;
+        (B._included || []).forEach(i => {
+          html += `<li style="display:flex;gap:10px;font-size:14px;line-height:1.5"><span style="color:#22c55e;font-weight:800">✓</span><div><strong>${i.item_name}</strong>${i.description ? '<br><span style="color:var(--muted);font-size:13px">'+i.description+'</span>' : ''}</div></li>`;
+        });
+        html += `</ul>`;
+        break;
+
+      case 'requirements':
+        html += `<ul style="margin:0;padding-left:18px;display:grid;gap:8px">`;
+        (B._requirements || []).forEach(r => {
+          html += `<li style="font-size:14px;color:var(--muted);line-height:1.5">${r.requirement_text}</li>`;
+        });
+        html += `</ul>`;
+        break;
+
+      case 'policies':
+        (B._policies || []).forEach(p => {
+          html += `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            ${p.policy_type ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:4px">${p.policy_type.replace(/_/g,' ')}</div>` : ''}
+            <div style="font-size:14px;color:var(--muted);line-height:1.6">${p.policy_text}</div>
+          </div>`;
+        });
+        break;
+
+      case 'meetingpoint': {
+        const mp = B._meetingPoint || {};
+        html += `${mp.location_name ? `<div style="font-weight:700;font-size:16px;margin-bottom:8px">${mp.location_name}</div>` : ''}
+          ${mp.address ? `<div style="font-size:14px;color:var(--muted);margin-bottom:8px">📍 ${mp.address}</div>` : ''}
+          ${mp.parking_info ? `<div style="font-size:13px;margin-bottom:6px"><strong>Parking:</strong> ${mp.parking_info}</div>` : ''}
+          ${mp.checkin_instructions ? `<div style="font-size:13px;margin-bottom:6px"><strong>Check-in:</strong> ${mp.checkin_instructions}</div>` : ''}
+          ${mp.what_to_bring ? `<div style="font-size:13px;margin-bottom:6px"><strong>What to Bring:</strong> ${mp.what_to_bring}</div>` : ''}`;
+        break;
+      }
+
+      case 'qna': {
+        const grouped = {};
+        (B._qna || []).forEach(q => {
+          const label = q.section_label || 'FAQ';
+          if (!grouped[label]) grouped[label] = [];
+          grouped[label].push(q);
+        });
+        Object.entries(grouped).forEach(([label, items]) => {
+          html += `<h3>${label}</h3>`;
+          items.forEach(q => {
+            html += `<div style="margin-bottom:14px">
+              <div style="font-weight:700;font-size:14px;margin-bottom:4px">${q.question}</div>
+              ${q.answer ? `<div style="font-size:13px;color:var(--muted);line-height:1.6">${q.answer}</div>` : ''}
+            </div>`;
+          });
+        });
+        break;
+      }
 
       default: {
         // Universal: any section key with grouped_items renders here

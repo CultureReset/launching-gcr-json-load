@@ -282,6 +282,13 @@ function buildCard(entity) {
   const phone  = entity.phone || '';
   const dir    = entity.directions_url || '';
   const website = entity.website_url || entity.website || '';
+  const bookingUrl = entity.booking_url || '';
+  const reservationUrl = entity.reservation_url || '';
+  const orderUrl = entity.order_url || '';
+  const desc = entity.description || '';
+  const hhDays = entity.hh_days || '';
+  const hhStart = entity.hh_start || '';
+  const hhEnd = entity.hh_end || '';
 
   const location = [city, state].filter(Boolean).join(', ');
 
@@ -321,6 +328,18 @@ function buildCard(entity) {
     ? `<a href="${website}" target="_blank" rel="noopener" class="gcr-btn"
         onclick="event.stopPropagation()">🌐 Website</a>`
     : '';
+  const bookBtn = bookingUrl
+    ? `<a href="${bookingUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#0ea5e9;color:#fff;border-color:#0ea5e9;"
+        onclick="event.stopPropagation()">📅 Book Now</a>`
+    : '';
+  const reserveBtn = reservationUrl
+    ? `<a href="${reservationUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#22c55e;color:#fff;border-color:#22c55e;"
+        onclick="event.stopPropagation()">🍽️ Reserve</a>`
+    : '';
+  const orderBtn = orderUrl
+    ? `<a href="${orderUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#f59e0b;color:#fff;border-color:#f59e0b;"
+        onclick="event.stopPropagation()">🛵 Order</a>`
+    : '';
 
   // Full address line
   const fullAddr = [addr, city, state].filter(Boolean).join(', ');
@@ -343,12 +362,14 @@ function buildCard(entity) {
         <div class="gcr-card-body">
           <div class="gcr-card-name">${name}</div>
           <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
+          ${desc ? `<div style="margin-top:6px;font-size:13px;color:#5c6b81;line-height:1.4;">${desc.length > 120 ? desc.slice(0,120)+'…' : desc}</div>` : ''}
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-          ${hoursInfo ? `<div style="margin-top:8px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : ''}
+          ${hhDays ? `<div style="margin-top:8px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>` : ''}
+          ${hoursInfo ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : ''}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${fullAddr || location}</div>
-            <div class="gcr-card-actions">${dirBtn}${callBtn}${webBtn}</div>
+            <div class="gcr-card-actions">${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
           </div>
         </div>
       </div>
