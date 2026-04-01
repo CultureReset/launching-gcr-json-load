@@ -18,6 +18,14 @@
       text-decoration:none;color:inherit;
       transition:transform .14s ease,box-shadow .14s ease;
       cursor:pointer;
+      width:100%;
+      margin-bottom:14px;
+    }
+    .list > a, .cards > a, #listingsGrid > a {
+      display:block;
+      text-decoration:none;
+      color:inherit;
+      width:100%;
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-card-img{
@@ -176,7 +184,7 @@ function tagToPage(tag) {
 }
 
 function tagLabel(tag) {
-  return tag.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  return tag.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 /* ── Star rating ── */
@@ -293,7 +301,7 @@ function buildCard(entity) {
   const location = [city, state].filter(Boolean).join(', ');
 
   // Normalize tags
-  const rawTags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
 
   const statusBadge = computeStatus(entity.hours || [], rawTags);
 
@@ -304,8 +312,7 @@ function buildCard(entity) {
 
   const chipLinks = rawTags.slice(0, 4).map(tag => {
     const dest = tagToPage(tag);
-    const norm = tag.toLowerCase().replace(/ /g, '_');
-    return `<a href="${dest}?tag=${encodeURIComponent(norm)}" class="gcr-chip"
+    return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip"
       onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
   }).join('');
 
