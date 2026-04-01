@@ -540,11 +540,15 @@ function wireFilterChips(grid) {
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
-    // Direct match: subtype IS the category (e.g., "restaurants" on restaurants page)
-    if (raw === category) return true;
-    // Normalize hyphens → underscores for map lookup
     const norm = raw.replace(/-/g, '_');
-    return SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
+    const catMatch = raw === category || SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
+    if (!catMatch) return false;
+    // Skip incomplete imports — must have at least one of: image, tags, description, or subtitle
+    const hasTags  = (b.tags || []).length > 0;
+    const hasImage = !!(b.hero_image_url || b.cover_url);
+    const hasDesc  = !!(b.description || b.subtitle || b.tagline);
+    const hasPhone = !!b.phone;
+    return hasTags || hasImage || hasDesc || hasPhone;
   });
 }
 
