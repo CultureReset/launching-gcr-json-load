@@ -325,13 +325,13 @@ function buildCard(entity) {
 
   // Action buttons — no Website button, no duplicates
   const usedUrls = new Set();
-  function dedupeBtn(url, label, style) {
+  const dedupeBtn = (url, label, style) => {
     if (!url) return '';
     const key = url.replace(/https?:\/\//, '').replace(/\/$/, '').split('?')[0];
     if (usedUrls.has(key)) return '';
     usedUrls.add(key);
     return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
-  }
+  };
   const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
   const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
   const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ View Menu</a>`;
