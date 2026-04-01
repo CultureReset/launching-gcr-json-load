@@ -90,15 +90,20 @@ const GCR = {
   },
   getHappyHours() {
     return this.businesses.filter(b => {
+      // New DB fields
+      if (b.hh_days && b.hh_days.trim()) return true;
+      // Old field aliases
       const hh = b.happyHour || b.happy_hour;
       if (!hh) return false;
       if (hh === true) return true;
       if (typeof hh === 'string' && hh.trim().length > 0) return true;
-      return false;
+      // Check tags
+      const tags = (b.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).map(t => t.toLowerCase());
+      return tags.includes('happy_hour') || tags.includes('happy hour');
     });
   },
   getSpecials() {
-    return this.specials.filter(s => s.active !== false);
+    return this.specials.filter(s => s.active !== false && s.is_active !== false);
   },
   getByTag(tag) {
     return this.businesses.filter(b => b.tags && b.tags.includes(tag));
