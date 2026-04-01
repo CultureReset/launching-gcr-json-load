@@ -541,26 +541,33 @@
         B.sections.push({ id: 'hours', label: 'Hours', icon: '🕐' });
     }
 
-    // Menu sections from new tables
-    (data.menu || []).forEach(sec => {
+    // Menu sections from new tables — API returns { sections:[], sub_sections:[], items:[] }
+    const menuSections   = (data.menu && data.menu.sections)      || [];
+    const menuSubSecs    = (data.menu && data.menu.sub_sections)   || [];
+    const menuItems      = (data.menu && data.menu.items)          || [];
+    const mapMenuItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : '') });
+    menuSections.forEach(sec => {
       const mealId = 'newmenu-' + sec.id;
-      const mapItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : '') });
-      if ((sec.items || []).length) {
-        B.foodMenu.push({ category: sec.section_name, meal: mealId, note: sec.section_note, isDrink: false, items: sec.items.map(mapItem) });
-      }
-      (sec.sub_sections || []).forEach(sub => {
-        if ((sub.items || []).length)
-          B.foodMenu.push({ category: sub.sub_section_name, meal: mealId, note: sub.section_note, isDrink: false, items: sub.items.map(mapItem) });
+      const secItems = menuItems.filter(i => i.menu_section_id === sec.id && !i.menu_sub_section_id);
+      if (secItems.length)
+        B.foodMenu.push({ category: sec.section_name, meal: mealId, note: sec.section_note, isDrink: false, items: secItems.map(mapMenuItem) });
+      menuSubSecs.filter(sub => sub.menu_section_id === sec.id).forEach(sub => {
+        const subItems = menuItems.filter(i => i.menu_sub_section_id === sub.id);
+        if (subItems.length)
+          B.foodMenu.push({ category: sub.sub_section_name, meal: mealId, note: sub.section_note, isDrink: false, items: subItems.map(mapMenuItem) });
       });
       if (B.foodMenu.some(c => c.meal === mealId))
         B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
     });
 
-    // Drink sections from new tables
-    (data.drinks || []).forEach(sec => {
+    // Drink sections from new tables — API returns { sections:[], items:[] }
+    const drinkSections = (data.drinks && data.drinks.sections) || [];
+    const drinkItems    = (data.drinks && data.drinks.items)    || [];
+    drinkSections.forEach(sec => {
       const drinkId = 'newdrink-' + sec.id;
-      if ((sec.items || []).length) {
-        B.foodMenu.push({ category: sec.section_name, meal: drinkId, note: sec.section_note, isDrink: true, items: sec.items.map(i => {
+      const secItems = drinkItems.filter(i => i.drink_section_id === sec.id);
+      if (secItems.length) {
+        B.foodMenu.push({ category: sec.section_name, meal: drinkId, note: sec.section_note, isDrink: true, items: secItems.map(i => {
           const beerParts = [i.item_style, i.abv, i.ibu, i.brewery].filter(Boolean).join(' · ');
           return { name: i.item_name, desc: beerParts ? (i.description ? i.description + ' · ' + beerParts : beerParts) : i.description, price: i.price_text || (i.price ? '$' + i.price : '') };
         })});
@@ -568,14 +575,16 @@
       }
     });
 
-    // Happy hour from new tables
-    if (!B.happyHour && (data.happy_hour || []).length) {
+    // Happy hour from new tables — API returns { sections:[], items:[] }
+    const hhSections = (data.happy_hour && data.happy_hour.sections) || [];
+    const hhItems    = (data.happy_hour && data.happy_hour.items)    || [];
+    if (!B.happyHour && hhSections.length) {
       const schedule = [e.hh_days, (e.hh_start && e.hh_end) ? `${e.hh_start}–${e.hh_end}` : '', e.hh_description].filter(Boolean).join(' · ');
-      const deals = data.happy_hour.flatMap(sec => (sec.items || []).map(i => ({
+      const deals = hhItems.map(i => ({
         name: i.item_name, desc: i.description,
         price: i.price_text || (i.hh_price != null ? `$${i.hh_price}` : ''),
-      })));
-      if (deals.length) {
+      }));
+      if (deals.length || schedule) {
         B.happyHour = { schedule, deals };
         if (!B.sections.find(s => s.id === 'happy-hour'))
           B.sections.push({ id: 'happy-hour', label: 'Happy Hour', icon: '🍺' });
