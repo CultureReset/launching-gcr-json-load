@@ -506,7 +506,10 @@ function buildDynamicFilters(entities) {
     })
     .slice(0, 15);
 
-  if (!sorted.length) return; // keep existing static chips
+  if (!sorted.length) return;
+
+  // Reset delegation flag so new container gets wired
+  if (chipContainer._wired) chipContainer._wired = false;
 
   // Build new chip HTML — keep "All" as first chip
   const allBtn = '<button class="tag-btn active" data-filter="all">All</button>';
@@ -518,19 +521,21 @@ function buildDynamicFilters(entities) {
   chipContainer.innerHTML = allBtn + tagBtns;
 }
 
-/* ── Wire filter chips (handles .tag-btn and .filter-chip) ── */
+/* ── Wire filter chips — use event delegation to avoid stacking listeners ── */
 function wireFilterChips(grid) {
-  const chips = document.querySelectorAll('.tag-btn, .filter-chip');
-  chips.forEach(btn => {
-    btn.addEventListener('click', () => {
-      chips.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.filter || 'all';
-      applyFilter(grid, filter);
-      const url = new URL(window.location);
-      filter !== 'all' ? url.searchParams.set('tag', filter) : url.searchParams.delete('tag');
-      window.history.replaceState({}, '', url);
-    });
+  const container = document.querySelector('.tag-row, .filter-row, .chips-row');
+  if (!container || container._wired) return;
+  container._wired = true;
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.tag-btn, .filter-chip');
+    if (!btn) return;
+    document.querySelectorAll('.tag-btn, .filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter || 'all';
+    applyFilter(grid, filter);
+    const url = new URL(window.location);
+    filter !== 'all' ? url.searchParams.set('tag', filter) : url.searchParams.delete('tag');
+    window.history.replaceState({}, '', url);
   });
 }
 
