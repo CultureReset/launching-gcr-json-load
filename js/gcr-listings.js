@@ -323,7 +323,7 @@ function buildCard(entity) {
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
-  // Deduplicate action URLs — never show same URL twice, only show if link exists
+  // Action buttons — no Website button, no duplicates
   const usedUrls = new Set();
   function dedupeBtn(url, label, style) {
     if (!url) return '';
@@ -332,13 +332,26 @@ function buildCard(entity) {
     usedUrls.add(key);
     return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
   }
-  const viewBtn    = `<a href="profile.html?id=${encodeURIComponent(slug)}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ View Menu</a>`;
   const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
   const dirBtn     = dedupeBtn(dir,            '📍 Directions', '');
   const bookBtn    = dedupeBtn(bookingUrl,     '📅 Book Now',   'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
   const reserveBtn = dedupeBtn(reservationUrl, '🍽️ Reserve',   'background:#22c55e;color:#fff;border-color:#22c55e;');
   const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
-  const webBtn     = dedupeBtn(website,        '🌐 Website',    '');
+
+  // Happy Hour expand button + panel (only if hh_days exists)
+  const hhPanelId = `hh-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const hhBtn = hhDays
+    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;" onclick="event.stopPropagation();event.preventDefault();var p=document.getElementById('${hhPanelId}');p.style.display=p.style.display==='none'?'block':'none';">🍺 Happy Hour</button>`
+    : '';
+  const hhPanel = hhDays ? `
+    <div id="${hhPanelId}" style="display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
+      <div style="font-weight:800;font-size:14px;color:#92400e;margin-bottom:6px;">🍺 Happy Hour</div>
+      <div style="font-size:13px;color:#78350f;font-weight:600;">${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>
+      ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${entity.hh_description}</div>` : ''}
+    </div>` : '';
 
   // About — 3 lines, no fallback
   const aboutBlock = desc
@@ -397,10 +410,11 @@ function buildCard(entity) {
           ${musicBlock}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${fullAddr || location}</div>
-            <div class="gcr-card-actions">${viewBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
+            <div class="gcr-card-actions">${viewBtn}${menuBtn}${hhBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
           </div>
         </div>
       </div>
+      ${hhPanel}
     </a>`;
 }
 
