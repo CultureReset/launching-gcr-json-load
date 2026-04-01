@@ -508,9 +508,6 @@ function buildDynamicFilters(entities) {
 
   if (!sorted.length) return;
 
-  // Reset delegation flag so new container gets wired
-  if (chipContainer._wired) chipContainer._wired = false;
-
   // Build new chip HTML — keep "All" as first chip
   const allBtn = '<button class="tag-btn active" data-filter="all">All</button>';
   const tagBtns = sorted.map(([tag]) => {
