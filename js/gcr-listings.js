@@ -567,11 +567,27 @@ function wireFilterChips(grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
+    // Happy Hours — businesses that have hh_days set OR a happy_hour tag
+    if (category === 'happy-hours') {
+      const hasHH = !!b.hh_days;
+      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
+      const hasHHTag = tags.some(t => t.includes('happy_hour') || t.includes('happy hour'));
+      return hasHH || hasHHTag;
+    }
+
+    // Specials — businesses that have specials in GCR.specials OR a specials-related tag
+    if (category === 'specials') {
+      const specialSlugs = new Set((window.GCR && GCR.specials || []).map(s => s.entity_slug || s.slug || s.entity_id));
+      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
+      const hasSpecialTag = tags.some(t => t.includes('special') || t.includes('deal') || t.includes('promo'));
+      return specialSlugs.has(b.slug) || specialSlugs.has(b.id) || hasSpecialTag;
+    }
+
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
     const norm = raw.replace(/-/g, '_');
     const catMatch = raw === category || SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
     if (!catMatch) return false;
-    // Skip incomplete imports — must have at least one of: image, tags, description, or subtitle
+    // Skip incomplete imports — must have at least one of: image, tags, description, phone, or subtitle
     const hasTags  = (b.tags || []).length > 0;
     const hasImage = !!(b.hero_image_url || b.cover_url);
     const hasDesc  = !!(b.description || b.subtitle || b.tagline);
