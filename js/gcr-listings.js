@@ -148,7 +148,168 @@ const SUBTYPE_TO_CATEGORY = {
 
   // Things To Do (water sports, tours, attractions, rentals)
   parasailing:'things-to-do', dolphin_cruise:'things-to-do',
-fferncee   }).join('');
+  dolphin_cruises_tours:'things-to-do',
+  snorkeling:'things-to-do', kayak_rental:'things-to-do',
+  canoe_kayak_paddleboard:'things-to-do',
+  boat_rental:'things-to-do', boat_rentals:'things-to-do',
+  fishing_charter:'things-to-do',
+  tour:'things-to-do', attraction:'things-to-do',
+  jet_ski:'things-to-do', jet_ski_rentals_tours:'things-to-do',
+  paddleboard:'things-to-do',
+  banana_boat_rides:'things-to-do', banana_boat:'things-to-do',
+  things_to_do:'things-to-do',
+
+  // Nightlife
+  nightlife:'nightlife',
+  bar_club:'nightlife', nightclub:'nightlife', sports_bar:'nightlife',
+  rooftop_bar:'nightlife', lounge:'nightlife',
+
+  // Services
+  services:'services', service:'services',
+  salon:'services', spa:'services', photographer:'services', photography:'services',
+  wellness:'services', transportation:'services',
+
+  // Other
+  other:'other',
+  boat_launch:'other', parking:'other', vacation_rental:'other',
+  hotel:'other', condo:'other', resort:'other',
+  beach_access:'other', park:'other',
+};
+
+/* ── tag → destination page for clickable chips ── */
+const TAG_TO_PAGE = {
+  happy_hour:'happy-hours.html',   'happy hour':'happy-hours.html',
+  live_music:'events.html',        'live music':'events.html',
+  bingo:'events.html',             karaoke:'events.html',
+  trivia:'events.html',            concert:'events.html',
+  seafood:'restaurants.html',      waterfront:'restaurants.html',
+  waterfront_dining:'restaurants.html',
+  breakfast:'restaurants.html',    brunch:'restaurants.html',
+  bar_grill:'restaurants.html',    southern:'restaurants.html',
+  steakhouse:'restaurants.html',   pizza:'restaurants.html',
+  mexican:'restaurants.html',
+  coffee:'coffee-sweets.html',     'ice cream':'coffee-sweets.html',
+  ice_cream:'coffee-sweets.html',  bakery:'coffee-sweets.html',
+  desserts:'coffee-sweets.html',
+  parasailing:'things-to-do.html', fishing:'things-to-do.html',
+  boat_rental:'things-to-do.html', kayak:'things-to-do.html',
+  snorkeling:'things-to-do.html',  dolphin:'things-to-do.html',
+  boutique:'shopping.html',        souvenir:'shopping.html',
+  photography:'other.html',        photographer:'other.html',
+};
+
+function tagToPage(tag) {
+  const lower = (tag || '').toLowerCase();
+  const key = lower.replace(/ /g, '_');
+  if (TAG_TO_PAGE[key]) return TAG_TO_PAGE[key];
+  if (TAG_TO_PAGE[lower]) return TAG_TO_PAGE[lower];
+  if (/happy.?hour/.test(lower)) return 'happy-hours.html';
+  if (/live.?music/.test(lower)) return 'events.html';
+  if (/waterfront/.test(lower))  return 'restaurants.html';
+  if (/seafood/.test(lower))     return 'restaurants.html';
+  if (/parasail/.test(lower))    return 'things-to-do.html';
+  if (/fishing/.test(lower))     return 'things-to-do.html';
+  if (/coffee/.test(lower))      return 'coffee-sweets.html';
+  return `search.html?q=${encodeURIComponent(tag)}`;
+}
+
+function tagLabel(tag) {
+  return tag.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+/* ── Star rating ── */
+function starsHtml(rating) {
+  if (!rating) return '';
+  const r = Math.round(Number(rating) * 2) / 2;
+  const full = Math.floor(r);
+  const half = r - full >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+/* ── Time-aware status badge ── */
+function computeStatus(hours, tags) {
+  const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const now = new Date();
+  const todayName = DAYS[now.getDay()];
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const todayRow = (hours || []).find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
+  let statusHtml = '';
+  if (todayRow) {
+    if (todayRow.is_closed) {
+      statusHtml = '<div class="gcr-status closed">Closed Today</div>';
+    } else if (todayRow.open_time && todayRow.close_time) {
+      const parseMins = t => { if (!t) return null; const [h,m] = t.split(':').map(Number); return h*60+(m||0); };
+      const fmt12 = t => { if (!t) return ''; let [h,m] = t.split(':').map(Number); const ap=h>=12?'pm':'am'; h=h%12||12; return m?`${h}:${String(m).padStart(2,'0')}${ap}`:`${h}${ap}`; };
+      const openMins = parseMins(todayRow.open_time), closeMins = parseMins(todayRow.close_time);
+      if (openMins !== null && closeMins !== null) {
+        if (nowMins < openMins - 60)       statusHtml = `<div class="gcr-status closed">Opens ${fmt12(todayRow.open_time)}</div>`;
+        else if (nowMins < openMins)       statusHtml = `<div class="gcr-status opening">Opening Soon · ${fmt12(todayRow.open_time)}</div>`;
+        else if (nowMins < closeMins - 60) statusHtml = `<div class="gcr-status open">Open · Closes ${fmt12(todayRow.close_time)}</div>`;
+        else if (nowMins < closeMins)      statusHtml = `<div class="gcr-status closing">Closing Soon · ${fmt12(todayRow.close_time)}</div>`;
+        else                               statusHtml = `<div class="gcr-status closed">Closed · Opens ${fmt12(todayRow.open_time)}</div>`;
+      }
+    }
+  }
+  const tagList = (tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
+  if ((tagList.includes('live_music') || tagList.includes('live music')) && now.getHours() >= 16 && now.getHours() < 23) {
+    statusHtml = '<div class="gcr-status music">🎸 Live Music Tonight</div>';
+  }
+  return statusHtml;
+}
+
+/* ── Today's hours one-liner ── */
+function computeHoursLine(hours) {
+  if (!hours || !hours.length) return '';
+  const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const todayName = DAYS[new Date().getDay()];
+  const todayRow = hours.find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
+  if (!todayRow) return '';
+  if (todayRow.is_closed) return 'Closed Today';
+  if (todayRow.open_time && todayRow.close_time) {
+    const fmt = t => { let [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; h=h%12||12; return m?`${h}:${String(m).padStart(2,'0')}${ap}`:`${h}${ap}`; };
+    return `Today ${fmt(todayRow.open_time)} – ${fmt(todayRow.close_time)}`;
+  }
+  return '';
+}
+
+/* ── Build one card ── */
+function buildCard(entity) {
+  const slug    = entity.slug || entity.subdomain || entity.id || '';
+  const name    = entity.name || 'Business';
+  const icon    = entity.icon || entity.emoji || '📍';
+  const sub     = entity.subtitle || entity.tagline || '';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const rating  = entity.rating;
+  const reviews = entity.review_count || entity.reviewCount || 0;
+  const addr    = entity.address_line_1 || entity.address || '';
+  const phone   = entity.phone || '';
+  const dir     = entity.directions_url || '';
+  const bookingUrl     = entity.booking_url || '';
+  const reservationUrl = entity.reservation_url || '';
+  const orderUrl       = entity.order_url || '';
+  const desc    = entity.description || '';
+  const hhDays  = entity.hh_days || '';
+  const hhStart = entity.hh_start || '';
+  const hhEnd   = entity.hh_end || '';
+  const location = [city, state].filter(Boolean).join(', ');
+
+  // Normalize tags — handle both string tags and {tag, tag_category} objects
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+
+  const statusBadge = computeStatus(entity.hours || [], rawTags);
+  const priceRange  = entity.priceRange || entity.price_range || '';
+  const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
+  const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
+
+  const displayTags = rawTags.length ? rawTags.slice(0, 4) : (subtype ? [subtype.replace(/ /g,'_')] : []);
+  const chipLinks = displayTags.map(tag => {
+    const dest = tagToPage(tag);
+    return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip" onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
+  }).join('');
 
   const ratingBlock = rating ? `
     <div class="gcr-card-rating">
@@ -157,11 +318,10 @@ fferncee   }).join('');
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
-  // Action buttons — no Website button, no duplicates
   const usedUrls = new Set();
   const dedupeBtn = (url, label, style) => {
     if (!url) return '';
-    const key = url.replace(/https?:\/\//, '').replace(/\/$/, '').split('?')[0];
+    const key = url.replace(/https?:\/\//,'').replace(/\/$/,'').split('?')[0];
     if (usedUrls.has(key)) return '';
     usedUrls.add(key);
     return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
@@ -170,8 +330,8 @@ fferncee   }).join('');
   const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
   const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ View Menu</a>`;
   const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
-  const dirBtn     = dedupeBtn(dir,            '📍 Directions', '');
-  const bookBtn    = dedupeBtn(bookingUrl,     '📅 Book Now',   'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
+  const dirBtn     = dedupeBtn(dir,         '📍 Directions','');
+  const bookBtn    = dedupeBtn(bookingUrl,  '📅 Book Now',  'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
   const reserveBtn = dedupeBtn(reservationUrl, '🍽️ Reserve',   'background:#22c55e;color:#fff;border-color:#22c55e;');
   const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
 
