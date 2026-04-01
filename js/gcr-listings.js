@@ -340,20 +340,39 @@ function buildCard(entity) {
   const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
   const webBtn     = dedupeBtn(website,        '🌐 Website',    '');
 
-  // 3 lines of about text — description first, fall back to subtitle
-  const aboutText = (desc || sub || '').trim();
-  const aboutBlock = aboutText
-    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${aboutText}</div>`
+  // About — 3 lines, no fallback
+  const aboutBlock = desc
+    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${desc}</div>`
     : '';
 
-  // Hours — show today's hours if available, then happy hour
+  // Hours — only if data exists
   const fullAddr  = [addr, city, state].filter(Boolean).join(', ');
   const hoursInfo = computeHoursLine(entity.hours || []);
   const hoursBlock = hoursInfo
     ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>`
-    : hhDays
-      ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>`
-      : '';
+    : '';
+
+  // Happy hour — only if data exists
+  const hhBlock = hhDays
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>`
+    : '';
+
+  // Live music today — check actual events
+  const todayStr2  = new Date().toISOString().split('T')[0];
+  const todayName2 = new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+  const todayMusic = (window.GCR && GCR.events || []).filter(e => {
+    const matchEntity = (e.entity_slug||e.slug||e.entity_id) === (slug||entity.id);
+    if (!matchEntity) return false;
+    const isToday = e.event_date === todayStr2;
+    const isRecurringToday = e.recurring && (e.day_of_week||'').toLowerCase() === todayName2;
+    if (!isToday && !isRecurringToday) return false;
+    const t = (e.event_type||'').toLowerCase();
+    const n = (e.event_name||'').toLowerCase();
+    return t.includes('live')||t.includes('music')||t.includes('dj')||n.includes('live')||n.includes('dj');
+  });
+  const musicBlock = todayMusic.length
+    ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
+    : '';
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -374,6 +393,8 @@ function buildCard(entity) {
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
           ${hoursBlock}
+          ${hhBlock}
+          ${musicBlock}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${fullAddr || location}</div>
             <div class="gcr-card-actions">${viewBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
