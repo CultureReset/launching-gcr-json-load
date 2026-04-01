@@ -91,6 +91,11 @@
   document.head.appendChild(s);
 })();
 
+/* ── HTML escape helper ── */
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 /* ── Category fallback images ── */
 const FALLBACK_IMGS = {
   restaurants:     'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
@@ -377,13 +382,13 @@ function buildCard(entity) {
   const hhPanel = hhDays ? `
     <div id="${hhPanelId}" style="display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
       <div style="font-weight:800;font-size:14px;color:#92400e;margin-bottom:6px;">🍺 Happy Hour</div>
-      <div style="font-size:13px;color:#78350f;font-weight:600;">${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>
-      ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${entity.hh_description}</div>` : ''}
+      <div style="font-size:13px;color:#78350f;font-weight:600;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
     </div>` : '';
 
   // About — 3 lines, no fallback
   const aboutBlock = desc
-    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${desc}</div>`
+    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>`
     : '';
 
   // Hours — only if data exists
@@ -395,7 +400,7 @@ function buildCard(entity) {
 
   // Happy hour — only if data exists
   const hhBlock = hhDays
-    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>`
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
     : '';
 
   // Live music today — check actual events
@@ -428,8 +433,8 @@ function buildCard(entity) {
           ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
         </div>
         <div class="gcr-card-body">
-          <div class="gcr-card-name">${name}</div>
-          <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
+          <div class="gcr-card-name">${esc(name)}</div>
+          <div class="gcr-card-sub">${esc([sub, location].filter(Boolean).join(' · '))}</div>
           ${aboutBlock}
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
@@ -437,7 +442,7 @@ function buildCard(entity) {
           ${hhBlock}
           ${musicBlock}
           <div class="gcr-card-bottom">
-            <div class="gcr-card-addr">${fullAddr || location}</div>
+            <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
             <div class="gcr-card-actions">${viewBtn}${menuBtn}${hhBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
           </div>
         </div>
@@ -723,7 +728,14 @@ function initStandardPage() {
     const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
     wireFilterChips(grid);
-    if (urlTag) applyFilter(grid, urlTag);
+    if (urlTag) {
+      // Activate the matching chip
+      document.querySelectorAll('.tag-btn, .filter-chip').forEach(btn => {
+        const f = (btn.dataset.filter || '').replace(/-/g, '_');
+        btn.classList.toggle('active', f === urlTag.replace(/-/g, '_'));
+      });
+      applyFilter(grid, urlTag);
+    }
   }
 
   function render(businesses) {
