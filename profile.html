@@ -742,7 +742,10 @@
     btn.textContent = (sec.icon ? sec.icon + ' ' : '') + sec.label;
     btn.onclick = () => {
       const target = sec.scrollTo || sec.id;
-      document.getElementById('sec-' + target)?.scrollIntoView({ behavior:'smooth', block:'start' });
+      const el = document.getElementById('sec-' + target);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - 64 - 56;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     };
     tabsEl.appendChild(btn);
   });
@@ -1088,8 +1091,43 @@
     container.appendChild(el);
   });
 
+  // ── Sticky tab bar (JS-driven, works in all browsers) ────────
+  const stickyWrap = document.querySelector('.sticky-wrap');
+  const stickyPlaceholder = document.createElement('div');
+  stickyPlaceholder.style.display = 'none';
+  stickyWrap.parentNode.insertBefore(stickyPlaceholder, stickyWrap);
+
+  const HEADER_H = 64;
+  let isFixed = false;
+
+  function updateSticky() {
+    if (!stickyWrap) return;
+    const navH = stickyWrap.offsetHeight;
+    // Use placeholder's position when the nav is fixed (it holds the space)
+    const triggerY = isFixed
+      ? stickyPlaceholder.getBoundingClientRect().top + window.scrollY
+      : stickyWrap.getBoundingClientRect().top + window.scrollY;
+
+    if (!isFixed && window.scrollY + HEADER_H >= triggerY) {
+      // Pin it
+      const rect = stickyWrap.getBoundingClientRect();
+      stickyPlaceholder.style.cssText = `display:block;height:${navH}px;`;
+      stickyWrap.style.cssText = `position:fixed;top:${HEADER_H}px;left:${rect.left}px;width:${rect.width}px;z-index:998;`;
+      isFixed = true;
+    } else if (isFixed && window.scrollY + HEADER_H < stickyPlaceholder.getBoundingClientRect().top + window.scrollY) {
+      // Unpin it
+      stickyWrap.style.cssText = '';
+      stickyPlaceholder.style.cssText = 'display:none;';
+      isFixed = false;
+    }
+  }
+
+  window.addEventListener('scroll', updateSticky, { passive: true });
+  window.addEventListener('resize', () => { isFixed = false; stickyWrap.style.cssText=''; stickyPlaceholder.style.cssText='display:none;'; updateSticky(); }, { passive: true });
+
   // ── Scroll spy ─────────────────────────────────────────────
   const tabs = document.querySelectorAll('.tab');
+  const SCROLL_OFFSET = HEADER_H + 56; // header + tab bar height
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1098,7 +1136,7 @@
         document.querySelector(`.tab[data-id="${id}"]`)?.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
       }
     });
-  }, { threshold: 0.2, rootMargin: '-70px 0px 0px 0px' });
+  }, { threshold: 0.15, rootMargin: `-${SCROLL_OFFSET}px 0px 0px 0px` });
 
   document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
   if (tabs[0]) tabs[0].classList.add('active');
