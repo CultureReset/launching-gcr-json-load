@@ -120,53 +120,35 @@ const GCR = {
       .sort((a, b) => (a.date || a.event_date || '').localeCompare(b.date || b.event_date || ''));
     return limit ? upcoming.slice(0, limit) : upcoming;
   },
-  search(q) {
-    // Strip emojis from search query so they don't interfere
+  // Full search — hits backend which queries entity, menu_items, drink_items, specials, events, tags, activities
+  async search(q) {
     const term = q.toLowerCase().replace(/[\u{1F300}-\u{1FAF6}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '').trim();
-    // Build a set of business slugs that have matching specials/menu items
-    const specialMatches = new Set();
-    this.specials.forEach(s => {
-      if ((s.name || '').toLowerCase().includes(term) ||
-          (s.description || '').toLowerCase().includes(term) ||
-          (s.discount || '').toLowerCase().includes(term) ||
-          (s.discount_text || '').toLowerCase().includes(term) ||
-          (s.businessName || '').toLowerCase().includes(term)) {
-        specialMatches.add(s.slug || s.subdomain);
-      }
-    });
-    // Also match events
-    const eventMatches = new Set();
-    this.events.forEach(e => {
-      if ((e.name || '').toLowerCase().includes(term) ||
-          (e.description || '').toLowerCase().includes(term) ||
-          (e.artist_name || '').toLowerCase().includes(term) ||
-          (e.businessName || '').toLowerCase().includes(term)) {
-        eventMatches.add(e.slug || e.subdomain);
-      }
-    });
-    const stripEmoji = s => (s||'').replace(/[\u{1F300}-\u{1FAF6}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '');
-    return this.businesses.filter(b => {
-      if (stripEmoji(b.name).toLowerCase().includes(term)) return true;
-      if ((b.subtitle    || '').toLowerCase().includes(term)) return true;
-      if ((b.tagline     || '').toLowerCase().includes(term)) return true;
-      if ((b.description || '').toLowerCase().includes(term)) return true;
-      if ((b.area        || '').toLowerCase().includes(term)) return true;
-      if ((b.type        || '').toLowerCase().includes(term)) return true;
-      if ((b.entity_subtype || '').toLowerCase().replace(/_/g,' ').includes(term)) return true;
-      if ((b.city        || '').toLowerCase().includes(term)) return true;
-      // Check tags (can be strings or objects)
-      if (b.tags && b.tags.some(t => {
-        const tagStr = typeof t === 'string' ? t : (t.tag || '');
-        return tagStr.toLowerCase().replace(/_/g,' ').includes(term);
-      })) return true;
-      if (specialMatches.has(b.slug) || specialMatches.has(b.subdomain)) return true;
-      if (eventMatches.has(b.slug) || eventMatches.has(b.subdomain)) return true;
-      return false;
-    }).sort((a, b) => {
-      const aTop = (a.name || '').toLowerCase().startsWith(term) ? 1 : 0;
-      const bTop = (b.name || '').toLowerCase().startsWith(term) ? 1 : 0;
-      return bTop - aTop;
-    });
+    if (!term) return [];
+    try {
+      const res = await fetch(GCR_API + '/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: term }),
+      });
+      if (!res.ok) throw new Error('search failed');
+      const data = await res.json();
+      return data.results || [];
+    } catch(e) {
+      // Fallback to local search if API fails
+      const stripEmoji = s => (s||'').replace(/[\u{1F300}-\u{1FAF6}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]/gu, '');
+      return this.businesses.filter(b => {
+        if (stripEmoji(b.name).toLowerCase().includes(term)) return true;
+        if ((b.subtitle || '').toLowerCase().includes(term)) return true;
+        if ((b.description || '').toLowerCase().includes(term)) return true;
+        if ((b.city || '').toLowerCase().includes(term)) return true;
+        if ((b.entity_subtype || '').toLowerCase().replace(/_/g,' ').includes(term)) return true;
+        if (b.tags && b.tags.some(t => {
+          const tagStr = typeof t === 'string' ? t : (t.tag || '');
+          return tagStr.toLowerCase().replace(/_/g,' ').includes(term);
+        })) return true;
+        return false;
+      });
+    }
   },
   getBusiness(slugOrId) {
     return this.businesses.find(b => b.slug === slugOrId || b.id === slugOrId || b.site_id === slugOrId || b.subdomain === slugOrId);
