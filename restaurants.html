@@ -225,23 +225,32 @@
 
     <section class="toolbar">
       <div class="toolbar-top">
-        <div class="toolbar-title">Filter Restaurants</div>
-        <div class="toolbar-meta">Browse all</div>
+        <div class="toolbar-title">Restaurants</div>
+        <div class="toolbar-meta" id="resultCount">Loading...</div>
       </div>
+
+      <!-- Quick stat row -->
+      <div id="statRow" style="display:flex;gap:10px;flex-wrap:wrap;padding:10px 0 4px;border-bottom:1px solid #e2e8f0;margin-bottom:4px;">
+        <span id="stat-open"    style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:#d4edda;color:#155724;">🟢 Open Now: —</span>
+        <span id="stat-water"   style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:#dbeafe;color:#1e40af;">🌊 Waterfront: —</span>
+        <span id="stat-hh"      style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:#fef3c7;color:#92400e;">🍻 Happy Hour: —</span>
+        <span id="stat-music"   style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;background:#ede9fe;color:#5b21b6;">🎸 Live Music: —</span>
+      </div>
+
+      <!-- Filter chips — populated from real entity tags by gcr-listings.js -->
       <div class="tag-row">
         <button class="tag-btn active" data-filter="all">All</button>
-        <button class="tag-btn" data-filter="waterfront">Waterfront</button>
-        <button class="tag-btn" data-filter="seafood">🐟 Seafood</button>
-        <button class="tag-btn" data-filter="bar-grill">🍺 Bar & Grill</button>
-        <button class="tag-btn" data-filter="southern">🍗 Southern</button>
-        <button class="tag-btn" data-filter="steakhouse">🥩 Steakhouse</button>
-        <button class="tag-btn" data-filter="beach-bar">🏖️ Beach Bar</button>
-        <button class="tag-btn" data-filter="casual">😎 Casual</button>
-        <button class="tag-btn" data-filter="breakfast">🍳 Breakfast</button>
-        <button class="tag-btn" data-filter="pizza">🍕 Pizza</button>
-        <button class="tag-btn" data-filter="mexican">🌮 Mexican</button>
-        <button class="tag-btn" data-filter="happy-hour">🍻 Happy Hour</button>
-        <button class="tag-btn" data-filter="live-music">🎸 Live Music</button>
+      </div>
+
+      <!-- Sort options -->
+      <div style="display:flex;gap:8px;padding-top:10px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:12px;font-weight:700;color:#66788a;">Sort:</span>
+        <button class="sort-btn active" data-sort="default"  style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">Default</button>
+        <button class="sort-btn" data-sort="rating"          style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">⭐ Best Rated</button>
+        <button class="sort-btn" data-sort="open"            style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">🟢 Open Now</button>
+        <button class="sort-btn" data-sort="waterfront"      style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">🌊 Waterfront</button>
+        <button class="sort-btn" data-sort="happy_hour"      style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">🍻 Happy Hour</button>
+        <button class="sort-btn" data-sort="live_music"      style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">🎸 Live Music</button>
       </div>
     </section>
 
@@ -283,12 +292,19 @@
         </div>
 
         <div class="panel">
-          <h3>Map Area</h3>
-          <div class="mapbox">
-            <div class="river"></div>
-            <div class="pin"></div>
+          <h3>Map</h3>
+          <div style="border-radius:14px;overflow:hidden;height:200px;">
+            <iframe
+              title="Orange Beach & Gulf Shores"
+              width="100%" height="200" style="border:0;display:block;"
+              loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-87.7200%2C30.2000%2C-87.5500%2C30.3200&layer=mapnik&marker=30.2460%2C-87.6003">
+            </iframe>
           </div>
-          <div class="mini-meta" style="margin-top:10px">Use a real map here so people can choose based on where they are staying.</div>
+          <a href="https://maps.google.com/?q=Orange+Beach,+AL" target="_blank" rel="noopener"
+             style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:700;color:#0b7a75;text-decoration:none;">
+            Open in Google Maps →
+          </a>
         </div>
 
         <div class="panel">

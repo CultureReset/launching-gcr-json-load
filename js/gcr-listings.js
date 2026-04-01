@@ -316,6 +316,8 @@ function buildCard(entity) {
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
+  const viewBtn = `<a href="profile.html?id=${encodeURIComponent(slug)}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+
   const dirBtn = dir
     ? `<a href="${dir}" target="_blank" rel="noopener" class="gcr-btn"
         onclick="event.stopPropagation()">📍 Directions</a>`
@@ -369,7 +371,7 @@ function buildCard(entity) {
           ${hoursInfo ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : ''}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${fullAddr || location}</div>
-            <div class="gcr-card-actions">${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
+            <div class="gcr-card-actions">${viewBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
           </div>
         </div>
       </div>
@@ -429,7 +431,7 @@ function applyFilter(grid, filter) {
 }
 
 /* ── Build dynamic filter chips from actual entity tags ── */
-function buildDynamicFilters(entities, category) {
+function buildDynamicFilters(entities) {
   const chipContainer = document.querySelector('.tag-row, .filter-row, .chips-row');
   if (!chipContainer) return;
 
@@ -468,7 +470,7 @@ function buildDynamicFilters(entities, category) {
 
   // Build new chip HTML — keep "All" as first chip
   const allBtn = '<button class="tag-btn active" data-filter="all">All</button>';
-  const tagBtns = sorted.map(([tag, count]) => {
+  const tagBtns = sorted.map(([tag]) => {
     const label = tag.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     return `<button class="tag-btn" data-filter="${tag}">${label}</button>`;
   }).join('');
@@ -536,9 +538,78 @@ function initStandardPage() {
     });
   }
 
-  function render(businesses) {
-    const entities = getEntitiesForCategory(businesses, category);
+  let _allEntities = [];
 
+  function updateStatRow(entities) {
+    const now = new Date();
+    const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const todayName = DAYS[now.getDay()];
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    let openCount = 0, waterfrontCount = 0, hhCount = 0, musicCount = 0;
+    entities.forEach(e => {
+      const tags = (e.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
+      if (tags.includes('waterfront') || tags.includes('waterfront_dining')) waterfrontCount++;
+      if (tags.includes('live_music') || tags.includes('live music')) musicCount++;
+      if (e.hh_days) hhCount++;
+      // Check open now
+      const todayHours = (e.hours || []).find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
+      if (todayHours && !todayHours.is_closed && todayHours.open_time && todayHours.close_time) {
+        const [oh, om] = todayHours.open_time.split(':').map(Number);
+        const [ch, cm] = todayHours.close_time.split(':').map(Number);
+        const openMins  = oh * 60 + (om || 0);
+        const closeMins = ch * 60 + (cm || 0);
+        if (nowMins >= openMins && nowMins < closeMins) openCount++;
+      }
+    });
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('stat-open',  `🟢 Open Now: ${openCount}`);
+    set('stat-water', `🌊 Waterfront: ${waterfrontCount}`);
+    set('stat-hh',    `🍻 Happy Hour: ${hhCount}`);
+    set('stat-music', `🎸 Live Music: ${musicCount}`);
+  }
+
+  function sortEntities(entities, sortBy) {
+    const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const todayName = DAYS[new Date().getDay()];
+    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+
+    const copy = [...entities];
+    if (sortBy === 'rating') {
+      return copy.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+    if (sortBy === 'open') {
+      return copy.sort((a, b) => {
+        const isOpen = e => {
+          const row = (e.hours || []).find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
+          if (!row || row.is_closed || !row.open_time || !row.close_time) return 0;
+          const [oh, om] = row.open_time.split(':').map(Number);
+          const [ch, cm] = row.close_time.split(':').map(Number);
+          return (nowMins >= oh*60+(om||0) && nowMins < ch*60+(cm||0)) ? 1 : 0;
+        };
+        return isOpen(b) - isOpen(a);
+      });
+    }
+    if (sortBy === 'waterfront') {
+      return copy.sort((a, b) => {
+        const hasTag = e => (e.tags || []).some(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().includes('waterfront'));
+        return hasTag(b) - hasTag(a);
+      });
+    }
+    if (sortBy === 'happy_hour') {
+      return copy.sort((a, b) => (b.hh_days ? 1 : 0) - (a.hh_days ? 1 : 0));
+    }
+    if (sortBy === 'live_music') {
+      return copy.sort((a, b) => {
+        const hasMusic = e => (e.tags || []).some(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().includes('live_music'));
+        return hasMusic(b) - hasMusic(a);
+      });
+    }
+    return copy;
+  }
+
+  function renderEntities(entities) {
     if (!entities.length) {
       grid.innerHTML = `
         <div class="gcr-empty">
@@ -546,23 +617,39 @@ function initStandardPage() {
           <h3>Coming Soon</h3>
           <p>We're adding Gulf Coast businesses every day. Check back soon!</p>
         </div>`;
-      const meta = document.querySelector('.toolbar-meta');
+      const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
       if (meta) meta.textContent = '0 listed';
       return;
     }
-
-    // Build dynamic filter chips from entity tags
-    buildDynamicFilters(entities, category);
-
     grid.innerHTML = entities.map(buildCard).join('');
-
-    const meta = document.querySelector('.toolbar-meta');
+    const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
-
     wireFilterChips(grid);
-    populateSidebar(entities);
-
     if (urlTag) applyFilter(grid, urlTag);
+  }
+
+  function render(businesses) {
+    _allEntities = getEntitiesForCategory(businesses, category);
+    buildDynamicFilters(_allEntities);
+    renderEntities(_allEntities);
+    updateStatRow(_allEntities);
+    populateSidebar(_allEntities);
+
+    // Wire sort buttons
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sort-btn').forEach(b => {
+          b.style.background = '#fff';
+          b.style.color = '#25465b';
+          b.classList.remove('active');
+        });
+        btn.style.background = '#0b7a75';
+        btn.style.color = '#fff';
+        btn.classList.add('active');
+        const sorted = sortEntities(_allEntities, btn.dataset.sort || 'default');
+        renderEntities(sorted);
+      });
+    });
   }
 
   if (window.GCR && GCR.loaded) {
@@ -571,7 +658,6 @@ function initStandardPage() {
     document.addEventListener('gcr:loaded', e => render(e.detail.businesses || []));
   }
 
-  // Wire chips immediately for visual feedback
   wireFilterChips(grid);
 }
 

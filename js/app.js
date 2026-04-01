@@ -8,6 +8,73 @@
 /* ══════════════════════════════════════════
    GLOBAL SEARCH HELPERS (called from HTML onclick)
 ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   LOYALTY / SIGNUP MODAL — captures leads → GCR dashboard
+══════════════════════════════════════════ */
+window.openSignupModal = function() {
+  if (document.getElementById('_gcrSignupModal')) {
+    document.getElementById('_gcrSignupModal').style.display = 'flex';
+    return;
+  }
+  const modal = document.createElement('div');
+  modal.id = '_gcrSignupModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;';
+  modal.innerHTML = `
+    <div style="background:#1a1a2e;border:1px solid #f59e0b;border-radius:16px;padding:32px;max-width:420px;width:100%;position:relative;color:#fff;">
+      <button onclick="document.getElementById('_gcrSignupModal').style.display='none'" style="position:absolute;top:14px;right:18px;background:none;border:none;color:#aaa;font-size:24px;cursor:pointer;">×</button>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:2rem;">⭐</div>
+        <h2 style="margin:8px 0 4px;font-size:1.4rem;color:#f59e0b;">Join Our Loyalty Program</h2>
+        <p style="color:#aaa;font-size:0.9rem;margin:0;">Get exclusive deals, early event access & rewards from Gulf Coast businesses.</p>
+      </div>
+      <div id="_gcrSignupError" style="display:none;background:#7f1d1d;color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;"></div>
+      <div id="_gcrSignupSuccess" style="display:none;background:#14532d;color:#86efac;padding:16px;border-radius:8px;font-size:14px;text-align:center;"></div>
+      <form id="_gcrSignupForm" onsubmit="window._submitLoyaltySignup(event)" style="display:flex;flex-direction:column;gap:12px;">
+        <input name="name" placeholder="Your name" required style="padding:11px 14px;border-radius:8px;border:1px solid #374151;background:#111827;color:#fff;font-size:14px;">
+        <input name="email" type="email" placeholder="Email address" style="padding:11px 14px;border-radius:8px;border:1px solid #374151;background:#111827;color:#fff;font-size:14px;">
+        <input name="phone" placeholder="Phone number" style="padding:11px 14px;border-radius:8px;border:1px solid #374151;background:#111827;color:#fff;font-size:14px;">
+        <button type="submit" style="padding:12px;background:#f59e0b;color:#000;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">🎁 Sign Me Up!</button>
+      </form>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+};
+
+window._submitLoyaltySignup = async function(e) {
+  e.preventDefault();
+  const form   = document.getElementById('_gcrSignupForm');
+  const errEl  = document.getElementById('_gcrSignupError');
+  const sucEl  = document.getElementById('_gcrSignupSuccess');
+  const data   = Object.fromEntries(new FormData(form));
+
+  if (!data.email && !data.phone) {
+    errEl.textContent = 'Please enter an email or phone number.';
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch('https://cybercheck-api-database.vercel.app/api/gcr/tourist/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: data.name, email: data.email || null, phone: data.phone || null, source: 'loyalty_popup', page: window.location.pathname })
+    });
+    if (res.ok) {
+      form.style.display = 'none';
+      sucEl.innerHTML = '🎉 <strong>You\'re in!</strong><br>Welcome to the GCR Loyalty Program. Watch for exclusive deals!';
+      sucEl.style.display = 'block';
+      setTimeout(() => { document.getElementById('_gcrSignupModal').style.display = 'none'; form.style.display = 'flex'; sucEl.style.display = 'none'; form.reset(); }, 3500);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      errEl.textContent = d.error || 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+    }
+  } catch {
+    errEl.textContent = 'Network error. Please check your connection.';
+    errEl.style.display = 'block';
+  }
+};
+
 window.doHeroSearch = function() {
   const q = (document.getElementById('heroSearch') || {}).value?.trim();
   if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
@@ -275,7 +342,7 @@ function _gcrCalRenderEvents() {
   // — Specials + Happy Hours —
   (GCR.specials||[]).filter(sp=>{
     if (sp.active===false) return false;
-    const days=(sp.days||sp.day_of_week||[]).map(dd=>dd.toLowerCase());
+    const _raw=sp.days||sp.day_of_week||[];const days=(Array.isArray(_raw)?_raw:(_raw?String(_raw).split(/[,;]+/).map(s=>s.trim()).filter(Boolean):[])).map(dd=>dd.toLowerCase());
     const dayMatch = !days.length || ['daily','everyday','all'].some(k=>days.includes(k)) ||
       days.includes(dayName) || (isWeekend&&(days.includes('weekend')||days.includes('weekends')));
     if (!dayMatch) return false;

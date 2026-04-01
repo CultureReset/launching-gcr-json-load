@@ -1042,6 +1042,49 @@
   </div>
 </section>
 
+<!-- ══════════ HAPPENING NOW / TONIGHT ══════════ -->
+<section class="home-section bg-white" id="happeningNow" style="padding-top:32px;padding-bottom:32px;">
+  <div class="hcont">
+    <div class="section-head" style="margin-bottom:16px;">
+      <div class="section-label">Right Now</div>
+      <h2 class="section-title" style="font-size:1.5rem;">Happening Tonight</h2>
+      <p class="section-sub">Live music, open happy hours, daily specials & things to book now</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;" id="happeningGrid">
+
+      <!-- Live Music Tonight -->
+      <div style="background:#0d2137;border-radius:14px;padding:18px;color:#fff;min-height:130px;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#5dd9d4;margin-bottom:8px;">🎵 Live Music Tonight</div>
+        <div id="hn-music" style="font-size:.85rem;color:rgba(255,255,255,.8);line-height:1.6;">Loading...</div>
+        <a href="events.html?type=live_music" style="display:inline-block;margin-top:10px;font-size:.78rem;font-weight:700;color:#5dd9d4;text-decoration:none;">See all tonight →</a>
+      </div>
+
+      <!-- Happy Hours Open Now -->
+      <div style="background:linear-gradient(135deg,#0b7a75,#065f5b);border-radius:14px;padding:18px;color:#fff;min-height:130px;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#a7f3d0;margin-bottom:8px;">🍻 Happy Hours Open Now</div>
+        <div id="hn-happyhour" style="font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.6;">Loading...</div>
+        <a href="happy-hours.html" style="display:inline-block;margin-top:10px;font-size:.78rem;font-weight:700;color:#a7f3d0;text-decoration:none;">See all happy hours →</a>
+      </div>
+
+      <!-- Today's Specials -->
+      <div style="background:linear-gradient(135deg,#7c3f00,#c9831f);border-radius:14px;padding:18px;color:#fff;min-height:130px;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#fde68a;margin-bottom:8px;">🏷️ Today's Specials</div>
+        <div id="hn-specials" style="font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.6;">Loading...</div>
+        <a href="specials.html" style="display:inline-block;margin-top:10px;font-size:.78rem;font-weight:700;color:#fde68a;text-decoration:none;">See all specials →</a>
+      </div>
+
+      <!-- Book Now Activities -->
+      <div style="background:linear-gradient(135deg,#1a3a5c,#1a6496);border-radius:14px;padding:18px;color:#fff;min-height:130px;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#93c5fd;margin-bottom:8px;">🎯 Book Now</div>
+        <div id="hn-activities" style="font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.6;">Loading...</div>
+        <a href="things-to-do.html" style="display:inline-block;margin-top:10px;font-size:.78rem;font-weight:700;color:#93c5fd;text-decoration:none;">See all activities →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- ══════════ FEATURED ══════════ -->
 <section class="home-section bg-white">
   <div class="hcont">
@@ -1621,32 +1664,161 @@ window.installApp = function() {
   }
 };
 
+/* ── Happening Now / Tonight ── */
+document.addEventListener('gcr:loaded', function() {
+  const now     = new Date();
+  const dayName = now.toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+  const hour    = now.getHours();
+  const todayStr = now.toISOString().split('T')[0];
+
+  function setEl(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
+
+  // ── Live Music Tonight ──
+  var musicEvents = (GCR.events || []).filter(function(e) {
+    const t = (e.event_type || e.type || '').toLowerCase();
+    const n = (e.name || e.event_name || '').toLowerCase();
+    const isMusic = t.includes('live') || t.includes('music') || t.includes('dj') || t.includes('karaoke') || n.includes('live') || n.includes('music');
+    if (!isMusic) return false;
+    // today or recurring today
+    if (e.event_date === todayStr) return true;
+    const dow = (e.day_of_week || '').toLowerCase();
+    return dow === dayName || dow === 'daily' || dow === 'everyday';
+  }).slice(0, 3);
+
+  if (musicEvents.length) {
+    setEl('hn-music', musicEvents.map(function(e) {
+      const venue = e.businessName || e.venue_location || '';
+      const time  = e.start_time || e.time || '';
+      return '<div style="margin-bottom:5px;">🎵 <strong>' + (e.name || e.event_name || 'Live Music') + '</strong>' +
+        (venue ? ' · ' + venue : '') + (time ? ' · ' + time : '') + '</div>';
+    }).join(''));
+  } else {
+    setEl('hn-music', '<span style="color:rgba(255,255,255,.5);font-size:.82rem;">No events listed tonight — check back soon</span>');
+  }
+
+  // ── Happy Hours Open Now ──
+  var openHH = (GCR.businesses || []).filter(function(b) {
+    if (!b.hh_days && !b.hh_start) return false;
+    const days = (b.hh_days || '').toLowerCase();
+    const dayMatch = days.includes(dayName.slice(0,3)) || days.includes('daily') || days.includes('every') || days.includes('mon-fri') || days.includes('weekday');
+    if (!dayMatch) return false;
+    if (b.hh_start && b.hh_end) {
+      try {
+        const start = parseInt(b.hh_start.replace(':',''));
+        const end   = parseInt(b.hh_end.replace(':',''));
+        const now4  = hour * 100 + now.getMinutes();
+        return now4 >= start && now4 <= end;
+      } catch(e) { return true; }
+    }
+    return true;
+  }).slice(0, 4);
+
+  if (openHH.length) {
+    setEl('hn-happyhour', openHH.map(function(b) {
+      const time = (b.hh_start && b.hh_end) ? b.hh_start + '–' + b.hh_end : '';
+      return '<div style="margin-bottom:5px;">🟢 <strong>' + b.name + '</strong>' + (time ? ' · ' + time : '') + '</div>';
+    }).join(''));
+  } else {
+    // Show upcoming happy hours for today
+    var upcomingHH = (GCR.businesses || []).filter(function(b) {
+      return b.hh_days && (b.hh_days.toLowerCase().includes(dayName.slice(0,3)) || b.hh_days.toLowerCase().includes('daily'));
+    }).slice(0, 3);
+    if (upcomingHH.length) {
+      setEl('hn-happyhour', upcomingHH.map(function(b) {
+        return '<div style="margin-bottom:5px;">🕐 <strong>' + b.name + '</strong>' + (b.hh_start ? ' starts ' + b.hh_start : '') + '</div>';
+      }).join(''));
+    } else {
+      setEl('hn-happyhour', '<span style="color:rgba(255,255,255,.5);font-size:.82rem;">Check individual listings for happy hour times</span>');
+    }
+  }
+
+  // ── Today's Specials ──
+  var todaySpecials = (GCR.specials || []).filter(function(sp) {
+    if (sp.active === false) return false;
+    const raw  = sp.days || sp.day_of_week || sp.recurring_days || [];
+    const days = (Array.isArray(raw) ? raw : (raw ? String(raw).split(/[,;]+/).map(s=>s.trim()).filter(Boolean) : [])).map(d=>d.toLowerCase());
+    return !days.length || days.some(function(d) {
+      return d.includes(dayName.slice(0,3)) || d === 'daily' || d === 'everyday' || d === 'all';
+    });
+  }).slice(0, 3);
+
+  if (todaySpecials.length) {
+    setEl('hn-specials', todaySpecials.map(function(sp) {
+      const biz = sp.businessName || sp.entity_name || '';
+      const title = sp.title || sp.special_title || sp.name || 'Special';
+      return '<div style="margin-bottom:5px;">⭐ <strong>' + title + '</strong>' + (biz ? ' · ' + biz : '') + '</div>';
+    }).join(''));
+  } else {
+    setEl('hn-specials', '<span style="color:rgba(255,255,255,.5);font-size:.82rem;">No specials listed today</span>');
+  }
+
+  // ── Book Now Activities ──
+  var activities = (GCR.businesses || []).filter(function(b) {
+    const t = (b.entity_subtype || b.category || b.type || '').toLowerCase();
+    return t.includes('activit') || t.includes('tour') || t.includes('rental') || t.includes('cruise') || t.includes('fishing') || t.includes('parasail');
+  }).filter(function(b) { return b.booking_url || b.reservation_url || b.call_url || b.phone; })
+    .slice(0, 4);
+
+  if (activities.length) {
+    setEl('hn-activities', activities.map(function(b) {
+      const link = b.booking_url || b.reservation_url || ('profile.html?id=' + encodeURIComponent(b.slug || b.id));
+      return '<div style="margin-bottom:5px;"><a href="' + link + '" style="color:#93c5fd;font-weight:700;text-decoration:none;">→ ' + b.name + '</a></div>';
+    }).join(''));
+  } else {
+    setEl('hn-activities', '<span style="color:rgba(255,255,255,.5);font-size:.82rem;">Loading activities...</span>');
+  }
+});
+
 /* ── Weather ── */
-fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.6003&current_weather=true&hourly=relativehumidity_2m,apparent_temperature&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&windspeed_unit=mph&timezone=America%2FChicago&forecast_days=1')
-  .then(r => r.json())
-  .then(d => {
-    const cw = d.current_weather;
-    const tempF   = Math.round(cw.temperature);
-    const windMph = Math.round(cw.windspeed);
-    const hiF     = Math.round(d.daily.temperature_2m_max[0]);
-    const loF     = Math.round(d.daily.temperature_2m_min[0]);
-    const icons = [
-      [0,'☀️','Clear'],[1,'🌤️','Mostly Clear'],[2,'⛅','Partly Cloudy'],[3,'☁️','Overcast'],
-      [45,'🌫️','Foggy'],[51,'🌦️','Drizzle'],[61,'🌧️','Rain'],
-      [65,'🌧️','Heavy Rain'],[71,'❄️','Snow'],[80,'🌦️','Showers'],[95,'⛈️','Thunderstorm']
-    ];
-    const wc = cw.weathercode;
-    const wInfo = [...icons].reverse().find(([code]) => wc >= code) || [0,'🌤️','Clear'];
-    document.getElementById('wTemp').textContent  = `${tempF}°F`;
-    document.getElementById('wCond').textContent  = wInfo[2];
-    document.getElementById('wIcon').textContent  = wInfo[1];
-    document.getElementById('wHi').textContent    = `${hiF}°`;
-    document.getElementById('wLo').textContent    = `${loF}°`;
-    document.getElementById('wWind').textContent  = `${windMph} mph`;
-    document.getElementById('wFeels').textContent = `Feels ${tempF}°F`;
-    if (windMph > 20) document.getElementById('wBeachFlag').textContent = '🚩 Check Beach Flags';
-  })
-  .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
+(function loadWeather() {
+  const url = 'https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.6003' +
+    '&current_weather=true' +
+    '&hourly=relativehumidity_2m,apparent_temperature' +
+    '&daily=temperature_2m_max,temperature_2m_min' +
+    '&temperature_unit=fahrenheit&windspeed_unit=mph' +
+    '&timezone=America%2FChicago&forecast_days=1';
+
+  fetch(url)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(d => {
+      const cw      = d.current_weather;
+      const tempF   = Math.round(cw.temperature);
+      const windMph = Math.round(cw.windspeed);
+      const hiF     = Math.round(d.daily.temperature_2m_max[0]);
+      const loF     = Math.round(d.daily.temperature_2m_min[0]);
+
+      // Find current hour index in hourly arrays
+      const nowHour  = new Date().getHours();
+      const feelsArr = d.hourly && d.hourly.apparent_temperature;
+      const humArr   = d.hourly && d.hourly.relativehumidity_2m;
+      const feelsF   = feelsArr ? Math.round(feelsArr[nowHour] ?? feelsArr[0] ?? tempF) : tempF;
+      const humidity = humArr   ? Math.round(humArr[nowHour]   ?? humArr[0]   ?? 0)     : null;
+
+      const icons = [
+        [0,'☀️','Clear'],[1,'🌤️','Mostly Clear'],[2,'⛅','Partly Cloudy'],[3,'☁️','Overcast'],
+        [45,'🌫️','Foggy'],[51,'🌦️','Drizzle'],[61,'🌧️','Rain'],
+        [65,'🌧️','Heavy Rain'],[71,'❄️','Snow'],[80,'🌦️','Showers'],[95,'⛈️','Thunderstorm']
+      ];
+      const wc    = cw.weathercode;
+      const wInfo = [...icons].reverse().find(([code]) => wc >= code) || [0,'🌤️','Clear'];
+
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('wTemp',      `${tempF}°F`);
+      set('wCond',      wInfo[2]);
+      set('wIcon',      wInfo[1]);
+      set('wHi',        `${hiF}°`);
+      set('wLo',        `${loF}°`);
+      set('wWind',      `${windMph} mph`);
+      set('wFeels',     `Feels ${feelsF}°F`);
+      if (humidity !== null) set('wHumid', `${humidity}%`);
+      if (windMph > 20) set('wBeachFlag', '🚩 Check Beach Flags');
+      else              set('wBeachFlag', '🏖️ Beach Open');
+    })
+    .catch(() => {
+      const el = document.getElementById('wCond');
+      if (el) el.textContent = 'Weather unavailable';
+    });
+})();
 </script>
 </body>
 </html>
