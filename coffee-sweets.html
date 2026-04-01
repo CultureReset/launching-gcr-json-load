@@ -226,17 +226,19 @@
 
     <section class="toolbar">
       <div class="toolbar-top">
-        <div class="toolbar-title">Filter Shops</div>
-        <div class="toolbar-meta">Browse all</div>
+        <div class="toolbar-title">Coffee & Sweets</div>
+        <div class="toolbar-meta" id="resultCount">Loading...</div>
       </div>
+      <!-- Filter chips — populated from real entity tags -->
       <div class="tag-row">
         <button class="tag-btn active" data-filter="all">All</button>
-        <button class="tag-btn" data-filter="coffee">☕ Coffee</button>
-        <button class="tag-btn" data-filter="ice-cream">🍦 Ice Cream</button>
-        <button class="tag-btn" data-filter="bakery">🥐 Bakery</button>
-        <button class="tag-btn" data-filter="dessert">🍰 Desserts</button>
-        <button class="tag-btn" data-filter="espresso">☕ Espresso</button>
-        <button class="tag-btn" data-filter="pastries">🥐 Pastries</button>
+      </div>
+      <!-- Sort options -->
+      <div style="display:flex;gap:8px;padding-top:10px;flex-wrap:wrap;align-items:center;">
+        <span style="font-size:12px;font-weight:700;color:#66788a;">Sort:</span>
+        <button class="sort-btn active" data-sort="default"  style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">Default</button>
+        <button class="sort-btn" data-sort="rating"          style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">⭐ Best Rated</button>
+        <button class="sort-btn" data-sort="open"            style="border:1px solid #e2e8f0;background:#fff;color:#25465b;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;">🟢 Open Now</button>
       </div>
     </section>
 
@@ -250,39 +252,20 @@
       <aside class="sidebar">
         <div class="panel">
           <h3>Popular Nearby</h3>
-
-          <div class="mini-card">
-            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80')"></div>
-            <div>
-              <div class="mini-name">Morning Brew</div>
-              <div class="mini-meta">Orange Beach, AL</div>
-              <div class="mini-links">
-                <a href="#">Directions</a>
-                <a href="#">Call</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="mini-card">
-            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514432324607-2e467f4af3fb?auto=format&fit=crop&w=800&q=80')"></div>
-            <div>
-              <div class="mini-name">Sweet Treats Cafe</div>
-              <div class="mini-meta">Gulf Shores, AL</div>
-              <div class="mini-links">
-                <a href="#">Directions</a>
-                <a href="#">Call</a>
-              </div>
-            </div>
-          </div>
+          <!-- Populated by gcr-listings.js populateSidebar() -->
         </div>
 
         <div class="panel">
-          <h3>Map Area</h3>
-          <div class="mapbox">
-            <div class="river"></div>
-            <div class="pin"></div>
+          <h3>Map</h3>
+          <div style="border-radius:14px;overflow:hidden;height:200px;">
+            <iframe title="Orange Beach & Gulf Shores" width="100%" height="200" style="border:0;display:block;" loading="lazy"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-87.7200%2C30.2000%2C-87.5500%2C30.3200&layer=mapnik&marker=30.2460%2C-87.6003">
+            </iframe>
           </div>
-          <div class="mini-meta" style="margin-top:10px">Use a real map here to find shops near where you're staying.</div>
+          <a href="https://maps.google.com/?q=Orange+Beach,+AL" target="_blank" rel="noopener"
+             style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:700;color:#0b7a75;text-decoration:none;">
+            Open in Google Maps →
+          </a>
         </div>
 
         <div class="panel">
