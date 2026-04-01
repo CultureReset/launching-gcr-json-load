@@ -323,38 +323,37 @@ function buildCard(entity) {
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
-  const viewBtn = `<a href="profile.html?id=${encodeURIComponent(slug)}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  // Deduplicate action URLs — never show same URL twice, only show if link exists
+  const usedUrls = new Set();
+  function dedupeBtn(url, label, style) {
+    if (!url) return '';
+    const key = url.replace(/https?:\/\//, '').replace(/\/$/, '').split('?')[0];
+    if (usedUrls.has(key)) return '';
+    usedUrls.add(key);
+    return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
+  }
+  const viewBtn    = `<a href="profile.html?id=${encodeURIComponent(slug)}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
+  const dirBtn     = dedupeBtn(dir,            '📍 Directions', '');
+  const bookBtn    = dedupeBtn(bookingUrl,     '📅 Book Now',   'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
+  const reserveBtn = dedupeBtn(reservationUrl, '🍽️ Reserve',   'background:#22c55e;color:#fff;border-color:#22c55e;');
+  const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
+  const webBtn     = dedupeBtn(website,        '🌐 Website',    '');
 
-  const dirBtn = dir
-    ? `<a href="${dir}" target="_blank" rel="noopener" class="gcr-btn"
-        onclick="event.stopPropagation()">📍 Directions</a>`
-    : '';
-  const callBtn = phone
-    ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn"
-        onclick="event.stopPropagation()">📞 Call</a>`
-    : '';
-  const webBtn = website
-    ? `<a href="${website}" target="_blank" rel="noopener" class="gcr-btn"
-        onclick="event.stopPropagation()">🌐 Website</a>`
-    : '';
-  const bookBtn = bookingUrl
-    ? `<a href="${bookingUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#0ea5e9;color:#fff;border-color:#0ea5e9;"
-        onclick="event.stopPropagation()">📅 Book Now</a>`
-    : '';
-  const reserveBtn = reservationUrl
-    ? `<a href="${reservationUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#22c55e;color:#fff;border-color:#22c55e;"
-        onclick="event.stopPropagation()">🍽️ Reserve</a>`
-    : '';
-  const orderBtn = orderUrl
-    ? `<a href="${orderUrl}" target="_blank" rel="noopener" class="gcr-btn" style="background:#f59e0b;color:#fff;border-color:#f59e0b;"
-        onclick="event.stopPropagation()">🛵 Order</a>`
+  // 3 lines of about text — description first, fall back to subtitle
+  const aboutText = (desc || sub || '').trim();
+  const aboutBlock = aboutText
+    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${aboutText}</div>`
     : '';
 
-  // Full address line
-  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
-
-  // Hours line for card
+  // Hours — show today's hours if available, then happy hour
+  const fullAddr  = [addr, city, state].filter(Boolean).join(', ');
   const hoursInfo = computeHoursLine(entity.hours || []);
+  const hoursBlock = hoursInfo
+    ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>`
+    : hhDays
+      ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>`
+      : '';
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -371,11 +370,10 @@ function buildCard(entity) {
         <div class="gcr-card-body">
           <div class="gcr-card-name">${name}</div>
           <div class="gcr-card-sub">${[sub, location].filter(Boolean).join(' · ')}</div>
-          ${desc ? `<div style="margin-top:6px;font-size:13px;color:#5c6b81;line-height:1.4;">${desc.length > 120 ? desc.slice(0,120)+'…' : desc}</div>` : ''}
+          ${aboutBlock}
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-          ${hhDays ? `<div style="margin-top:8px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${hhDays}${hhStart ? ' · '+hhStart : ''}${hhEnd ? '–'+hhEnd : ''}</div>` : ''}
-          ${hoursInfo ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : ''}
+          ${hoursBlock}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${fullAddr || location}</div>
             <div class="gcr-card-actions">${viewBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}${webBtn}</div>
