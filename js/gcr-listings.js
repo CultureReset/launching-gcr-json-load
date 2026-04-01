@@ -548,33 +548,41 @@ function initStandardPage() {
   let _allEntities = [];
 
   function updateStatRow(entities) {
-    const now = new Date();
-    const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const now      = new Date();
+    const DAYS     = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
     const todayName = DAYS[now.getDay()];
-    const nowMins = now.getHours() * 60 + now.getMinutes();
+    const todayStr  = now.toISOString().split('T')[0];
+    const nowMins   = now.getHours() * 60 + now.getMinutes();
 
-    let openCount = 0, waterfrontCount = 0, hhCount = 0, musicCount = 0;
+    let openCount = 0, waterfrontCount = 0, hhCount = 0;
     entities.forEach(e => {
       const tags = (e.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
-      if (tags.includes('waterfront') || tags.includes('waterfront_dining')) waterfrontCount++;
-      if (tags.includes('live_music') || tags.includes('live music')) musicCount++;
+      if (tags.some(t => t.includes('waterfront'))) waterfrontCount++;
       if (e.hh_days) hhCount++;
-      // Check open now
       const todayHours = (e.hours || []).find(h => h.day_of_week && h.day_of_week.toLowerCase() === todayName);
       if (todayHours && !todayHours.is_closed && todayHours.open_time && todayHours.close_time) {
         const [oh, om] = todayHours.open_time.split(':').map(Number);
         const [ch, cm] = todayHours.close_time.split(':').map(Number);
-        const openMins  = oh * 60 + (om || 0);
-        const closeMins = ch * 60 + (cm || 0);
-        if (nowMins >= openMins && nowMins < closeMins) openCount++;
+        if (nowMins >= oh*60+(om||0) && nowMins < ch*60+(cm||0)) openCount++;
       }
     });
+
+    // Live music tonight = actual events from GCR.events, not tags
+    const entitySlugs = new Set(entities.map(e => e.slug || e.id));
+    const musicTonight = (window.GCR && GCR.events || []).filter(e => {
+      const isToday = e.event_date === todayStr;
+      const isRecurringToday = e.recurring && (e.day_of_week || '').toLowerCase() === todayName;
+      if (!isToday && !isRecurringToday) return false;
+      const t = (e.event_type || '').toLowerCase();
+      const n = (e.event_name || '').toLowerCase();
+      return t.includes('live') || t.includes('music') || t.includes('dj') || n.includes('live music') || n.includes('dj');
+    }).filter(e => entitySlugs.has(e.entity_slug || e.slug));
 
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     set('stat-open',  `🟢 Open Now: ${openCount}`);
     set('stat-water', `🌊 Waterfront: ${waterfrontCount}`);
     set('stat-hh',    `🍻 Happy Hour: ${hhCount}`);
-    set('stat-music', `🎸 Live Music: ${musicCount}`);
+    set('stat-music', `🎸 Live Music Tonight: ${musicTonight.length}`);
   }
 
   function sortEntities(entities, sortBy) {
