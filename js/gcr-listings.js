@@ -91,8 +91,34 @@
   document.head.appendChild(s);
 })();
 
-/* ── Fallback hero image ── */
-const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
+/* ── Category fallback images ── */
+const FALLBACK_IMGS = {
+  restaurants:     'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
+  restaurant:      'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80',
+  seafood:         'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80',
+  bar_grill:       'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+  bar:             'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+  coffee_shop:     'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+  cafe:            'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+  bakery:          'https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?auto=format&fit=crop&w=800&q=80',
+  ice_cream:       'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=800&q=80',
+  shopping:        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80',
+  boutique:        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=800&q=80',
+  nightlife:       'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?auto=format&fit=crop&w=800&q=80',
+  parasailing:     'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+  boat_rental:     'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+  fishing_charter: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+  dolphin_cruise:  'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+  tour:            'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80',
+  hotel:           'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+  spa:             'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80',
+  default:         'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80',
+};
+const FALLBACK_IMG = FALLBACK_IMGS.default;
+function getFallbackImg(subtype) {
+  const key = (subtype || '').toLowerCase().replace(/-/g, '_');
+  return FALLBACK_IMGS[key] || FALLBACK_IMG;
+}
 
 /* ── entity_subtype → listing page ── */
 /* Keys use underscores. The lookup normalizes hyphens→underscores automatically. */
@@ -283,7 +309,7 @@ function buildCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city   = entity.city || '';
   const state  = entity.state || '';
-  const hero   = entity.hero_image_url || entity.cover_url || FALLBACK_IMG;
+  const hero   = entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
   const rating = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr   = entity.address_line_1 || entity.address || '';
@@ -310,7 +336,9 @@ function buildCard(entity) {
   const priceTag = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
   const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
 
-  const chipLinks = rawTags.slice(0, 4).map(tag => {
+  // Show tags as chips, or show subtype as a chip if no tags
+  const displayTags = rawTags.length ? rawTags.slice(0, 4) : (subtype ? [subtype.replace(/ /g, '_')] : []);
+  const chipLinks = displayTags.map(tag => {
     const dest = tagToPage(tag);
     return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip"
       onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
