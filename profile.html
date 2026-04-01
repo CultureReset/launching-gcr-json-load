@@ -66,17 +66,17 @@
     .social-btn:hover svg { fill:#fff; }
     .social-btn svg { width:17px; height:17px; fill:var(--muted); }
 
-    /* Sticky nav */
-    .sticky-wrap { position:sticky; top:0; z-index:999; }
-    .sticky-nav { background:rgba(255,255,255,0.95); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); box-shadow:var(--shadow); }
-    .tabs { display:flex; overflow:auto; gap:8px; padding:10px 12px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+    /* Sticky nav — sits below the 64px global gcr-header */
+    .sticky-wrap { position:sticky; top:64px; z-index:998; }
+    .sticky-nav { background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); box-shadow:0 2px 12px rgba(0,0,0,.10); }
+    .tabs { display:flex; overflow:auto; gap:6px; padding:10px 14px; scroll-snap-type:x mandatory; scrollbar-width:none; }
     .tabs::-webkit-scrollbar { display:none; }
-    .tab { white-space:nowrap; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:14px; font-weight:500; cursor:pointer; scroll-snap-align:start; transition:all .2s; color:var(--ink); }
+    .tab { white-space:nowrap; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; scroll-snap-align:start; transition:all .18s; color:var(--ink); flex-shrink:0; }
     .tab:hover { border-color:var(--accent); color:var(--accent); }
     .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 
-    /* Sections */
-    section { padding:20px; scroll-margin-top:72px; }
+    /* Sections — scroll margin = 64px header + ~52px tab bar */
+    section { padding:20px; scroll-margin-top:120px; }
     .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin:12px 0; box-shadow:var(--shadow); }
     h2 { font-size:20px; margin:0 0 8px 0; }
     h3 { font-size:15px; color:var(--accent); margin:16px 0 8px 0; border-bottom:1px solid var(--border); padding-bottom:6px; }
