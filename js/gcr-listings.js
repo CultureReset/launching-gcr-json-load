@@ -390,7 +390,8 @@ function buildCard(entity) {
        style="text-decoration:none;color:inherit;display:block;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
-       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}">
+       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
+       data-hh="${entity.hh_days ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
@@ -525,7 +526,8 @@ function buildHHCard(entity) {
        style="text-decoration:none;color:inherit;display:block;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
-       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}">
+       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
+       data-hh="${entity.hh_days ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
@@ -643,7 +645,9 @@ function applyFilter(grid, filter) {
     if (filter === 'all') { card.style.display = 'block'; visible++; return; }
     const tags    = (card.dataset.tags || '').split(',');
     const subtype = card.dataset.subtype || '';
-    const match   = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
+    let match = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
+    // For happy_hour filter: also match businesses that have hh_days set (data-hh="1")
+    if (norm === 'happy_hour' && card.dataset.hh === '1') match = true;
     card.style.display = match ? 'block' : 'none';
     if (match) visible++;
   });
@@ -661,10 +665,14 @@ function buildDynamicFilters(entities) {
   const tagCounts = {};
   entities.forEach(e => {
     const tags = (e.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
-    tags.forEach(t => {
-      const norm = t.toLowerCase().replace(/ /g, '_');
+    const tagNorms = tags.map(t => t.toLowerCase().replace(/ /g, '_'));
+    tagNorms.forEach(norm => {
       tagCounts[norm] = (tagCounts[norm] || 0) + 1;
     });
+    // Count hh_days businesses as happy_hour even if they don't have the tag
+    if (e.hh_days && !tagNorms.includes('happy_hour')) {
+      tagCounts['happy_hour'] = (tagCounts['happy_hour'] || 0) + 1;
+    }
   });
 
   // Priority tags that should be first if they exist (most useful filters)
@@ -873,17 +881,27 @@ function initStandardPage() {
       if (meta) meta.textContent = '0 listed';
       return;
     }
+
+    // Capture which filter is currently active BEFORE rebuilding the grid
+    const activeChip = document.querySelector('.tag-btn.active, .filter-chip.active');
+    const currentFilter = (activeChip ? activeChip.dataset.filter : null) || urlTag || 'all';
+
     grid.innerHTML = entities.map(category === 'happy-hours' ? buildHHCard : buildCard).join('');
     const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
     wireFilterChips(grid);
+
+    // Activate chip from URL on initial page load
     if (urlTag) {
-      // Activate the matching chip
       document.querySelectorAll('.tag-btn, .filter-chip').forEach(btn => {
         const f = (btn.dataset.filter || '').replace(/-/g, '_');
         btn.classList.toggle('active', f === urlTag.replace(/-/g, '_'));
       });
-      applyFilter(grid, urlTag);
+    }
+
+    // Always re-apply the active filter after rebuilding (preserves filter state across sort)
+    if (currentFilter && currentFilter !== 'all') {
+      applyFilter(grid, currentFilter);
     }
   }
 
