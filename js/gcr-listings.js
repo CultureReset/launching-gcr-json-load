@@ -11,6 +11,8 @@
 (function injectStyles() {
   const s = document.createElement('style');
   s.textContent = `
+    .layout { padding-top:0 !important; }
+    .results-title { margin-top:14px; }
     .gcr-card {
       display:grid;grid-template-columns:280px minmax(0,1fr);
       background:#fff;border:1px solid #e2e8f0;border-radius:20px;
