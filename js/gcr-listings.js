@@ -404,9 +404,6 @@ function buildCard(entity) {
           ${hoursBlock}
           ${hhBlock}
           ${musicBlock}
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            ${phoneClean ? `<a href="tel:${phoneClean}" style="flex:1;min-width:120px;padding:8px 12px;background:#f0f4f8;border-radius:8px;text-decoration:none;color:#0b7a75;font-size:13px;font-weight:700;text-align:center;border:1px solid #d4e5e3;" onclick="event.stopPropagation();">📞 ${esc(phone)}</a>` : ''}
-          </div>
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
             <div class="gcr-card-actions">${viewBtn}${menuBtn}${hhBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
@@ -542,9 +539,6 @@ function buildHHCard(entity) {
           ${hoursBlock}
           ${hhBlock}
           ${musicBlock}
-          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            ${phoneClean ? `<a href="tel:${phoneClean}" style="flex:1;min-width:120px;padding:8px 12px;background:#f0f4f8;border-radius:8px;text-decoration:none;color:#0b7a75;font-size:13px;font-weight:700;text-align:center;border:1px solid #d4e5e3;" onclick="event.stopPropagation();">📞 ${esc(phone)}</a>` : ''}
-          </div>
           ${hhItemsBtn ? `<div style="margin-top:10px;display:flex;gap:8px;">${hhItemsBtn}</div>` : ''}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
