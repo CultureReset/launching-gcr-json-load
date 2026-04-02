@@ -638,11 +638,11 @@ function applyFilter(grid, filter) {
   const norm = filter.toLowerCase().replace(/-/g, '_');
 
   cards.forEach(card => {
-    if (filter === 'all') { card.style.display = ''; visible++; return; }
+    if (filter === 'all') { card.style.display = 'block'; visible++; return; }
     const tags    = (card.dataset.tags || '').split(',');
     const subtype = card.dataset.subtype || '';
     const match   = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
-    card.style.display = match ? '' : 'none';
+    card.style.display = match ? 'block' : 'none';
     if (match) visible++;
   });
 
