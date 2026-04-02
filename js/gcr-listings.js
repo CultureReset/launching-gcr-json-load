@@ -282,11 +282,12 @@ function buildCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr    = entity.address_line_1 || entity.address || '';
   const phone   = entity.phone || '';
+  const phoneClean = phone.replace(/\D/g, '');
   const dir     = entity.directions_url || '';
   const bookingUrl     = entity.booking_url || '';
   const reservationUrl = entity.reservation_url || '';
@@ -295,6 +296,7 @@ function buildCard(entity) {
   const hhDays  = entity.hh_days || '';
   const hhStart = entity.hh_start || '';
   const hhEnd   = entity.hh_end || '';
+  const hhDesc  = entity.hh_description || '';
   const location = [city, state].filter(Boolean).join(', ');
 
   // Normalize tags — handle both string tags and {tag, tag_category} objects
@@ -402,6 +404,9 @@ function buildCard(entity) {
           ${hoursBlock}
           ${hhBlock}
           ${musicBlock}
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${phoneClean ? `<a href="tel:${phoneClean}" style="flex:1;min-width:120px;padding:8px 12px;background:#f0f4f8;border-radius:8px;text-decoration:none;color:#0b7a75;font-size:13px;font-weight:700;text-align:center;border:1px solid #d4e5e3;" onclick="event.stopPropagation();">📞 ${esc(phone)}</a>` : ''}
+          </div>
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
             <div class="gcr-card-actions">${viewBtn}${menuBtn}${hhBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
@@ -412,6 +417,193 @@ function buildCard(entity) {
     </a>`;
 }
 
+/* ── Build happy hour card with items popup (for happy-hours.html page) ── */
+function buildHHCard(entity) {
+  const slug    = entity.slug || entity.subdomain || entity.id || '';
+  const name    = entity.name || 'Business';
+  const icon    = entity.icon || entity.emoji || '📍';
+  const sub     = entity.subtitle || entity.tagline || '';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const rating  = entity.rating;
+  const reviews = entity.review_count || entity.reviewCount || 0;
+  const addr    = entity.address_line_1 || entity.address || '';
+  const phone   = entity.phone || '';
+  const phoneClean = phone.replace(/\D/g, '');
+  const dir     = entity.directions_url || '';
+  const bookingUrl     = entity.booking_url || '';
+  const reservationUrl = entity.reservation_url || '';
+  const orderUrl       = entity.order_url || '';
+  const desc    = entity.description || '';
+  const hhDays  = entity.hh_days || '';
+  const hhStart = entity.hh_start || '';
+  const hhEnd   = entity.hh_end || '';
+  const hhDesc  = entity.hh_description || '';
+  const location = [city, state].filter(Boolean).join(', ');
+
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const statusBadge = computeStatus(entity.hours || [], rawTags);
+  const priceRange  = entity.priceRange || entity.price_range || '';
+  const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
+  const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
+
+  const displayTags = rawTags.length ? rawTags.slice(0, 4) : (subtype ? [subtype.replace(/ /g,'_')] : []);
+  const chipLinks = displayTags.map(tag => {
+    const dest = tagToPage(tag);
+    return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip" onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
+  }).join('');
+
+  const ratingBlock = rating ? `
+    <div class="gcr-card-rating">
+      <span class="gcr-stars">${starsHtml(rating)}</span>
+      <span>${Number(rating).toFixed(1)}</span>
+      ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
+    </div>` : '';
+
+  const usedUrls = new Set();
+  const dedupeBtn = (url, label, style) => {
+    if (!url) return '';
+    const key = url.replace(/https?:\/\//,'').replace(/\/$/,'').split('?')[0];
+    if (usedUrls.has(key)) return '';
+    usedUrls.add(key);
+    return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
+  };
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
+  const dirBtn     = dedupeBtn(dir,         '📍 Directions','');
+  const bookBtn    = dedupeBtn(bookingUrl,  '📅 Book Now',  'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
+  const reserveBtn = dedupeBtn(reservationUrl, '🍽️ Reserve',   'background:#22c55e;color:#fff;border-color:#22c55e;');
+  const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
+
+  const aboutBlock = desc
+    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>`
+    : '';
+
+  const fullAddr  = [addr, city, state].filter(Boolean).join(', ');
+  const hoursInfo = computeHoursLine(entity.hours || []);
+  const hoursBlock = hoursInfo
+    ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>`
+    : '';
+
+  const hhBlock = hhDays
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
+    : '';
+
+  const todayStr2  = new Date().toISOString().split('T')[0];
+  const todayName2 = new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+  const todayMusic = (window.GCR && GCR.events || []).filter(e => {
+    const matchEntity = (e.entity_slug||e.slug||e.entity_id) === (slug||entity.id);
+    if (!matchEntity) return false;
+    const isToday = e.event_date === todayStr2;
+    const isRecurringToday = e.recurring && (e.day_of_week||'').toLowerCase() === todayName2;
+    if (!isToday && !isRecurringToday) return false;
+    const t = (e.event_type||'').toLowerCase();
+    const n = (e.event_name||'').toLowerCase();
+    return t.includes('live')||t.includes('music')||t.includes('dj')||n.includes('live')||n.includes('dj');
+  });
+  const musicBlock = todayMusic.length
+    ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
+    : '';
+
+  // Happy Hour Items popup — large button for HH page
+  const hhItemsPopupId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const hhItemsBtn = hhDays
+    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;flex:1;font-size:14px;font-weight:900;padding:12px 16px;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhItemsPopupId}')">🍺 View Happy Hour Items</button>`
+    : '';
+  const hhItemsPopup = hhDays ? `
+    <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:500px;overflow-y:auto;">
+      <div style="font-weight:900;font-size:16px;color:#92400e;margin-bottom:12px;">🍺 Happy Hour Menu</div>
+      <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      ${hhDesc ? `<div style="margin-bottom:14px;font-size:13px;color:#92400e;line-height:1.5;">${esc(hhDesc)}</div>` : ''}
+      <div id="${hhItemsPopupId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
+    </div>` : '';
+
+  return `
+    <a href="profile.html?id=${encodeURIComponent(slug)}"
+       style="text-decoration:none;color:inherit;display:block;"
+       data-slug="${slug}"
+       data-tags="${rawTags.join(',').toLowerCase()}"
+       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}">
+      <div class="gcr-card">
+        <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <div class="gcr-card-badge">${icon} ${subtype}</div>
+          ${statusBadge}
+          ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
+        </div>
+        <div class="gcr-card-body">
+          <div class="gcr-card-name">${esc(name)}</div>
+          <div class="gcr-card-sub">${esc([sub, location].filter(Boolean).join(' · '))}</div>
+          ${aboutBlock}
+          ${ratingBlock}
+          ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
+          ${hoursBlock}
+          ${hhBlock}
+          ${musicBlock}
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            ${phoneClean ? `<a href="tel:${phoneClean}" style="flex:1;min-width:120px;padding:8px 12px;background:#f0f4f8;border-radius:8px;text-decoration:none;color:#0b7a75;font-size:13px;font-weight:700;text-align:center;border:1px solid #d4e5e3;" onclick="event.stopPropagation();">📞 ${esc(phone)}</a>` : ''}
+          </div>
+          ${hhItemsBtn ? `<div style="margin-top:10px;display:flex;gap:8px;">${hhItemsBtn}</div>` : ''}
+          <div class="gcr-card-bottom">
+            <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
+            <div class="gcr-card-actions">${viewBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
+          </div>
+        </div>
+      </div>
+      ${hhItemsPopup}
+    </a>`;
+}
+
+/* ── Toggle Happy Hour Items Popup ── */
+function toggleHHItems(popupId) {
+  const popup = document.getElementById(popupId);
+  if (!popup) return;
+
+  if (popup.style.display === 'none') {
+    popup.style.display = 'block';
+    // Load items if not already loaded
+    const itemsContainer = document.getElementById(popupId + '-items');
+    if (itemsContainer && itemsContainer.textContent === 'Loading items...') {
+      loadHHItems(popupId);
+    }
+  } else {
+    popup.style.display = 'none';
+  }
+}
+
+function loadHHItems(popupId) {
+  const itemsContainer = document.getElementById(popupId + '-items');
+  const slug = popupId.replace('hh-items-', '').replace(/_/g, '-');
+
+  // Fetch happy hour items for this entity
+  fetch(`https://cybercheck-api-database.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
+    .then(res => res.json())
+    .then(data => {
+      const hhItems = (data.happy_hour && data.happy_hour.items) || [];
+      if (hhItems.length === 0) {
+        itemsContainer.innerHTML = '<div style="color:#92400e;">No items listed</div>';
+        return;
+      }
+
+      const html = hhItems.map(item => `
+        <div style="border-bottom:1px solid #fcd34d;padding:12px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+          <div style="flex:1;">
+            <div style="font-weight:700;color:#78350f;">${esc(item.item_name)}</div>
+            ${item.description ? `<div style="font-size:12px;color:#92400e;margin-top:4px;line-height:1.4;">${esc(item.description)}</div>` : ''}
+          </div>
+          <div style="font-weight:800;color:#d97706;white-space:nowrap;">${esc(item.price_text || item.hh_price || '')}</div>
+        </div>
+      `).join('');
+
+      itemsContainer.innerHTML = html;
+    })
+    .catch(err => {
+      itemsContainer.innerHTML = '<div style="color:#92400e;">Error loading items</div>';
+    });
+}
+
 /* ── Populate sidebar with real top-rated entities ── */
 function populateSidebar(entities) {
   const heading = document.querySelector('.panel h3');
@@ -420,7 +612,7 @@ function populateSidebar(entities) {
   if (!panel) return;
 
   const top = [...entities]
-    .filter(e => e.hero_image_url || e.cover_url)
+    .filter(e => (e.photos && e.photos[0]) || e.hero_image_url || e.cover_url)
     .sort((a, b) => (b.rating || 0) - (a.rating || 0))
     .slice(0, 3);
 
@@ -428,7 +620,7 @@ function populateSidebar(entities) {
 
   panel.innerHTML = `<h3>Popular Nearby</h3>` + top.map(e => {
     const slug = e.slug || e.subdomain || e.id;
-    const img  = e.hero_image_url || e.cover_url;
+    const img  = (e.photos && e.photos[0] && e.photos[0].image_url) || e.hero_image_url || e.cover_url;
     return `
       <div class="mini-card">
         <div class="mini-thumb" style="background-image:url('${img}')"></div>
@@ -685,7 +877,7 @@ function initStandardPage() {
       if (meta) meta.textContent = '0 listed';
       return;
     }
-    grid.innerHTML = entities.map(buildCard).join('');
+    grid.innerHTML = entities.map(category === 'happy-hours' ? buildHHCard : buildCard).join('');
     const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
     wireFilterChips(grid);
