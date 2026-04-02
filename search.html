@@ -8,10 +8,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <style>
-    /* ── Search bar (inline, tight) ── */
-    .search-header {
-      background: var(--navy); padding: 24px 0;
-    }
+    /* ── Search header ── */
+    .search-header { background: var(--navy); padding: 24px 0; }
     .search-row {
       display: flex; gap: 0; max-width: 760px;
       background: #fff; border-radius: var(--radius);
@@ -21,92 +19,190 @@
       flex: 1; border: none; outline: none; padding: 14px 18px;
       font-size: .98rem; font-family: var(--font); color: var(--text);
     }
-    /* Mode buttons beside the search */
-    .search-mode-btns {
-      display: flex; border-left: 1px solid var(--gray-200);
-    }
-    .search-mode-btn {
-      padding: 0 16px; font-size: .8rem; font-weight: 700;
-      color: var(--text-muted); border: none; background: #fff;
-      cursor: pointer; transition: all .15s; border-right: 1px solid var(--gray-200);
-      white-space: nowrap;
-    }
-    .search-mode-btn:hover  { background: var(--sky); color: var(--teal); }
-    .search-mode-btn.active { background: var(--teal); color: #fff; }
     .search-submit {
-      background: var(--teal); color: #fff; padding: 0 24px;
+      background: var(--teal); color: #fff; padding: 0 28px;
       font-size: .9rem; font-weight: 700; border: none; cursor: pointer;
-      transition: background .15s;
+      transition: background .15s; white-space: nowrap;
     }
     .search-submit:hover { background: var(--teal-dark); }
 
-    /* ── Food result card (compact with menu items) ── */
-    .food-result-card {
-      background: #fff; border-radius: var(--radius);
-      box-shadow: var(--shadow-sm); overflow: hidden;
-      margin-bottom: 16px; transition: box-shadow .2s;
+    /* Quick tags */
+    .search-tag {
+      display: inline-block; padding: 7px 14px;
+      background: rgba(255,255,255,.12); color: #fff; border-radius: 999px;
+      font-size: .8rem; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.25); transition: background .15s;
     }
-    .food-result-card:hover { box-shadow: var(--shadow); }
-    .food-result-header {
-      display: flex; align-items: center; gap: 16px;
-      padding: 16px 20px; border-bottom: 1px solid var(--gray-100);
-      flex-wrap: wrap;
-    }
-    .food-result-emoji { font-size: 2rem; flex-shrink: 0; }
-    .food-result-info  { flex: 1; }
-    .food-result-info h4 { font-size: 1rem; margin-bottom: 3px; }
-    .food-result-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .food-result-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+    .search-tag:hover { background: rgba(255,255,255,.22); }
 
-    .food-menu-items { padding: 12px 20px 16px; }
-    .food-menu-items .label {
-      font-size: .7rem; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
-    }
-    .food-item-row {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 8px 0; border-bottom: 1px solid var(--gray-100); gap: 12px;
-    }
-    .food-item-row:last-child { border-bottom: none; }
-    .food-item-name { font-size: .88rem; font-weight: 600; }
-    .food-item-desc { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
-    .food-item-price { font-size: .85rem; font-weight: 700; color: var(--teal); flex-shrink: 0; }
-
-    /* ── Result type toggle (above results) ── */
+    /* ── Result tabs ── */
     .result-type-bar {
       background: #fff; border-bottom: 1px solid var(--gray-200);
-      padding: 10px 0; position: sticky; top: var(--header-h); z-index: 800;
+      padding: 0; position: sticky; top: var(--header-h); z-index: 800;
     }
     .result-tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
     .result-tabs::-webkit-scrollbar { display: none; }
     .result-tab {
-      padding: 8px 20px; font-size: .82rem; font-weight: 600;
+      padding: 12px 20px; font-size: .82rem; font-weight: 600;
       color: var(--text-muted); border-bottom: 3px solid transparent;
-      cursor: pointer; transition: all .15s; white-space: nowrap;
+      cursor: pointer; transition: all .15s; white-space: nowrap; flex-shrink: 0;
     }
     .result-tab:hover  { color: var(--teal); }
     .result-tab.active { color: var(--teal); border-color: var(--teal); }
+    .tab-count {
+      display: inline-block; background: var(--gray-200); color: var(--text-muted);
+      font-size: .68rem; padding: 1px 7px; border-radius: 10px; margin-left: 5px;
+      font-weight: 700;
+    }
+    .result-tab.active .tab-count { background: var(--teal); color: #fff; }
+
+    /* ── Business card (full) ── */
+    .gcr-search-card {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(15,34,51,.07);
+      overflow: hidden; margin-bottom: 18px;
+      border: 1px solid #e8eef4;
+      transition: box-shadow .2s, transform .15s;
+      display: block; text-decoration: none; color: inherit;
+    }
+    .gcr-search-card:hover { box-shadow: 0 8px 32px rgba(11,122,117,.13); transform: translateY(-2px); }
+    .gcr-search-card-inner { display: grid; grid-template-columns: 200px 1fr; }
+    .gcr-search-card-img {
+      min-height: 160px; background-size: cover; background-position: center;
+      position: relative;
+    }
+    .gcr-search-card-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+      color: #fff; font-size: 11px; font-weight: 700;
+      padding: 4px 10px; border-radius: 999px; text-transform: capitalize;
+    }
+    .gcr-search-open-badge {
+      position: absolute; bottom: 10px; left: 10px;
+      font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px;
+    }
+    .gcr-search-card-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; }
+    .gcr-search-card-name { font-size: 18px; font-weight: 900; color: #1a2f3e; line-height: 1.2; }
+    .gcr-search-card-sub  { font-size: 13px; font-weight: 600; color: #66788a; }
+    .gcr-search-card-desc {
+      font-size: 13px; color: #5c6b81; line-height: 1.6;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .gcr-search-rating { font-size: 13px; color: #f4b400; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+    .gcr-search-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .gcr-search-chip {
+      display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: #f0f4f8; color: #3d5166; font-size: 11px; font-weight: 700;
+      text-transform: capitalize; border: none;
+    }
+    .gcr-search-chip.feature { background: #e6f9f0; color: #1a7a47; }
+    .gcr-search-chip.hh { background: #fef3c7; color: #92400e; }
+    .gcr-search-card-footer {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+      padding-top: 10px; border-top: 1px solid #f0f4f8;
+    }
+    .gcr-search-btn {
+      display: inline-block; padding: 8px 14px; border-radius: 10px;
+      font-size: 12px; font-weight: 800; cursor: pointer;
+      border: 1.5px solid #cbd5e1; background: #fff; color: #25465b;
+      text-decoration: none; transition: all .15s; white-space: nowrap;
+    }
+    .gcr-search-btn:hover { background: #f0f4f8; }
+    .gcr-search-btn.primary { background: #0b7a75; color: #fff; border-color: #0b7a75; }
+    .gcr-search-btn.primary:hover { background: #065f5b; }
+    .gcr-search-btn.amber { background: #d97706; color: #fff; border-color: #d97706; }
+    .gcr-search-btn.green { background: #16a34a; color: #fff; border-color: #16a34a; }
+
+    /* ── Item result card (compact with matched items) ── */
+    .gcr-item-card {
+      background: #fff; border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(15,34,51,.07);
+      overflow: hidden; margin-bottom: 18px;
+      border: 1px solid #e8eef4;
+    }
+    .gcr-item-card-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px; border-bottom: 1px solid #f0f4f8;
+    }
+    .gcr-item-card-thumb {
+      width: 60px; height: 60px; border-radius: 12px;
+      background-size: cover; background-position: center; flex-shrink: 0;
+      border: 1.5px solid #e8eef4;
+    }
+    .gcr-item-card-biz { flex: 1; }
+    .gcr-item-card-bizname { font-size: 15px; font-weight: 800; color: #1a2f3e; }
+    .gcr-item-card-loc { font-size: 12px; color: #8fa3b1; font-weight: 600; margin-top: 2px; }
+    .gcr-item-card-actions { display: flex; gap: 7px; flex-shrink: 0; }
+
+    .gcr-item-list { padding: 2px 18px 14px; }
+    .gcr-item-label {
+      font-size: 10px; font-weight: 800; color: #8fa3b1;
+      text-transform: uppercase; letter-spacing: 1px; padding: 10px 0 6px;
+    }
+    .gcr-item-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 9px 0; border-bottom: 1px solid #f7fafc; gap: 12px;
+    }
+    .gcr-item-row:last-child { border-bottom: none; }
+    .gcr-item-name { font-size: 14px; font-weight: 700; color: #1a2f3e; }
+    .gcr-item-name.exact { color: #0b7a75; }
+    .gcr-item-desc { font-size: 12px; color: #8fa3b1; margin-top: 2px; line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .gcr-item-price { font-size: 14px; font-weight: 800; color: #0b7a75; flex-shrink: 0; }
+    .gcr-item-type-badge {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 999px; margin-left: 6px;
+    }
+    .gcr-item-type-badge.menu { background: #e0f2fe; color: #0369a1; }
+    .gcr-item-type-badge.drink { background: #f3e8ff; color: #7e22ce; }
+    .gcr-item-type-badge.happy_hour { background: #fef3c7; color: #92400e; }
+
+    /* ── Spinner ── */
+    @keyframes gcr-spin { to { transform: rotate(360deg); } }
+    .gcr-spinner {
+      display: inline-block; width: 36px; height: 36px;
+      border: 4px solid #e2e8f0; border-top-color: var(--teal,#0b7a75);
+      border-radius: 50%; animation: gcr-spin .7s linear infinite;
+    }
 
     /* ── No results ── */
-    .no-results {
-      text-align: center; padding: 60px 20px;
-    }
+    .no-results { text-align: center; padding: 60px 20px; }
     .no-results .big-icon { font-size: 3rem; margin-bottom: 16px; }
-    .no-results h3 { margin-bottom: 8px; }
 
-    /* ── Mobile search ── */
+    /* ── Browse tiles ── */
+    .browse-tile {
+      display: block; text-decoration: none; border-radius: 16px; overflow: hidden;
+      border: 1.5px solid #e8eef4; background: #fff;
+      box-shadow: 0 2px 12px rgba(15,34,51,.05); transition: box-shadow .2s;
+    }
+    .browse-tile:hover { box-shadow: 0 6px 24px rgba(11,122,117,.13); }
+    .browse-tile-top { display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; height: 70px; }
+    .browse-tile-body { padding: 12px 14px; }
+    .browse-tile-body h3 { font-size: 14px; font-weight: 800; margin: 0 0 3px; }
+    .browse-tile-body p { font-size: 12px; color: var(--text-muted); margin: 0; }
+
+    /* ── Search mode toggles ── */
+    .search-mode-toggle {
+      padding: 8px 18px; border-radius: 999px;
+      font-size: 13px; font-weight: 700;
+      border: 2px solid #e8eef4; background: #fff; color: #42596c;
+      cursor: pointer; transition: all .15s;
+    }
+    .search-mode-toggle:hover { border-color: var(--teal); color: var(--teal); background: #f0faf9; }
+    .search-mode-toggle.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+    /* ── Mobile ── */
     @media (max-width: 600px) {
       .search-row { flex-wrap: wrap; overflow: visible; border-radius: var(--radius-sm); }
-      .search-row input { width: 100%; flex-basis: 100%; padding: 13px 14px; font-size: .9rem; }
-      .search-mode-btns { width: 100%; border-left: none; border-top: 1px solid var(--gray-200); }
-      .search-mode-btn { flex: 1; padding: 10px 4px; font-size: .75rem; }
+      .search-row input { width: 100%; flex-basis: 100%; padding: 13px 14px; }
       .search-submit { width: 100%; padding: 12px; }
-      .food-result-header { flex-wrap: wrap; gap: 10px; }
-      .food-result-actions { width: 100%; }
-      .food-result-actions .btn { flex: 1; text-align: center; }
+      .gcr-search-card-inner { grid-template-columns: 1fr; }
+      .gcr-search-card-img { min-height: 140px; }
+      .gcr-item-card-actions { display: none; }
     }
-    @media (max-width: 480px) {
-      .search-mode-btn { font-size: .7rem; }
+    @media (max-width: 760px) {
+      .gcr-search-card-inner { grid-template-columns: 140px 1fr; }
     }
   </style>
 </head>
@@ -122,361 +218,466 @@
       📲 Install App
     </button>
   </div>
-        <div class="gcr-cat-tabs" id="gcrCatTabs">
-      <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
-      <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
-      <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
-      <a href="specials.html"     class="gcr-cat-tab">🏷️ Specials</a>
-      <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
-      <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
-      <a href="nightlife.html"    class="gcr-cat-tab">🎶 Nightlife</a>
-      <a href="artists.html"      class="gcr-cat-tab">🎸 Artists</a>
-      <a href="shopping.html"     class="gcr-cat-tab">🛍️ Shopping</a>
-      <a href="other.html"        class="gcr-cat-tab">✨ Other</a>
-      <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
-    </div>
-    <div class="gcr-action-strip">
+  <div class="gcr-cat-tabs" id="gcrCatTabs">
+    <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"     class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="nightlife.html"    class="gcr-cat-tab">🎶 Nightlife</a>
+    <a href="artists.html"      class="gcr-cat-tab">🎸 Artists</a>
+    <a href="shopping.html"     class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="other.html"        class="gcr-cat-tab">✨ Other</a>
+    <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
     <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
     <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
   </div>
 </div>
 
-
-  <!-- SEARCH HEADER -->
-  <div class="search-header">
-    <div class="container">
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder='Search restaurants, activities, "crab legs", "happy hour"...' autocomplete="off">
-        <!-- Mode buttons: sit right inside the search bar -->
-        <div class="search-mode-btns">
-          <button class="search-mode-btn active" id="modeAll"    data-mode="all">🔍 All</button>
-          <button class="search-mode-btn"         id="modeFood"  data-mode="food">🍽️ Food</button>
-          <button class="search-mode-btn"         id="modeTodo"  data-mode="todo">🎯 Activities</button>
-          <button class="search-mode-btn"         id="modeEvent" data-mode="events">🎉 Events</button>
-        </div>
-        <button class="search-submit" id="searchBtn">Search</button>
-      </div>
-
-      <!-- Quick tags -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-        <span class="search-tag" data-q="crab legs">🦀 Crab Legs</span>
-        <span class="search-tag" data-q="happy hour">🍻 Happy Hour</span>
-        <span class="search-tag" data-q="boat rental">🚤 Boat Rental</span>
-        <span class="search-tag" data-q="all you can eat">🍽️ All You Can Eat</span>
-        <span class="search-tag" data-q="live music">🎸 Live Music</span>
-        <span class="search-tag" data-q="fishing">🎣 Fishing</span>
-        <span class="search-tag" data-q="seafood">🐟 Seafood</span>
-        <span class="search-tag" data-q="kids">👨‍👩‍👧 Kids Friendly</span>
-      </div>
+<!-- SEARCH HEADER -->
+<div class="search-header">
+  <div class="container">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder='Search restaurants, "crab legs", "raw oysters", "happy hour"...' autocomplete="off">
+      <button class="search-submit" id="searchBtn">🔍 Search</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+      <span class="search-tag" data-q="crab legs">🦀 Crab Legs</span>
+      <span class="search-tag" data-q="raw oysters">🦪 Raw Oysters</span>
+      <span class="search-tag" data-q="happy hour">🍻 Happy Hour</span>
+      <span class="search-tag" data-q="boat rental">🚤 Boat Rental</span>
+      <span class="search-tag" data-q="all you can eat">🍽️ All You Can Eat</span>
+      <span class="search-tag" data-q="live music">🎸 Live Music</span>
+      <span class="search-tag" data-q="seafood">🐟 Seafood</span>
+      <span class="search-tag" data-q="spicy cobia">🌶️ Spicy Cobia</span>
     </div>
   </div>
+</div>
 
-  <!-- RESULT TYPE TABS (shown after search) -->
-  <div class="result-type-bar" id="resultTypeBar" style="display:none;">
-    <div class="container">
-      <div class="result-tabs">
-        <div class="result-tab active" data-cat="all">All Results <span id="countAll" style="background:var(--teal);color:#fff;font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="restaurants">🍽️ Restaurants <span id="countRestaurants" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="things-to-do">🎯 Things To Do <span id="countTodo" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="events">🎉 Events <span id="countEvents" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="coffee-sweets">☕ Coffee & Sweets <span id="countCoffee" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="shopping">🛍️ Shopping <span id="countShopping" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-        <div class="result-tab" data-cat="other">✨ Other <span id="countOther" style="background:var(--gray-200);color:var(--text-muted);font-size:.68rem;padding:1px 6px;border-radius:10px;margin-left:4px;"></span></div>
-      </div>
+<!-- SEARCH MODE TOGGLES (always visible) -->
+<div style="background:#fff;border-bottom:1px solid #e8eef4;padding:12px 0;">
+  <div class="container">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:12px;font-weight:700;color:#8fa3b1;margin-right:4px;">Filter:</span>
+      <button class="search-mode-toggle active" data-tab="all">🔍 All</button>
+      <button class="search-mode-toggle" data-tab="businesses">🏢 Businesses</button>
+      <button class="search-mode-toggle" data-tab="menu">🍽️ Food</button>
+      <button class="search-mode-toggle" data-tab="drinks">🍺 Drinks</button>
+      <button class="search-mode-toggle" data-tab="specials">🏷️ Specials</button>
     </div>
   </div>
+</div>
 
-  <!-- LOADING SPINNER -->
-  <div id="gcrLoadingOverlay" style="display:none;text-align:center;padding:60px 20px;">
-    <div style="display:inline-block;width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:var(--teal,#0b7a75);border-radius:50%;animation:gcr-spin 0.7s linear infinite;"></div>
-    <p style="margin-top:16px;color:#6b7280;font-size:.9rem;">Loading Gulf Coast data…</p>
+<!-- RESULT COUNT BAR (shown after search) -->
+<div class="result-type-bar" id="resultTypeBar" style="display:none;">
+  <div class="container">
+    <div class="result-tabs">
+      <div class="result-tab active" data-tab="all">All <span class="tab-count" id="tabCountAll">0</span></div>
+      <div class="result-tab" data-tab="businesses">🏢 Businesses <span class="tab-count" id="tabCountBiz">0</span></div>
+      <div class="result-tab" data-tab="menu">🍽️ Food <span class="tab-count" id="tabCountMenu">0</span></div>
+      <div class="result-tab" data-tab="drinks">🍺 Drinks <span class="tab-count" id="tabCountDrinks">0</span></div>
+      <div class="result-tab" data-tab="specials">🏷️ Specials <span class="tab-count" id="tabCountSpecials">0</span></div>
+    </div>
   </div>
-  <style>@keyframes gcr-spin{to{transform:rotate(360deg)}}</style>
+</div>
 
-  <!-- RESULTS -->
-  <section class="section">
-    <div class="container">
+<!-- LOADING -->
+<div id="gcrLoadingOverlay" style="display:none;text-align:center;padding:80px 20px;">
+  <div class="gcr-spinner"></div>
+  <p style="margin-top:16px;color:#6b7280;font-size:.9rem;">Searching Gulf Coast…</p>
+</div>
 
-      <!-- Heading -->
-      <div style="margin-bottom:24px;">
-        <h2 id="searchHeading" style="font-size:1.3rem;">Search the Gulf Coast</h2>
-        <p id="searchSubheading" class="text-muted" style="font-size:.85rem;margin-top:4px;">Try "crab legs", "all you can eat", "boat rental", or any restaurant name</p>
-      </div>
-
-      <!-- FOOD MODE: compact cards with menu item matches shown inline -->
-      <div id="foodResults" style="display:none;"></div>
-
-      <!-- ALL / ACTIVITY / EVENT MODE: standard grid cards -->
-      <div class="listings-grid" id="gridResults" style="display:none;"></div>
-
-      <!-- Empty state -->
-      <div id="noResults" style="display:none;" class="no-results">
-        <div class="big-icon">🔍</div>
-        <h3>No results found</h3>
-        <p>Try something like "seafood", "happy hour", "crab legs", or "fishing charter"</p>
-        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-          <a href="restaurants.html" class="btn btn-outline btn-sm">Browse Restaurants</a>
-          <a href="things-to-do.html" class="btn btn-outline btn-sm">Browse Activities</a>
-          <a href="events.html" class="btn btn-outline btn-sm">Browse Events</a>
-        </div>
-      </div>
-
-      <!-- Default state: browse by category -->
-      <div id="defaultState">
-        <div class="section-heading mb-32">
-          <div class="eyebrow">Browse</div>
-          <h2 style="font-size:1.4rem;">Popular Searches</h2>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
-          <a href="?q=crab+legs&mode=food"       class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#c0392b,#922b21);height:70px;">🦀</div><div class="tile-body"><h3>Crab Legs</h3><p>All you can eat & more</p></div></a>
-          <a href="?q=happy+hour&mode=food"       class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#c9831f,#a0621a);height:70px;">🍻</div><div class="tile-body"><h3>Happy Hour</h3><p>Drink deals near you</p></div></a>
-          <a href="?q=seafood&mode=food"          class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#0b7a75,#065f5b);height:70px;">🐟</div><div class="tile-body"><h3>Seafood</h3><p>Fresh Gulf Coast catch</p></div></a>
-          <a href="?q=boat+rental&mode=todo"      class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#1a6496,#134f78);height:70px;">🚤</div><div class="tile-body"><h3>Boat Rentals</h3><p>Get on the water</p></div></a>
-          <a href="?q=fishing+charter&mode=todo"  class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#1e8449,#186038);height:70px;">🎣</div><div class="tile-body"><h3>Fishing Charters</h3><p>Deep sea & inshore</p></div></a>
-          <a href="?q=live+music&mode=events"     class="section-tile"><div class="tile-top" style="background:linear-gradient(135deg,#6c3483,#5b2c6f);height:70px;">🎸</div><div class="tile-body"><h3>Live Music</h3><p>Who's playing tonight</p></div></a>
-        </div>
-      </div>
-
+<!-- RESULTS -->
+<section class="section" id="resultsSection" style="display:none;">
+  <div class="container">
+    <div style="margin-bottom:20px;">
+      <h2 id="searchHeading" style="font-size:1.3rem;"></h2>
+      <p id="searchSubheading" class="text-muted" style="font-size:.85rem;margin-top:4px;"></p>
     </div>
-  </section>
-
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
+    <div id="resultsContainer"></div>
+    <div id="loadMoreWrap" style="text-align:center;margin-top:24px;display:none;">
+      <button id="loadMoreBtn" class="gcr-search-btn primary" style="padding:12px 32px;font-size:14px;">Load More Results</button>
     </div>
-  </div></footer>
+  </div>
+</section>
 
-  <script src="js/gcr-api.js"></script>
-  <script src="js/app.js"></script>
-  <script>
-    let currentMode = 'all';
-    let currentCatFilter = 'all';
-    let lastResults = [];
+<!-- NO RESULTS -->
+<div id="noResults" style="display:none;" class="no-results">
+  <div class="big-icon">🔍</div>
+  <h3>No results found</h3>
+  <p style="color:#8fa3b1;">Try "seafood", "happy hour", "crab legs", or a restaurant name</p>
+  <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <a href="restaurants.html" class="gcr-search-btn">Browse Restaurants</a>
+    <a href="things-to-do.html" class="gcr-search-btn">Browse Activities</a>
+    <a href="events.html" class="gcr-search-btn">Browse Events</a>
+  </div>
+</div>
 
-    // Build menu/specials data dynamically from GCR.specials (loaded from API)
-    function getMenuData(bizSlug) {
-      if (typeof GCR === 'undefined') return [];
-      return (GCR.getSpecialsByBusiness(bizSlug) || []).map(s => {
-        const tags = [s.type || ''];
-        if (s.type === 'happy_hour') tags.push('happy hour', 'drinks');
-        if (s.type === 'daily_special') tags.push('special', 'food');
-        if ((s.name || '').toLowerCase().includes('crab')) tags.push('crab', 'seafood');
-        if ((s.name || '').toLowerCase().includes('shrimp')) tags.push('shrimp', 'seafood');
-        if ((s.name || '').toLowerCase().includes('seafood')) tags.push('seafood');
-        if ((s.name || '').toLowerCase().includes('all you can eat') || (s.name || '').toLowerCase().includes('ayce')) tags.push('ayce', 'all you can eat');
-        // include drink specials as individual items
-        const drinkItems = (s.drink_specials || []).map(d => ({
-          name: d.name ? d.name.charAt(0).toUpperCase() + d.name.slice(1) + ' Special' : 'Drink Special',
-          desc: d.note || 'Happy hour drink special',
-          price: d.price ? `$${d.price}` : '',
-          tags: ['happy hour', 'drinks', d.name || ''],
-        }));
-        return [{ name: s.name, desc: s.description || '', price: s.discount_text || '', tags }, ...drinkItems];
-      }).flat();
-    }
+<!-- DEFAULT: browse tiles -->
+<div id="defaultState" class="section">
+  <div class="container">
+    <div class="section-heading mb-32">
+      <div class="eyebrow">Browse</div>
+      <h2 style="font-size:1.4rem;">Popular Searches</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;">
+      <a href="?q=crab+legs"       class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#c0392b,#922b21);">🦀</div><div class="browse-tile-body"><h3>Crab Legs</h3><p>All you can eat &amp; more</p></div></a>
+      <a href="?q=raw+oysters"     class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#0369a1,#075985);">🦪</div><div class="browse-tile-body"><h3>Raw Oysters</h3><p>Fresh Gulf oysters</p></div></a>
+      <a href="?q=happy+hour"      class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#c9831f,#a0621a);">🍻</div><div class="browse-tile-body"><h3>Happy Hour</h3><p>Drink deals near you</p></div></a>
+      <a href="?q=seafood"         class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#0b7a75,#065f5b);">🐟</div><div class="browse-tile-body"><h3>Seafood</h3><p>Fresh Gulf catch</p></div></a>
+      <a href="?q=boat+rental"     class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#1a6496,#134f78);">🚤</div><div class="browse-tile-body"><h3>Boat Rentals</h3><p>Get on the water</p></div></a>
+      <a href="?q=live+music"      class="browse-tile"><div class="browse-tile-top" style="background:linear-gradient(135deg,#6c3483,#5b2c6f);">🎸</div><div class="browse-tile-body"><h3>Live Music</h3><p>Who's playing tonight</p></div></a>
+    </div>
+  </div>
+</div>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      // Mode button switching
-      document.querySelectorAll('.search-mode-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.search-mode-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentMode = btn.dataset.mode;
-        });
-      });
+<footer class="site-footer"><div class="container">
+  <div class="footer-bottom" style="border-top:none;padding-top:0">
+    <p>© 2026 Gulf Coast Radar · <a href="index.html" style="color:var(--teal-light)">Home</a></p>
+    <p>Powered by <span class="powered">CyberCheck</span></p>
+  </div>
+</div></footer>
 
-      // Search tags
-      document.querySelectorAll('.search-tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-          const q = tag.dataset.q || tag.textContent.trim();
-          document.getElementById('searchInput').value = q;
-          doSearch(q);
-        });
-      });
+<script src="js/gcr-api.js"></script>
+<script src="js/app.js"></script>
+<script>
+const API = 'https://cybercheck-api-database.vercel.app';
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
+const PAGE_SIZE = 20;
 
-      // Search button + enter
-      const doSearchFromBtn = () => {
-        const q = document.getElementById('searchInput').value.trim();
-        if (q) {
-          history.pushState({}, '', `?q=${encodeURIComponent(q)}&mode=${currentMode}`);
-          doSearch(q);
-        }
-      };
-      document.getElementById('searchBtn').addEventListener('click', doSearchFromBtn);
-      document.getElementById('searchInput').addEventListener('keydown', e => { if(e.key==='Enter') doSearchFromBtn(); });
+let allResults = [];
+let filteredResults = [];
+let currentTab = 'all';
+let visibleCount = 0;
+let lastQuery = '';
 
-      // Result type tabs
-      document.querySelectorAll('.result-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          currentCatFilter = tab.dataset.cat;
-          renderResults(lastResults, document.getElementById('searchInput').value.trim());
-        });
-      });
+/* ── Helpers ── */
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function starsHtml(r) {
+  const full = Math.floor(r), half = r - full >= 0.4 ? 1 : 0;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - half);
+}
+function getFallback(subtype) {
+  const map = {
+    restaurants: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=600&q=70',
+    coffee_sweets: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=70',
+    nightlife: 'https://images.unsplash.com/photo-1574007557323-a47e9b72e4c0?auto=format&fit=crop&w=600&q=70',
+    things_to_do: 'https://images.unsplash.com/photo-1473186578172-c141e6798cf4?auto=format&fit=crop&w=600&q=70',
+  };
+  return map[(subtype||'').replace(/-/g,'_')] || FALLBACK_IMG;
+}
+function openStatusHtml(entity) {
+  const hours = entity.hours || [];
+  if (!hours.length) return '';
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const row = hours.find(h => h.day_of_week === day);
+  if (!row) return '';
+  if (row.is_closed) return '<span class="gcr-search-open-badge" style="background:rgba(239,68,68,.9);color:#fff;">Closed Today</span>';
+  const [oh, om] = (row.open_time || '00:00').split(':').map(Number);
+  const [ch, cm] = (row.close_time || '23:59').split(':').map(Number);
+  const openM = oh * 60 + om, closeM = ch * 60 + cm;
+  const isOpen = mins >= openM && mins < closeM;
+  if (isOpen) {
+    const closeAt = `${ch > 12 ? ch - 12 : ch}:${String(cm).padStart(2,'0')} ${ch >= 12 ? 'PM' : 'AM'}`;
+    return `<span class="gcr-search-open-badge" style="background:rgba(22,163,74,.9);color:#fff;">Open · Closes ${closeAt}</span>`;
+  }
+  const openAt = `${oh > 12 ? oh - 12 : oh}:${String(om).padStart(2,'0')} ${oh >= 12 ? 'PM' : 'AM'}`;
+  return `<span class="gcr-search-open-badge" style="background:rgba(239,68,68,.85);color:#fff;">Closed · Opens ${openAt}</span>`;
+}
 
-      // Auto-run from URL params
-      const params = new URLSearchParams(window.location.search);
-      const q = params.get('q');
-      const m = params.get('mode');
-      if (m && ['all','food','todo','events'].includes(m)) {
-        currentMode = m;
-        document.querySelectorAll('.search-mode-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.mode === m);
-        });
-      }
-      if (q) {
-        document.getElementById('searchInput').value = q;
-        doSearch(q);
-      }
-    });
+/* ── Score an item match for display emphasis ── */
+function isExactMatch(itemName, q) {
+  return (itemName || '').toLowerCase().trim() === q.toLowerCase().trim();
+}
 
-    let _pendingQuery = null;
-    document.addEventListener('gcr:loaded', () => {
-      if (_pendingQuery) { doSearch(_pendingQuery); _pendingQuery = null; }
-    });
+/* ── Build full business card ── */
+function buildBusinessCard(entity, q) {
+  const slug    = entity.slug || entity.subdomain || '';
+  const name    = entity.name || 'Business';
+  const icon    = entity.icon || entity.emoji || '📍';
+  const sub     = entity.subtitle || entity.tagline || '';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g,' ');
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
+  const rating  = entity.rating;
+  const reviews = entity.review_count || 0;
+  const addr    = entity.address_line_1 || '';
+  const phone   = entity.phone || '';
+  const dir     = entity.directions_url || '';
+  const location = [city, state].filter(Boolean).join(', ');
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
+  const hh     = entity.hh_days ? `${esc(entity.hh_days)}${entity.hh_start ? ' · '+esc(entity.hh_start) : ''}${entity.hh_end ? '–'+esc(entity.hh_end) : ''}` : '';
+  const desc   = entity.description || '';
 
-    function doSearch(q) {
-      if (!q) return;
-      if (typeof GCR === 'undefined' || !GCR.loaded) {
-        _pendingQuery = q;
-        document.getElementById('defaultState').style.display = 'none';
-        document.getElementById('gcrLoadingOverlay').style.display = '';
-        return;
-      }
-      document.getElementById('gcrLoadingOverlay').style.display = 'none';
-      document.getElementById('defaultState').style.display = 'none';
-      document.getElementById('resultTypeBar').style.display = '';
+  const ratingBlock = rating
+    ? `<div class="gcr-search-rating">${starsHtml(rating)} <span style="color:#374151">${Number(rating).toFixed(1)}</span>${reviews ? `<span style="color:#94a3b8;font-weight:500;font-size:12px;">(${reviews})</span>` : ''}</div>`
+    : '';
 
-      // Helper: get the category/type of a business (API uses 'type', some records use 'category')
-      const bcat = b => b.type || b.category || '';
+  const tags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean).slice(0, 4);
+  const chips = tags.map(t => {
+    const cl = t.includes('happy') || t.includes('hh') ? 'hh' : (t.includes('kids') || t.includes('pet') || t.includes('live_music') ? 'feature' : '');
+    return `<span class="gcr-search-chip ${cl}">${t.replace(/_/g,' ')}</span>`;
+  }).join('');
 
-      // Filter by mode
-      let results = GCR.search(q);
-      if (currentMode === 'food')   results = results.filter(b => ['restaurants','coffee-sweets','specials','happy-hours'].includes(bcat(b)));
-      if (currentMode === 'todo')   results = results.filter(b => bcat(b) === 'things-to-do');
-      if (currentMode === 'events') results = results.filter(b => bcat(b) === 'events');
+  const openBadge = openStatusHtml(entity);
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
 
-      lastResults = results;
+  const viewBtn    = `<a href="${profileUrl}" class="gcr-search-btn primary" onclick="event.stopPropagation()">View Profile</a>`;
+  const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
+  const dirBtn     = dir  ? `<a href="${dir}" target="_blank" rel="noopener" class="gcr-search-btn" onclick="event.stopPropagation();event.preventDefault();window.open('${dir}')">📍 Directions</a>` : '';
+  const hhBtn      = hh   ? `<span class="gcr-search-btn amber" style="pointer-events:none;">🍺 HH ${hh}</span>` : '';
 
-      // Update count badges
-      const allR = GCR.search(q);
-      document.getElementById('countAll').textContent         = allR.length;
-      document.getElementById('countRestaurants').textContent = allR.filter(b=>bcat(b)==='restaurants').length;
-      document.getElementById('countTodo').textContent        = allR.filter(b=>bcat(b)==='things-to-do').length;
-      document.getElementById('countEvents').textContent      = allR.filter(b=>bcat(b)==='events').length;
-      document.getElementById('countCoffee').textContent      = allR.filter(b=>bcat(b)==='coffee-sweets').length;
-      document.getElementById('countShopping').textContent    = allR.filter(b=>bcat(b)==='shopping').length;
-      document.getElementById('countOther').textContent       = allR.filter(b=>bcat(b)==='other').length;
+  return `
+    <a href="${profileUrl}" class="gcr-search-card">
+      <div class="gcr-search-card-inner">
+        <div class="gcr-search-card-img" style="background-image:url('${hero}')">
+          ${subtype ? `<div class="gcr-search-card-badge">${icon} ${esc(subtype)}</div>` : ''}
+          ${openBadge}
+        </div>
+        <div class="gcr-search-card-body">
+          <div class="gcr-search-card-name">${esc(name)}</div>
+          ${sub || location ? `<div class="gcr-search-card-sub">${esc([sub,location].filter(Boolean).join(' · '))}</div>` : ''}
+          ${desc ? `<div class="gcr-search-card-desc">${esc(desc)}</div>` : ''}
+          ${ratingBlock}
+          ${chips ? `<div class="gcr-search-chips">${chips}</div>` : ''}
+          ${fullAddr ? `<div style="font-size:12px;color:#8fa3b1;font-weight:600;margin-top:2px;">📍 ${esc(fullAddr)}</div>` : ''}
+          <div class="gcr-search-card-footer">${viewBtn}${hhBtn}${dirBtn}${callBtn}</div>
+        </div>
+      </div>
+    </a>`;
+}
 
-      renderResults(results, q);
-    }
+/* ── Build item result card (matched menu/drink/HH items) ── */
+function buildItemCard(entity, items, q) {
+  const slug    = entity.slug || entity.subdomain || '';
+  const name    = entity.name || 'Business';
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
+  const phone   = entity.phone || '';
+  const dir     = entity.directions_url || '';
+  const location = [city, state].filter(Boolean).join(', ');
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
 
-    function renderResults(results, q) {
-      const bcat = b => b.type || b.category || '';
-      // Apply category filter
-      let filtered = currentCatFilter === 'all' ? results : results.filter(b => bcat(b) === currentCatFilter);
+  const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary" onclick="event.stopPropagation()">View Menu</a>`;
+  const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
 
-      const headingEl     = document.getElementById('searchHeading');
-      const subEl         = document.getElementById('searchSubheading');
-      const foodEl        = document.getElementById('foodResults');
-      const gridEl        = document.getElementById('gridResults');
-      const noEl          = document.getElementById('noResults');
+  const typeLabel = { menu: 'Menu', drink: 'Drinks', happy_hour: 'Happy Hour' };
+  const itemsHtml = items.slice(0, 5).map(item => {
+    const iname    = item.item_name || item.special_name || '';
+    const idesc    = item.description || '';
+    const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
+    const itype    = item._type || 'menu';
+    const exact    = isExactMatch(iname, q);
+    const typeBadge = `<span class="gcr-item-type-badge ${itype}">${typeLabel[itype] || itype}</span>`;
+    return `
+      <div class="gcr-item-row">
+        <div style="flex:1">
+          <div class="gcr-item-name ${exact ? 'exact' : ''}">${esc(iname)}${typeBadge}</div>
+          ${idesc ? `<div class="gcr-item-desc">${esc(idesc)}</div>` : ''}
+        </div>
+        ${iprice ? `<div class="gcr-item-price">${esc(iprice)}</div>` : ''}
+      </div>`;
+  }).join('');
 
-      headingEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''} for "${q}"`;
-      subEl.textContent     = `Showing ${currentCatFilter === 'all' ? 'everything' : currentCatFilter} · Orange Beach & Gulf Shores`;
+  const moreCount = items.length > 5 ? items.length - 5 : 0;
 
-      if (!filtered.length) {
-        foodEl.style.display = 'none';
-        gridEl.style.display = 'none';
-        noEl.style.display   = '';
-        return;
-      }
-      noEl.style.display = 'none';
-
-      // FOOD mode: compact cards with matching menu items inline
-      if (currentMode === 'food' || currentCatFilter === 'restaurants' || currentCatFilter === 'coffee-sweets') {
-        gridEl.style.display = 'none';
-        foodEl.style.display = '';
-        foodEl.innerHTML = filtered.map(biz => {
-          const term    = q.toLowerCase();
-          const menuData = getMenuData(biz.slug || biz.id);
-          const matching = menuData.filter(item =>
-            item.name.toLowerCase().includes(term) ||
-            (item.desc && item.desc.toLowerCase().includes(term)) ||
-            (item.tags && item.tags.some(t => t.includes(term)))
-          );
-          const stars = '★'.repeat(Math.round(biz.rating||4)) + '☆'.repeat(5 - Math.round(biz.rating||4));
-          return `
-          <div class="food-result-card">
-            <div class="food-result-header">
-              <div class="food-result-emoji">${biz.emoji||'🍽️'}</div>
-              <div class="food-result-info">
-                <h4>${biz.name}</h4>
-                <div class="food-result-meta">
-                  ${biz.priceRange ? `<span class="biz-tag">${biz.priceRange}</span>` : ''}
-                  ${biz.happyHour  ? `<span class="biz-tag" style="background:#e6f9f0;color:#1a7a47">HH ${biz.happyHour}</span>` : ''}
-                  ${biz.rating     ? `<span class="biz-rating"><span class="stars">${stars}</span> ${biz.rating}</span>` : ''}
-                  <span class="text-muted" style="font-size:.75rem;">${biz.address||''}</span>
-                </div>
-                <p style="font-size:.82rem;margin-top:5px;color:var(--text);">${biz.tagline||''}</p>
-              </div>
-              <div class="food-result-actions">
-                <a href="profile.html?id=${biz.slug}" class="btn btn-primary btn-sm">View</a>
-                ${biz.phone ? `<a href="tel:${biz.phone}" class="btn btn-outline btn-sm">Call</a>` : ''}
-              </div>
-            </div>
-            ${matching.length ? `
-            <div class="food-menu-items">
-              <div class="label">🍴 Matching menu items</div>
-              ${matching.slice(0,4).map(item => `
-              <div class="food-item-row">
-                <div>
-                  <div class="food-item-name">${item.name}</div>
-                  <div class="food-item-desc">${item.desc}</div>
-                </div>
-                <div class="food-item-price">${item.price}</div>
-              </div>`).join('')}
-            </div>` : ''}
-          </div>`;
-        }).join('');
-      } else {
-        // ALL / ACTIVITY / EVENT mode: standard grid
-        foodEl.style.display = 'none';
-        gridEl.style.display = '';
-        gridEl.innerHTML = filtered.map(renderBizCard).join('');
-      }
-    }
-
-    function renderBizCard(biz) {
-      const slug = biz.slug || biz.subdomain || biz.id || '';
-      const icon = biz.icon || biz.emoji || '📍';
-      const name = biz.name || '';
-      const sub = biz.subtitle || biz.tagline || '';
-      const hero = biz.hero_image_url || biz.cover_url || 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
-      const city = biz.city || '';
-      const rating = biz.rating;
-      const addr = biz.address_line_1 || biz.address || '';
-      const phone = biz.phone || '';
-      const dir = biz.directions_url || '';
-
-      return `
-        <a href="profile.html?id=${encodeURIComponent(slug)}" style="text-decoration:none;color:inherit;display:block;margin-bottom:14px;">
-          <div style="display:grid;grid-template-columns:120px 1fr;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 4px 16px rgba(15,34,51,.06);overflow:hidden;">
-            <div style="min-height:100px;background-image:url('${hero}');background-size:cover;background-position:center;"></div>
-            <div style="padding:12px 16px;">
-              <div style="font-size:17px;font-weight:900;">${name}</div>
-              <div style="color:#66788a;font-size:13px;font-weight:600;margin-top:2px;">${[sub, city].filter(Boolean).join(' · ')}</div>
-              ${rating ? `<div style="margin-top:4px;font-size:13px;color:#f4b400;font-weight:700;">${'★'.repeat(Math.floor(rating))}${'☆'.repeat(5-Math.floor(rating))} ${Number(rating).toFixed(1)}</div>` : ''}
-              <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
-                ${dir ? `<a href="${dir}" target="_blank" style="background:#f7fafc;border:1px solid #e2e8f0;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:800;color:#25465b;text-decoration:none;" onclick="event.stopPropagation();event.preventDefault();window.open('${dir}')">📍 Directions</a>` : ''}
-                ${phone ? `<a href="tel:${phone.replace(/\\D/g,'')}" style="background:#f7fafc;border:1px solid #e2e8f0;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:800;color:#25465b;text-decoration:none;" onclick="event.stopPropagation()">📞 Call</a>` : ''}
-              </div>
-            </div>
+  return `
+    <div class="gcr-item-card">
+      <a href="${profileUrl}" style="text-decoration:none;color:inherit;display:block;">
+        <div class="gcr-item-card-header">
+          <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
+          <div class="gcr-item-card-biz">
+            <div class="gcr-item-card-bizname">${esc(name)}</div>
+            ${location ? `<div class="gcr-item-card-loc">📍 ${esc(location)}</div>` : ''}
           </div>
-        </a>`;
-    }
-  </script>
+          <div class="gcr-item-card-actions">${viewBtn}${callBtn}</div>
+        </div>
+      </a>
+      <div class="gcr-item-list">
+        <div class="gcr-item-label">🍴 Matching Items</div>
+        ${itemsHtml}
+        ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:8px 0;font-weight:600;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
+      </div>
+    </div>`;
+}
+
+/* ── Categorize results ── */
+function categorizeResult(entity, q) {
+  const nameLower = (entity.name || '').toLowerCase();
+  const cityLower = (entity.city || '').toLowerCase();
+  const descLower = (entity.description || entity.subtitle || '').toLowerCase();
+  const ql = (q || '').toLowerCase();
+  const isBusinessMatch = nameLower.includes(ql) || cityLower.includes(ql) || descLower.includes(ql);
+  const hasMenuItems = (entity.matched_menu_items || []).length > 0;
+  const hasSpecials  = (entity.matched_specials || []).length > 0;
+  return { isBusinessMatch, hasMenuItems, hasSpecials };
+}
+
+/* ── Render one result ── */
+function renderResult(entity, q, tab) {
+  const { hasMenuItems, hasSpecials } = categorizeResult(entity, q);
+  const allItems = entity.matched_menu_items || [];
+  const menuItems  = allItems.filter(i => i._type === 'menu');
+  const drinkItems = allItems.filter(i => i._type === 'drink');
+  const hhItems    = allItems.filter(i => i._type === 'happy_hour');
+
+  if (tab === 'businesses') return buildBusinessCard(entity, q);
+
+  if (tab === 'drinks') {
+    if (!drinkItems.length) return '';
+    return buildItemCard(entity, drinkItems, q);
+  }
+
+  if (tab === 'menu') {
+    if (!menuItems.length && !hhItems.length) return '';
+    return buildItemCard(entity, [...menuItems, ...hhItems], q);
+  }
+
+  if (tab === 'specials') {
+    if (!hasSpecials) return '';
+    return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
+  }
+
+  // "all" tab: prefer item card if items matched, fallback to business card
+  if (allItems.length) return buildItemCard(entity, allItems, q);
+  if (hasSpecials) return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
+  return buildBusinessCard(entity, q);
+}
+
+/* ── Render visible slice ── */
+function renderResults() {
+  const container  = document.getElementById('resultsContainer');
+  const loadWrap   = document.getElementById('loadMoreWrap');
+  const slice      = filteredResults.slice(0, visibleCount);
+  container.innerHTML = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
+  loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
+}
+
+/* ── Apply tab filter ── */
+function applyTab(tab) {
+  currentTab = tab;
+  if (tab === 'all' || tab === 'businesses') {
+    filteredResults = allResults;
+  } else if (tab === 'menu') {
+    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu'));
+  } else if (tab === 'drinks') {
+    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink'));
+  } else if (tab === 'specials') {
+    filteredResults = allResults.filter(e => (e.matched_specials||[]).length > 0);
+  }
+  visibleCount = PAGE_SIZE;
+  // Sync both tab bars
+  document.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  renderResults();
+}
+
+/* ── Render one result with tab-aware item filtering ── */
+
+/* ── Update count badges ── */
+function updateCounts(results) {
+  document.getElementById('tabCountAll').textContent      = results.length;
+  document.getElementById('tabCountBiz').textContent      = results.length;
+  document.getElementById('tabCountMenu').textContent     = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu')).length;
+  document.getElementById('tabCountDrinks').textContent   = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink')).length;
+  document.getElementById('tabCountSpecials').textContent = results.filter(e => (e.matched_specials||[]).length > 0).length;
+}
+
+/* ── Main search ── */
+async function doSearch(q) {
+  if (!q || !q.trim()) return;
+  lastQuery = q.trim();
+
+  // Show loading
+  document.getElementById('defaultState').style.display      = 'none';
+  document.getElementById('resultsSection').style.display    = 'none';
+  document.getElementById('noResults').style.display         = 'none';
+  document.getElementById('gcrLoadingOverlay').style.display = '';
+
+  try {
+    const res  = await fetch(`${API}/api/gcr/search`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ query: lastQuery }),
+    });
+    const data = await res.json();
+    allResults = data.results || [];
+  } catch (err) {
+    console.error('Search error:', err);
+    allResults = [];
+  }
+
+  document.getElementById('gcrLoadingOverlay').style.display = 'none';
+
+  if (!allResults.length) {
+    document.getElementById('noResults').style.display = '';
+    document.getElementById('resultTypeBar').style.display = 'none';
+    return;
+  }
+
+  // Show tabs and results
+  document.getElementById('resultTypeBar').style.display   = '';
+  document.getElementById('resultsSection').style.display  = '';
+
+  updateCounts(allResults);
+
+  document.getElementById('searchHeading').textContent    = `${allResults.length} result${allResults.length !== 1 ? 's' : ''} for "${lastQuery}"`;
+  document.getElementById('searchSubheading').textContent = 'Orange Beach & Gulf Shores · Exact matches first';
+
+  // Reset to "all" tab
+  applyTab('all');
+}
+
+/* ── Boot ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Search bar events
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn   = document.getElementById('searchBtn');
+
+  searchBtn.addEventListener('click', () => {
+    const q = searchInput.value.trim();
+    if (q) { history.pushState({}, '', `?q=${encodeURIComponent(q)}`); doSearch(q); }
+  });
+  searchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchBtn.click();
+  });
+
+  // Quick tags
+  document.querySelectorAll('.search-tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const q = tag.dataset.q;
+      searchInput.value = q;
+      history.pushState({}, '', `?q=${encodeURIComponent(q)}`);
+      doSearch(q);
+    });
+  });
+
+  // Result tabs AND mode toggles — both share data-tab
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyTab(btn.dataset.tab);
+    });
+  });
+
+  // Load more
+  document.getElementById('loadMoreBtn').addEventListener('click', () => {
+    visibleCount += PAGE_SIZE;
+    renderResults();
+  });
+
+  // URL params auto-search
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (q) { searchInput.value = q; doSearch(q); }
+});
+</script>
 </body>
 </html>
