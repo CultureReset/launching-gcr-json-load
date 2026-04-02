@@ -13,6 +13,15 @@
   s.textContent = `
     .layout { padding-top:0 !important; }
     .results-title { margin-top:14px; }
+    .toolbar {
+      position:sticky;
+      top:var(--gcr-header-h, 64px);
+      z-index:900;
+      border-radius:0 !important;
+      margin:0 !important;
+      border-left:none !important;
+      border-right:none !important;
+    }
     .gcr-card {
       display:grid;grid-template-columns:280px minmax(0,1fr);
       background:#fff;border:1px solid #e2e8f0;border-radius:20px;
@@ -938,9 +947,18 @@ function initStandardPage() {
   wireFilterChips(grid);
 }
 
+/* ── Set --gcr-header-h CSS variable to actual header height so toolbar sticks correctly ── */
+function setHeaderHeight() {
+  const header = document.querySelector('.gcr-header');
+  if (header) {
+    document.documentElement.style.setProperty('--gcr-header-h', header.offsetHeight + 'px');
+  }
+}
+
 /* ── Boot ── */
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initStandardPage);
+  document.addEventListener('DOMContentLoaded', () => { setHeaderHeight(); initStandardPage(); });
 } else {
+  setHeaderHeight();
   initStandardPage();
 }
