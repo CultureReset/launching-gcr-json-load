@@ -26,36 +26,6 @@
     }
     .search-submit:hover { background: var(--teal-dark); }
 
-    /* Quick tags */
-    .search-tag {
-      display: inline-block; padding: 7px 14px;
-      background: rgba(255,255,255,.12); color: #fff; border-radius: 999px;
-      font-size: .8rem; font-weight: 600; cursor: pointer;
-      border: 1px solid rgba(255,255,255,.25); transition: background .15s;
-    }
-    .search-tag:hover { background: rgba(255,255,255,.22); }
-
-    /* ── Result tabs ── */
-    .result-type-bar {
-      background: #fff; border-bottom: 1px solid var(--gray-200);
-      padding: 0; position: sticky; top: var(--header-h); z-index: 800;
-    }
-    .result-tabs { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
-    .result-tabs::-webkit-scrollbar { display: none; }
-    .result-tab {
-      padding: 12px 20px; font-size: .82rem; font-weight: 600;
-      color: var(--text-muted); border-bottom: 3px solid transparent;
-      cursor: pointer; transition: all .15s; white-space: nowrap; flex-shrink: 0;
-    }
-    .result-tab:hover  { color: var(--teal); }
-    .result-tab.active { color: var(--teal); border-color: var(--teal); }
-    .tab-count {
-      display: inline-block; background: var(--gray-200); color: var(--text-muted);
-      font-size: .68rem; padding: 1px 7px; border-radius: 10px; margin-left: 5px;
-      font-weight: 700;
-    }
-    .result-tab.active .tab-count { background: var(--teal); color: #fff; }
-
     /* ── Business card (full) ── */
     .gcr-search-card {
       background: #fff; border-radius: 18px;
@@ -244,16 +214,6 @@
       <input type="text" id="searchInput" placeholder='Search restaurants, "crab legs", "raw oysters", "happy hour"...' autocomplete="off">
       <button class="search-submit" id="searchBtn">🔍 Search</button>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
-      <span class="search-tag" data-q="crab legs">🦀 Crab Legs</span>
-      <span class="search-tag" data-q="raw oysters">🦪 Raw Oysters</span>
-      <span class="search-tag" data-q="happy hour">🍻 Happy Hour</span>
-      <span class="search-tag" data-q="boat rental">🚤 Boat Rental</span>
-      <span class="search-tag" data-q="all you can eat">🍽️ All You Can Eat</span>
-      <span class="search-tag" data-q="live music">🎸 Live Music</span>
-      <span class="search-tag" data-q="seafood">🐟 Seafood</span>
-      <span class="search-tag" data-q="spicy cobia">🌶️ Spicy Cobia</span>
-    </div>
   </div>
 </div>
 
@@ -267,19 +227,6 @@
       <button class="search-mode-toggle" data-tab="menu">🍽️ Food</button>
       <button class="search-mode-toggle" data-tab="drinks">🍺 Drinks</button>
       <button class="search-mode-toggle" data-tab="specials">🏷️ Specials</button>
-    </div>
-  </div>
-</div>
-
-<!-- RESULT COUNT BAR (shown after search) -->
-<div class="result-type-bar" id="resultTypeBar" style="display:none;">
-  <div class="container">
-    <div class="result-tabs">
-      <div class="result-tab active" data-tab="all">All <span class="tab-count" id="tabCountAll">0</span></div>
-      <div class="result-tab" data-tab="businesses">🏢 Businesses <span class="tab-count" id="tabCountBiz">0</span></div>
-      <div class="result-tab" data-tab="menu">🍽️ Food <span class="tab-count" id="tabCountMenu">0</span></div>
-      <div class="result-tab" data-tab="drinks">🍺 Drinks <span class="tab-count" id="tabCountDrinks">0</span></div>
-      <div class="result-tab" data-tab="specials">🏷️ Specials <span class="tab-count" id="tabCountSpecials">0</span></div>
     </div>
   </div>
 </div>
@@ -582,13 +529,17 @@ function applyTab(tab) {
 
 /* ── Render one result with tab-aware item filtering ── */
 
-/* ── Update count badges ── */
+/* ── Update count badges on toggle pills ── */
 function updateCounts(results) {
-  document.getElementById('tabCountAll').textContent      = results.length;
-  document.getElementById('tabCountBiz').textContent      = results.length;
-  document.getElementById('tabCountMenu').textContent     = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu')).length;
-  document.getElementById('tabCountDrinks').textContent   = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink')).length;
-  document.getElementById('tabCountSpecials').textContent = results.filter(e => (e.matched_specials||[]).length > 0).length;
+  const all      = results.length;
+  const menu     = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu')).length;
+  const drinks   = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink')).length;
+  const specials = results.filter(e => (e.matched_specials||[]).length > 0).length;
+  document.querySelector('.search-mode-toggle[data-tab="all"]').textContent        = `🔍 All (${all})`;
+  document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${all})`;
+  document.querySelector('.search-mode-toggle[data-tab="menu"]').textContent       = `🍽️ Food (${menu})`;
+  document.querySelector('.search-mode-toggle[data-tab="drinks"]').textContent     = `🍺 Drinks (${drinks})`;
+  document.querySelector('.search-mode-toggle[data-tab="specials"]').textContent   = `🏷️ Specials (${specials})`;
 }
 
 /* ── Main search ── */
@@ -619,12 +570,10 @@ async function doSearch(q) {
 
   if (!allResults.length) {
     document.getElementById('noResults').style.display = '';
-    document.getElementById('resultTypeBar').style.display = 'none';
     return;
   }
 
-  // Show tabs and results
-  document.getElementById('resultTypeBar').style.display   = '';
+  // Show results
   document.getElementById('resultsSection').style.display  = '';
 
   updateCounts(allResults);
@@ -650,17 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') searchBtn.click();
   });
 
-  // Quick tags
-  document.querySelectorAll('.search-tag').forEach(tag => {
-    tag.addEventListener('click', () => {
-      const q = tag.dataset.q;
-      searchInput.value = q;
-      history.pushState({}, '', `?q=${encodeURIComponent(q)}`);
-      doSearch(q);
-    });
-  });
-
-  // Result tabs AND mode toggles — both share data-tab
+  // Mode toggles
   document.querySelectorAll('[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
       applyTab(btn.dataset.tab);
