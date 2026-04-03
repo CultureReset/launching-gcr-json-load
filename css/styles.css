@@ -148,24 +148,27 @@ p  { color: var(--text-muted); }
 }
 .gcr-action-strip {
   display: flex;
-  gap: 8px;
-  padding: 0 10px 10px;
+  gap: 6px;
+  padding: 0 8px 8px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .gcr-strip-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
+  gap: 5px;
+  padding: 8px 10px;
   border: none;
   border-radius: 22px;
-  font-size: .82rem;
+  font-size: .75rem;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   transition: transform .18s, box-shadow .18s;
   white-space: nowrap;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
 }
 .gcr-strip-btn:hover { transform: translateY(-2px); }
 .gcr-strip-gold {
