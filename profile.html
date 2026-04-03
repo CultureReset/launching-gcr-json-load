@@ -1220,6 +1220,15 @@
 
 })();
 </script>
+<script>
+function updateHeaderVar() {
+  const h = document.querySelector('.gcr-header');
+  if (h) document.documentElement.style.setProperty('--header-h', Math.ceil(h.getBoundingClientRect().height) + 'px');
+}
+document.addEventListener('DOMContentLoaded', updateHeaderVar);
+window.addEventListener('load', updateHeaderVar);
+window.addEventListener('resize', updateHeaderVar);
+</script>
 <script src="js/claim-modal.js"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@
     .results-title { margin-top:14px; }
     .toolbar {
       position:sticky;
-      top:var(--gcr-header-h, 64px);
+      top:var(--gcr-header-h, 180px);
       z-index:900;
       border-radius:0 !important;
       margin:0 !important;
@@ -1507,14 +1507,23 @@ const GCREvents = (() => {
 function setHeaderHeight() {
   const header = document.querySelector('.gcr-header');
   if (header) {
-    document.documentElement.style.setProperty('--gcr-header-h', header.offsetHeight + 'px');
+    const h = header.getBoundingClientRect().height;
+    document.documentElement.style.setProperty('--gcr-header-h', Math.ceil(h) + 'px');
   }
 }
 
 /* ── Boot ── */
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { setHeaderHeight(); initStandardPage(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    setHeaderHeight();
+    initStandardPage();
+    // Re-measure after fonts/images load
+    window.addEventListener('load', setHeaderHeight);
+    window.addEventListener('resize', setHeaderHeight);
+  });
 } else {
   setHeaderHeight();
   initStandardPage();
+  window.addEventListener('load', setHeaderHeight);
+  window.addEventListener('resize', setHeaderHeight);
 }
