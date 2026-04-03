@@ -919,7 +919,7 @@ function buildDynamicFilters(entities) {
   const tagCounts = {};
   entities.forEach(e => {
     const tags = (e.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
-    const tagNorms = tags.map(t => t.toLowerCase().replace(/ /g, '_'));
+    const tagNorms = tags.map(t => t.toLowerCase().replace(/[\s\-]+/g, '_'));
     tagNorms.forEach(norm => {
       tagCounts[norm] = (tagCounts[norm] || 0) + 1;
     });
@@ -1165,8 +1165,8 @@ function initStandardPage() {
 
   function render(businesses) {
     _allEntities = getEntitiesForCategory(businesses, category);
-    buildDynamicFilters(_allEntities);
     renderEntities(_allEntities);
+    buildDynamicFilters(_allEntities);
     updateStatRow(_allEntities);
     populateSidebar(_allEntities);
 
