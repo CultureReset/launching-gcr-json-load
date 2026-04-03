@@ -285,32 +285,6 @@
 
 </div>
 
-<!-- Booking Modal Overlay -->
-<div id="booking-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;overflow:auto;padding:20px;">
-  <div style="position:relative;margin:40px auto;width:100%;max-width:700px;background:#fff;border-radius:12px;overflow:hidden;">
-    <button onclick="closeBookingModal()" style="position:absolute;top:14px;right:14px;background:#f0f0f0;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;z-index:10001;">✕</button>
-    <iframe id="booking-frame" src="https://beachsidecircleboats.com/links.html" style="width:100%;height:90vh;border:none;display:block;"></iframe>
-  </div>
-</div>
-
-<script>
-function openBookingModal() {
-  document.getElementById('booking-overlay').style.display = 'flex';
-  document.getElementById('booking-overlay').style.alignItems = 'flex-start';
-  document.getElementById('booking-overlay').style.justifyContent = 'center';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeBookingModal() {
-  document.getElementById('booking-overlay').style.display = 'none';
-  document.body.style.overflow = 'auto';
-}
-
-// Close modal on background click
-document.getElementById('booking-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'booking-overlay') closeBookingModal();
-});
-</script>
 
 <script>
 (async function () {
@@ -754,9 +728,9 @@ document.getElementById('booking-overlay').addEventListener('click', (e) => {
   (B.about.features || []).forEach(f => { badges.innerHTML += `<span class="badge">${f}</span>`; });
 
   const cta = document.getElementById('js-cta');
-  // Circle Boats: Book Now opens booking modal overlay
+  // Circle Boats: Book Now opens modular booking modal
   if (slug === 'beachside-circle-boats') {
-    cta.innerHTML += `<button onclick="openBookingModal()" class="btn btn-dir" style="background:#7c3aed;border-color:#7c3aed;border:none;cursor:pointer;">📅 Book Now</button>`;
+    cta.innerHTML += `<button onclick="openBooking('beachside-circle-boats')" class="btn btn-dir" style="background:#7c3aed;border-color:#7c3aed;border:none;cursor:pointer;">📅 Book Now</button>`;
   }
   if (B.phone)          cta.innerHTML += `<a href="tel:${B.phone}" class="btn btn-call">📞 Call Now</a>`;
   if (B.googleMaps)     cta.innerHTML += `<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
@@ -1257,5 +1231,6 @@ window.addEventListener('load', updateHeaderVar);
 window.addEventListener('resize', updateHeaderVar);
 </script>
 <script src="js/claim-modal.js"></script>
+<script src="js/booking-modal.js"></script>
 </body>
 </html>
