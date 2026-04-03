@@ -228,8 +228,9 @@
   function buildEventCard(ev) {
     const slug  = ev.entity_slug || ev.slug || '';
     const name  = ev.event_name || ev.name || '';
-    const biz   = ev.entity_name || ev.businessName || '';
-    const city  = ev.entity_city || ev.city || '';
+    const venueParts = (ev.venue_location || '').split(',');
+    const biz   = ev.entity_name || ev.businessName || venueParts[0]?.trim() || '';
+    const city  = ev.entity_city || ev.city || venueParts.slice(1).join(',').trim() || '';
     const hero  = ev.entity_hero_image_url || ev.hero_image_url || FALLBACK_IMG;
     const etype = (ev.event_type || '').replace(/_/g,' ');
     const time  = ev.start_time ? fmt12(ev.start_time) : '';
