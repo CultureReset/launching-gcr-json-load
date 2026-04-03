@@ -179,6 +179,8 @@ const SUBTYPE_TO_CATEGORY = {
   services:'services', service:'services',
   salon:'services', spa:'services', photographer:'services', photography:'services',
   wellness:'services', transportation:'services',
+  concierge:'services', chair_rental:'services', grocery_delivery:'services',
+  cleaning:'services', lawn_care:'services', pest_control:'services',
 
   // Other
   other:'other',
@@ -206,7 +208,7 @@ const TAG_TO_PAGE = {
   boat_rental:'things-to-do.html', kayak:'things-to-do.html',
   snorkeling:'things-to-do.html',  dolphin:'things-to-do.html',
   boutique:'shopping.html',        souvenir:'shopping.html',
-  photography:'other.html',        photographer:'other.html',
+  photography:'services.html',      photographer:'services.html',
 };
 
 function tagToPage(tag) {
@@ -390,9 +392,10 @@ function buildCard(entity) {
     const n = (e.event_name||'').toLowerCase();
     return t.includes('live')||t.includes('music')||t.includes('dj')||n.includes('live')||n.includes('dj');
   });
+  const hasLiveMusic = rawTags.some(t => t.includes('live_music') || t.includes('live music')) || todayMusic.length > 0;
   const musicBlock = todayMusic.length
     ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
-    : '';
+    : (hasLiveMusic ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:600;">🎸 Live Music</div>` : '');
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -400,7 +403,8 @@ function buildCard(entity) {
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
-       data-hh="${entity.hh_days ? '1' : '0'}">
+       data-hh="${entity.hh_days ? '1' : '0'}"
+       data-live="${hasLiveMusic ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
@@ -513,9 +517,10 @@ function buildHHCard(entity) {
     const n = (e.event_name||'').toLowerCase();
     return t.includes('live')||t.includes('music')||t.includes('dj')||n.includes('live')||n.includes('dj');
   });
+  const hasLiveMusicHH = rawTags.some(t => t.includes('live_music') || t.includes('live music')) || todayMusic.length > 0;
   const musicBlock = todayMusic.length
     ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
-    : '';
+    : (hasLiveMusicHH ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:600;">🎸 Live Music</div>` : '');
 
   // Happy Hour Items popup — large button for HH page
   const hhItemsPopupId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
@@ -536,7 +541,8 @@ function buildHHCard(entity) {
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
-       data-hh="${entity.hh_days ? '1' : '0'}">
+       data-hh="${entity.hh_days ? '1' : '0'}"
+       data-live="${hasLiveMusicHH ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
@@ -611,6 +617,219 @@ function loadHHItems(popupId) {
     });
 }
 
+/* ── Build specials card (for specials.html page) ── */
+function buildSpecialsCard(entity) {
+  // Get specials for this entity from GCR.specials
+  const entitySpecials = (window.GCR && GCR.specials || []).filter(s =>
+    (s.entity_slug || s.slug) === entity.slug || s.entity_id === entity.id
+  );
+
+  const slug    = entity.slug || entity.subdomain || entity.id || '';
+  const name    = entity.name || 'Business';
+  const icon    = entity.icon || entity.emoji || '📍';
+  const sub     = entity.subtitle || entity.tagline || '';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const rating  = entity.rating;
+  const reviews = entity.review_count || entity.reviewCount || 0;
+  const addr    = entity.address_line_1 || entity.address || '';
+  const phone   = entity.phone || '';
+  const dir     = entity.directions_url || '';
+  const desc    = entity.description || '';
+  const location = [city, state].filter(Boolean).join(', ');
+
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const statusBadge = computeStatus(entity.hours || [], rawTags);
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
+  const hoursInfo = computeHoursLine(entity.hours || []);
+  const hoursBlock = hoursInfo ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : '';
+
+  const ratingBlock = rating ? `
+    <div class="gcr-card-rating">
+      <span class="gcr-stars">${starsHtml(rating)}</span>
+      <span>${Number(rating).toFixed(1)}</span>
+      ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
+    </div>` : '';
+
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const viewBtn = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
+  const dirBtn  = dir   ? `<a href="${dir}" target="_blank" rel="noopener" class="gcr-btn" onclick="event.stopPropagation()">📍 Directions</a>` : '';
+
+  // Specials preview line — show first special's name + discount
+  const firstSpecial = entitySpecials[0];
+  const specialsPreview = firstSpecial
+    ? `<div style="margin-top:6px;font-size:13px;color:#0369a1;font-weight:700;">🏷️ ${esc(firstSpecial.special_name || firstSpecial.name || '')}${firstSpecial.discount_text ? ' · '+esc(firstSpecial.discount_text) : ''}</div>`
+    : '';
+
+  // Specials popup
+  const specPopupId = `specials-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const specBtn = entitySpecials.length
+    ? `<button class="gcr-btn" style="background:#0369a1;color:#fff;border-color:#0369a1;flex:1;font-size:14px;font-weight:900;padding:12px 16px;" onclick="event.stopPropagation();event.preventDefault();toggleSpecialsPopup('${specPopupId}','${encodeURIComponent(slug)}')">🏷️ View Specials</button>`
+    : '';
+  const specPopup = entitySpecials.length ? `
+    <div id="${specPopupId}" style="display:none;margin-top:14px;border:1px solid #bae6fd;border-radius:14px;background:#f0f9ff;padding:18px;max-height:500px;overflow-y:auto;">
+      <div style="font-weight:900;font-size:16px;color:#0369a1;margin-bottom:12px;">🏷️ Specials</div>
+      <div id="${specPopupId}-items">
+        ${entitySpecials.map(s => `
+          <div style="border-bottom:1px solid #bae6fd;padding:12px 0;">
+            <div style="font-weight:700;color:#0c4a6e;">${esc(s.special_name || s.name || '')}</div>
+            ${s.discount_text ? `<div style="font-size:13px;color:#0369a1;font-weight:700;margin-top:2px;">${esc(s.discount_text)}</div>` : ''}
+            ${s.description ? `<div style="font-size:12px;color:#075985;margin-top:4px;line-height:1.4;">${esc(s.description)}</div>` : ''}
+            ${s.days_of_week ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days_of_week)}</div>` : ''}
+          </div>`).join('')}
+      </div>
+    </div>` : '';
+
+  return `
+    <a href="${profileUrl}"
+       style="text-decoration:none;color:inherit;display:block;"
+       data-slug="${slug}"
+       data-tags="${rawTags.join(',').toLowerCase()}"
+       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
+       data-hh="${entity.hh_days ? '1' : '0'}"
+       data-live="0">
+      <div class="gcr-card">
+        <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <div class="gcr-card-badge">${icon} ${subtype}</div>
+          ${statusBadge}
+        </div>
+        <div class="gcr-card-body">
+          <div class="gcr-card-name">${esc(name)}</div>
+          <div class="gcr-card-sub">${esc([sub, location].filter(Boolean).join(' · '))}</div>
+          ${desc ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>` : ''}
+          ${ratingBlock}
+          ${hoursBlock}
+          ${specialsPreview}
+          ${specBtn ? `<div style="margin-top:10px;display:flex;gap:8px;">${specBtn}</div>` : ''}
+          <div class="gcr-card-bottom">
+            <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
+            <div class="gcr-card-actions">${viewBtn}${dirBtn}${callBtn}</div>
+          </div>
+        </div>
+      </div>
+      ${specPopup}
+    </a>`;
+}
+
+function toggleSpecialsPopup(popupId) {
+  const popup = document.getElementById(popupId);
+  if (!popup) return;
+  popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+}
+
+/* ── Build combined HH + Specials card (for deals.html page) ── */
+function buildHHSpecialsCard(entity) {
+  // Get specials for this entity
+  const entitySpecials = (window.GCR && GCR.specials || []).filter(s =>
+    (s.entity_slug || s.slug) === entity.slug || s.entity_id === entity.id
+  );
+
+  const slug    = entity.slug || entity.subdomain || entity.id || '';
+  const name    = entity.name || 'Business';
+  const icon    = entity.icon || entity.emoji || '📍';
+  const sub     = entity.subtitle || entity.tagline || '';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
+  const city    = entity.city || '';
+  const state   = entity.state || '';
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const rating  = entity.rating;
+  const reviews = entity.review_count || entity.reviewCount || 0;
+  const addr    = entity.address_line_1 || entity.address || '';
+  const phone   = entity.phone || '';
+  const dir     = entity.directions_url || '';
+  const desc    = entity.description || '';
+  const hhDays  = entity.hh_days || '';
+  const hhStart = entity.hh_start || '';
+  const hhEnd   = entity.hh_end || '';
+  const location = [city, state].filter(Boolean).join(', ');
+
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const statusBadge = computeStatus(entity.hours || [], rawTags);
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
+  const hoursInfo = computeHoursLine(entity.hours || []);
+  const hoursBlock = hoursInfo ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>` : '';
+  const ratingBlock = rating ? `
+    <div class="gcr-card-rating"><span class="gcr-stars">${starsHtml(rating)}</span><span>${Number(rating).toFixed(1)}</span>${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}</div>` : '';
+
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const viewBtn = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
+  const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
+  const dirBtn  = dir   ? `<a href="${dir}" target="_blank" rel="noopener" class="gcr-btn" onclick="event.stopPropagation()">📍 Directions</a>` : '';
+
+  // HH block
+  const hhBlock = hhDays
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
+    : '';
+
+  // Specials preview
+  const firstSpecial = entitySpecials[0];
+  const specialsPreview = firstSpecial
+    ? `<div style="margin-top:4px;font-size:13px;color:#0369a1;font-weight:700;">🏷️ ${esc(firstSpecial.special_name || firstSpecial.name || '')}${firstSpecial.discount_text ? ' · '+esc(firstSpecial.discount_text) : ''}</div>`
+    : '';
+
+  // HH popup button
+  const hhItemsPopupId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const hhItemsBtn = hhDays
+    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;font-size:13px;font-weight:900;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhItemsPopupId}')">🍺 HH Items</button>`
+    : '';
+  const hhItemsPopup = hhDays ? `
+    <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:400px;overflow-y:auto;">
+      <div style="font-weight:900;font-size:15px;color:#92400e;margin-bottom:8px;">🍺 Happy Hour</div>
+      <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:12px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      <div id="${hhItemsPopupId}-items">Loading items...</div>
+    </div>` : '';
+
+  // Specials popup button
+  const specPopupId = `specials-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const specBtn = entitySpecials.length
+    ? `<button class="gcr-btn" style="background:#0369a1;color:#fff;border-color:#0369a1;font-size:13px;font-weight:900;" onclick="event.stopPropagation();event.preventDefault();toggleSpecialsPopup('${specPopupId}')">🏷️ Specials</button>`
+    : '';
+  const specPopup = entitySpecials.length ? `
+    <div id="${specPopupId}" style="display:none;margin-top:14px;border:1px solid #bae6fd;border-radius:14px;background:#f0f9ff;padding:18px;max-height:400px;overflow-y:auto;">
+      <div style="font-weight:900;font-size:15px;color:#0369a1;margin-bottom:8px;">🏷️ Specials</div>
+      ${entitySpecials.map(s => `
+        <div style="border-bottom:1px solid #bae6fd;padding:10px 0;">
+          <div style="font-weight:700;color:#0c4a6e;">${esc(s.special_name || s.name || '')}</div>
+          ${s.discount_text ? `<div style="font-size:13px;color:#0369a1;font-weight:700;margin-top:2px;">${esc(s.discount_text)}</div>` : ''}
+          ${s.days_of_week ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days_of_week)}</div>` : ''}
+        </div>`).join('')}
+    </div>` : '';
+
+  return `
+    <a href="${profileUrl}"
+       style="text-decoration:none;color:inherit;display:block;"
+       data-slug="${slug}"
+       data-tags="${rawTags.join(',').toLowerCase()}"
+       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
+       data-hh="${entity.hh_days ? '1' : '0'}"
+       data-live="0">
+      <div class="gcr-card">
+        <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <div class="gcr-card-badge">${icon} ${subtype}</div>
+          ${statusBadge}
+        </div>
+        <div class="gcr-card-body">
+          <div class="gcr-card-name">${esc(name)}</div>
+          <div class="gcr-card-sub">${esc([sub, location].filter(Boolean).join(' · '))}</div>
+          ${desc ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>` : ''}
+          ${ratingBlock}
+          ${hoursBlock}
+          ${hhBlock}
+          ${specialsPreview}
+          ${(hhItemsBtn || specBtn) ? `<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">${hhItemsBtn}${specBtn}</div>` : ''}
+          <div class="gcr-card-bottom">
+            <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
+            <div class="gcr-card-actions">${viewBtn}${dirBtn}${callBtn}</div>
+          </div>
+        </div>
+      </div>
+      ${hhItemsPopup}${specPopup}
+    </a>`;
+}
+
 /* ── Populate sidebar with real top-rated entities ── */
 function populateSidebar(entities) {
   const heading = document.querySelector('.panel h3');
@@ -657,6 +876,8 @@ function applyFilter(grid, filter) {
     let match = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
     // For happy_hour filter: also match businesses that have hh_days set (data-hh="1")
     if (norm === 'happy_hour' && card.dataset.hh === '1') match = true;
+    // For live_music filter: also match businesses that have live music events (data-live="1")
+    if ((norm === 'live_music' || norm === 'live music') && card.dataset.live === '1') match = true;
     card.style.display = match ? 'block' : 'none';
     if (match) visible++;
   });
@@ -895,7 +1116,11 @@ function initStandardPage() {
     const activeChip = document.querySelector('.tag-btn.active, .filter-chip.active');
     const currentFilter = (activeChip ? activeChip.dataset.filter : null) || urlTag || 'all';
 
-    grid.innerHTML = entities.map(category === 'happy-hours' ? buildHHCard : buildCard).join('');
+    const cardFn = category === 'happy-hours' ? buildHHCard
+                 : category === 'specials'    ? buildSpecialsCard
+                 : category === 'deals'       ? buildHHSpecialsCard
+                 : buildCard;
+    grid.innerHTML = entities.map(cardFn).join('');
     const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
     wireFilterChips(grid);
