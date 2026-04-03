@@ -21,7 +21,7 @@
     .hero p{margin:10px 0 0;font-size:18px;line-height:1.5;color:rgba(255,255,255,.92);max-width:760px}
     .livebox{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);padding:14px 16px;border-radius:18px;min-width:250px}
     .livebox strong{display:block;font-size:18px}.livebox span{display:block;margin-top:6px;color:rgba(255,255,255,.9);font-weight:600}
-    .toolbar{position:sticky;top:140px;z-index:30;margin:14px 18px 0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:12px}
+    .toolbar{position:sticky;top:var(--gcr-header-h,180px);z-index:30;margin:14px 18px 0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:12px}
     .toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
     .toolbar-title{font-size:20px;font-weight:900}.toolbar-actions{display:flex;gap:10px;flex-wrap:wrap}
     .ctrl{border:1px solid var(--line);background:#fff;color:#37556a;padding:10px 12px;border-radius:12px;font-weight:700}
@@ -272,6 +272,12 @@
 
   <script src="js/gcr-api.js"></script>
   <script src="js/app.js"></script>
+  <script>
+  function _setHdrH(){const h=document.querySelector('.gcr-header');if(h)document.documentElement.style.setProperty('--gcr-header-h',Math.ceil(h.getBoundingClientRect().height)+'px');}
+  document.addEventListener('DOMContentLoaded',_setHdrH);
+  window.addEventListener('load',_setHdrH);
+  window.addEventListener('resize',_setHdrH);
+  </script>
   <script>
   const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   const MUSIC_IMG  = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80';
