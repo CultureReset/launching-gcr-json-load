@@ -106,7 +106,7 @@ const GCR = {
     return this.specials.filter(s => s.active !== false && s.is_active !== false);
   },
   getByTag(tag) {
-    return this.businesses.filter(b => b.tags && b.tags.includes(tag));
+    return this.businesses.filter(b => b.tags && b.tags.some(t => (typeof t === 'string' ? t : t.tag || '') === tag));
   },
   getEventsByMonth(year, month) {
     const prefix = `${year}-${String(month).padStart(2,'0')}`;
