@@ -14,13 +14,20 @@
     .layout { padding-top:0 !important; }
     .results-title { margin-top:14px; }
     .toolbar {
-      position:sticky;
-      top:var(--gcr-header-h, 180px);
-      z-index:900;
       border-radius:0 !important;
       margin:0 !important;
       border-left:none !important;
       border-right:none !important;
+    }
+    .tag-row, .filter-row, .chips-row {
+      position:sticky;
+      top:var(--gcr-header-h, 180px);
+      z-index:900;
+      background:#fff;
+      padding:10px 0;
+      margin:0 !important;
+      border-bottom:1px solid #e2e8f0;
+      box-shadow:0 2px 8px rgba(15,34,51,.06);
     }
     .gcr-card {
       display:grid;grid-template-columns:280px minmax(0,1fr);
