@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beachside Circle Boats – Gulf Coast Radar</title>
+  <meta name="description" content="Premium circle boat rentals in Orange Beach, AL. Book online with live availability.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    :root {
+      --bg:     #0b1220;
+      --card:   #ffffff;
+      --ink:    #0e1726;
+      --muted:  #5c6b81;
+      --accent: #0ea5e9;
+      --teal:   #00ada8;
+      --teal-dark: #009590;
+      --chip:   #eef6ff;
+      --border: #e6ecf3;
+      --shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:#f6f8fb; color:var(--ink); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    a { color:var(--accent); text-decoration:none; }
+
+    .wrap { max-width:980px; margin:0 auto; padding-bottom:64px; }
+
+    /* Hero Cover Slideshow */
+    .hero-cover { position:relative; width:100%; aspect-ratio:16/9; background:linear-gradient(135deg, #00ada8, #009590); overflow:hidden; }
+    .hero-slides { position:relative; width:100%; height:100%; }
+    .hero-slide { position:absolute; top:0; left:0; width:100%; height:100%; background:#00ada8; opacity:0; transition:opacity .5s ease; pointer-events:none; }
+    .hero-slide.active { opacity:1; pointer-events:auto; }
+    .hero-slide img { width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
+    .hero-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:none; color:#fff; font-size:22px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
+    .hero-arrow:hover { background:rgba(0,0,0,.7); }
+    .hero-prev { left:12px; }
+    .hero-next { right:12px; }
+    .hero-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:10; }
+    .hero-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.5); border:none; cursor:pointer; padding:0; transition:background .2s; }
+    .hero-dot.active { background:#fff; }
+
+    /* Header */
+    .header { padding:16px 20px; background:var(--card); border-bottom:1px solid var(--border); }
+    .title { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+    .title h1 { font-size:clamp(22px,3.8vw,32px); margin:0; }
+    .title .emoji { font-size:40px; }
+    .meta { display:flex; gap:16px; flex-wrap:wrap; color:var(--muted); margin-top:6px; font-size:14px; }
+    .meta-item { display:flex; align-items:center; gap:6px; }
+    .badge-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .badge { background:var(--chip); color:#0b6aa3; border:1px solid #cfe6ff; padding:6px 10px; border-radius:999px; font-size:13px; }
+
+    /* CTA buttons */
+    .cta-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 20px; border-radius:999px; font-size:14px; font-weight:700; transition:all .2s; white-space:nowrap; text-decoration:none; border:none; cursor:pointer; }
+    .btn-book { background:var(--teal); color:#fff; }
+    .btn-book:hover { background:var(--teal-dark); transform:translateY(-1px); }
+    .btn-call { background:#22c55e; color:#fff; }
+    .btn-call:hover { background:#16a34a; transform:translateY(-1px); }
+    .btn-web  { background:var(--chip); color:var(--ink); border:1px solid var(--border); }
+    .btn-web:hover  { background:var(--border); }
+
+    /* Social */
+    .social-row { display:flex; gap:10px; margin-top:12px; }
+    .social-btn { width:36px; height:36px; border-radius:50%; background:var(--chip); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .social-btn:hover { background:var(--accent); border-color:var(--accent); }
+    .social-btn:hover svg { fill:#fff; }
+    .social-btn svg { width:17px; height:17px; fill:var(--muted); }
+
+    /* Sticky nav — sits below the 64px global gcr-header */
+    .sticky-wrap { position:sticky; top:64px; z-index:998; }
+    .sticky-nav { background:rgba(255,255,255,0.97); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); box-shadow:0 2px 12px rgba(0,0,0,.10); }
+    .tabs { display:flex; overflow:auto; gap:6px; padding:10px 14px; scroll-snap-type:x mandatory; scrollbar-width:none; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { white-space:nowrap; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; scroll-snap-align:start; transition:all .18s; color:var(--ink); flex-shrink:0; }
+    .tab:hover { border-color:var(--accent); color:var(--accent); }
+    .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+    /* Sections */
+    section { padding:20px; scroll-margin-top:120px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; margin:12px 0; box-shadow:var(--shadow); }
+    h2 { font-size:20px; margin:0 0 8px 0; }
+    h3 { font-size:15px; color:var(--accent); margin:16px 0 8px 0; border-bottom:1px solid var(--border); padding-bottom:6px; }
+
+    /* Boats Grid — image left, info right */
+    .boats-grid { display:grid; gap:20px; }
+    .boat-item { display:grid; grid-template-columns: 1fr 1fr; gap:20px; align-items:start; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow); }
+    .boat-image { width:100%; aspect-ratio:4/3; border-radius:8px; object-fit:cover; background:#f0f4f8; }
+    .boat-info { display:flex; flex-direction:column; gap:12px; }
+    .boat-name { font-size:18px; font-weight:700; color:var(--ink); }
+    .boat-desc { font-size:14px; color:var(--muted); line-height:1.6; }
+    .boat-cap { font-size:13px; color:var(--teal); font-weight:600; }
+    .boat-price { font-size:16px; font-weight:700; color:var(--accent); }
+    @media (max-width:640px) {
+      .boat-item { grid-template-columns:1fr; }
+      .boat-image { aspect-ratio:16/9; }
+    }
+
+    /* Addons Grid — image left, info right */
+    .addons-grid { display:grid; gap:16px; }
+    .addon-item { display:grid; grid-template-columns: 150px 1fr; gap:16px; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:var(--shadow); }
+    .addon-image { width:150px; height:120px; border-radius:8px; object-fit:cover; background:#f0f4f8; flex-shrink:0; }
+    .addon-info { display:flex; flex-direction:column; gap:8px; }
+    .addon-name { font-size:16px; font-weight:700; color:var(--ink); }
+    .addon-desc { font-size:13px; color:var(--muted); line-height:1.5; }
+    .addon-price { font-size:15px; font-weight:700; color:var(--teal); }
+    @media (max-width:640px) {
+      .addon-item { grid-template-columns:1fr; }
+      .addon-image { width:100%; height:150px; }
+    }
+
+    /* Pricing Table */
+    .pricing-table { width:100%; border-collapse:collapse; margin-top:12px; }
+    .pricing-table th { background:var(--chip); padding:12px; text-align:left; font-weight:700; font-size:14px; border-bottom:1px solid var(--border); }
+    .pricing-table td { padding:12px; border-bottom:1px solid var(--border); font-size:14px; }
+    .pricing-table tr:hover { background:#f9fafb; }
+    .pricing-price { font-weight:700; color:var(--teal); }
+
+    /* FAQ */
+    .faq-list { display:flex; flex-direction:column; gap:12px; }
+    .faq-item { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; cursor:pointer; transition:all .2s; }
+    .faq-item:hover { border-color:var(--accent); box-shadow:var(--shadow); }
+    .faq-q { font-weight:700; font-size:15px; color:var(--ink); display:flex; justify-content:space-between; align-items:center; }
+    .faq-a { font-size:14px; color:var(--muted); margin-top:12px; line-height:1.6; display:none; }
+    .faq-item.open .faq-a { display:block; }
+    .faq-toggle { font-size:18px; transition:transform .2s; }
+    .faq-item.open .faq-toggle { transform:rotate(180deg); }
+
+    /* Booking Modal */
+    .booking-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.95); z-index:2000; overflow-y:auto; padding:20px; }
+    .booking-modal.open { display:flex; align-items:flex-start; justify-content:center; padding-top:40px; }
+    .booking-box { background:#fff; border-radius:16px; width:100%; max-width:700px; padding:28px; position:relative; }
+    .booking-close { position:absolute; top:14px; right:14px; background:#f0f0f0; border:none; border-radius:50%; width:36px; height:36px; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#555; transition:background .2s; }
+    .booking-close:hover { background:#e0e0e0; color:#000; }
+    .booking-title { font-size:22px; font-weight:800; margin:0 0 20px 0; }
+
+    /* No content message */
+    .no-content { text-align:center; color:var(--muted); padding:30px 0; font-size:14px; }
+
+    @media (max-width:480px) {
+      .boat-item { grid-template-columns:1fr; }
+      .addon-item { grid-template-columns:1fr; }
+      .addon-image { width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="/index3.html" class="gcr-logo-row">
+      <img src="gcr-logo.png" alt="Gulf Coast Radar">
+      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+    </a>
+    <button onclick="history.back()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1rem;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;">← Back</button>
+  </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html"   class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html"   class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="specials.html"      class="gcr-cat-tab">🏷️ Specials</a>
+    <a href="events.html"        class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html"  class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="services.html"      class="gcr-cat-tab">🛠️ Services</a>
+    <a href="nightlife.html"     class="gcr-cat-tab">🎶 Bars &amp; Nightlife</a>
+    <a href="artists.html"       class="gcr-cat-tab">🎸 Artists</a>
+    <a href="shopping.html"      class="gcr-cat-tab">🛍️ Shopping</a>
+    <a href="public-spots.html"  class="gcr-cat-tab">✨ Public Spots</a>
+    <a href="feed.html"          class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">
+      ⭐ Join Our Loyalty Program 🎁
+    </button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">
+      📅 Master Calendar 🎉
+    </button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- Hero Cover Slideshow -->
+  <div class="hero-cover" id="js-hero">
+    <div class="hero-slides" id="js-slides"></div>
+    <button class="hero-arrow hero-prev" id="js-prev">&#8249;</button>
+    <button class="hero-arrow hero-next" id="js-next">&#8250;</button>
+    <div class="hero-dots" id="js-dots"></div>
+  </div>
+
+  <!-- Header with Book Now Button -->
+  <div class="header">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+      <div class="title">
+        <span class="emoji">🚤</span>
+        <h1>Beachside Circle Boats</h1>
+      </div>
+      <button class="btn btn-book" onclick="openBookingModal()" style="margin-top:4px;">📅 Book Now</button>
+    </div>
+    <div class="meta">
+      <div class="meta-item">
+        <span>📍 Orange Beach, AL</span>
+      </div>
+      <div class="meta-item">
+        <span id="js-rating">★★★★★</span>
+      </div>
+    </div>
+    <div class="badge-row">
+      <span class="badge">✓ Easy to Drive</span>
+      <span class="badge">✓ No License Required</span>
+      <span class="badge">✓ Life Jackets Included</span>
+    </div>
+  </div>
+
+  <!-- Sticky Navigation -->
+  <div class="sticky-wrap">
+    <div class="sticky-nav">
+      <div class="tabs" id="js-tabs"></div>
+    </div>
+  </div>
+
+  <!-- Boats Section -->
+  <section id="boats">
+    <h2>🚤 Our Boats</h2>
+    <div class="boats-grid" id="boats-list"></div>
+  </section>
+
+  <!-- Add-ons Section -->
+  <section id="addons">
+    <h2>➕ Add-Ons & Rentals</h2>
+    <div class="addons-grid" id="addons-list"></div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing">
+    <h2>💰 Pricing</h2>
+    <table class="pricing-table" id="pricing-table"></table>
+  </section>
+
+  <!-- FAQs Section -->
+  <section id="faqs">
+    <h2>❓ FAQ</h2>
+    <div class="faq-list" id="faqs-list"></div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about">
+    <h2>About Circle Boats</h2>
+    <p style="font-size:14px; color:var(--muted); line-height:1.8;">
+      Beachside Circle Boats offers premium circle boat rentals in Orange Beach, Alabama.
+      Enjoy our easy-to-operate boats that require no license. Perfect for family outings,
+      fishing, or a day on the water. All boats include life jackets and on-site staff support.
+    </p>
+  </section>
+
+</div>
+
+<!-- Booking Modal -->
+<div class="booking-modal" id="booking-modal">
+  <div class="booking-box">
+    <button class="booking-close" onclick="closeBookingModal()">✕</button>
+    <div class="booking-title">📅 Book Your Circle Boat Rental</div>
+    <div style="margin-top:20px; padding:20px; background:#f0f4f8; border-radius:12px; text-align:center;">
+      <p style="color:var(--ink); font-size:14px;">Redirecting to booking system...</p>
+      <p style="color:var(--muted); font-size:13px; margin-top:10px;">
+        <a href="https://beachsidecircleboats.com/links.html" style="color:var(--accent); font-weight:600;">
+          Click here if not redirected automatically
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="js/gcr-header.js"></script>
+<script>
+(async function() {
+  const API_BASE = 'https://cybercheck-api-database.vercel.app';
+  const SITE_DATA_URL = `${API_BASE}/api/site-data?subdomain=beachside-circle-boats`;
+
+  let siteData = null;
+
+  // Load site data
+  try {
+    const res = await fetch(SITE_DATA_URL);
+    siteData = await res.json();
+    console.log('Circle Boats data loaded:', siteData);
+  } catch(e) {
+    console.error('Error loading site data:', e);
+    document.getElementById('boats-list').innerHTML = '<div class="no-content">Unable to load boat data</div>';
+    return;
+  }
+
+  if (!siteData) return;
+
+  // ──────────────────────────────────────────────────────────────
+  // Hero Slideshow
+  // ──────────────────────────────────────────────────────────────
+  const heroImages = siteData.photos?.map(p => p.image_url).slice(0, 5) || [];
+  const slidesEl = document.getElementById('js-slides');
+  const dotsEl = document.getElementById('js-dots');
+  let currentSlide = 0;
+
+  if (heroImages.length > 0) {
+    heroImages.forEach((img, i) => {
+      const slide = document.createElement('div');
+      slide.className = `hero-slide ${i === 0 ? 'active' : ''}`;
+      slide.innerHTML = `<img src="${img}" alt="Circle Boats ${i+1}" loading="lazy">`;
+      slidesEl.appendChild(slide);
+
+      const dot = document.createElement('button');
+      dot.className = `hero-dot ${i === 0 ? 'active' : ''}`;
+      dot.onclick = () => goToSlide(i);
+      dotsEl.appendChild(dot);
+    });
+
+    function goToSlide(n) {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.hero-dot');
+      slides.forEach(s => s.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      slides[n].classList.add('active');
+      dots[n].classList.add('active');
+      currentSlide = n;
+    }
+
+    document.getElementById('js-prev').onclick = () => goToSlide((currentSlide - 1 + heroImages.length) % heroImages.length);
+    document.getElementById('js-next').onclick = () => goToSlide((currentSlide + 1) % heroImages.length);
+  } else {
+    document.getElementById('js-hero').style.display = 'none';
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Build Boats Section
+  // ──────────────────────────────────────────────────────────────
+  const boatsList = document.getElementById('boats-list');
+  if (siteData.products && siteData.products.length > 0) {
+    boatsList.innerHTML = siteData.products.map(boat => `
+      <div class="boat-item">
+        <img src="${boat.image || siteData.photos?.[0]?.image_url || ''}" alt="${boat.name}" class="boat-image">
+        <div class="boat-info">
+          <div class="boat-name">${boat.name || 'Circle Boat'}</div>
+          <div class="boat-desc">${boat.description || 'Premium circle boat rental experience'}</div>
+          ${boat.capacity ? `<div class="boat-cap">👥 Capacity: ${boat.capacity} people</div>` : ''}
+          <div class="boat-price" style="margin-top:auto;">Starting from ${boat.price ? '$' + boat.price : 'Call for pricing'}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    boatsList.innerHTML = '<div class="no-content">No boats available</div>';
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Build Add-ons Section
+  // ──────────────────────────────────────────────────────────────
+  const addonsList = document.getElementById('addons-list');
+  if (siteData.addons && siteData.addons.length > 0) {
+    addonsList.innerHTML = siteData.addons.map(addon => `
+      <div class="addon-item">
+        <img src="${addon.image || siteData.photos?.[1]?.image_url || ''}" alt="${addon.name}" class="addon-image">
+        <div class="addon-info">
+          <div class="addon-name">${addon.name}</div>
+          ${addon.description ? `<div class="addon-desc">${addon.description}</div>` : ''}
+          <div class="addon-price">${addon.price ? '+$' + addon.price : 'Included'}</div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    addonsList.innerHTML = '<div class="no-content">No add-ons available</div>';
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Build Pricing Table
+  // ──────────────────────────────────────────────────────────────
+  const pricingTable = document.getElementById('pricing-table');
+  if (siteData.pricing && siteData.pricing.length > 0) {
+    let html = `
+      <tr>
+        <th>Package</th>
+        <th>Duration</th>
+        <th>Price</th>
+        <th></th>
+      </tr>
+    `;
+    siteData.pricing.forEach(p => {
+      html += `
+        <tr>
+          <td>${p.name || 'Boat Rental'}</td>
+          <td>${p.duration || 'Varies'}</td>
+          <td class="pricing-price">${p.price ? '$' + p.price : 'Call for pricing'}</td>
+          <td><button class="btn btn-book" onclick="openBookingModal()" style="padding:6px 12px; font-size:12px;">Book</button></td>
+        </tr>
+      `;
+    });
+    pricingTable.innerHTML = html;
+  } else {
+    pricingTable.innerHTML = '<tr><td colspan="4" class="no-content">Pricing available upon request</td></tr>';
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Build FAQ Section
+  // ──────────────────────────────────────────────────────────────
+  const faqsList = document.getElementById('faqs-list');
+  if (siteData.faqs && siteData.faqs.length > 0) {
+    faqsList.innerHTML = siteData.faqs.map((faq, i) => `
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">
+          <span>${faq.question}</span>
+          <span class="faq-toggle">▼</span>
+        </div>
+        <div class="faq-a">${faq.answer}</div>
+      </div>
+    `).join('');
+  } else {
+    faqsList.innerHTML = '<div class="no-content">No FAQs available</div>';
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // Build Tab Navigation
+  // ──────────────────────────────────────────────────────────────
+  const tabs = document.getElementById('js-tabs');
+  const sections = [
+    { id: 'boats', label: '🚤 Boats', hasContent: siteData.products?.length > 0 },
+    { id: 'addons', label: '➕ Add-Ons', hasContent: siteData.addons?.length > 0 },
+    { id: 'pricing', label: '💰 Pricing', hasContent: siteData.pricing?.length > 0 },
+    { id: 'faqs', label: '❓ FAQ', hasContent: siteData.faqs?.length > 0 },
+    { id: 'about', label: 'ℹ️ About', hasContent: true },
+  ];
+
+  sections.forEach((sec, i) => {
+    if (sec.hasContent) {
+      const tab = document.createElement('button');
+      tab.className = `tab ${i === 0 ? 'active' : ''}`;
+      tab.textContent = sec.label;
+      tab.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(sec.id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      tabs.appendChild(tab);
+    }
+  });
+})();
+
+// ──────────────────────────────────────────────────────────────
+// Booking Modal
+// ──────────────────────────────────────────────────────────────
+function openBookingModal() {
+  document.getElementById('booking-modal').classList.add('open');
+  // Redirect to booking system after 1 second
+  setTimeout(() => {
+    window.location.href = 'https://beachsidecircleboats.com/links.html';
+  }, 1000);
+}
+
+function closeBookingModal() {
+  document.getElementById('booking-modal').classList.remove('open');
+}
+
+// Close modal on background click
+document.getElementById('booking-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'booking-modal') closeBookingModal();
+});
+</script>
+
+</body>
+</html>
