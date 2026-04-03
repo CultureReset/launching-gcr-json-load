@@ -40,8 +40,8 @@
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-card-img{
-      min-height:210px;background-size:cover;background-position:center;
-      position:relative;
+      min-height:210px;height:100%;background-size:cover;background-position:center center;
+      position:relative;align-self:stretch;
     }
     .gcr-card-badge{
       position:absolute;left:14px;bottom:14px;
