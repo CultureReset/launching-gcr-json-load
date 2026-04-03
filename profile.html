@@ -673,6 +673,13 @@
     if (!B.sections.find(s => s.id === 'location') && (B.address || B.city))
       B.sections.push({ id: 'location', label: 'Location', icon: '📍' });
 
+    // Move photos and hours to the end regardless of API order
+    const moveToEnd = ['gallery', 'hours'];
+    moveToEnd.forEach(id => {
+      const idx = B.sections.findIndex(s => s.id === id);
+      if (idx > -1) B.sections.push(B.sections.splice(idx, 1)[0]);
+    });
+
     return B;
   }
 
