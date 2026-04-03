@@ -175,7 +175,7 @@ function _gcrInjectCal() {
         <button class="cal-toggle on" data-t="events"     onclick="gcrCalToggle(this)">🎉 Events</button>
         <button class="cal-toggle on" data-t="happy_hour" onclick="gcrCalToggle(this)">🍻 Happy Hours</button>
         <button class="cal-toggle on" data-t="special"    onclick="gcrCalToggle(this)">🏷️ Specials</button>
-        <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎶 Live Music</button>
+        <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎸 Live Music</button>
       </div>
       <div class="cal-body">
         <div class="cal-mini" id="gcrMiniCal"></div>
@@ -324,38 +324,54 @@ function _gcrCalRenderEvents() {
   const items = [];
 
   // — Dated events —
-  if (_gcrCalTypes.has('events')) {
-    (GCR.events||[]).filter(ev=>(ev.date||ev.event_date||'').startsWith(dateStr))
-      .forEach(ev=>items.push({...ev,_src:'event'}));
-    // Recurring events (no date)
-    (GCR.events||[]).filter(ev=>{
-      if (ev.date||ev.event_date) return false;
-      const nm=(ev.name||ev.title||'').toLowerCase();
-      const md=DAY_NAMES.find(dd=>nm.includes(dd));
-      if (md && md!==dayName) return false;
-      const tags=(ev.tags||[]).join(' ').toLowerCase();
-      if (_gcrCalTypes.has('live-music') && (tags.includes('live-music')||nm.includes('live')||nm.includes('music'))) return true;
-      return _gcrCalTypes.has('events');
-    }).forEach(ev=>items.push({...ev,_src:'event-rec'}));
-  }
+  (GCR.events||[]).filter(ev=>{
+    const evDate = ev.event_date || ev.date || '';
+    const evType = (ev.event_type||'').toLowerCase();
+    const isLiveMusic = evType.includes('live_music') || evType.includes('live music') || evType.includes('open_mic') || evType.includes('karaoke') || evType.includes('show_performance');
+    const isEvent = !isLiveMusic;
+
+    // Filter by date (dated events) or day_of_week (recurring)
+    const matchesDate = evDate.startsWith(dateStr);
+    const matchesRecurring = !evDate && ev.recurring && (ev.day_of_week||'').toLowerCase() === dayName;
+    if (!matchesDate && !matchesRecurring) return false;
+
+    // Apply type filters
+    if (isLiveMusic && _gcrCalTypes.has('live-music')) return true;
+    if (isEvent && _gcrCalTypes.has('events')) return true;
+    // Live music also shows under events if events is on
+    if (isLiveMusic && _gcrCalTypes.has('events')) return true;
+    return false;
+  }).forEach(ev=>{
+    const isLiveMusic = (ev.event_type||'').toLowerCase().includes('live_music') || (ev.event_type||'').toLowerCase().includes('open_mic');
+    items.push({...ev, _src: isLiveMusic ? 'live_music' : 'event'});
+  });
 
   // — Specials + Happy Hours —
   (GCR.specials||[]).filter(sp=>{
-    if (sp.active===false) return false;
-    const _raw=sp.days||sp.day_of_week||[];const days=(Array.isArray(_raw)?_raw:(_raw?String(_raw).split(/[,;]+/).map(s=>s.trim()).filter(Boolean):[])).map(dd=>dd.toLowerCase());
+    if (sp.is_active===false || sp.active===false) return false;
+    // Parse days — GCR uses sp.days (JSON string or array)
+    let daysRaw = sp.days || sp.day_of_week || [];
+    if (typeof daysRaw === 'string') {
+      try { daysRaw = JSON.parse(daysRaw); } catch(e) { daysRaw = daysRaw.split(/[,;]+/).map(s=>s.trim()); }
+    }
+    const days = (Array.isArray(daysRaw) ? daysRaw : []).map(d=>d.toLowerCase());
     const dayMatch = !days.length || ['daily','everyday','all'].some(k=>days.includes(k)) ||
       days.includes(dayName) || (isWeekend&&(days.includes('weekend')||days.includes('weekends')));
     if (!dayMatch) return false;
-    const type=(sp.type||'special').toLowerCase();
-    if (type==='happy_hour') return _gcrCalTypes.has('happy_hour');
+    // GCR uses special_type, old DB uses type
+    const type = (sp.special_type || sp.type || 'special').toLowerCase();
+    if (type === 'happy_hour') return _gcrCalTypes.has('happy_hour');
     return _gcrCalTypes.has('special');
-  }).forEach(sp=>items.push({...sp,_src:sp.type==='happy_hour'?'happy_hour':'special'}));
+  }).forEach(sp=>{
+    const type = (sp.special_type || sp.type || 'special').toLowerCase();
+    items.push({...sp, _src: type==='happy_hour' ? 'happy_hour' : 'special'});
+  });
 
   // Sort by time
   items.sort((a,b)=>{
-    const at=_gcrCalToMin(a.start_time||a.time||a.event_time||'')??9999;
-    const bt=_gcrCalToMin(b.start_time||b.time||b.event_time||'')??9999;
-    return at-bt;
+    const at = _gcrCalToMin(a.start_time||a.time||a.event_time||'') ?? 9999;
+    const bt = _gcrCalToMin(b.start_time||b.time||b.event_time||'') ?? 9999;
+    return at - bt;
   });
 
   if (!items.length) {
@@ -368,37 +384,49 @@ function _gcrCalRenderEvents() {
   }
 
   const CLRS = {
-    'event'     :{bg:'#f0fdf4',bdr:'#16a34a',ic:'🎉',lbl:'Event'},
-    'event-rec' :{bg:'#f0fdf4',bdr:'#16a34a',ic:'🔁',lbl:'Recurring'},
-    'happy_hour':{bg:'#fff7ed',bdr:'#ea580c',ic:'🍻',lbl:'Happy Hour'},
-    'special'   :{bg:'#fef9c3',bdr:'#ca8a04',ic:'🏷️',lbl:'Special'},
+    'event'     : {bg:'#f0fdf4', bdr:'#16a34a', ic:'🎉', lbl:'Event'},
+    'live_music': {bg:'#f5f3ff', bdr:'#7c3aed', ic:'🎸', lbl:'Live Music'},
+    'happy_hour': {bg:'#fff7ed', bdr:'#ea580c', ic:'🍻', lbl:'Happy Hour'},
+    'special'   : {bg:'#fef9c3', bdr:'#ca8a04', ic:'🏷️', lbl:'Special'},
   };
 
-  let html=`<div style="font-size:.75rem;font-weight:700;color:#888;margin-bottom:10px;">${items.length} item${items.length!==1?'s':''} · ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>`;
+  let html = `<div style="font-size:.75rem;font-weight:700;color:#888;margin-bottom:10px;">${items.length} item${items.length!==1?'s':''} · ${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>`;
 
-  items.forEach(item=>{
-    const biz=bizMap[item.site_id]||bizMap[item.business_id]||{};
-    const t=item.start_time||item.time||item.event_time||'';
-    const eMin=_gcrCalToMin(t);
-    const live=isToday&&eMin!==null&&nowMin>=eMin&&nowMin<eMin+180;
-    const past=isToday&&eMin!==null&&eMin<nowMin-180;
-    const c=CLRS[item._src]||CLRS['event'];
-    const venue=item.venue||item.businessName||biz.name||'';
-    const title=item.name||item.title||'Event';
-    const desc=item.description||item.desc||'';
-    const slug=biz.slug||biz.id||biz.site_id||'';
+  items.forEach(item => {
+    // GCR DB field names: event_name, venue_location, entity_name, entity_slug
+    // Old DB field names: name, title, venue, businessName
+    const title = item.event_name || item.special_name || item.name || item.title || 'Event';
+    const venue = item.venue_location || item.entity_name || item.businessName ||
+                  bizMap[item.entity_id]?.name || bizMap[item.site_id]?.name || '';
+    const slug  = item.entity_slug || item.slug ||
+                  bizMap[item.entity_id]?.slug || bizMap[item.site_id]?.slug || '';
+    const t     = item.start_time || item.time || item.event_time || '';
+    const desc  = item.description || '';
+    const eMin  = _gcrCalToMin(t);
+    const live  = isToday && eMin !== null && nowMin >= eMin && nowMin < eMin + 180;
+    const past  = isToday && eMin !== null && eMin < nowMin - 180;
+    const c     = CLRS[item._src] || CLRS['event'];
 
-    html+=`<div class="cal-ev-card" style="background:${c.bg};border:1.5px solid ${c.bdr}22;${past?'opacity:.45':''}">
+    // Format time from 24hr "19:00" → "7pm"
+    let timeDisplay = t;
+    if (t && t.match(/^\d{2}:\d{2}/)) {
+      const [hh, mm] = t.split(':').map(Number);
+      const ap = hh >= 12 ? 'pm' : 'am';
+      const h12 = hh % 12 || 12;
+      timeDisplay = mm ? `${h12}:${String(mm).padStart(2,'0')}${ap}` : `${h12}${ap}`;
+    }
+
+    html += `<div class="cal-ev-card" style="background:${c.bg};border:1.5px solid ${c.bdr}22;${past?'opacity:.45':''}">
       <div style="font-size:1.5rem;flex-shrink:0;line-height:1;">${c.ic}</div>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:700;font-size:.88rem;margin-bottom:1px;">${title}</div>
-        ${venue?`<div style="font-size:.75rem;color:#666;">📍 ${venue}</div>`:''}
-        ${t?`<div style="font-size:.75rem;color:#666;">⏰ ${t}${live?' · <span style="color:#059669;font-weight:700;">🟢 Live Now</span>':''}</div>`:''}
-        ${desc?`<div style="font-size:.75rem;color:#555;margin-top:3px;line-height:1.4;">${desc}</div>`:''}
-        ${item.artist_name?`<div style="font-size:.75rem;color:#be185d;font-weight:600;margin-top:3px;">🎤 ${item.artist_name}</div>`:''}
+        ${venue ? `<div style="font-size:.75rem;color:#666;">📍 ${venue}</div>` : ''}
+        ${timeDisplay ? `<div style="font-size:.75rem;color:#666;">⏰ ${timeDisplay}${live ? ' · <span style="color:#059669;font-weight:700;">🟢 Live Now</span>' : ''}</div>` : ''}
+        ${desc ? `<div style="font-size:.75rem;color:#555;margin-top:3px;line-height:1.4;">${desc}</div>` : ''}
+        ${item.artist_name ? `<div style="font-size:.75rem;color:#be185d;font-weight:600;margin-top:3px;">🎤 ${item.artist_name}</div>` : ''}
         <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
           <span style="background:${c.bdr}18;color:${c.bdr};font-size:.67rem;font-weight:700;padding:2px 7px;border-radius:12px;">${c.lbl}</span>
-          ${slug?`<a href="profile.html?id=${slug}" style="font-size:.7rem;color:#0b7a75;font-weight:600;text-decoration:none;">View →</a>`:''}
+          ${slug ? `<a href="profile.html?id=${slug}" style="font-size:.7rem;color:#0b7a75;font-weight:600;text-decoration:none;">View →</a>` : ''}
         </div>
       </div>
     </div>`;
