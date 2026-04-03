@@ -38,6 +38,11 @@
       color:inherit;
       width:100%;
     }
+    .list > a[data-slug][style*="display: none"],
+    .cards > a[data-slug][style*="display: none"],
+    #listingsGrid > a[data-slug][style*="display: none"] {
+      display:none !important;
+    }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-card-img{
       min-height:210px;height:100%;background-size:cover;background-position:center center;
