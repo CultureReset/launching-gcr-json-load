@@ -337,7 +337,7 @@ function buildCard(entity) {
   const location = [city, state].filter(Boolean).join(', ');
 
   // Normalize tags — handle both string tags and {tag, tag_category} objects
-  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
 
   const statusBadge = computeStatus(entity.hours || [], rawTags);
   const priceRange  = entity.priceRange || entity.price_range || '';
@@ -480,7 +480,7 @@ function buildHHCard(entity) {
   const hhDesc  = entity.hh_description || '';
   const location = [city, state].filter(Boolean).join(', ');
 
-  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
   const statusBadge = computeStatus(entity.hours || [], rawTags);
   const priceRange  = entity.priceRange || entity.price_range || '';
   const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
@@ -664,7 +664,7 @@ function buildSpecialsCard(entity) {
   const desc    = entity.description || '';
   const location = [city, state].filter(Boolean).join(', ');
 
-  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
   const statusBadge = computeStatus(entity.hours || [], rawTags);
   const fullAddr = [addr, city, state].filter(Boolean).join(', ');
   const hoursInfo = computeHoursLine(entity.hours || []);
@@ -770,7 +770,7 @@ function buildHHSpecialsCard(entity) {
   const hhEnd   = entity.hh_end || '';
   const location = [city, state].filter(Boolean).join(', ');
 
-  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/ /g, '_')).filter(Boolean);
+  const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
   const statusBadge = computeStatus(entity.hours || [], rawTags);
   const fullAddr = [addr, city, state].filter(Boolean).join(', ');
   const hoursInfo = computeHoursLine(entity.hours || []);
