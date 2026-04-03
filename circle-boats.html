@@ -295,9 +295,15 @@
   if (!siteData) return;
 
   // ──────────────────────────────────────────────────────────────
-  // Hero Slideshow
+  // Hero Slideshow — Use hardcoded goboat images
   // ──────────────────────────────────────────────────────────────
-  const heroImages = siteData.photos?.map(p => p.image_url).slice(0, 5) || [];
+  const heroImages = [
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-main.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-hero.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-onwater1.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-onwater2.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-beach.jpg',
+  ];
   const slidesEl = document.getElementById('js-slides');
   const dotsEl = document.getElementById('js-dots');
   let currentSlide = 0;
@@ -332,13 +338,19 @@
   }
 
   // ──────────────────────────────────────────────────────────────
-  // Build Boats Section
+  // Build Boats Section — Use goboat images + API data
   // ──────────────────────────────────────────────────────────────
   const boatsList = document.getElementById('boats-list');
+  const boatImages = [
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-main.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-onwater1.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-onwater2.jpg',
+  ];
+
   if (siteData.products && siteData.products.length > 0) {
-    boatsList.innerHTML = siteData.products.map(boat => `
+    boatsList.innerHTML = siteData.products.map((boat, i) => `
       <div class="boat-item">
-        <img src="${boat.image || siteData.photos?.[0]?.image_url || ''}" alt="${boat.name}" class="boat-image">
+        <img src="${boatImages[i] || boatImages[0]}" alt="${boat.name}" class="boat-image">
         <div class="boat-info">
           <div class="boat-name">${boat.name || 'Circle Boat'}</div>
           <div class="boat-desc">${boat.description || 'Premium circle boat rental experience'}</div>
@@ -352,13 +364,19 @@
   }
 
   // ──────────────────────────────────────────────────────────────
-  // Build Add-ons Section
+  // Build Add-ons Section — Use goboat accessory images + API data
   // ──────────────────────────────────────────────────────────────
   const addonsList = document.getElementById('addons-list');
+  const addonImages = [
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-accessories.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/mini-dock-tow.jpg',
+    'https://circle-boats-main-.vercel.app/images/goboat/goboat-bumpers.jpg',
+  ];
+
   if (siteData.addons && siteData.addons.length > 0) {
-    addonsList.innerHTML = siteData.addons.map(addon => `
+    addonsList.innerHTML = siteData.addons.map((addon, i) => `
       <div class="addon-item">
-        <img src="${addon.image || siteData.photos?.[1]?.image_url || ''}" alt="${addon.name}" class="addon-image">
+        <img src="${addonImages[i] || addonImages[0]}" alt="${addon.name}" class="addon-image">
         <div class="addon-info">
           <div class="addon-name">${addon.name}</div>
           ${addon.description ? `<div class="addon-desc">${addon.description}</div>` : ''}
