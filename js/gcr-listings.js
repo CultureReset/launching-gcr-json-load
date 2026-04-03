@@ -426,7 +426,7 @@ function buildCard(entity) {
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
-       style="text-decoration:none;color:inherit;display:block;"
+       style="text-decoration:none;color:inherit;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
@@ -564,7 +564,7 @@ function buildHHCard(entity) {
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
-       style="text-decoration:none;color:inherit;display:block;"
+       style="text-decoration:none;color:inherit;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
@@ -712,7 +712,7 @@ function buildSpecialsCard(entity) {
 
   return `
     <a href="${profileUrl}"
-       style="text-decoration:none;color:inherit;display:block;"
+       style="text-decoration:none;color:inherit;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
@@ -827,7 +827,7 @@ function buildHHSpecialsCard(entity) {
 
   return `
     <a href="${profileUrl}"
-       style="text-decoration:none;color:inherit;display:block;"
+       style="text-decoration:none;color:inherit;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
        data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
