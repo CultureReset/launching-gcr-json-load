@@ -240,6 +240,32 @@ function starsHtml(rating) {
   return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
 }
 
+/* ── Parse time string to total minutes — handles "11:00 am", "11:00 AM", "23:00", "9pm" ── */
+function parseTimeMins(t) {
+  if (!t) return null;
+  const s = String(t).trim().toLowerCase();
+  const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+  if (!m) return null;
+  let h = parseInt(m[1], 10);
+  const min = parseInt(m[2] || '0', 10);
+  const ap = m[3];
+  if (ap === 'pm' && h !== 12) h += 12;
+  if (ap === 'am' && h === 12) h = 0;
+  return h * 60 + min;
+}
+
+/* ── Format minutes back to 12hr display ── */
+function fmtTimeMins(t) {
+  if (!t) return '';
+  const mins = parseTimeMins(t);
+  if (mins === null) return t; // pass through if unparseable
+  const h24 = Math.floor(mins / 60);
+  const m   = mins % 60;
+  const ap  = h24 >= 12 ? 'pm' : 'am';
+  const h12 = h24 % 12 || 12;
+  return m ? `${h12}:${String(m).padStart(2,'0')}${ap}` : `${h12}${ap}`;
+}
+
 /* ── Time-aware status badge ── */
 function computeStatus(hours, tags) {
   const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
@@ -252,15 +278,14 @@ function computeStatus(hours, tags) {
     if (todayRow.is_closed) {
       statusHtml = '<div class="gcr-status closed">Closed Today</div>';
     } else if (todayRow.open_time && todayRow.close_time) {
-      const parseMins = t => { if (!t) return null; const [h,m] = t.split(':').map(Number); return h*60+(m||0); };
-      const fmt12 = t => { if (!t) return ''; let [h,m] = t.split(':').map(Number); const ap=h>=12?'pm':'am'; h=h%12||12; return m?`${h}:${String(m).padStart(2,'0')}${ap}`:`${h}${ap}`; };
-      const openMins = parseMins(todayRow.open_time), closeMins = parseMins(todayRow.close_time);
+      const openMins  = parseTimeMins(todayRow.open_time);
+      const closeMins = parseTimeMins(todayRow.close_time);
       if (openMins !== null && closeMins !== null) {
-        if (nowMins < openMins - 60)       statusHtml = `<div class="gcr-status closed">Opens ${fmt12(todayRow.open_time)}</div>`;
-        else if (nowMins < openMins)       statusHtml = `<div class="gcr-status opening">Opening Soon · ${fmt12(todayRow.open_time)}</div>`;
-        else if (nowMins < closeMins - 60) statusHtml = `<div class="gcr-status open">Open · Closes ${fmt12(todayRow.close_time)}</div>`;
-        else if (nowMins < closeMins)      statusHtml = `<div class="gcr-status closing">Closing Soon · ${fmt12(todayRow.close_time)}</div>`;
-        else                               statusHtml = `<div class="gcr-status closed">Closed · Opens ${fmt12(todayRow.open_time)}</div>`;
+        if (nowMins < openMins - 60)       statusHtml = `<div class="gcr-status closed">Opens ${fmtTimeMins(todayRow.open_time)}</div>`;
+        else if (nowMins < openMins)       statusHtml = `<div class="gcr-status opening">Opening Soon · ${fmtTimeMins(todayRow.open_time)}</div>`;
+        else if (nowMins < closeMins - 60) statusHtml = `<div class="gcr-status open">Open · Closes ${fmtTimeMins(todayRow.close_time)}</div>`;
+        else if (nowMins < closeMins)      statusHtml = `<div class="gcr-status closing">Closing Soon · ${fmtTimeMins(todayRow.close_time)}</div>`;
+        else                               statusHtml = `<div class="gcr-status closed">Closed · Opens ${fmtTimeMins(todayRow.open_time)}</div>`;
       }
     }
   }
@@ -280,8 +305,7 @@ function computeHoursLine(hours) {
   if (!todayRow) return '';
   if (todayRow.is_closed) return 'Closed Today';
   if (todayRow.open_time && todayRow.close_time) {
-    const fmt = t => { let [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; h=h%12||12; return m?`${h}:${String(m).padStart(2,'0')}${ap}`:`${h}${ap}`; };
-    return `Today ${fmt(todayRow.open_time)} – ${fmt(todayRow.close_time)}`;
+    return `Today ${fmtTimeMins(todayRow.open_time)} – ${fmtTimeMins(todayRow.close_time)}`;
   }
   return '';
 }
@@ -678,7 +702,7 @@ function buildSpecialsCard(entity) {
             <div style="font-weight:700;color:#0c4a6e;">${esc(s.special_name || s.name || '')}</div>
             ${s.discount_text ? `<div style="font-size:13px;color:#0369a1;font-weight:700;margin-top:2px;">${esc(s.discount_text)}</div>` : ''}
             ${s.description ? `<div style="font-size:12px;color:#075985;margin-top:4px;line-height:1.4;">${esc(s.description)}</div>` : ''}
-            ${s.days_of_week ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days_of_week)}</div>` : ''}
+            ${s.days ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days)}</div>` : ''}
           </div>`).join('')}
       </div>
     </div>` : '';
@@ -794,7 +818,7 @@ function buildHHSpecialsCard(entity) {
         <div style="border-bottom:1px solid #bae6fd;padding:10px 0;">
           <div style="font-weight:700;color:#0c4a6e;">${esc(s.special_name || s.name || '')}</div>
           ${s.discount_text ? `<div style="font-size:13px;color:#0369a1;font-weight:700;margin-top:2px;">${esc(s.discount_text)}</div>` : ''}
-          ${s.days_of_week ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days_of_week)}</div>` : ''}
+          ${s.days ? `<div style="font-size:12px;color:#0369a1;margin-top:4px;font-weight:600;">📅 ${esc(s.days)}</div>` : ''}
         </div>`).join('')}
     </div>` : '';
 

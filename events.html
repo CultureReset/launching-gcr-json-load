@@ -232,7 +232,7 @@
     const city  = ev.entity_city || ev.city || '';
     const hero  = ev.entity_hero_image_url || ev.hero_image_url || FALLBACK_IMG;
     const etype = (ev.event_type || '').replace(/_/g,' ');
-    const time  = ev.event_time ? fmt12(ev.event_time) : '';
+    const time  = ev.start_time ? fmt12(ev.start_time) : '';
     const desc  = (ev.description || '').slice(0, 120);
     const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
     return `
