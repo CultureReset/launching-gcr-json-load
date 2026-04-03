@@ -38,9 +38,7 @@
       color:inherit;
       width:100%;
     }
-    .list > a[data-slug][style*="display: none"],
-    .cards > a[data-slug][style*="display: none"],
-    #listingsGrid > a[data-slug][style*="display: none"] {
+    .gcr-card-hidden {
       display:none !important;
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
@@ -903,7 +901,7 @@ function applyFilter(grid, filter) {
   const isDayFilter = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','daily'].includes(norm);
 
   cards.forEach(card => {
-    if (filter === 'all') { card.style.display = 'block'; visible++; return; }
+    if (filter === 'all') { card.classList.remove('gcr-card-hidden'); visible++; return; }
 
     let match = false;
 
@@ -928,7 +926,7 @@ function applyFilter(grid, filter) {
       if ((norm === 'live_music' || norm === 'live music') && card.dataset.live === '1') match = true;
     }
 
-    card.style.display = match ? 'block' : 'none';
+    card.classList.toggle('gcr-card-hidden', !match);
     if (match) visible++;
   });
 
