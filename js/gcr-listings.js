@@ -1196,6 +1196,232 @@ function initStandardPage() {
   wireFilterChips(grid);
 }
 
+/* ============================================================
+   GCR EVENTS — modular builders, usable on any page
+   Usage:
+     GCREvents.renderList('#myDiv')                     full list view (events page)
+     GCREvents.renderStrip('#myDiv', { limit:4 })       teaser strip (homepage)
+     GCREvents.renderForVenue('#myDiv', 'tacky-jacks')  venue profile
+     GCREvents.renderLiveMusic('#myDiv')                nightlife page
+   ============================================================ */
+const GCREvents = (() => {
+  const MUSIC_IMG  = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80';
+  const EVENT_IMG  = 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80';
+  const MARKET_IMG = 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=800&q=80';
+  const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmt12(t) { if (!t) return ''; const [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; const h12=h%12||12; return m?`${h12}:${String(m).padStart(2,'0')}${ap}`:`${h12}${ap}`; }
+
+  function venueOf(ev) {
+    const vp = (ev.venue_location||'').split(',');
+    return {
+      biz:  ev.entity_name || ev.businessName || vp[0]?.trim() || '',
+      city: ev.entity_city || ev.city || vp.slice(1).join(',').trim() || '',
+      slug: ev.entity_slug || ev.slug || '',
+      hero: ev.entity_hero_image_url || ev.hero_image_url || fallbackImg(ev),
+    };
+  }
+
+  function fallbackImg(ev) {
+    const t = (ev.event_type||'').toLowerCase();
+    if (t.includes('music')||t.includes('live')||t.includes('mic')||t.includes('karaoke')) return MUSIC_IMG;
+    if (t.includes('market')) return MARKET_IMG;
+    return EVENT_IMG;
+  }
+
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
+  function todayName() { return DAYS[new Date().getDay()]; }
+
+  function isTonight(ev) {
+    return ev.event_date === todayStr() || (ev.recurring && (ev.day_of_week||'').toLowerCase() === todayName());
+  }
+
+  // ── Single compact list row with expandable detail ──
+  function buildRow(ev, idx) {
+    const v = venueOf(ev);
+    const time = ev.start_time ? fmt12(ev.start_time) : '—';
+    const desc = (ev.description||'').slice(0,160);
+    const profileUrl = v.slug ? `profile.html?id=${encodeURIComponent(v.slug)}` : '';
+    const eid = `gcrev-${idx}`;
+    return `
+      <div class="gcr-ev-row" id="row-${eid}" onclick="GCREvents.toggle('${eid}')">
+        <div class="gcr-ev-time">${esc(time)}</div>
+        <div class="gcr-ev-name">${esc(ev.event_name||'')}</div>
+        <div class="gcr-ev-venue">📍 ${esc(v.biz)}${v.city?' · '+esc(v.city):''}</div>
+        <div class="gcr-ev-chev">▶</div>
+      </div>
+      <div class="gcr-ev-expand" id="exp-${eid}">
+        <div class="gcr-ev-thumb" style="background-image:url('${v.hero}')"></div>
+        <div class="gcr-ev-detail">
+          <div class="gcr-ev-detail-name">${esc(ev.event_name||'')}</div>
+          <div class="gcr-ev-detail-meta">📍 ${esc(v.biz)}${v.city?' · '+esc(v.city):''}${ev.start_time?' &nbsp;·&nbsp; 🕐 '+fmt12(ev.start_time):''}</div>
+          ${desc?`<div class="gcr-ev-detail-desc">${esc(desc)}</div>`:''}
+          <div class="gcr-ev-detail-btns">
+            ${profileUrl?`<a href="${profileUrl}" class="gcr-ev-btn primary">View Venue →</a>`:''}
+            ${profileUrl?`<a href="${profileUrl}#events" class="gcr-ev-btn">All Events at ${esc(v.biz)}</a>`:''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Full card (artist-focused) ──
+  function buildCard(ev) {
+    const v = venueOf(ev);
+    const time = ev.start_time ? fmt12(ev.start_time) : '';
+    const desc = (ev.description||'').slice(0,120);
+    const profileUrl = v.slug ? `profile.html?id=${encodeURIComponent(v.slug)}` : '';
+    const isMusic = (ev.event_type||'').includes('live')||(ev.event_type||'').includes('music')||(ev.event_type||'').includes('mic');
+    const etype = (ev.event_type||'').replace(/_/g,' ');
+    return `
+      <div class="gcr-ev-card">
+        <div class="gcr-ev-card-img" style="background-image:url('${v.hero}')">
+          <div class="gcr-ev-card-badge">${esc(etype||'Event')}</div>
+        </div>
+        <div class="gcr-ev-card-body">
+          ${isMusic?`<div class="gcr-ev-card-label">🎸 Live Music</div>`:''}
+          <div class="gcr-ev-card-name">${esc(ev.event_name||'')}</div>
+          <div class="gcr-ev-card-venue">📍 ${esc(v.biz)}${v.city?' · '+esc(v.city):''}</div>
+          ${time?`<div class="gcr-ev-card-time">🕐 ${time}</div>`:''}
+          ${desc?`<div class="gcr-ev-card-desc">${esc(desc)}</div>`:''}
+          <div class="gcr-ev-card-btns">
+            ${profileUrl?`<a href="${profileUrl}" class="gcr-ev-btn primary">View Venue →</a>`:''}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Small teaser card for strips/homepage ──
+  function buildMiniCard(ev) {
+    const v = venueOf(ev);
+    const time = ev.start_time ? fmt12(ev.start_time) : '';
+    const profileUrl = v.slug ? `profile.html?id=${encodeURIComponent(v.slug)}` : '';
+    return `
+      <a href="${profileUrl||'events.html'}" class="gcr-ev-mini">
+        <div class="gcr-ev-mini-img" style="background-image:url('${v.hero}')">
+          ${time?`<div class="gcr-ev-mini-time">🕐 ${esc(time)}</div>`:''}
+        </div>
+        <div class="gcr-ev-mini-body">
+          <div class="gcr-ev-mini-name">${esc(ev.event_name||'')}</div>
+          <div class="gcr-ev-mini-venue">📍 ${esc(v.biz)}${v.city?' · '+esc(v.city):''}</div>
+        </div>
+      </a>`;
+  }
+
+  // ── Inject shared CSS once ──
+  let _cssInjected = false;
+  function injectCSS() {
+    if (_cssInjected) return;
+    _cssInjected = true;
+    const s = document.createElement('style');
+    s.textContent = `
+      .gcr-ev-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:#fff;border:1px solid #e2e8f0;margin-bottom:6px;cursor:pointer;transition:.14s ease}
+      .gcr-ev-row:hover{background:#f7fbfc;border-color:#b9e7ef}
+      .gcr-ev-row.open .gcr-ev-chev{transform:rotate(90deg)}
+      .gcr-ev-time{font-size:13px;font-weight:800;color:#7c3aed;min-width:48px;text-align:right;flex-shrink:0}
+      .gcr-ev-name{flex:1;font-size:15px;font-weight:800;color:#12263a}
+      .gcr-ev-venue{font-size:13px;color:#66788a;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+      .gcr-ev-chev{font-size:12px;color:#b0c4ce;transition:.2s ease;flex-shrink:0}
+      .gcr-ev-expand{display:none;margin:-4px 0 8px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 14px 14px;background:#fafcfe;padding:14px 16px;gap:12px}
+      .gcr-ev-expand.open{display:flex;flex-wrap:wrap;align-items:flex-start}
+      .gcr-ev-thumb{width:90px;height:76px;border-radius:12px;background-size:cover;background-position:center;flex-shrink:0}
+      .gcr-ev-detail{flex:1;min-width:160px}
+      .gcr-ev-detail-name{font-size:17px;font-weight:900;color:#12263a}
+      .gcr-ev-detail-meta{font-size:13px;color:#66788a;margin-top:3px;font-weight:600}
+      .gcr-ev-detail-desc{font-size:13px;color:#50677a;margin-top:6px;line-height:1.5}
+      .gcr-ev-detail-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+      .gcr-ev-btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid #e2e8f0;background:#fff;color:#25465b;text-decoration:none;cursor:pointer;display:inline-block}
+      .gcr-ev-btn.primary{background:#0b7a75;border-color:#0b7a75;color:#fff}
+      .gcr-ev-card{display:grid;grid-template-columns:220px 1fr;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;margin-bottom:14px}
+      .gcr-ev-card-img{min-height:200px;background-size:cover;background-position:center;position:relative}
+      .gcr-ev-card-badge{position:absolute;left:12px;bottom:12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.92);color:#21485d;font-weight:800;font-size:12px}
+      .gcr-ev-card-body{padding:16px 18px}
+      .gcr-ev-card-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#0f7c90;margin-bottom:4px}
+      .gcr-ev-card-name{font-size:24px;font-weight:900;color:#12263a;letter-spacing:-.02em}
+      .gcr-ev-card-venue{font-size:14px;color:#0f7c90;font-weight:700;margin-top:4px}
+      .gcr-ev-card-time{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:#f4efff;color:#7c3aed;border:1px solid #e1d3ff;border-radius:999px;padding:7px 12px;font-weight:800;font-size:13px}
+      .gcr-ev-card-desc{margin-top:10px;color:#42596c;font-size:13px;line-height:1.5}
+      .gcr-ev-card-btns{margin-top:12px}
+      .gcr-ev-mini{display:flex;flex-direction:column;background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;transition:.14s ease;min-width:180px;flex:1}
+      .gcr-ev-mini:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,34,51,.1)}
+      .gcr-ev-mini-img{height:110px;background-size:cover;background-position:center;position:relative}
+      .gcr-ev-mini-time{position:absolute;bottom:8px;left:8px;background:rgba(15,34,51,.8);color:#fff;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:800}
+      .gcr-ev-mini-body{padding:10px 12px}
+      .gcr-ev-mini-name{font-size:14px;font-weight:800;color:#12263a}
+      .gcr-ev-mini-venue{font-size:12px;color:#66788a;margin-top:2px;font-weight:600}
+      .gcr-ev-strip{display:flex;gap:12px;overflow-x:auto;padding-bottom:4px}
+      @media(max-width:760px){.gcr-ev-card{grid-template-columns:1fr}.gcr-ev-card-img{min-height:160px}.gcr-ev-venue{max-width:160px}}
+    `;
+    document.head.appendChild(s);
+  }
+
+  // ── Public API ──────────────────────────────────────────────────────────────
+
+  // Full list (events page)
+  function renderList(selector, opts={}) {
+    const el = document.querySelector(selector); if (!el) return;
+    injectCSS();
+    const events = _getEvents(opts);
+    if (!events.length) { el.innerHTML = _empty('No events found'); return; }
+    el.innerHTML = events.map((e,i) => buildRow(e, (opts.offset||0)+i)).join('');
+  }
+
+  // Card grid (events page card view)
+  function renderCards(selector, opts={}) {
+    const el = document.querySelector(selector); if (!el) return;
+    injectCSS();
+    const events = _getEvents(opts);
+    if (!events.length) { el.innerHTML = _empty('No events found'); return; }
+    el.innerHTML = events.map(buildCard).join('');
+  }
+
+  // Horizontal strip for homepage / sidebars
+  function renderStrip(selector, opts={}) {
+    const el = document.querySelector(selector); if (!el) return;
+    injectCSS();
+    const events = _getEvents({ tonight: true, limit: opts.limit||4, ...opts });
+    if (!events.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="gcr-ev-strip">${events.map(buildMiniCard).join('')}</div>`;
+  }
+
+  // Events for a specific venue (profile page)
+  function renderForVenue(selector, slug, opts={}) {
+    renderList(selector, { slug, ...opts });
+  }
+
+  // Live music only (nightlife page)
+  function renderLiveMusic(selector, opts={}) {
+    renderList(selector, { type: 'live_music_or_event', ...opts });
+  }
+
+  // Toggle expand on a list row
+  function toggle(eid) {
+    const exp = document.getElementById('exp-'+eid);
+    const row = document.getElementById('row-'+eid);
+    if (!exp || !row) return;
+    const open = exp.classList.toggle('open');
+    row.classList.toggle('open', open);
+  }
+
+  // ── Internal helpers ────────────────────────────────────────────────────────
+  function _getEvents(opts={}) {
+    let events = (window.GCR && GCR.events) || [];
+    if (opts.tonight) events = events.filter(isTonight);
+    if (opts.slug)    events = events.filter(e => (e.entity_slug||e.slug||'') === opts.slug);
+    if (opts.type)    events = events.filter(e => (e.event_type||'').toLowerCase() === opts.type.toLowerCase());
+    if (opts.date)    events = events.filter(e => e.event_date === opts.date);
+    events = events.sort((a,b) => (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
+    if (opts.limit)   events = events.slice(0, opts.limit);
+    return events;
+  }
+
+  function _empty(msg) {
+    return `<div style="padding:40px 24px;text-align:center;color:#66788a;font-weight:700;">${msg}</div>`;
+  }
+
+  return { renderList, renderCards, renderStrip, renderForVenue, renderLiveMusic, toggle, buildRow, buildCard, buildMiniCard };
+})();
+
 /* ── Set --gcr-header-h CSS variable to actual header height so toolbar sticks correctly ── */
 function setHeaderHeight() {
   const header = document.querySelector('.gcr-header');
