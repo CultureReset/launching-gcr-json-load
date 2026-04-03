@@ -162,6 +162,33 @@
     .search-mode-toggle:hover { border-color: var(--teal); color: var(--teal); background: #f0faf9; }
     .search-mode-toggle.active { background: var(--teal); color: #fff; border-color: var(--teal); }
 
+    /* ── Autocomplete ── */
+    .autocomplete-box {
+      position:absolute; top:100%; left:0; right:0;
+      background:#fff; border-radius:0 0 16px 16px;
+      box-shadow:0 8px 32px rgba(15,34,51,.15);
+      border:1px solid #e2e8f0; border-top:none;
+      z-index:999; max-height:320px; overflow-y:auto;
+    }
+    .autocomplete-item {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 18px; cursor:pointer; border-bottom:1px solid #f4f7fb;
+      transition:background .1s;
+    }
+    .autocomplete-item:last-child { border-bottom:none; }
+    .autocomplete-item:hover, .autocomplete-item.active { background:#f0faf9; }
+    .autocomplete-icon { font-size:18px; flex-shrink:0; }
+    .autocomplete-text { flex:1; }
+    .autocomplete-main { font-size:14px; font-weight:700; color:#1a2f3e; }
+    .autocomplete-main mark { background:none; color:#0b7a75; font-weight:900; }
+    .autocomplete-sub { font-size:12px; color:#8fa3b1; margin-top:1px; }
+    .autocomplete-type { font-size:11px; color:#8fa3b1; font-weight:700; white-space:nowrap; }
+    .autocomplete-section { padding:6px 18px; font-size:11px; font-weight:800; color:#8fa3b1; text-transform:uppercase; letter-spacing:1px; background:#f9fafb; }
+
+    /* ── Similar results section ── */
+    .similar-section { margin-top:32px; padding-top:24px; border-top:2px dashed #e2e8f0; }
+    .similar-label { font-size:13px; font-weight:800; color:#8fa3b1; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+
     /* ── Mobile ── */
     @media (max-width: 600px) {
       .search-row { flex-wrap: wrap; overflow: visible; border-radius: var(--radius-sm); }
@@ -210,9 +237,12 @@
 <!-- SEARCH HEADER -->
 <div class="search-header">
   <div class="container">
-    <div class="search-row">
-      <input type="text" id="searchInput" placeholder='Search restaurants, "crab legs", "raw oysters", "happy hour"...' autocomplete="off">
-      <button class="search-submit" id="searchBtn">🔍 Search</button>
+    <div style="position:relative;max-width:760px;">
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder='Search restaurants, "crab legs", "raw oysters", "happy hour"...' autocomplete="off">
+        <button class="search-submit" id="searchBtn">🔍 Search</button>
+      </div>
+      <div class="autocomplete-box" id="autocompleteBox" style="display:none;"></div>
     </div>
   </div>
 </div>
@@ -296,10 +326,51 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8
 const PAGE_SIZE = 20;
 
 let allResults = [];
+let similarResults = [];
 let filteredResults = [];
 let currentTab = 'all';
 let visibleCount = 0;
 let lastQuery = '';
+let acIdx = -1;
+
+// ── Fuzzy match score (0=no match, 1-100=match strength) ──────────────────
+function fuzzyScore(str, q) {
+  if (!str || !q) return 0;
+  const s = str.toLowerCase(), t = q.toLowerCase();
+  if (s === t) return 100;
+  if (s.startsWith(t)) return 90;
+  if (s.includes(t)) return 80;
+  // Partial word match — each word in query matches somewhere in str
+  const words = t.split(/\s+/).filter(w => w.length > 1);
+  const wordMatches = words.filter(w => s.includes(w));
+  if (wordMatches.length === words.length) return 70;
+  if (wordMatches.length > 0) return 50;
+  // Typo tolerance — Levenshtein distance on short strings
+  if (t.length >= 3) {
+    const dist = levenshtein(s.substring(0, Math.min(s.length, t.length + 3)), t);
+    if (dist === 1) return 40;
+    if (dist === 2 && t.length >= 5) return 25;
+  }
+  return 0;
+}
+
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const d = Array.from({length:m+1}, (_,i) => Array.from({length:n+1}, (_,j) => j === 0 ? i : i === 0 ? j : 0));
+  for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+    d[i][j] = a[i-1] === b[j-1] ? d[i-1][j-1] : 1 + Math.min(d[i-1][j], d[i][j-1], d[i-1][j-1]);
+  return d[m][n];
+}
+
+function entityScore(entity, q) {
+  return Math.max(
+    fuzzyScore(entity.name, q),
+    fuzzyScore(entity.entity_subtype, q),
+    fuzzyScore(entity.description, q),
+    fuzzyScore(entity.city, q),
+    ...(entity.tags||[]).map(t => fuzzyScore(typeof t==='string'?t:t.tag||'', q))
+  );
+}
 
 /* ── Helpers ── */
 function esc(s) {
@@ -542,12 +613,120 @@ function updateCounts(results) {
   document.querySelector('.search-mode-toggle[data-tab="specials"]').textContent   = `🏷️ Specials (${specials})`;
 }
 
+/* ── Autocomplete ──────────────────────────────────────────────────────── */
+function buildSuggestions(q) {
+  if (!q || q.length < 2) return [];
+  const businesses = (window.GCR && GCR.businesses) || [];
+  const seen = new Set();
+  const suggestions = [];
+
+  // Exact + starts-with name matches first
+  businesses.forEach(b => {
+    const score = fuzzyScore(b.name, q);
+    if (score >= 70 && !seen.has(b.slug)) {
+      seen.add(b.slug);
+      suggestions.push({ type:'business', icon:b.icon||b.emoji||'📍', main:b.name, sub:(b.city||'')+(b.entity_subtype?' · '+(b.entity_subtype||'').replace(/_/g,' '):''), query:b.name, score });
+    }
+  });
+
+  // Category/type suggestions
+  const cats = [
+    {q:'seafood',label:'Seafood Restaurants',icon:'🐟'},
+    {q:'happy hour',label:'Happy Hour Deals',icon:'🍻'},
+    {q:'live music',label:'Live Music Tonight',icon:'🎸'},
+    {q:'boat rental',label:'Boat Rentals',icon:'🚤'},
+    {q:'oysters',label:'Raw Oysters',icon:'🦪'},
+    {q:'crab legs',label:'Crab Legs',icon:'🦀'},
+    {q:'dolphins',label:'Dolphin Cruises',icon:'🐬'},
+    {q:'parasailing',label:'Parasailing',icon:'🪂'},
+    {q:'coffee',label:'Coffee Shops',icon:'☕'},
+    {q:'brunch',label:'Brunch Spots',icon:'🥂'},
+    {q:'waterfront',label:'Waterfront Dining',icon:'⚓'},
+    {q:'kids',label:'Kid Friendly',icon:'👶'},
+    {q:'pizza',label:'Pizza',icon:'🍕'},
+    {q:'burgers',label:'Burgers',icon:'🍔'},
+    {q:'steaks',label:'Steakhouses',icon:'🥩'},
+    {q:'trivia',label:'Trivia Night',icon:'🧠'},
+    {q:'karaoke',label:'Karaoke',icon:'🎤'},
+  ];
+  cats.forEach(c => {
+    if (fuzzyScore(c.label, q) >= 40 || fuzzyScore(c.q, q) >= 40) {
+      suggestions.push({ type:'category', icon:c.icon, main:c.label, sub:'Browse all results', query:c.q, score:60 });
+    }
+  });
+
+  return suggestions.sort((a,b) => b.score - a.score).slice(0, 8);
+}
+
+function highlightMatch(text, q) {
+  if (!q) return esc(text);
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return esc(text);
+  return esc(text.substring(0, idx)) + '<mark>' + esc(text.substring(idx, idx+q.length)) + '</mark>' + esc(text.substring(idx+q.length));
+}
+
+function showAutocomplete(q) {
+  const box = document.getElementById('autocompleteBox');
+  const suggestions = buildSuggestions(q);
+  if (!suggestions.length) { box.style.display = 'none'; return; }
+
+  const biz = suggestions.filter(s => s.type === 'business');
+  const cat = suggestions.filter(s => s.type === 'category');
+  let html = '';
+  if (biz.length) html += `<div class="autocomplete-section">Businesses</div>` + biz.map((s,i) => `
+    <div class="autocomplete-item" data-query="${esc(s.query)}" data-idx="${i}">
+      <div class="autocomplete-icon">${s.icon}</div>
+      <div class="autocomplete-text">
+        <div class="autocomplete-main">${highlightMatch(s.main, q)}</div>
+        ${s.sub ? `<div class="autocomplete-sub">${esc(s.sub)}</div>` : ''}
+      </div>
+      <div class="autocomplete-type">→</div>
+    </div>`).join('');
+  if (cat.length) html += `<div class="autocomplete-section">Categories</div>` + cat.map((s,i) => `
+    <div class="autocomplete-item" data-query="${esc(s.query)}" data-idx="${biz.length+i}">
+      <div class="autocomplete-icon">${s.icon}</div>
+      <div class="autocomplete-text">
+        <div class="autocomplete-main">${highlightMatch(s.main, q)}</div>
+        <div class="autocomplete-sub">${esc(s.sub)}</div>
+      </div>
+    </div>`).join('');
+
+  box.innerHTML = html;
+  box.style.display = '';
+  acIdx = -1;
+
+  box.querySelectorAll('.autocomplete-item').forEach(item => {
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const q2 = item.dataset.query;
+      document.getElementById('searchInput').value = q2;
+      box.style.display = 'none';
+      history.pushState({}, '', `?q=${encodeURIComponent(q2)}`);
+      doSearch(q2);
+    });
+  });
+}
+
+function hideAutocomplete() { document.getElementById('autocompleteBox').style.display = 'none'; }
+
+/* ── Similar results using local fuzzy match ─────────────────────────── */
+function findSimilar(q, exactResults) {
+  const businesses = (window.GCR && GCR.businesses) || [];
+  const exactSlugs = new Set(exactResults.map(e => e.slug || e.subdomain));
+  return businesses
+    .filter(b => !exactSlugs.has(b.slug) && !exactSlugs.has(b.subdomain))
+    .map(b => ({ ...b, _score: entityScore(b, q) }))
+    .filter(b => b._score >= 25)
+    .sort((a,b) => b._score - a._score)
+    .slice(0, 6);
+}
+
 /* ── Main search ── */
 async function doSearch(q) {
   if (!q || !q.trim()) return;
   lastQuery = q.trim();
+  hideAutocomplete();
 
-  // Show loading
   document.getElementById('defaultState').style.display      = 'none';
   document.getElementById('resultsSection').style.display    = 'none';
   document.getElementById('noResults').style.display         = 'none';
@@ -555,39 +734,57 @@ async function doSearch(q) {
 
   try {
     const res  = await fetch(`${API}/api/gcr/search`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ query: lastQuery }),
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ query: lastQuery }),
     });
     const data = await res.json();
     allResults = data.results || [];
-  } catch (err) {
+  } catch(err) {
     console.error('Search error:', err);
     allResults = [];
   }
 
+  // Find similar using local fuzzy match
+  similarResults = findSimilar(lastQuery, allResults);
+
   document.getElementById('gcrLoadingOverlay').style.display = 'none';
 
-  if (!allResults.length) {
+  if (!allResults.length && !similarResults.length) {
     document.getElementById('noResults').style.display = '';
     return;
   }
 
-  // Show results
-  document.getElementById('resultsSection').style.display  = '';
-
+  document.getElementById('resultsSection').style.display = '';
   updateCounts(allResults);
 
-  document.getElementById('searchHeading').textContent    = `${allResults.length} result${allResults.length !== 1 ? 's' : ''} for "${lastQuery}"`;
-  document.getElementById('searchSubheading').textContent = 'Orange Beach & Gulf Shores · Exact matches first';
+  const total = allResults.length;
+  document.getElementById('searchHeading').textContent    = total ? `${total} result${total!==1?'s':''} for "${lastQuery}"` : `No exact results for "${lastQuery}"`;
+  document.getElementById('searchSubheading').textContent = total ? 'Orange Beach & Gulf Shores · Best matches first' : 'Showing similar businesses below';
 
-  // Reset to "all" tab
   applyTab('all');
+}
+
+/* ── Render visible slice + similar ── */
+function renderResults() {
+  const container = document.getElementById('resultsContainer');
+  const loadWrap  = document.getElementById('loadMoreWrap');
+  const slice     = filteredResults.slice(0, visibleCount);
+  let html = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
+
+  // Similar results section
+  if (similarResults.length && currentTab === 'all') {
+    html += `<div class="similar-section">
+      <div class="similar-label">📍 Similar — you might also like</div>
+      ${similarResults.map(e => buildBusinessCard(e, lastQuery)).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = html;
+  loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
 }
 
 /* ── Boot ── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Search bar events
   const searchInput = document.getElementById('searchInput');
   const searchBtn   = document.getElementById('searchBtn');
 
@@ -595,24 +792,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const q = searchInput.value.trim();
     if (q) { history.pushState({}, '', `?q=${encodeURIComponent(q)}`); doSearch(q); }
   });
+
   searchInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter') searchBtn.click();
+    const box = document.getElementById('autocompleteBox');
+    const items = box.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx+1, items.length-1); items.forEach((el,i) => el.classList.toggle('active', i===acIdx)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx-1, -1); items.forEach((el,i) => el.classList.toggle('active', i===acIdx)); }
+    else if (e.key === 'Enter') {
+      if (acIdx >= 0 && items[acIdx]) { items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
+      else searchBtn.click();
+    }
+    else if (e.key === 'Escape') hideAutocomplete();
   });
 
-  // Mode toggles
-  document.querySelectorAll('[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      applyTab(btn.dataset.tab);
-    });
+  let acTimer;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(acTimer);
+    const q = searchInput.value.trim();
+    if (!q || q.length < 2) { hideAutocomplete(); return; }
+    // Wait for GCR data to load before showing autocomplete
+    acTimer = setTimeout(() => showAutocomplete(q), 150);
   });
 
-  // Load more
-  document.getElementById('loadMoreBtn').addEventListener('click', () => {
-    visibleCount += PAGE_SIZE;
-    renderResults();
-  });
+  searchInput.addEventListener('blur', () => setTimeout(hideAutocomplete, 150));
+  searchInput.addEventListener('focus', () => { if (searchInput.value.trim().length >= 2) showAutocomplete(searchInput.value.trim()); });
 
-  // URL params auto-search
+  document.querySelectorAll('[data-tab]').forEach(btn => btn.addEventListener('click', () => applyTab(btn.dataset.tab)));
+  document.getElementById('loadMoreBtn').addEventListener('click', () => { visibleCount += PAGE_SIZE; renderResults(); });
+
   const params = new URLSearchParams(window.location.search);
   const q = params.get('q');
   if (q) { searchInput.value = q; doSearch(q); }
