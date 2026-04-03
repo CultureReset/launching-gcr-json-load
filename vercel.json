@@ -3,17 +3,9 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "$1"
-    },
-    {
-      "src": "/(.*)(?<!\\..*)",
-      "dest": "/$1.html"
-    },
-    {
-      "src": "/(.*)/$",
-      "dest": "/$1"
-    }
+    { "src": "/", "dest": "/index3.html" },
+    { "src": "/(.*)", "dest": "$1" },
+    { "src": "/(.*)(?<!\\..*)", "dest": "/$1.html" },
+    { "src": "/(.*)/", "dest": "/$1" }
   ]
 }
