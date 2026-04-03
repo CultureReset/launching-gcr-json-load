@@ -890,48 +890,71 @@ function populateSidebar(entities) {
   }).join('');
 }
 
-/* ── Show/hide cards by active filter ── */
-function applyFilter(grid, filter) {
-  const cards = grid.querySelectorAll('[data-slug]');
-  let visible = 0;
+/* ── Filter entities by tag — pure data, no DOM manipulation ── */
+function filterEntities(entities, filter) {
+  if (!filter || filter === 'all') return entities;
   const norm = filter.toLowerCase().replace(/-/g, '_');
-  const isCategory = grid.dataset.category || '';
+  const grid = document.getElementById('listingsGrid');
+  const category = grid ? grid.dataset.category : '';
 
   // Day-of-week filter for specials page
   const isDayFilter = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','daily'].includes(norm);
-
-  cards.forEach(card => {
-    if (filter === 'all') { card.classList.remove('gcr-card-hidden'); visible++; return; }
-
-    let match = false;
-
-    if (isDayFilter && isCategory === 'specials') {
-      // Match by specials days — check data-days attribute
-      const cardSlug = card.dataset.slug || '';
+  if (isDayFilter && category === 'specials') {
+    return entities.filter(b => {
+      const slug = b.slug || b.id || '';
       const cardSpecials = (window.GCR && GCR.specials || []).filter(s =>
-        (s.entity_slug === cardSlug || s.entity_id === card.dataset.entityId) && s.is_active !== false
+        (s.entity_slug === slug || s.entity_id === b.id) && s.is_active !== false
       );
-      match = cardSpecials.some(s => {
+      return cardSpecials.some(s => {
         let d = s.days || [];
         if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = [d]; } }
         const days = (Array.isArray(d) ? d : []).map(x => (x||'').toLowerCase());
         if (norm === 'daily') return days.includes('daily') || days.length === 0;
         return days.includes(norm) || days.includes('daily') || days.includes('everyday');
       });
-    } else {
-      const tags    = (card.dataset.tags || '').split(',');
-      const subtype = card.dataset.subtype || '';
-      match = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
-      if (norm === 'happy_hour' && card.dataset.hh === '1') match = true;
-      if ((norm === 'live_music' || norm === 'live music') && card.dataset.live === '1') match = true;
+    });
+  }
+
+  return entities.filter(b => {
+    const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().replace(/[\s\-]+/g, '_'));
+    const subtype = (b.entity_subtype || b.type || '').toLowerCase();
+    if (tags.some(t => t === norm || t.includes(norm))) return true;
+    if (subtype.includes(norm)) return true;
+    if (norm === 'happy_hour' && b.hh_days) return true;
+    if (norm === 'live_music') {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const todayName = new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+      return (window.GCR && GCR.events || []).some(e => {
+        const matchEntity = (e.entity_slug||e.slug||e.entity_id) === (b.slug||b.id);
+        if (!matchEntity) return false;
+        const isToday = e.event_date === todayStr;
+        const isRec = e.recurring && (e.day_of_week||'').toLowerCase() === todayName;
+        if (!isToday && !isRec) return false;
+        return (e.event_type||'').toLowerCase().includes('live') || (e.event_name||'').toLowerCase().includes('live');
+      });
     }
-
-    card.classList.toggle('gcr-card-hidden', !match);
-    if (match) visible++;
+    return false;
   });
+}
 
-  const meta = document.querySelector('.toolbar-meta');
-  if (meta) meta.textContent = `${visible} result${visible !== 1 ? 's' : ''}`;
+/* ── Re-render grid with filtered entities ── */
+function renderWithFilter(filter) {
+  const grid = document.getElementById('listingsGrid');
+  if (!grid) return;
+  const category = grid.dataset.category || '';
+  const cardFn = category === 'happy-hours' ? buildHHCard
+               : category === 'specials'    ? buildSpecialsCard
+               : category === 'deals'       ? buildHHSpecialsCard
+               : buildCard;
+
+  // Get the full entity list for this page
+  const base = window._gcrAllEntities || [];
+  const filtered = filterEntities(base, filter);
+
+  grid.innerHTML = filtered.map(cardFn).join('');
+
+  const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
+  if (meta) meta.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
 }
 
 /* ── Build dynamic filter chips from actual entity tags ── */
@@ -1007,7 +1030,7 @@ function buildDynamicFilters(entities) {
 }
 
 /* ── Wire filter chips — use event delegation to avoid stacking listeners ── */
-function wireFilterChips(grid) {
+function wireFilterChips(_grid) {
   const container = document.querySelector('.tag-row, .filter-row, .chips-row');
   if (!container || container._wired) return;
   container._wired = true;
@@ -1017,7 +1040,7 @@ function wireFilterChips(grid) {
     document.querySelectorAll('.tag-btn, .filter-chip').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const filter = btn.dataset.filter || 'all';
-    applyFilter(grid, filter);
+    renderWithFilter(filter);
     const url = new URL(window.location);
     filter !== 'all' ? url.searchParams.set('tag', filter) : url.searchParams.delete('tag');
     window.history.replaceState({}, '', url);
@@ -1219,6 +1242,7 @@ function initStandardPage() {
 
   function render(businesses) {
     _allEntities = getEntitiesForCategory(businesses, category);
+    window._gcrAllEntities = _allEntities;
     renderEntities(_allEntities);
     buildDynamicFilters(_allEntities);
     updateStatRow(_allEntities);
