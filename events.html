@@ -133,9 +133,37 @@
 
     <section class="toolbar">
       <div class="toolbar-top">
-        <div style="display:flex;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button class="tag-btn active" id="tabToday" onclick="switchTab('today')">📅 Today</button>
           <button class="tag-btn" id="tabWeekly" onclick="switchTab('weekly')">🗓️ Weekly Schedule</button>
+          <div style="position:relative;">
+            <button class="tag-btn" id="tabDatePick" onclick="toggleDatePicker()" style="gap:6px;display:flex;align-items:center;">
+              📆 <span id="datePickLabel">Pick Date</span>
+            </button>
+            <div id="datePickerBox" style="display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 10px 28px rgba(15,34,51,.12);padding:18px;z-index:999;min-width:280px;">
+              <div style="font-size:13px;font-weight:700;color:#66788a;margin-bottom:12px;">Choose a date or range</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                <div style="flex:1;min-width:110px;">
+                  <label style="display:block;font-size:11px;font-weight:700;color:#66788a;margin-bottom:4px;">FROM</label>
+                  <input type="date" id="dateFrom" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#12263a;">
+                </div>
+                <div style="flex:1;min-width:110px;">
+                  <label style="display:block;font-size:11px;font-weight:700;color:#66788a;margin-bottom:4px;">TO (optional)</label>
+                  <input type="date" id="dateTo" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;color:#12263a;">
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                <button onclick="setQuickDate(0)" style="padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f4f7fb;font-size:12px;font-weight:700;cursor:pointer;">Today</button>
+                <button onclick="setQuickDate(1)" style="padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f4f7fb;font-size:12px;font-weight:700;cursor:pointer;">Tomorrow</button>
+                <button onclick="setQuickRange(0,2)" style="padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f4f7fb;font-size:12px;font-weight:700;cursor:pointer;">This Weekend</button>
+                <button onclick="setQuickRange(0,6)" style="padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f4f7fb;font-size:12px;font-weight:700;cursor:pointer;">This Week</button>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="applyDateFilter()" style="flex:1;padding:10px;background:#0b7a75;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;">Show Events</button>
+                <button onclick="clearDateFilter()" style="padding:10px 14px;background:#f4f7fb;color:#66788a;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">Clear</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="toolbar-meta" id="resultCount" style="color:#66788a;font-weight:600;"></div>
@@ -435,6 +463,136 @@
   }
 
   // ── CONTROLS ─────────────────────────────────────────────────────────────────
+  // ── DATE PICKER ──────────────────────────────────────────────────────────
+  let dateFilterFrom = null;
+  let dateFilterTo   = null;
+
+  function toggleDatePicker() {
+    const box = document.getElementById('datePickerBox');
+    box.style.display = box.style.display === 'none' ? '' : 'none';
+  }
+
+  function fmt(d) { return d.toISOString().split('T')[0]; }
+
+  function setQuickDate(offsetDays) {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    const s = fmt(d);
+    document.getElementById('dateFrom').value = s;
+    document.getElementById('dateTo').value   = '';
+  }
+
+  function setQuickRange(fromOffset, toOffset) {
+    const now = new Date();
+    // "This Weekend" = next Fri-Sun
+    if (fromOffset === 0 && toOffset === 2) {
+      const day = now.getDay(); // 0=Sun
+      const daysToFri = day <= 5 ? 5 - day : 6;
+      const fri = new Date(now); fri.setDate(now.getDate() + daysToFri);
+      const sun = new Date(fri); sun.setDate(fri.getDate() + 2);
+      document.getElementById('dateFrom').value = fmt(fri);
+      document.getElementById('dateTo').value   = fmt(sun);
+      return;
+    }
+    const from = new Date(now);
+    const to   = new Date(now);
+    to.setDate(now.getDate() + toOffset);
+    document.getElementById('dateFrom').value = fmt(from);
+    document.getElementById('dateTo').value   = fmt(to);
+  }
+
+  function applyDateFilter() {
+    const fromVal = document.getElementById('dateFrom').value;
+    const toVal   = document.getElementById('dateTo').value;
+    if (!fromVal) return;
+    dateFilterFrom = fromVal;
+    dateFilterTo   = toVal || fromVal;
+    const label = toVal && toVal !== fromVal ? `${fromVal} → ${toVal}` : fromVal;
+    document.getElementById('datePickLabel').textContent = label;
+    document.getElementById('datePickerBox').style.display = 'none';
+    // Activate date tab
+    document.getElementById('tabToday').classList.remove('active');
+    document.getElementById('tabWeekly').classList.remove('active');
+    document.getElementById('tabDatePick').classList.add('active');
+    currentTab = 'date';
+    renderDateRange();
+  }
+
+  function clearDateFilter() {
+    dateFilterFrom = null;
+    dateFilterTo   = null;
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value   = '';
+    document.getElementById('datePickLabel').textContent = 'Pick Date';
+    document.getElementById('tabDatePick').classList.remove('active');
+    document.getElementById('datePickerBox').style.display = 'none';
+    switchTab('today');
+  }
+
+  function renderDateRange() {
+    const grid = document.getElementById('todayGrid');
+    document.getElementById('todayView').style.display    = '';
+    document.getElementById('weeklyView').style.display   = 'none';
+
+    const from = dateFilterFrom;
+    const to   = dateFilterTo;
+
+    let events = allEvents.filter(e => {
+      const d = e.event_date || e.date || '';
+      if (!d) return false;
+      return d >= from && d <= to;
+    }).filter(matchesFilter);
+
+    events.sort((a,b) => {
+      const da = (a.event_date||a.date||''), db = (b.event_date||b.date||'');
+      if (da !== db) return da.localeCompare(db);
+      return (a.start_time||'99:99').localeCompare(b.start_time||'99:99');
+    });
+
+    const label = from === to
+      ? new Date(from+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})
+      : `${new Date(from+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${new Date(to+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+
+    document.getElementById('todayHeading').textContent = label;
+    document.getElementById('todaySub').textContent     = `${events.length} event${events.length!==1?'s':''}`;
+    document.getElementById('resultCount').textContent  = `${events.length} events`;
+
+    if (!events.length) {
+      grid.innerHTML = `<div style="padding:52px 24px;text-align:center;color:#66788a;"><div style="font-size:3rem;margin-bottom:12px;">📅</div><h3 style="font-weight:800;margin:0 0 8px;">No events for this period</h3><p style="margin:0;">Try a different date or check the weekly schedule</p></div>`;
+      return;
+    }
+
+    // Group by date if range
+    if (from !== to) {
+      const byDate = {};
+      events.forEach(e => {
+        const d = e.event_date || e.date || from;
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(e);
+      });
+      grid.innerHTML = Object.entries(byDate).sort(([a],[b])=>a.localeCompare(b)).map(([date, evs]) => {
+        const dayLabel = new Date(date+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+        const rows = currentView === 'cards'
+          ? evs.map(buildEventCard).join('')
+          : evs.map((e,i) => buildEventRow(e, i)).join('');
+        return `<div style="margin-bottom:24px;"><div style="font-size:14px;font-weight:800;color:#0b7a75;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e2e8f0;">${dayLabel}</div>${rows}</div>`;
+      }).join('');
+    } else {
+      grid.innerHTML = currentView === 'cards'
+        ? events.map(buildEventCard).join('')
+        : events.map((e,i) => buildEventRow(e,i)).join('');
+    }
+  }
+
+  // Close date picker when clicking outside
+  document.addEventListener('click', e => {
+    const box = document.getElementById('datePickerBox');
+    const btn = document.getElementById('tabDatePick');
+    if (box && !box.contains(e.target) && btn && !btn.contains(e.target)) {
+      box.style.display = 'none';
+    }
+  });
+
   function setView(v) {
     currentView = v;
     document.getElementById('viewCards').classList.toggle('active', v==='cards');
@@ -446,9 +604,12 @@
     currentTab = tab;
     document.getElementById('tabToday').classList.toggle('active', tab==='today');
     document.getElementById('tabWeekly').classList.toggle('active', tab==='weekly');
-    document.getElementById('todayView').style.display = tab==='today' ? '' : 'none';
+    document.getElementById('tabDatePick').classList.toggle('active', tab==='date');
+    document.getElementById('todayView').style.display  = (tab==='today'||tab==='date') ? '' : 'none';
     document.getElementById('weeklyView').style.display = tab==='weekly' ? '' : 'none';
-    if (tab==='today') renderToday(); else renderWeekly();
+    if (tab==='today') renderToday();
+    else if (tab==='weekly') renderWeekly();
+    else if (tab==='date') renderDateRange();
   }
 
   function init() {
