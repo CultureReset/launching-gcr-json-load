@@ -1054,12 +1054,11 @@ function wireFilterChips(_grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    // Happy Hours — hh_days set OR happy_hour tag OR has happy_hour_items via specials
+    // Happy Hours — ONLY businesses with actual HH data (not just the tag)
     if (category === 'happy-hours') {
+      // hh_days field set on entity
       if (b.hh_days) return true;
-      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
-      if (tags.some(t => t === 'happy_hour')) return true;
-      // Check entity_specials for happy_hour type
+      // Has actual entity_specials with special_type=happy_hour
       const hhSpecials = (window.GCR && GCR.specials || []).filter(s =>
         (s.special_type || s.type || '').toLowerCase() === 'happy_hour' &&
         s.is_active !== false
