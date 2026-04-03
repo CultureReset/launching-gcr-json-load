@@ -897,16 +897,37 @@ function applyFilter(grid, filter) {
   const cards = grid.querySelectorAll('[data-slug]');
   let visible = 0;
   const norm = filter.toLowerCase().replace(/-/g, '_');
+  const isCategory = grid.dataset.category || '';
+
+  // Day-of-week filter for specials page
+  const isDayFilter = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','daily'].includes(norm);
 
   cards.forEach(card => {
     if (filter === 'all') { card.style.display = 'block'; visible++; return; }
-    const tags    = (card.dataset.tags || '').split(',');
-    const subtype = card.dataset.subtype || '';
-    let match = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
-    // For happy_hour filter: also match businesses that have hh_days set (data-hh="1")
-    if (norm === 'happy_hour' && card.dataset.hh === '1') match = true;
-    // For live_music filter: also match businesses that have live music events (data-live="1")
-    if ((norm === 'live_music' || norm === 'live music') && card.dataset.live === '1') match = true;
+
+    let match = false;
+
+    if (isDayFilter && isCategory === 'specials') {
+      // Match by specials days — check data-days attribute
+      const cardSlug = card.dataset.slug || '';
+      const cardSpecials = (window.GCR && GCR.specials || []).filter(s =>
+        (s.entity_slug === cardSlug || s.entity_id === card.dataset.entityId) && s.is_active !== false
+      );
+      match = cardSpecials.some(s => {
+        let d = s.days || [];
+        if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = [d]; } }
+        const days = (Array.isArray(d) ? d : []).map(x => (x||'').toLowerCase());
+        if (norm === 'daily') return days.includes('daily') || days.length === 0;
+        return days.includes(norm) || days.includes('daily') || days.includes('everyday');
+      });
+    } else {
+      const tags    = (card.dataset.tags || '').split(',');
+      const subtype = card.dataset.subtype || '';
+      match = tags.some(t => t === norm || t.includes(norm)) || subtype.includes(norm);
+      if (norm === 'happy_hour' && card.dataset.hh === '1') match = true;
+      if ((norm === 'live_music' || norm === 'live music') && card.dataset.live === '1') match = true;
+    }
+
     card.style.display = match ? 'block' : 'none';
     if (match) visible++;
   });
@@ -919,6 +940,26 @@ function applyFilter(grid, filter) {
 function buildDynamicFilters(entities) {
   const chipContainer = document.querySelector('.tag-row, .filter-row, .chips-row');
   if (!chipContainer) return;
+
+  // Specials page gets day-of-week chips instead of tag chips
+  const grid = document.getElementById('listingsGrid');
+  if (grid && grid.dataset.category === 'specials') {
+    const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday','daily'];
+    const dayLabels = { monday:'Mon',tuesday:'Tue',wednesday:'Wed',thursday:'Thu',friday:'Fri',saturday:'Sat',sunday:'Sun',daily:'Daily' };
+    // Only show days that have actual specials
+    const activeDay = new Set();
+    (window.GCR && GCR.specials || []).filter(s => s.is_active !== false).forEach(s => {
+      let d = s.days || [];
+      if (typeof d === 'string') { try { d = JSON.parse(d); } catch(e) { d = [d]; } }
+      (Array.isArray(d) ? d : []).forEach(day => activeDay.add((day||'').toLowerCase()));
+    });
+    const allBtn = '<button class="tag-btn active" data-filter="all">All</button>';
+    const dayBtns = days.filter(d => activeDay.has(d) || d === 'daily').map(d =>
+      `<button class="tag-btn" data-filter="${d}">${dayLabels[d]||d}</button>`
+    ).join('');
+    chipContainer.innerHTML = allBtn + dayBtns;
+    return;
+  }
 
   // Count tags across all entities on this page
   const tagCounts = {};
@@ -988,20 +1029,30 @@ function wireFilterChips(grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    // Happy Hours — businesses that have hh_days set OR a happy_hour tag
+    // Happy Hours — hh_days set OR happy_hour tag OR has happy_hour_items via specials
     if (category === 'happy-hours') {
-      const hasHH = !!b.hh_days;
+      if (b.hh_days) return true;
       const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
-      const hasHHTag = tags.some(t => t.includes('happy_hour') || t.includes('happy hour'));
-      return hasHH || hasHHTag;
+      if (tags.some(t => t === 'happy_hour')) return true;
+      // Check entity_specials for happy_hour type
+      const hhSpecials = (window.GCR && GCR.specials || []).filter(s =>
+        (s.special_type || s.type || '').toLowerCase() === 'happy_hour' &&
+        s.is_active !== false
+      );
+      return hhSpecials.some(s =>
+        (s.entity_slug && s.entity_slug === b.slug) ||
+        (s.entity_id && s.entity_id === b.id)
+      );
     }
 
-    // Specials — businesses that have specials in GCR.specials OR a specials-related tag
+    // Specials — ONLY businesses that have actual active rows in GCR.specials
     if (category === 'specials') {
-      const specialSlugs = new Set((window.GCR && GCR.specials || []).map(s => s.entity_slug || s.slug || s.entity_id));
-      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase());
-      const hasSpecialTag = tags.some(t => t.includes('special') || t.includes('deal') || t.includes('promo'));
-      return specialSlugs.has(b.slug) || specialSlugs.has(b.id) || hasSpecialTag;
+      const specials = (window.GCR && GCR.specials || []).filter(s => s.is_active !== false && s.active !== false);
+      return specials.some(s =>
+        (s.entity_slug && s.entity_slug === b.slug) ||
+        (s.entity_id && s.entity_id === b.id) ||
+        (s.slug && s.slug === b.slug)
+      );
     }
 
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
