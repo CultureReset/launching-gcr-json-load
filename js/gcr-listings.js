@@ -30,7 +30,7 @@
       box-shadow:0 2px 8px rgba(15,34,51,.06);
     }
     .gcr-card {
-      display:grid;grid-template-columns:280px minmax(0,1fr);
+      display:grid;grid-template-columns:clamp(240px, 35%, 400px) minmax(0,1fr);
       background:#fff;border:1px solid #e2e8f0;border-radius:20px;
       box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;
       text-decoration:none;color:inherit;
@@ -38,6 +38,12 @@
       cursor:pointer;
       width:100%;
       margin-bottom:14px;
+    }
+    @media (max-width:768px) {
+      .gcr-card { grid-template-columns:200px minmax(0,1fr); }
+    }
+    @media (max-width:480px) {
+      .gcr-card { grid-template-columns:1fr; }
     }
     .list > a, .cards > a, #listingsGrid > a {
       display:block;
@@ -50,12 +56,18 @@
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-card-img{
-      min-height:210px;height:100%;
+      min-height:260px;height:100%;
       background-size:contain;
       background-position:center center;
       background-repeat:no-repeat;
       background-color:#f0f4f8;
       position:relative;align-self:stretch;
+    }
+    @media (max-width:768px) {
+      .gcr-card-img { min-height:200px; }
+    }
+    @media (max-width:480px) {
+      .gcr-card-img { min-height:240px; }
     }
     .gcr-card-badge{
       position:absolute;left:14px;bottom:14px;
