@@ -2,10 +2,7 @@
   "buildCommand": "echo 'Static site, no build needed'",
   "outputDirectory": ".",
   "cleanUrls": true,
-  "routes": [
-    { "src": "/", "dest": "/index3.html" },
-    { "src": "/(.*)", "dest": "$1" },
-    { "src": "/(.*)(?<!\\..*)", "dest": "/$1.html" },
-    { "src": "/(.*)/", "dest": "/$1" }
+  "redirects": [
+    { "source": "/", "destination": "/index3", "permanent": false }
   ]
 }
