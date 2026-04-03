@@ -111,36 +111,33 @@
 
     <section class="toolbar">
       <div class="toolbar-top">
-        <div class="toolbar-title">Filter Events</div>
-        <div class="toolbar-actions">
-          <select class="ctrl">
-            <option>Sort: Starting Soon</option>
-            <option>Tonight</option>
-            <option>This Weekend</option>
-            <option>Nearest</option>
-          </select>
+        <div style="display:flex;gap:8px;">
+          <button class="tag-btn active" id="tabToday" onclick="switchTab('today')">📅 Today</button>
+          <button class="tag-btn" id="tabWeekly" onclick="switchTab('weekly')">🗓️ Weekly Schedule</button>
         </div>
+        <div class="toolbar-meta" id="resultCount" style="color:#66788a;font-weight:600;"></div>
       </div>
-      <div class="tag-row">
-        <button class="tag-btn active" data-filter="all">Happening Now</button>
-        <button class="tag-btn" data-filter="tonight">Tonight</button>
-        <button class="tag-btn" data-filter="tomorrow">Tomorrow</button>
-        <button class="tag-btn" data-filter="weekend">This Weekend</button>
-        <button class="tag-btn" data-filter="live-music">🎵 Live Music</button>
-        <button class="tag-btn" data-filter="concerts">🎤 Concerts</button>
-        <button class="tag-btn" data-filter="festivals">🎪 Festivals</button>
-        <button class="tag-btn" data-filter="family">👨‍👩‍👧 Family</button>
-        <button class="tag-btn" data-filter="free">Free</button>
-        <button class="tag-btn" data-filter="bar-events">🍻 Bar Events</button>
+      <div class="tag-row" id="typeFilters">
+        <button class="tag-btn active" data-etype="all">All</button>
+        <button class="tag-btn" data-etype="live_music">🎸 Live Music</button>
+        <button class="tag-btn" data-etype="karaoke">🎤 Karaoke</button>
+        <button class="tag-btn" data-etype="trivia">🧠 Trivia</button>
+        <button class="tag-btn" data-etype="bingo">🎰 Bingo</button>
+        <button class="tag-btn" data-etype="comedy">😂 Comedy</button>
+        <button class="tag-btn" data-etype="dj">🎧 DJ</button>
       </div>
     </section>
 
     <section class="layout">
       <main>
-        <section class="section">
-          <div class="section-head"><h2 class="section-title">Happening Now</h2><div class="section-sub">Events already live</div></div>
-          <div class="cards" id="listingsGrid" data-category="events"></div>
-        </section>
+        <div id="todayView">
+          <div class="section-head"><h2 class="section-title" id="todayHeading">Today</h2><div class="section-sub" id="todaySub"></div></div>
+          <div class="cards" id="todayGrid"></div>
+        </div>
+        <div id="weeklyView" style="display:none;">
+          <div class="section-head"><h2 class="section-title">Weekly Schedule</h2><div class="section-sub">Recurring events by business</div></div>
+          <div id="weeklyGrid"></div>
+        </div>
       </main>
 
       <aside class="sidebar">
@@ -219,162 +216,144 @@
   <script src="js/gcr-api.js"></script>
   <script src="js/app.js"></script>
   <script>
-  /* ── Events Page: Live schedule view ── */
-  const DAYS_ORDER = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-  const DAY_LABELS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const FALLBACK_IMG = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80';
+  let currentTab = 'today';
+  let currentEtype = 'all';
+  let allEvents = [];
 
-  function renderEvents() {
-    const events = GCR.events || [];
-    const grid = document.getElementById('listingsGrid');
-    if (!grid || !events.length) {
-      if (grid) grid.innerHTML = '<div style="padding:40px;text-align:center;color:#66788a;font-weight:700">No events found yet. Check back soon!</div>';
-      return;
-    }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmt12(t) { if (!t) return ''; const [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; const h12=h%12||12; return m?`${h12}:${String(m).padStart(2,'0')}${ap}`:`${h12}${ap}`; }
 
-    const now = new Date();
-    const todayIdx = now.getDay();
-    const todayName = DAYS_ORDER[todayIdx];
-
-    // Parse day-of-week from event name (e.g., "Monday Night Karaoke" → monday)
-    function getEventDay(ev) {
-      const name = (ev.name || '').toLowerCase();
-      for (let i = 0; i < DAYS_ORDER.length; i++) {
-        if (name.includes(DAYS_ORDER[i])) return i;
-      }
-      // Check for day abbreviations
-      const abbrs = ['sun','mon','tue','wed','thu','fri','sat'];
-      for (let i = 0; i < abbrs.length; i++) {
-        if (name.includes(abbrs[i])) return i;
-      }
-      return -1; // no specific day = every day or general
-    }
-
-    // Parse time from description (e.g., "7–10 PM", "4:00 PM")
-    function getTimeFromDesc(desc) {
-      const m = (desc || '').match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)\s*[-–to]+\s*(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?)/i);
-      if (m) return m[1] + ' - ' + m[2];
-      const m2 = (desc || '').match(/(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))/i);
-      if (m2) return m2[1];
-      return '';
-    }
-
-    // Group events by day
-    const byDay = {};
-    const general = []; // events without a specific day
-    events.forEach(ev => {
-      const dayIdx = getEventDay(ev);
-      if (dayIdx >= 0) {
-        if (!byDay[dayIdx]) byDay[dayIdx] = [];
-        byDay[dayIdx].push(ev);
-      } else {
-        general.push(ev);
-      }
-    });
-
-    // Build schedule starting from today
-    let html = '';
-
-    // Today's date header
-    const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    html += `<div style="font-size:15px;font-weight:800;color:#0f7c90;margin-bottom:6px;">📅 Today — ${dateStr}</div>`;
-
-    // Render days in order starting from today
-    for (let offset = 0; offset < 7; offset++) {
-      const dayIdx = (todayIdx + offset) % 7;
-      const dayEvents = byDay[dayIdx] || [];
-      // Also add general events on every day
-      const allForDay = offset === 0 ? [...dayEvents, ...general] : dayEvents;
-      if (!allForDay.length) continue;
-
-      const label = offset === 0 ? 'Today' : offset === 1 ? 'Tomorrow' : DAY_LABELS[dayIdx];
-      html += `<div style="margin-top:${offset === 0 ? '12' : '24'}px;margin-bottom:10px;font-size:22px;font-weight:900;color:#12263a;">${label}</div>`;
-
-      allForDay.forEach(ev => {
-        const biz = ev.businessName || '';
-        const emoji = ev.businessEmoji || '🎵';
-        const slug = ev.slug || '';
-        const artist = ev.artist_name || '';
-        const time = getTimeFromDesc(ev.description);
-        const desc = (ev.description || '').slice(0, 100);
-        const category = ev.category || '';
-        const tags = [
-          ev.recurring ? 'recurring' : '',
-          (ev.name || '').toLowerCase().includes('music') ? 'live-music' : '',
-          (ev.name || '').toLowerCase().includes('karaoke') ? 'bar-events' : '',
-          ev.kids_friendly ? 'family' : '',
-          category,
-        ].filter(Boolean).join(',');
-
-        // Look up business for hero image
-        const bizData = GCR.getBusiness(slug);
-        const heroImg = (bizData && (bizData.hero_image_url || bizData.cover_url)) || '';
-        const FALLBACK = 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80';
-        const cardImg = heroImg || FALLBACK;
-
-        html += `
-          <a href="profile.html?id=${encodeURIComponent(slug)}" style="text-decoration:none;color:inherit;display:block;"
-             data-slug="${slug}" data-tags="${tags}">
-            <div class="event-card" style="margin-bottom:10px;">
-              <div class="event-image" style="background-image:url('${cardImg}');min-height:180px;">
-                <div class="image-badge">${emoji} ${category.replace(/_/g,' ')}</div>
+  function buildEventCard(ev) {
+    const slug  = ev.entity_slug || ev.slug || '';
+    const name  = ev.event_name || ev.name || '';
+    const biz   = ev.entity_name || ev.businessName || '';
+    const city  = ev.entity_city || ev.city || '';
+    const hero  = ev.entity_hero_image_url || ev.hero_image_url || FALLBACK_IMG;
+    const etype = (ev.event_type || '').replace(/_/g,' ');
+    const time  = ev.event_time ? fmt12(ev.event_time) : '';
+    const desc  = (ev.description || '').slice(0, 120);
+    const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+    return `
+      <a href="${profileUrl}" style="text-decoration:none;color:inherit;display:block;" data-slug="${slug}" data-etype="${(ev.event_type||'').toLowerCase()}">
+        <div class="event-card" style="margin-bottom:12px;">
+          <div class="event-image" style="background-image:url('${hero}')">
+            <div class="image-badge">${esc(etype||'Event')}</div>
+          </div>
+          <div style="padding:16px 18px;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:22px;font-weight:900;color:#12263a;letter-spacing:-.02em;">${esc(name)}</div>
+                <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-top:3px;">📍 ${esc(biz)}${city?' · '+esc(city):''}</div>
               </div>
-              <div style="padding:14px 16px;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-                  <div>
-                    <div style="font-size:20px;font-weight:900;color:#12263a;letter-spacing:-.02em;">${ev.name}</div>
-                    <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-top:3px;">${biz}</div>
-                  </div>
-                  ${time ? `<div class="timepill" style="margin-top:0;">${time}</div>` : ''}
-                </div>
-                ${artist ? `<div style="margin-top:8px;font-size:14px;font-weight:700;color:#5b21b6;">🎸 ${artist}</div>` : ''}
-                ${desc && desc !== ev.name ? `<div style="margin-top:6px;color:#50677a;font-size:13px;line-height:1.5;">${desc}</div>` : ''}
-                <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
-                  ${ev.recurring ? '<span style="background:#eef2ff;color:#7c3aed;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>' : ''}
-                  ${ev.cover_charge ? '<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>' : ''}
-                  ${ev.kids_friendly ? '<span style="background:#d4edda;color:#155724;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Family</span>' : ''}
-                </div>
-              </div>
+              ${time?`<div class="timepill" style="margin-top:0;">🕐 ${time}</div>`:''}
             </div>
-          </a>`;
-      });
-    }
+            ${desc?`<div style="margin-top:8px;color:#50677a;font-size:13px;line-height:1.5;">${esc(desc)}</div>`:''}
+            <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+              ${ev.recurring?'<span style="background:#eef2ff;color:#7c3aed;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>':''}
+              ${ev.cover_charge?'<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>':''}
+              <a href="${profileUrl}" style="margin-left:auto;background:#0b7a75;color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;text-decoration:none;">View ${esc(biz)} →</a>
+            </div>
+          </div>
+        </div>
+      </a>`;
+  }
 
-    grid.innerHTML = html;
+  function renderToday() {
+    const grid = document.getElementById('todayGrid');
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const todayName = DAYS[now.getDay()];
+    let events = allEvents.filter(e => {
+      const isToday = e.event_date === todayStr;
+      const isRecurringToday = e.recurring && (e.day_of_week||'').toLowerCase() === todayName;
+      return isToday || isRecurringToday;
+    });
+    if (currentEtype !== 'all') events = events.filter(e => (e.event_type||'').toLowerCase() === currentEtype);
+    events.sort((a,b) => (a.event_time||'99:99') < (b.event_time||'99:99') ? -1 : 1);
+    const dateLabel = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    document.getElementById('todayHeading').textContent = dateLabel;
+    document.getElementById('todaySub').textContent = `${events.length} event${events.length!==1?'s':''} today`;
+    document.getElementById('resultCount').textContent = `${events.length} events`;
+    grid.innerHTML = events.length
+      ? events.map(buildEventCard).join('')
+      : `<div style="padding:52px 24px;text-align:center;color:#66788a;"><div style="font-size:3rem;margin-bottom:12px;">📅</div><h3 style="font-weight:800;margin:0 0 8px;">No events today</h3><p style="margin:0;">Check the weekly schedule for upcoming events</p></div>`;
+  }
 
-    // Update hero livebox
-    const todayCount = (byDay[todayIdx] || []).length + general.length;
-    const liveMusic = events.filter(e => (e.name || '').toLowerCase().includes('music')).length;
-    const familyCount = events.filter(e => e.kids_friendly).length;
+  function renderWeekly() {
+    const grid = document.getElementById('weeklyGrid');
+    let events = allEvents.filter(e => e.recurring);
+    if (currentEtype !== 'all') events = events.filter(e => (e.event_type||'').toLowerCase() === currentEtype);
+    document.getElementById('resultCount').textContent = `${events.length} recurring events`;
+    if (!events.length) { grid.innerHTML = `<div style="padding:52px 24px;text-align:center;color:#66788a;"><div style="font-size:3rem;margin-bottom:12px;">🗓️</div><h3 style="font-weight:800;margin:0 0 8px;">No weekly schedules yet</h3></div>`; return; }
+    const dayOrder = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
+    const byEntity = {};
+    events.forEach(e => {
+      const key = e.entity_slug || e.slug || e.entity_name || '';
+      if (!byEntity[key]) byEntity[key] = {name:e.entity_name||e.businessName||'',city:e.entity_city||'',hero:e.entity_hero_image_url||e.hero_image_url||FALLBACK_IMG,slug:e.entity_slug||e.slug||key,events:[]};
+      byEntity[key].events.push(e);
+    });
+    grid.innerHTML = Object.values(byEntity).map(biz => {
+      const sorted = [...biz.events].sort((a,b)=>(dayOrder[(a.day_of_week||'').toLowerCase()]||7)-(dayOrder[(b.day_of_week||'').toLowerCase()]||7));
+      const rows = sorted.map(e => {
+        const day = (e.day_of_week||'').replace(/^\w/,c=>c.toUpperCase());
+        const t = e.event_time ? fmt12(e.event_time) : '';
+        return `<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #f0f4f8;align-items:baseline;">
+          <div style="font-size:13px;font-weight:800;color:#66788a;min-width:90px;">${esc(day)}</div>
+          <div style="flex:1;font-size:14px;font-weight:700;color:#12263a;">${esc(e.event_name||e.name||'')}</div>
+          ${t?`<div style="font-size:13px;font-weight:700;color:#7c3aed;">${t}</div>`:''}
+        </div>`;
+      }).join('');
+      return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;margin-bottom:14px;">
+        <div style="display:grid;grid-template-columns:120px 1fr;min-height:100px;">
+          <div style="background-image:url('${biz.hero}');background-size:cover;background-position:center;"></div>
+          <div style="padding:16px 18px;">
+            <div style="font-size:20px;font-weight:900;color:#12263a;">${esc(biz.name)}</div>
+            ${biz.city?`<div style="font-size:13px;color:#66788a;font-weight:600;margin-top:2px;">📍 ${esc(biz.city)}</div>`:''}
+            <div style="margin-top:12px;">${rows}</div>
+            <a href="profile.html?id=${encodeURIComponent(biz.slug)}" style="display:inline-block;margin-top:12px;background:#0b7a75;color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;text-decoration:none;">View Profile →</a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tabToday').classList.toggle('active', tab==='today');
+    document.getElementById('tabWeekly').classList.toggle('active', tab==='weekly');
+    document.getElementById('todayView').style.display = tab==='today' ? '' : 'none';
+    document.getElementById('weeklyView').style.display = tab==='weekly' ? '' : 'none';
+    if (tab==='today') renderToday(); else renderWeekly();
+  }
+
+  function init() {
+    allEvents = GCR.events || [];
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const todayName = DAYS[now.getDay()];
+    const todayCount = allEvents.filter(e => e.event_date===todayStr || (e.recurring&&(e.day_of_week||'').toLowerCase()===todayName)).length;
+    const musicCount = allEvents.filter(e => (e.event_type||'').toLowerCase().includes('music')||(e.event_type||'').toLowerCase().includes('live')).length;
     const livebox = document.querySelector('.livebox');
     if (livebox) {
-      livebox.innerHTML = `
-        <strong>${dateStr.split(',')[0]} • ${now.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true})}</strong>
-        <span>${todayCount} events today</span>
-        <span>${liveMusic} live music venues</span>
-        <span>${familyCount} family-friendly events</span>`;
+      const ds = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+      const ts = now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      livebox.innerHTML = `<strong>${ds.split(',')[0]} · ${ts}</strong><span>${todayCount} events today</span><span>${musicCount} live music</span>`;
     }
-
-    // Wire filter chips
-    const chips = document.querySelectorAll('.tag-btn');
-    chips.forEach(btn => {
+    document.querySelectorAll('[data-etype]').forEach(btn => {
       btn.addEventListener('click', () => {
-        chips.forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('[data-etype]').forEach(b=>b.classList.remove('active'));
         btn.classList.add('active');
-        const filter = (btn.dataset.filter || 'all').toLowerCase().replace(/-/g, '_');
-        document.querySelectorAll('[data-slug]').forEach(card => {
-          if (filter === 'all') { card.style.display = ''; return; }
-          const tags = (card.dataset.tags || '');
-          card.style.display = tags.includes(filter) ? '' : 'none';
-        });
+        currentEtype = btn.dataset.etype;
+        if (currentTab==='today') renderToday(); else renderWeekly();
       });
     });
+    renderToday();
   }
 
-  if (window.GCR && GCR.loaded) {
-    renderEvents();
-  } else {
-    document.addEventListener('gcr:loaded', renderEvents);
-  }
+  if (window.GCR && GCR.loaded) { init(); }
+  else { document.addEventListener('gcr:loaded', init); }
   </script>
 </body>
 </html>

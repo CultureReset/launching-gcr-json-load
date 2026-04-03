@@ -311,67 +311,6 @@
 
   <script src="js/gcr-api.js"></script>
   <script src="js/app.js"></script>
-  <script>
-  /* ── Deals page: render specials from GCR.specials ── */
-  function renderDeals(specials) {
-    const grid = document.getElementById('listingsGrid');
-    if (!grid) return;
-
-    const items = (specials || []).filter(s => s.active !== false);
-    if (!items.length) {
-      grid.innerHTML = '<div style="padding:40px;text-align:center;color:#66788a;font-weight:700">No deals available right now. Check back soon!</div>';
-      return;
-    }
-
-    // Dedupe by name+slug
-    const seen = new Set();
-    const unique = items.filter(s => {
-      const key = (s.slug || '') + '|' + (s.name || '');
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-
-    grid.innerHTML = unique.map(s => {
-      const biz = s.businessName || '';
-      const emoji = s.businessEmoji || '🏷️';
-      const slug = s.slug || '';
-      const desc = (s.description || '').slice(0, 120);
-      const days = s.days || '';
-      return `
-        <a href="profile.html?id=${encodeURIComponent(slug)}" style="text-decoration:none;color:inherit;display:block;"
-           data-slug="${slug}" data-tags="${(days || '').toLowerCase()}">
-          <div class="gcr-card" style="display:grid;grid-template-columns:80px 1fr;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;">
-            <div style="display:flex;align-items:center;justify-content:center;font-size:2.4rem;background:#f7fafc;">${emoji}</div>
-            <div style="padding:14px 16px;">
-              <div style="font-size:20px;font-weight:900;letter-spacing:-.02em;">${s.name || 'Special'}</div>
-              <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-top:2px;">${biz}</div>
-              ${desc ? `<div style="margin-top:6px;color:#50677a;font-size:13px;line-height:1.5;">${desc}</div>` : ''}
-              ${days ? `<div style="margin-top:8px;"><span style="background:#eef8fb;color:#0b6475;border:1px solid #d3eef3;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:800;">${days}</span></div>` : ''}
-            </div>
-          </div>
-        </a>`;
-    }).join('');
-
-    const meta = document.querySelector('.toolbar-meta');
-    if (meta) meta.textContent = `${unique.length} deals`;
-
-    // Wire filter chips
-    const chips = document.querySelectorAll('.tag-btn');
-    chips.forEach(btn => {
-      btn.addEventListener('click', () => {
-        chips.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        // Re-render could filter by tag here in future
-      });
-    });
-  }
-
-  if (window.GCR && GCR.loaded) {
-    renderDeals(GCR.specials);
-  } else {
-    document.addEventListener('gcr:loaded', e => renderDeals(e.detail.specials || GCR.specials || []));
-  }
-  </script>
+  <script src="js/gcr-listings.js"></script>
 </body>
 </html>
