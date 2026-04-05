@@ -70,6 +70,7 @@ p  { color: var(--text-muted); }
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 16px rgba(0,0,0,.25);
+  --gcr-header-height: 165px;
 }
 .gcr-header-top {
   display: flex;
@@ -304,7 +305,7 @@ p  { color: var(--text-muted); }
 /* ── Section Nav (9 categories) ── */
 .category-nav {
   background: #fff; border-bottom: 1px solid var(--gray-200);
-  position: sticky; top: var(--header-h); z-index: 900;
+  position: sticky; top: var(--gcr-header-height, 165px); z-index: 900;
   overflow-x: auto; scrollbar-width: none;
 }
 .category-nav::-webkit-scrollbar { display: none; }
