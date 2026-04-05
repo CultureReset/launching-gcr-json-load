@@ -922,17 +922,27 @@
       case 'schedules': {
         html += '</div>';
         let schedHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
+
+        // Group schedules by ticket structure to avoid duplication
+        const ticketKey = s => JSON.stringify((s.tickets||[]).map(t => `${t.name}:${t.price}`).sort());
+        const grouped = {};
         (B.schedules || []).forEach(s => {
+          const key = ticketKey(s);
+          if (!grouped[key]) grouped[key] = { times: [], tickets: s.tickets || [] };
+          grouped[key].times.push(s);
+        });
+
+        Object.values(grouped).forEach(group => {
+          const times = group.times.map(s => s.time).join(', ');
           schedHTML += `<div class="card" style="margin-bottom:12px">
             <div style="margin-bottom:12px">
-              <div style="font-size:18px;font-weight:800">${s.time}</div>
-              ${s.name?`<div style="font-size:13px;color:var(--muted);margin-top:2px">${s.name}</div>`:''}
+              <div style="font-size:16px;font-weight:800">${times}</div>
             </div>
             <div style="display:grid;gap:1px;border:1px solid var(--border);border-radius:8px;overflow:hidden">
               <div style="display:grid;grid-template-columns:1fr auto;padding:8px 12px;background:var(--chip);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)">
                 <span>Ticket Type</span><span>Price</span>
               </div>
-              ${(s.tickets||[]).map(t=>`
+              ${(group.tickets||[]).map(t=>`
               <div style="display:grid;grid-template-columns:1fr auto;padding:10px 12px;border-top:1px solid var(--border);background:#fff;font-size:14px">
                 <span style="font-weight:600">${t.name}</span>
                 <span style="font-weight:800;color:var(--accent)">$${t.price}</span>
