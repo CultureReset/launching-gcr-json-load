@@ -478,7 +478,7 @@ function buildBusinessCard(entity, q) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g,' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
   const rating  = entity.rating;
   const reviews = entity.review_count || 0;
   const addr    = entity.address_line_1 || '';
@@ -536,7 +536,7 @@ function buildItemCard(entity, items, q) {
   const addr    = entity.address_line_1 || '';
   const rating  = entity.rating;
   const reviews = entity.review_count || 0;
-  const hero    = entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
+  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
   const phone   = entity.phone || '';
   const dir     = entity.directions_url || '';
   const location = [city, state].filter(Boolean).join(', ');
