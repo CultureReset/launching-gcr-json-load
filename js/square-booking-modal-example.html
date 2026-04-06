@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Modal Example</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 32px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: #1a1a1a;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 32px;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    button {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #00ada8;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #008b84;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,173,168,0.3);
+    }
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #1a1a1a;
+      border: 2px solid #e5e5e5;
+    }
+    .btn-secondary:hover {
+      background: #e5e5e5;
+      border-color: #d0d0d0;
+    }
+    .info {
+      background: #f0f9ff;
+      border: 1px solid #80d9d5;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 32px;
+      font-size: 13px;
+      color: #008b84;
+      line-height: 1.6;
+    }
+    .code-block {
+      background: #1a1a1a;
+      color: #00ff00;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 24px;
+      text-align: left;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Boat Rental Booking</h1>
+    <p class="subtitle">Experience the easiest way to book your boat rental</p>
+
+    <div class="button-group">
+      <button class="btn-primary" onclick="window.openBooking()">
+        Book Now
+      </button>
+      <button class="btn-secondary" onclick="window.openBooking('single')">
+        Quick Book Single Seater
+      </button>
+      <button class="btn-secondary" onclick="window.openBooking('double')">
+        Quick Book Double Seater
+      </button>
+    </div>
+
+    <div class="info">
+      <strong>ℹ️ Configuration Required</strong>
+      <p style="margin-top: 8px;">
+        This example requires the following to be set before the booking script loads:
+      </p>
+    </div>
+
+    <div class="code-block">
+// Before &lt;script src="js/square-booking-modal.js"&gt;
+window.API_BASE = 'https://your-api.com';
+window.SUBDOMAIN = 'your-business';
+window.SITE_DATA = {
+  products: [...],
+  locations: [...],
+  docks: [...],
+  addons: [...]
+};
+    </div>
+  </div>
+
+  <!-- Load configuration and booking modal script -->
+  <script>
+    // Set your API base URL
+    window.API_BASE = 'https://cybercheck-api-database.vercel.app';
+
+    // Set your subdomain (for multi-tenant routing)
+    window.SUBDOMAIN = 'circle-boats';
+
+    // Set payment policy (optional)
+    window.BOOKING_POLICY = {
+      paymentMode: 'full',      // 'full' | 'deposit' | 'at_location'
+      depositPct: 25,
+      buttonLabel: 'Pay & Book'
+    };
+
+    // Load default site data (will be overridden by API response)
+    window.SITE_DATA = {
+      products: [
+        {
+          key: 'single',
+          name: 'Single Seater',
+          description: '1 person max',
+          halfDayAM: 150,
+          halfDayPM: 150,
+          allDay: 225,
+          image: ''
+        },
+        {
+          key: 'double',
+          name: 'Double Seater',
+          description: '2 person max',
+          halfDayAM: 200,
+          halfDayPM: 200,
+          allDay: 275,
+          image: ''
+        }
+      ],
+      locations: [
+        {
+          id: 'loc1',
+          name: 'Main Launch — Canal Road',
+          address: '25856 Canal Road, Unit A, Orange Beach, AL 36561'
+        }
+      ],
+      docks: [
+        {
+          id: 'premium',
+          name: 'Premium Dock',
+          size: '50x20ft',
+          capacity: '2 boats',
+          halfDay: 25,
+          allDay: 50,
+          image: ''
+        }
+      ],
+      addons: [
+        {
+          id: 'cooler',
+          name: 'Cooler Pack',
+          description: 'Ice + cups included',
+          price: 15,
+          icon: '🧊'
+        },
+        {
+          id: 'snorkel',
+          name: 'Snorkel Gear',
+          description: 'Per person',
+          price: 10,
+          icon: '🤿'
+        }
+      ]
+    };
+  </script>
+
+  <!-- Load the booking modal -->
+  <script src="square-booking-modal.js"></script>
+
+  <!-- Optional: Log booking state for debugging -->
+  <script>
+    // Example: Hook into the booking modal for analytics or custom behavior
+    const originalOpen = window.openBooking;
+    window.openBooking = function(slug) {
+      console.log('Booking modal opened for:', slug || 'default');
+      originalOpen(slug);
+    };
+
+    const originalClose = window.closeBooking;
+    window.closeBooking = function() {
+      console.log('Booking modal closed');
+      originalClose();
+    };
+  </script>
+</body>
+</html>

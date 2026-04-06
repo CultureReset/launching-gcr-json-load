@@ -1822,5 +1822,92 @@ document.addEventListener('gcr:loaded', function() {
 })();
 </script>
 <script src="js/claim-modal.js"></script>
+<script>
+/* Load admin-configured hero + category card overrides */
+(function() {
+  var API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+
+  function applyHero(hero) {
+    if (!hero) return;
+    var eyebrow = document.querySelector('.hero-eyebrow');
+    var title   = document.querySelector('.hero-title');
+    var sub     = document.querySelector('.hero-sub');
+    if (eyebrow && hero.eyebrow)  eyebrow.textContent = hero.eyebrow;
+    if (title   && hero.title)    title.innerHTML = hero.title.replace(/\n/g,'<br>');
+    if (sub     && hero.subtitle) sub.textContent = hero.subtitle;
+    if (hero.bg_image) {
+      var heroEl = document.querySelector('.gcr-hero');
+      if (heroEl) {
+        heroEl.style.background = 'linear-gradient(135deg,rgba(14,165,233,.9) 0%,rgba(20,184,166,.8) 30%,rgba(16,185,129,.7) 70%,rgba(14,165,233,.9) 100%), url(' + hero.bg_image + ') center/cover no-repeat';
+      }
+    }
+    if (Array.isArray(hero.quick_tags) && hero.quick_tags.length) {
+      var tagsEl = document.querySelector('.hero-quick-tags');
+      if (tagsEl) {
+        tagsEl.innerHTML = hero.quick_tags.map(function(t) {
+          return '<span class="hero-tag" onclick="doTagSearch(\'' + t.label.replace(/'/g,"\\'") + '\')">' + t.emoji + ' ' + t.label + '</span>';
+        }).join('');
+      }
+    }
+  }
+
+  function applyCards(cards) {
+    if (!cards || !cards.length) return;
+    var catMap = {};
+    cards.forEach(function(c) { catMap[c.category_id] = c; });
+
+    // Map category IDs to their home page tile selectors
+    var tileMap = {
+      'restaurants':   '.ct-restaurants',
+      'coffee-sweets': '.ct-coffee',
+      'happy-hours':   '.ct-happy',
+      'specials':      '.ct-specials',
+      'events':        '.ct-events',
+      'things-to-do':  '.ct-thingstodo',
+      'shopping':      '.ct-shopping',
+      'public-spots':  '.ct-other',
+      'nightlife':     '.ct-nightlife',
+      'artists':       '.ct-artists',
+      'feed':          '.ct-feed',
+    };
+
+    Object.keys(catMap).forEach(function(catId) {
+      var c = catMap[catId];
+      var cls = tileMap[catId];
+      if (!cls) return;
+      var top = document.querySelector(cls);
+      if (!top) return;
+      var tile = top.closest('.cat-tile');
+      if (!tile) return;
+
+      // Update background of tile-top div
+      if (c.image_url) {
+        top.style.background = 'url(' + c.image_url + ') center/cover no-repeat';
+        top.textContent = '';
+      } else if (c.color_gradient) {
+        top.style.background = c.color_gradient;
+        if (c.emoji) top.textContent = c.emoji;
+      } else if (c.emoji) {
+        top.textContent = c.emoji;
+      }
+
+      var nameEl = tile.querySelector('.cat-tile-name');
+      var descEl = tile.querySelector('.cat-tile-desc');
+      if (nameEl && c.label) nameEl.textContent = c.label;
+      if (descEl && c.description) descEl.textContent = c.description;
+    });
+  }
+
+  Promise.all([
+    fetch(API + '/site-config').then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+    fetch(API + '/category-cards').then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }),
+  ]).then(function(results) {
+    var cfgData   = results[0];
+    var cardsData = results[1];
+    if (cfgData && cfgData.config && cfgData.config.hero)  applyHero(cfgData.config.hero);
+    if (cardsData && cardsData.cards) applyCards(cardsData.cards);
+  });
+})();
+</script>
 </body>
 </html>

@@ -57,7 +57,7 @@
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-card-img{
       min-height:260px;height:100%;
-      background-size:contain;
+      background-size:cover;
       background-position:center center;
       background-repeat:no-repeat;
       background-color:#f0f4f8;

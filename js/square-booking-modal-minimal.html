@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimal Booking Modal Setup</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+    .hero {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    h1 { margin: 0 0 8px; color: #1a1a1a; }
+    p { color: #666; margin: 0 0 24px; }
+    button {
+      background: #00ada8;
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #008b84; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <h1>Book Your Adventure</h1>
+    <p>Click below to start booking your boat rental</p>
+    <button onclick="openBooking()">Open Booking Modal</button>
+  </div>
+
+  <!-- Step 1: Configure your API (before loading the modal script) -->
+  <script>
+    window.API_BASE = 'https://cybercheck-api-database.vercel.app';
+    window.SUBDOMAIN = 'circle-boats';
+  </script>
+
+  <!-- Step 2: Load the booking modal -->
+  <script src="square-booking-modal.js"></script>
+
+  <!-- Done! The modal will:
+       1. Auto-initialize on page load
+       2. Inject modal HTML and CSS
+       3. Load site data from API
+       4. Be ready to use
+
+       You can now:
+       - Call openBooking() to open
+       - Call closeBooking() to close
+       - That's it!
+  -->
+</body>
+</html>
