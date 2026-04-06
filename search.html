@@ -83,49 +83,101 @@
     .gcr-search-btn.amber { background: #d97706; color: #fff; border-color: #d97706; }
     .gcr-search-btn.green { background: #16a34a; color: #fff; border-color: #16a34a; }
 
-    /* ── Item result card (compact with matched items) ── */
+    /* ── Item result card (centered layout) ── */
     .gcr-item-card {
       background: #fff; border-radius: 18px;
       box-shadow: 0 4px 20px rgba(15,34,51,.07);
-      overflow: hidden; margin-bottom: 18px;
+      overflow: hidden; margin-bottom: 24px;
       border: 1px solid #e8eef4;
+      max-width: 700px; margin-left: auto; margin-right: auto;
     }
-    .gcr-item-card-header {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 18px; border-bottom: 1px solid #f0f4f8;
-    }
-    .gcr-item-card-thumb {
-      width: 60px; height: 60px; border-radius: 12px;
-      background-size: cover; background-position: center; flex-shrink: 0;
-      border: 1.5px solid #e8eef4;
-    }
-    .gcr-item-card-biz { flex: 1; }
-    .gcr-item-card-bizname { font-size: 15px; font-weight: 800; color: #1a2f3e; }
-    .gcr-item-card-loc { font-size: 12px; color: #8fa3b1; font-weight: 600; margin-top: 2px; }
-    .gcr-item-card-actions { display: flex; gap: 7px; flex-shrink: 0; }
 
-    .gcr-item-list { padding: 2px 18px 14px; }
-    .gcr-item-label {
-      font-size: 10px; font-weight: 800; color: #8fa3b1;
-      text-transform: uppercase; letter-spacing: 1px; padding: 10px 0 6px;
+    /* Restaurant header (centered) */
+    .gcr-item-card-header {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 24px 20px; text-align: center; border-bottom: 1px solid #f0f4f8;
     }
+    .gcr-item-card-bizname { font-size: 24px; font-weight: 900; color: #1a2f3e; margin: 0; }
+    .gcr-item-card-meta {
+      font-size: 13px; font-weight: 600; color: #66788a; margin: 4px 0;
+    }
+    .gcr-item-card-meta span { display: inline; margin: 0 6px; }
+    .gcr-item-card-meta span:first-child { margin-left: 0; }
+    .gcr-item-card-loc { font-size: 12px; color: #8fa3b1; font-weight: 600; margin-top: 6px; }
+    .gcr-item-card-addr { font-size: 12px; color: #8fa3b1; font-weight: 600; margin-top: 2px; }
+
+    /* Restaurant image (centered) */
+    .gcr-item-card-thumb {
+      width: 200px; height: 160px; border-radius: 12px;
+      background-size: cover; background-position: center; flex-shrink: 0;
+      border: 1.5px solid #e8eef4; margin: 16px auto;
+    }
+
+    /* Items list */
+    .gcr-item-list { padding: 20px; }
+    .gcr-item-label {
+      font-size: 11px; font-weight: 800; color: #8fa3b1;
+      text-transform: uppercase; letter-spacing: 1px; padding: 0 0 12px;
+      text-align: center;
+    }
+
     .gcr-item-row {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      padding: 9px 0; border-bottom: 1px solid #f7fafc; gap: 12px;
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 16px 0; border-bottom: 1px solid #f0f4f8;
     }
     .gcr-item-row:last-child { border-bottom: none; }
-    .gcr-item-name { font-size: 14px; font-weight: 700; color: #1a2f3e; }
+
+    .gcr-item-img-placeholder {
+      width: 100px; height: 100px; min-width: 100px;
+      border-radius: 10px; background: #f0f4f8;
+      background-size: cover; background-position: center;
+      border: 1px solid #e8eef4;
+    }
+
+    .gcr-item-content { flex: 1; }
+    .gcr-item-name {
+      font-size: 16px; font-weight: 700; color: #1a2f3e; margin: 0;
+      display: flex; align-items: center; gap: 8px;
+    }
     .gcr-item-name.exact { color: #0b7a75; }
-    .gcr-item-desc { font-size: 12px; color: #8fa3b1; margin-top: 2px; line-height: 1.5;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .gcr-item-price { font-size: 14px; font-weight: 800; color: #0b7a75; flex-shrink: 0; }
+    .gcr-item-desc {
+      font-size: 13px; color: #66788a; margin: 4px 0 0;
+      line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    .gcr-item-price-row {
+      display: flex; align-items: center; justify-content: space-between; margin-top: 8px;
+    }
+    .gcr-item-price {
+      font-size: 16px; font-weight: 900; color: #0b7a75;
+    }
     .gcr-item-type-badge {
       display: inline-block; font-size: 10px; font-weight: 700;
-      padding: 2px 7px; border-radius: 999px; margin-left: 6px;
+      padding: 3px 8px; border-radius: 999px;
     }
     .gcr-item-type-badge.menu { background: #e0f2fe; color: #0369a1; }
     .gcr-item-type-badge.drink { background: #f3e8ff; color: #7e22ce; }
     .gcr-item-type-badge.happy_hour { background: #fef3c7; color: #92400e; }
+
+    /* Card footer (buttons centered) */
+    .gcr-item-card-footer {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+      padding: 16px 20px; border-top: 1px solid #f0f4f8;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 600px) {
+      .gcr-item-card { margin-bottom: 20px; }
+      .gcr-item-card-bizname { font-size: 20px; }
+      .gcr-item-card-meta { font-size: 12px; }
+      .gcr-item-card-thumb { width: 160px; height: 130px; }
+      .gcr-item-row { gap: 12px; }
+      .gcr-item-img-placeholder { width: 80px; height: 80px; min-width: 80px; }
+      .gcr-item-name { font-size: 15px; }
+      .gcr-item-desc { font-size: 12px; }
+      .gcr-item-price { font-size: 15px; }
+    }
 
     /* ── Spinner ── */
     @keyframes gcr-spin { to { transform: rotate(360deg); } }
@@ -473,58 +525,69 @@ function buildBusinessCard(entity, q) {
     </a>`;
 }
 
-/* ── Build item result card (matched menu/drink/HH items) ── */
+/* ── Build item result card (centered layout) ── */
 function buildItemCard(entity, items, q) {
   const slug    = entity.slug || entity.subdomain || '';
   const name    = entity.name || 'Business';
   const city    = entity.city || '';
   const state   = entity.state || '';
+  const addr    = entity.address_line_1 || '';
+  const rating  = entity.rating;
+  const reviews = entity.review_count || 0;
   const hero    = entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
   const phone   = entity.phone || '';
   const dir     = entity.directions_url || '';
   const location = [city, state].filter(Boolean).join(', ');
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g,' ');
+  const priceRange = entity.price_range ? '·'.repeat(entity.price_range) : '$$';
   const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+
+  const ratingStr = rating ? `${Number(rating).toFixed(1)} ⭐` : '';
+  const metaItems = [subtype, priceRange, ratingStr].filter(Boolean);
+  const metaHtml = metaItems.length > 0 ? `<div class="gcr-item-card-meta">${metaItems.map(m => `<span>${m}</span>`).join('')}</div>` : '';
 
   const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary" onclick="event.stopPropagation()">View Menu</a>`;
   const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
 
   const typeLabel = { menu: 'Menu', drink: 'Drinks', happy_hour: 'Happy Hour' };
-  const itemsHtml = items.slice(0, 5).map(item => {
+  const itemsHtml = items.slice(0, 8).map(item => {
     const iname    = item.item_name || item.special_name || '';
     const idesc    = item.description || '';
     const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
     const itype    = item._type || 'menu';
+    const iimg     = item.image_url || '';
     const exact    = isExactMatch(iname, q);
     const typeBadge = `<span class="gcr-item-type-badge ${itype}">${typeLabel[itype] || itype}</span>`;
+
     return `
       <div class="gcr-item-row">
-        <div style="flex:1">
-          <div class="gcr-item-name ${exact ? 'exact' : ''}">${esc(iname)}${typeBadge}</div>
+        <div class="gcr-item-img-placeholder" ${iimg ? `style="background-image:url('${iimg}')"` : ''}></div>
+        <div class="gcr-item-content">
+          <div class="gcr-item-name ${exact ? 'exact' : ''}">${esc(iname)} ${typeBadge}</div>
           ${idesc ? `<div class="gcr-item-desc">${esc(idesc)}</div>` : ''}
+          ${iprice ? `<div class="gcr-item-price-row"><span></span><span class="gcr-item-price">${esc(iprice)}</span></div>` : ''}
         </div>
-        ${iprice ? `<div class="gcr-item-price">${esc(iprice)}</div>` : ''}
       </div>`;
   }).join('');
 
-  const moreCount = items.length > 5 ? items.length - 5 : 0;
+  const moreCount = items.length > 8 ? items.length - 8 : 0;
 
   return `
     <div class="gcr-item-card">
-      <a href="${profileUrl}" style="text-decoration:none;color:inherit;display:block;">
-        <div class="gcr-item-card-header">
-          <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
-          <div class="gcr-item-card-biz">
-            <div class="gcr-item-card-bizname">${esc(name)}</div>
-            ${location ? `<div class="gcr-item-card-loc">📍 ${esc(location)}</div>` : ''}
-          </div>
-          <div class="gcr-item-card-actions">${viewBtn}${callBtn}</div>
-        </div>
-      </a>
+      <div class="gcr-item-card-header">
+        <div class="gcr-item-card-bizname">${esc(name)}</div>
+        ${metaHtml}
+        ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
+        ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
+        <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
+      </div>
       <div class="gcr-item-list">
         <div class="gcr-item-label">🍴 Matching Items</div>
         ${itemsHtml}
-        ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:8px 0;font-weight:600;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
+        ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
       </div>
+      <div class="gcr-item-card-footer">${viewBtn}${callBtn}</div>
     </div>`;
 }
 
