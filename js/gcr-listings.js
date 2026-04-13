@@ -882,10 +882,12 @@ function buildHHSpecialsCard(entity) {
 
 /* ── Populate sidebar with real top-rated entities ── */
 function populateSidebar(entities) {
-  const heading = document.querySelector('.panel h3');
-  if (!heading || heading.textContent.trim() !== 'Popular Nearby') return;
+  const SIDEBAR_HEADINGS = ['Popular Nearby', 'Popular Deals'];
+  const heading = [...document.querySelectorAll('.panel h3')].find(h => SIDEBAR_HEADINGS.includes(h.textContent.trim()));
+  if (!heading) return;
   const panel = heading.closest('.panel');
   if (!panel) return;
+  const panelTitle = heading.textContent.trim();
 
   const top = [...entities]
     .filter(e => (e.photos && e.photos[0]) || e.hero_image_url || e.cover_url)
@@ -894,7 +896,7 @@ function populateSidebar(entities) {
 
   if (!top.length) return;
 
-  panel.innerHTML = `<h3>Popular Nearby</h3>` + top.map(e => {
+  panel.innerHTML = `<h3>${panelTitle}</h3>` + top.map(e => {
     const slug = e.slug || e.subdomain || e.id;
     const img  = (e.photos && e.photos[0] && e.photos[0].image_url) || e.hero_image_url || e.cover_url;
     return `
@@ -1073,11 +1075,13 @@ function wireFilterChips(_grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    // Happy Hours — ONLY businesses with actual HH data (not just the tag)
+    // Happy Hours — if source is already GCR.happyHours, pass through all entries
     if (category === 'happy-hours') {
-      // hh_days field set on entity
+      const hhList = window.GCR && GCR.happyHours;
+      if (hhList && hhList.length) return true; // already scoped by /happy-hours endpoint
+      // Fallback: hh_days field set on entity
       if (b.hh_days) return true;
-      // Has actual entity_specials with special_type=happy_hour
+      // Fallback: entity_specials with special_type=happy_hour
       const hhSpecials = (window.GCR && GCR.specials || []).filter(s =>
         (s.special_type || s.type || '').toLowerCase() === 'happy_hour' &&
         s.is_active !== false
@@ -1287,10 +1291,18 @@ function initStandardPage() {
     });
   }
 
+  function getSource(detail) {
+    if (category === 'happy-hours') {
+      const hh = (detail || window.GCR || {}).happyHours;
+      return hh && hh.length ? hh : (detail || window.GCR || {}).businesses || [];
+    }
+    return (detail || window.GCR || {}).businesses || [];
+  }
+
   if (window.GCR && GCR.loaded) {
-    render(GCR.businesses);
+    render(getSource());
   } else {
-    document.addEventListener('gcr:loaded', e => render(e.detail.businesses || []));
+    document.addEventListener('gcr:loaded', e => render(getSource(e.detail)));
   }
 
   wireFilterChips(grid);

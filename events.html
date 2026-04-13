@@ -122,11 +122,8 @@
           <h1>Events & Live Music</h1>
           <p>See what's happening tonight across Orange Beach, Gulf Shores, and nearby. Use time and event tags to narrow down what fits your vibe.</p>
         </div>
-        <div class="livebox">
-          <strong>Tuesday • 4:26 PM</strong>
-          <span>24 events today</span>
-          <span>9 live music sets tonight</span>
-          <span>6 family-friendly events</span>
+        <div class="livebox" id="liveboxStats">
+          <strong>Loading…</strong>
         </div>
       </div>
     </section>
@@ -198,28 +195,14 @@
       </main>
 
       <aside class="sidebar">
-        <div class="panel">
+        <div class="panel" id="featuredTonightPanel" style="display:none;">
           <h3>Featured Tonight</h3>
-          <div class="mini-card">
-            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80')"></div>
-            <div>
-              <div class="mini-name">Acoustic Sunset</div>
-              <div class="mini-meta">Tonight • 5:30 PM</div>
-              <div class="mini-links"><a href="#">Details</a><a href="#">Save</a></div>
-            </div>
-          </div>
+          <div id="featuredTonightList"></div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="recurringPanel" style="display:none;">
           <h3>Recurring Events</h3>
-          <div class="mini-card">
-            <div class="mini-thumb" style="background-image:url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=800&q=80')"></div>
-            <div>
-              <div class="mini-name">Weekly Trivia Night</div>
-              <div class="mini-meta">Every Tuesday • GTs</div>
-              <div class="mini-links"><a href="#">Details</a><a href="#">Save</a></div>
-            </div>
-          </div>
+          <div id="recurringList"></div>
         </div>
 
         <div class="panel">
@@ -640,6 +623,53 @@
       });
     });
     renderToday();
+    populateSidebarEvents();
+  }
+
+  function populateSidebarEvents() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayName = DAYS[new Date().getDay()];
+
+    // Featured Tonight: events happening today, sorted soonest first
+    const featured = allEvents.filter(e =>
+      e.event_date === today || (e.recurring && (e.day_of_week||'').toLowerCase() === todayName)
+    ).slice(0, 3);
+
+    const featuredPanel = document.getElementById('featuredTonightPanel');
+    const featuredList  = document.getElementById('featuredTonightList');
+    if (featured.length && featuredPanel && featuredList) {
+      featuredList.innerHTML = featured.map(e => {
+        const slug = e.entity_slug || e.slug || '';
+        const time = e.start_time ? ` · ${fmt12(e.start_time)}` : '';
+        return `<div class="mini-card">
+          <div>
+            <div class="mini-name">${e.title || e.name || 'Event'}</div>
+            <div class="mini-meta">Tonight${time}${e.venue_name ? ' · ' + e.venue_name : ''}</div>
+            <div class="mini-links">${slug ? `<a href="profile.html?id=${encodeURIComponent(slug)}">Details</a>` : ''}</div>
+          </div>
+        </div>`;
+      }).join('');
+      featuredPanel.style.display = '';
+    }
+
+    // Recurring: events with recurring=true
+    const recurring = allEvents.filter(e => e.recurring).slice(0, 3);
+    const recurringPanel = document.getElementById('recurringPanel');
+    const recurringList  = document.getElementById('recurringList');
+    if (recurring.length && recurringPanel && recurringList) {
+      recurringList.innerHTML = recurring.map(e => {
+        const slug = e.entity_slug || e.slug || '';
+        const day  = e.day_of_week ? `Every ${e.day_of_week}` : 'Recurring';
+        return `<div class="mini-card">
+          <div>
+            <div class="mini-name">${e.title || e.name || 'Event'}</div>
+            <div class="mini-meta">${day}${e.venue_name ? ' · ' + e.venue_name : ''}</div>
+            <div class="mini-links">${slug ? `<a href="profile.html?id=${encodeURIComponent(slug)}">Details</a>` : ''}</div>
+          </div>
+        </div>`;
+      }).join('');
+      recurringPanel.style.display = '';
+    }
   }
 
   if (window.GCR && GCR.loaded) { init(); }

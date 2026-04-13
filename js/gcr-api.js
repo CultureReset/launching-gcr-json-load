@@ -10,6 +10,7 @@ const GCR = {
   businesses: [],
   events: [],
   specials: [],
+  happyHours: [],
   loaded: false,
 
   /* ── CATEGORIES (static — these don't change) ── */
@@ -29,10 +30,11 @@ const GCR = {
   /* ── LOAD ALL DATA ── */
   async load() {
     try {
-      const [bizRes, evRes, spRes] = await Promise.all([
+      const [bizRes, evRes, spRes, hhRes] = await Promise.all([
         fetch(GCR_API + '/entities?limit=500').catch(() => null),
         fetch(GCR_API + '/events').catch(() => null),
         fetch(GCR_API + '/specials').catch(() => null),
+        fetch(GCR_API + '/happy-hours').catch(() => null),
       ]);
 
       if (bizRes && bizRes.ok) {
@@ -54,6 +56,9 @@ const GCR = {
       }
       if (spRes && spRes.ok) {
         this.specials = await spRes.json();
+      }
+      if (hhRes && hhRes.ok) {
+        this.happyHours = await hhRes.json();
       }
 
       this.loaded = true;
@@ -175,11 +180,5 @@ const GCR = {
   },
 };
 
-// Auto-load on script parse (skip on localhost to avoid CORS errors)
-if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-  GCR.load();
-} else {
-  // Mark as loaded to dispatch event (pages use hardwired sample data)
-  GCR.loaded = true;
-  document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: GCR }));
-}
+// Auto-load on script parse
+GCR.load();
