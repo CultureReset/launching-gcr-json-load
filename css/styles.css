@@ -35,7 +35,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: var(--font);
@@ -43,6 +43,7 @@ body {
   background: var(--sand);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -129,7 +130,10 @@ p  { color: var(--text-muted); }
 .gcr-cat-tabs::-webkit-scrollbar { display: none; }
 .gcr-cat-tab {
   flex-shrink: 0;
-  padding: 9px 18px;
+  padding: 10px 18px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
   background: rgba(255,255,255,.88);
   border: 1.5px solid rgba(255,255,255,.5);
   border-radius: 22px;
@@ -158,7 +162,8 @@ p  { color: var(--text-muted); }
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 10px;
+  padding: 10px 10px;
+  min-height: 40px;
   border: none;
   border-radius: 22px;
   font-size: .75rem;
@@ -1309,6 +1314,35 @@ p  { color: var(--text-muted); }
 .claim-success p {
   color: #66788a;
   font-size: .95rem;
+}
+
+/* ── Mobile tap target minimums ── */
+@media (max-width: 768px) {
+  /* "See all →" and similar small inline links */
+  .events-see-all,
+  a[href*="events.html"],
+  a[href*="happy-hours"],
+  a[href*="specials"],
+  a[href*="activities"] {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+  /* "Open in Google Maps →" sidebar link */
+  a[href*="maps.google"] {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 0;
+  }
+  /* Home nav links in footer */
+  a[href="index3.html"],
+  a[href="index.html"],
+  a[href="/"] {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 @media (max-width: 480px) {
   .claim-form-grid { grid-template-columns: 1fr; }
