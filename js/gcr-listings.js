@@ -412,6 +412,18 @@ function buildCard(entity) {
       ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
     </div>` : '';
 
+  // Detect activity type
+  const ACTIVITY_SUBTYPES = new Set([
+    'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
+    'dolphin-cruises-tours','dolphin_cruise','dolphin_cruises_tours','jet-ski-rentals-tours',
+    'jet_ski','jet_ski_rentals_tours','canoe-kayak-paddleboard-rentals','canoe_kayak_paddleboard',
+    'banana-boat-rides','banana_boat','helicopter-airplane-tours','sunset-cruises-tours',
+    'boat-tours','boat_tours','watersports','rentals','attraction','attractions','tour',
+    'snorkeling','paddleboard','kayak_rental'
+  ]);
+  const rawSubtype = (entity.entity_subtype || entity.type || '').toLowerCase();
+  const isActivity = ACTIVITY_SUBTYPES.has(rawSubtype) || ACTIVITY_SUBTYPES.has(rawSubtype.replace(/-/g,'_'));
+
   // About — 3 lines, no fallback
   const aboutBlock = desc
     ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>`
@@ -428,6 +440,14 @@ function buildCard(entity) {
   const hhBlock = hhDays
     ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
     : '';
+
+  // Activity info block — replaces hours/hh for activity types
+  const activityBlock = isActivity ? [
+    entity.duration_text   ? `<div style="margin-top:6px;font-size:13px;color:#0b6475;font-weight:700;">⏱ ${esc(entity.duration_text)}</div>` : '',
+    entity.capacity_max    ? `<div style="margin-top:4px;font-size:13px;color:#42596c;font-weight:600;">👥 Up to ${entity.capacity_max} people</div>` : '',
+    entity.min_age         ? `<div style="margin-top:4px;font-size:13px;color:#42596c;">Ages ${entity.min_age}+</div>` : '',
+    entity.price_from      ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">From $${entity.price_from}</div>` : '',
+  ].join('') : '';
 
   // Live music today — check actual events
   const todayStr2  = new Date().toISOString().split('T')[0];
@@ -467,12 +487,10 @@ function buildCard(entity) {
           ${aboutBlock}
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-          ${hoursBlock}
-          ${hhBlock}
-          ${musicBlock}
+          ${isActivity ? activityBlock : hoursBlock + hhBlock + musicBlock}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
-            <div class="gcr-card-actions">${viewBtn}${menuBtn}${hhBtn}${bookBtn}${reserveBtn}${orderBtn}${dirBtn}${callBtn}</div>
+            <div class="gcr-card-actions">${isActivity ? (bookBtn || viewBtn) + dirBtn + callBtn : viewBtn + menuBtn + hhBtn + bookBtn + reserveBtn + orderBtn + dirBtn + callBtn}</div>
           </div>
         </div>
       </div>
