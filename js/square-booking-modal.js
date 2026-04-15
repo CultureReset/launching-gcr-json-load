@@ -1186,9 +1186,6 @@
           '</div>' +
         '</div>';
       });
-      if (freeDoc) {
-        html += '<p style="font-size:12px;color:#10b981;font-weight:600;margin:-4px 0 12px;">🎉 Rent 4+ boats = FREE dock!</p>';
-      }
     }
 
     if (addons.length) {

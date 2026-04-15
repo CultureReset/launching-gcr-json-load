@@ -1132,7 +1132,10 @@ function getEntitiesForCategory(businesses, category) {
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
     const norm = raw.replace(/-/g, '_');
     const catMatch = raw === category || SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
-    if (!catMatch) return false;
+    // Also check secondary_types — comma-separated page slugs (e.g. "restaurants,things-to-do")
+    const secTypes = (b.secondary_types || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    const secMatch = secTypes.some(s => s === category || s.replace(/_/g, '-') === category || s.replace(/-/g, '_') === category.replace(/-/g, '_'));
+    if (!catMatch && !secMatch) return false;
     // Skip incomplete imports — must have at least one of: image, tags, description, phone, or subtitle
     const hasTags  = (b.tags || []).length > 0;
     const hasImage = !!(b.hero_image_url || b.cover_url);
