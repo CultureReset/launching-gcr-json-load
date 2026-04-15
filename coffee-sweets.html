@@ -75,58 +75,6 @@
     }
     .results-title{font-size:34px;font-weight:900;letter-spacing:-.03em;margin:2px 0 14px}
     .list{display:flex;flex-direction:column;gap:14px}
-    .restaurant-card, .cafe-card{
-      display:grid;grid-template-columns:290px minmax(0,1fr);
-      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-      box-shadow:var(--shadow);overflow:hidden;
-      transition:transform .14s ease, box-shadow .14s ease;
-    }
-    .restaurant-card:hover, .cafe-card:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(15,34,51,.10)}
-    .restaurant-image, .cafe-image{
-      min-height:208px;background-size:cover;background-position:center;position:relative;
-    }
-    .image-badge{
-      position:absolute;left:14px;bottom:14px;
-      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.92);
-      color:#21485d;font-weight:800;font-size:13px;
-    }
-    .restaurant-body, .cafe-body{padding:16px 18px}
-    .title-row{
-      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-    }
-    .name{font-size:30px;font-weight:900;letter-spacing:-.03em}
-    .status{
-      background:#e9f9ef;color:var(--green);
-      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap
-    }
-    .subline{
-      margin-top:4px;color:var(--muted);font-size:16px;font-weight:600;
-      display:flex;flex-wrap:wrap;gap:10px;align-items:center;
-    }
-    .rating{
-      margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-      font-size:15px;font-weight:700;color:#384f61;
-    }
-    .stars{color:var(--gold);letter-spacing:1px}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .chip{
-      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
-      padding:7px 11px;border-radius:999px;font-size:13px;font-weight:700
-    }
-    .desc{
-      margin-top:12px;color:#50677a;line-height:1.6;font-size:14px;
-    }
-    .bottom-row{
-      margin-top:14px;padding-top:14px;border-top:1px solid #edf2f7;
-      display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
-    }
-    .address, .venue{color:#425b70;font-weight:700;font-size:14px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .action{
-      border:1px solid var(--line);background:#fff;color:#25465b;
-      padding:10px 14px;border-radius:12px;font-weight:800;
-    }
-    .action.primary{background:var(--brand);border-color:var(--brand);color:#fff}
     .sidebar{display:flex;flex-direction:column;gap:14px}
     .panel{
       background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
