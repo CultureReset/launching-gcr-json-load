@@ -442,12 +442,21 @@ function buildCard(entity) {
     : '';
 
   // Activity info block — replaces hours/hh for activity types
+  const pFrom = entity.price_from;
+  const pUnit = entity.price_unit || '';
+  const priceLabel = pFrom === 0 || pFrom === '0'
+    ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">✓ Free</div>`
+    : pFrom != null
+      ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">From $${pFrom}${pUnit ? '/'+pUnit : ''}</div>`
+      : '';
   const activityBlock = isActivity ? [
     entity.duration_text   ? `<div style="margin-top:6px;font-size:13px;color:#0b6475;font-weight:700;">⏱ ${esc(entity.duration_text)}</div>` : '',
     entity.capacity_max    ? `<div style="margin-top:4px;font-size:13px;color:#42596c;font-weight:600;">👥 Up to ${entity.capacity_max} people</div>` : '',
     entity.min_age         ? `<div style="margin-top:4px;font-size:13px;color:#42596c;">Ages ${entity.min_age}+</div>` : '',
-    entity.price_from      ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">From $${entity.price_from}</div>` : '',
+    priceLabel,
   ].join('') : '';
+  // For non-activity types with a price (public spots, services, etc.)
+  const priceFromBlock = !isActivity && priceLabel ? priceLabel : '';
 
   // Live music today — check actual events
   const todayStr2  = new Date().toISOString().split('T')[0];
@@ -487,7 +496,7 @@ function buildCard(entity) {
           ${aboutBlock}
           ${ratingBlock}
           ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-          ${isActivity ? activityBlock : hoursBlock + hhBlock + musicBlock}
+          ${isActivity ? activityBlock : hoursBlock + hhBlock + musicBlock + priceFromBlock}
           <div class="gcr-card-bottom">
             <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
             <div class="gcr-card-actions">${isActivity ? (bookBtn || viewBtn) + dirBtn + callBtn : viewBtn + menuBtn + hhBtn + bookBtn + reserveBtn + orderBtn + dirBtn + callBtn}</div>
