@@ -665,6 +665,8 @@ function toggleHHItems(popupId) {
 
 function loadHHItems(popupId) {
   const itemsContainer = document.getElementById(popupId + '-items');
+  // Reverse the slug: non-alphanumeric chars were replaced with _ when building the ID
+  // Since slugs use hyphens, underscores map back to hyphens
   const slug = popupId.replace('hh-items-', '').replace(/_/g, '-');
 
   // Fetch happy hour items for this entity
@@ -672,26 +674,49 @@ function loadHHItems(popupId) {
     .then(res => res.json())
     .then(data => {
       const hhItems = (data.happy_hour && data.happy_hour.items) || [];
+      const entity  = data.entity || {};
+      const hhDesc  = entity.hh_description || '';
+
       if (hhItems.length === 0) {
-        itemsContainer.innerHTML = '<div style="color:#92400e;">No items listed</div>';
+        itemsContainer.innerHTML = hhDesc
+          ? `<div style="color:#92400e;line-height:1.6;">${esc(hhDesc)}</div>`
+          : '<div style="color:#92400e;">No items listed yet</div>';
         return;
       }
 
-      const html = hhItems.map(item => `
-        <div style="border-bottom:1px solid #fcd34d;padding:12px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-          <div style="flex:1;">
-            <div style="font-weight:700;color:#78350f;">${esc(item.item_name)}</div>
-            ${item.description ? `<div style="font-size:12px;color:#92400e;margin-top:4px;line-height:1.4;">${esc(item.description)}</div>` : ''}
-          </div>
-          <div style="font-weight:800;color:#d97706;white-space:nowrap;">${esc(item.price_text || item.hh_price || '')}</div>
-        </div>
-      `).join('');
+      // Group by section if sections exist
+      const sections = (data.happy_hour && data.happy_hour.sections) || [];
+      let html = '';
+      if (sections.length) {
+        sections.forEach(sec => {
+          const secItems = hhItems.filter(i => i.hh_section_id === sec.id);
+          if (!secItems.length) return;
+          html += `<div style="font-weight:800;color:#92400e;font-size:14px;margin:14px 0 6px;">${esc(sec.section_name)}</div>`;
+          html += secItems.map(item => hhItemRow(item)).join('');
+        });
+        // Items without a section
+        const unsectioned = hhItems.filter(i => !i.hh_section_id);
+        html += unsectioned.map(item => hhItemRow(item)).join('');
+      } else {
+        html = hhItems.map(item => hhItemRow(item)).join('');
+      }
 
-      itemsContainer.innerHTML = html;
+      itemsContainer.innerHTML = html || '<div style="color:#92400e;">No items listed yet</div>';
     })
-    .catch(err => {
+    .catch(() => {
       itemsContainer.innerHTML = '<div style="color:#92400e;">Error loading items</div>';
     });
+}
+
+function hhItemRow(item) {
+  return `
+    <div style="border-bottom:1px solid #fcd34d;padding:10px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+      <div style="flex:1;">
+        <div style="font-weight:700;color:#78350f;">${esc(item.item_name || '')}</div>
+        ${item.description ? `<div style="font-size:12px;color:#92400e;margin-top:3px;line-height:1.4;">${esc(item.description)}</div>` : ''}
+      </div>
+      ${(item.price_text || item.hh_price) ? `<div style="font-weight:800;color:#d97706;white-space:nowrap;">${esc(item.price_text || item.hh_price)}</div>` : ''}
+    </div>`;
 }
 
 /* ── Build specials card (for specials.html page) ── */
