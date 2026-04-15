@@ -1119,7 +1119,7 @@ function getEntitiesForCategory(businesses, category) {
       );
     }
 
-    // Specials — ONLY businesses that have actual active rows in GCR.specials
+    // Specials — ONLY businesses that have actual active rows in GCR.specials — skip completeness check
     if (category === 'specials') {
       const specials = (window.GCR && GCR.specials || []).filter(s => s.is_active !== false && s.active !== false);
       return specials.some(s =>
@@ -1128,6 +1128,8 @@ function getEntitiesForCategory(businesses, category) {
         (s.slug && s.slug === b.slug)
       );
     }
+
+    // Happy hours completeness check also skipped — already scoped to real HH data above
 
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
     const norm = raw.replace(/-/g, '_');
