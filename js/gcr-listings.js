@@ -1133,6 +1133,12 @@ function getEntitiesForCategory(businesses, category) {
       if (hhList && hhList.length) return true; // already scoped by /happy-hours endpoint
       // Fallback: hh_days field set on entity
       if (b.hh_days) return true;
+      // Fallback: happy_hour tag on entity
+      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().replace(/[\s\-]+/g,'_'));
+      if (tags.includes('happy_hour') || tags.includes('happy_hours')) return true;
+      // Fallback: happyHour / happy_hour field (old format)
+      const hhField = b.happyHour || b.happy_hour;
+      if (hhField === true || (typeof hhField === 'string' && hhField.trim())) return true;
       // Fallback: entity_specials with special_type=happy_hour
       const hhSpecials = (window.GCR && GCR.specials || []).filter(s =>
         (s.special_type || s.type || '').toLowerCase() === 'happy_hour' &&

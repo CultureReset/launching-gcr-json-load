@@ -37,9 +37,19 @@ const GCR = {
         fetch(GCR_API + '/happy-hours').catch(() => null),
       ]);
 
+      // Filter out test/spam entities
+      const isTestEntity = b => {
+        const s = (b.slug || b.subdomain || '').toLowerCase();
+        const n = (b.name || '').toLowerCase();
+        const a = (b.address_line_1 || b.address || '').toLowerCase();
+        return s.startsWith('gcr-upload-test') || s.startsWith('888') ||
+               n.includes('upload test') || n.startsWith('888') ||
+               a.includes('test lane');
+      };
+
       if (bizRes && bizRes.ok) {
         const data = await bizRes.json();
-        const raw = data.entities || data.businesses || [];
+        const raw = (data.entities || data.businesses || []).filter(b => !isTestEntity(b));
         // Deduplicate: remove -1 suffix duplicates (keep the base slug version)
         const slugSet = new Set();
         this.businesses = raw.filter(b => {
@@ -58,7 +68,8 @@ const GCR = {
         this.specials = await spRes.json();
       }
       if (hhRes && hhRes.ok) {
-        this.happyHours = await hhRes.json();
+        const hhRaw = await hhRes.json();
+        this.happyHours = (Array.isArray(hhRaw) ? hhRaw : []).filter(b => !isTestEntity(b));
       }
 
       this.loaded = true;

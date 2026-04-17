@@ -1102,40 +1102,6 @@
   </div>
 </section>
 
-<!-- ══════════ MASTER CALENDAR ══════════ -->
-<section class="home-section bg-sand">
-  <div class="hcont">
-    <div class="section-head" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-      <div>
-        <div class="section-label">What's On</div>
-        <h2 class="section-title">Events &amp; Live Music</h2>
-        <p class="section-sub">Don't miss a thing this month</p>
-      </div>
-      <a href="events.html" style="font-size:.85rem;font-weight:700;color:#0b7a75;text-decoration:none;">All Events →</a>
-    </div>
-    <div class="calendar-wrap">
-      <div class="cal-widget">
-        <div class="cal-header-row">
-          <button class="cal-nav-btn" id="calPrev">‹</button>
-          <div class="cal-month-lbl" id="calMonthLbl">March 2026</div>
-          <button class="cal-nav-btn" id="calNext">›</button>
-        </div>
-        <div class="cal-dow">
-          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span>
-          <span>Th</span><span>Fr</span><span>Sa</span>
-        </div>
-        <div class="cal-days" id="calDays"></div>
-      </div>
-      <div class="events-panel">
-        <div class="events-panel-head">
-          <div class="events-panel-title" id="eventsTitle">Upcoming Events</div>
-          <a href="events.html" class="events-see-all">View All →</a>
-        </div>
-        <div id="eventsList"></div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ══════════ LOCATION DISTRICTS ══════════ -->
 <section class="home-section bg-white">
@@ -1176,8 +1142,7 @@
         <h2>Planning Your Gulf Coast Trip?</h2>
         <p>Get a personal trip link — your own saved places, bookings, and co-op rewards. One link, the whole trip.</p>
         <div class="trip-cta-btns">
-          <a href="trip.html" class="btn-white">Get My Trip Link</a>
-          <a href="restaurants.html" class="btn-ghost-white">Browse Everything</a>
+          <a href="#" class="btn-white" onclick="document.getElementById('tripComingSoonModal').style.display='flex';return false;">Get My Trip Link</a>
         </div>
       </div>
       <div style="font-size:4rem;opacity:.6;flex-shrink:0;">🏖️</div>
@@ -1233,6 +1198,19 @@
     </div>
   </div>
 </footer>
+
+<!-- ══════════════════════════════════════════
+     TRIP LINK COMING SOON MODAL
+══════════════════════════════════════════ -->
+<div id="tripComingSoonModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:20px;padding:36px 32px;max-width:400px;width:100%;text-align:center;position:relative;">
+    <button onclick="document.getElementById('tripComingSoonModal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;">✕</button>
+    <div style="font-size:2.8rem;margin-bottom:12px;">🏖️</div>
+    <h3 style="margin:0 0 10px;font-size:1.4rem;font-weight:900;color:#0d2137;">Coming Soon</h3>
+    <p style="margin:0;color:#66788a;font-size:.95rem;line-height:1.6;">Personal trip links are on the way — save places, book activities, and share your whole Gulf Coast itinerary in one link.</p>
+    <button onclick="document.getElementById('tripComingSoonModal').style.display='none'" style="margin-top:22px;background:#0b7a75;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:.95rem;cursor:pointer;width:100%;">Got It</button>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════
      LOYALTY SIGNUP MODAL
