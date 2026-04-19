@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title id="page-title">Rental – Gulf Coast Radar</title>
+  <meta id="page-desc" name="description" content="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root{--bg:#0b1220;--card:#fff;--ink:#0e1726;--muted:#5c6b81;--accent:#0891b2;--chip:#ecfeff;--border:#e6ecf3;--shadow:0 2px 8px rgba(0,0,0,.08);}
+    *{box-sizing:border-box;}html,body{margin:0;padding:0;background:#f6f8fb;color:var(--ink);font-family:'Inter',system-ui,sans-serif;}a{color:var(--accent);text-decoration:none;}
+    .wrap{max-width:980px;margin:0 auto;padding-bottom:120px;}
+    .cover{position:relative;width:100%;height:460px;background:#031a20;overflow:hidden;}
+    @media(max-width:860px){.cover{height:300px;}}@media(max-width:480px){.cover{height:220px;}}
+    .cover-slides{position:relative;width:100%;height:100%;}
+    .cover-slide{position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#031a20,#074d5e);opacity:0;transition:opacity .5s;pointer-events:none;}
+    .cover-slide.active{opacity:1;pointer-events:auto;}
+    .cover-slide img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+    .cover-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.1) 55%,transparent 100%);pointer-events:none;z-index:5;}
+    .cover-hero{position:absolute;bottom:28px;left:20px;right:80px;z-index:10;color:#fff;}
+    @media(max-width:480px){.cover-hero{bottom:16px;left:14px;right:60px;}}
+    .cover-hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(8,145,178,.35);backdrop-filter:blur(6px);border:1px solid rgba(8,145,178,.5);color:#fff;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;padding:4px 11px;border-radius:999px;margin-bottom:8px;}
+    .cover-hero-name{font-size:clamp(1.4rem,4vw,2.4rem);font-weight:900;line-height:1.15;text-shadow:0 2px 12px rgba(0,0,0,.5);margin-bottom:6px;}
+    .cover-hero-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.82rem;color:rgba(255,255,255,.85);}
+    .cover-hero-rating{display:flex;align-items:center;gap:4px;font-weight:700;color:#fbbf24;}
+    .cover-arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.45);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:background .2s;}
+    .cover-arrow:hover{background:rgba(0,0,0,.7);}.cover-prev{left:12px;}.cover-next{right:12px;}
+    .cover-dots{position:absolute;bottom:10px;right:56px;display:flex;gap:6px;z-index:10;}
+    .cover-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.45);border:none;cursor:pointer;padding:0;transition:background .2s;}.cover-dot.active{background:#fff;}
+    .cover-count{position:absolute;bottom:10px;right:14px;background:rgba(0,0,0,.5);color:#fff;font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:999px;z-index:10;}
+    .header{padding:16px 20px;background:var(--card);border-bottom:1px solid var(--border);}
+    .title{display:flex;flex-wrap:wrap;align-items:center;gap:12px;}.title h1{font-size:clamp(22px,3.8vw,32px);margin:0;}
+    .meta{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);margin-top:6px;font-size:14px;}
+    .badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+    .badge{background:var(--chip);color:#0e7490;border:1px solid #a5f3fc;padding:6px 10px;border-radius:999px;font-size:13px;}
+    .cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:999px;font-size:14px;font-weight:700;transition:all .2s;white-space:nowrap;text-decoration:none;}
+    .btn-call{background:#22c55e;color:#fff;}.btn-call:hover{background:#16a34a;transform:translateY(-1px);}
+    .btn-book{background:#0891b2;color:#fff;}.btn-book:hover{background:#0e7490;transform:translateY(-1px);}
+    .btn-dir{background:#0ea5e9;color:#fff;}.btn-dir:hover{background:#0284c7;transform:translateY(-1px);}
+    .btn-web{background:var(--chip);color:var(--ink);border:1px solid var(--border);}.btn-web:hover{background:var(--border);}
+    .social-row{display:flex;gap:10px;margin-top:12px;}
+    .social-btn{width:36px;height:36px;border-radius:50%;background:var(--chip);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s;}
+    .social-btn:hover{background:var(--accent);border-color:var(--accent);}.social-btn:hover svg{fill:#fff;}.social-btn svg{width:17px;height:17px;fill:var(--muted);}
+    .sticky-wrap{position:sticky;top:64px;z-index:998;}
+    .sticky-nav{background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,.10);}
+    .tabs{display:flex;overflow:auto;gap:6px;padding:10px 14px;scroll-snap-type:x mandatory;scrollbar-width:none;}.tabs::-webkit-scrollbar{display:none;}
+    .tab{white-space:nowrap;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;scroll-snap-align:start;transition:all .18s;color:var(--ink);flex-shrink:0;}
+    .tab:hover{border-color:var(--accent);color:var(--accent);}.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    section{padding:20px;scroll-margin-top:120px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px 0;box-shadow:var(--shadow);}
+    h2{font-size:20px;margin:0 0 8px 0;}h3{font-size:15px;color:var(--accent);margin:16px 0 8px 0;border-bottom:1px solid var(--border);padding-bottom:6px;}
+    .fleet-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:16px;}@media(min-width:560px){.fleet-grid{grid-template-columns:repeat(2,1fr);}}@media(min-width:860px){.fleet-grid{grid-template-columns:repeat(3,1fr);}}
+    .fleet-card{border:2px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;transition:all .2s;}
+    .fleet-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 24px rgba(8,145,178,.12);}
+    .fleet-body{padding:16px;}.fleet-name{font-weight:800;font-size:16px;margin-bottom:6px;}
+    .fleet-desc{font-size:13px;color:var(--muted);line-height:1.4;margin-bottom:10px;}
+    .fleet-meta{display:flex;flex-wrap:wrap;gap:8px;}
+    .fleet-meta span{background:var(--chip);border:1px solid #a5f3fc;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;color:#0e7490;}
+    .pricing-table{width:100%;border-collapse:collapse;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+    .pricing-table th{background:var(--chip);padding:10px 14px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);border-bottom:1px solid var(--border);}
+    .pricing-table td{padding:10px 14px;font-size:14px;border-bottom:1px solid var(--border);}
+    .pricing-table tr:last-child td{border-bottom:none;}
+    .pricing-table td:last-child{font-weight:800;color:var(--accent);text-align:right;}
+    .included-list{margin:0;padding:0;list-style:none;display:grid;gap:8px;}
+    .included-list li{display:flex;gap:10px;font-size:14px;line-height:1.5;}
+    .check{color:#22c55e;font-weight:800;flex-shrink:0;}
+    .addon-grid{display:grid;grid-template-columns:repeat(1,1fr);gap:10px;}@media(min-width:560px){.addon-grid{grid-template-columns:repeat(2,1fr);}}
+    .addon-item{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff;}
+    .addon-name{font-weight:600;font-size:14px;}.addon-desc{font-size:12px;color:var(--muted);margin-top:3px;}.addon-price{font-size:14px;font-weight:700;color:var(--accent);margin-top:6px;}
+    .req-list{margin:0;padding-left:18px;display:grid;gap:8px;}.req-list li{font-size:14px;color:var(--muted);line-height:1.5;}
+    .policy-block{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .policy-type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:4px;}
+    .policy-text{font-size:14px;color:var(--muted);line-height:1.6;}
+    .tag-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}.tag{background:var(--chip);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:13px;}
+    .sub-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:14px 0 8px;}
+    .about-p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:14px;}
+    .loc-addr{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+    .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;overflow-y:auto;padding:20px;}
+    .popup-overlay.open{display:flex;align-items:flex-start;justify-content:center;}
+    .popup-box{background:#fff;border-radius:16px;width:100%;max-width:780px;padding:28px;position:relative;margin:auto;}
+    .popup-close{position:absolute;top:14px;right:14px;background:#f0f0f0;border:none;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#555;}
+    .popup-title{font-size:22px;font-weight:800;margin:0 40px 20px 0;}
+    .gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}@media(min-width:500px){.gallery-grid{grid-template-columns:repeat(3,1fr);}}@media(min-width:700px){.gallery-grid{grid-template-columns:repeat(4,1fr);}}
+    .gallery-img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;cursor:pointer;transition:opacity .2s;background:#f0f4f8;}.gallery-img:hover{opacity:.85;}
+    .gallery-caption{font-size:11px;color:var(--muted);text-align:center;margin-top:3px;}
+    .popup-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px;}
+    .popup-page-btn{padding:8px 20px;border-radius:999px;border:1px solid var(--border);background:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--ink);}
+    .popup-page-btn:hover:not(:disabled){background:var(--accent);color:#fff;border-color:var(--accent);}.popup-page-btn:disabled{opacity:.35;cursor:default;}
+    .popup-page-info{font-size:13px;color:var(--muted);}
+    .review-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px;}
+    .review-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+    .review-author{font-weight:700;font-size:14px;}.review-date{font-size:12px;color:var(--muted);}
+    .review-stars{color:#f59e0b;font-size:15px;margin-bottom:6px;}.review-text{font-size:13px;color:var(--muted);line-height:1.6;}
+    .no-content{text-align:center;color:var(--muted);padding:30px 0;font-size:14px;}
+    .section-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--chip);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--ink);margin-bottom:8px;}
+    .section-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+    /* Sticky book bar */
+    .book-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--accent);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:900;box-shadow:0 -4px 20px rgba(0,0,0,.15);}
+    .book-bar-info{font-size:13px;color:var(--muted);}.book-bar-name{font-weight:700;color:var(--ink);font-size:14px;}
+    .book-bar-btn{background:#0891b2;color:#fff;border:none;border-radius:999px;padding:12px 28px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+    .book-bar-btn:hover{background:#0e7490;transform:translateY(-1px);}
+    .book-bar-phone{background:#22c55e;color:#fff;border:none;border-radius:999px;padding:12px 20px;font-size:15px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  </style>
+</head>
+<body>
+<div class="gcr-header">
+  <div class="gcr-header-top">
+    <a href="/index.html" class="gcr-logo-row"><img src="gcr-logo.png" alt="Gulf Coast Radar"><div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div></a>
+    <button onclick="history.back()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1rem;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;">← Back</button>
+  </div>
+  <div class="gcr-cat-tabs">
+    <a href="restaurants.html" class="gcr-cat-tab">🍽️ Restaurants</a>
+    <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
+    <a href="happy-hours.html" class="gcr-cat-tab">🍻 Happy Hours</a>
+    <a href="events.html" class="gcr-cat-tab">🎉 Events</a>
+    <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
+    <a href="services.html" class="gcr-cat-tab">🛠️ Services</a>
+    <a href="public-spots.html" class="gcr-cat-tab">✨ Public Spots</a>
+    <a href="feed.html" class="gcr-cat-tab">📡 Live Feed</a>
+  </div>
+  <div class="gcr-action-strip">
+    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal?.()">⭐ Join Our Loyalty Program 🎁</button>
+    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal?.()">📅 Master Calendar 🎉</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="cover" id="js-cover">
+    <div class="cover-slides" id="js-slides"></div>
+    <div class="cover-overlay"></div>
+    <div class="cover-hero">
+      <div class="cover-hero-badge" id="js-hero-badge" style="display:none"></div>
+      <div class="cover-hero-name" id="js-hero-name"></div>
+      <div class="cover-hero-meta" id="js-hero-meta"></div>
+    </div>
+    <button class="cover-arrow cover-prev" id="js-prev">&#8249;</button>
+    <button class="cover-arrow cover-next" id="js-next">&#8250;</button>
+    <div class="cover-dots" id="js-dots"></div>
+    <div class="cover-count" id="js-cover-count" style="display:none"></div>
+  </div>
+  <div class="popup-overlay" id="gallery-popup">
+    <div class="popup-box"><button class="popup-close" onclick="closePopup('gallery-popup')">&#215;</button><div class="popup-title">📸 Photos</div><div class="gallery-grid" id="gallery-grid"></div><div class="popup-pagination"><button class="popup-page-btn" id="gallery-prev-btn" onclick="galleryPage(-1)">&#8249; Prev</button><span class="popup-page-info" id="gallery-page-info"></span><button class="popup-page-btn" id="gallery-next-btn" onclick="galleryPage(1)">Next &#8250;</button></div></div>
+  </div>
+  <div class="popup-overlay" id="reviews-popup">
+    <div class="popup-box"><button class="popup-close" onclick="closePopup('reviews-popup')">&#215;</button><div class="popup-title">⭐ Reviews</div><div id="reviews-list"></div><div class="popup-pagination"><button class="popup-page-btn" id="reviews-prev-btn" onclick="reviewsPage(-1)">&#8249; Prev</button><span class="popup-page-info" id="reviews-page-info"></span><button class="popup-page-btn" id="reviews-next-btn" onclick="reviewsPage(1)">Next &#8250;</button></div></div>
+  </div>
+  <div class="header">
+    <div class="title"><span id="js-emoji" style="font-size:40px"></span><h1 id="js-name"></h1></div>
+    <div class="meta" id="js-meta"></div>
+    <div class="badge-row" id="js-badges"></div>
+    <div class="cta-row" id="js-cta"></div>
+    <div class="social-row" id="js-social"></div>
+  </div>
+  <div class="sticky-wrap"><div class="sticky-nav"><div class="tabs" id="js-tabs"></div></div></div>
+  <div id="js-sections"></div>
+</div>
+<div class="book-bar" id="js-book-bar" style="display:none">
+  <div><div class="book-bar-info">Ready to rent?</div><div class="book-bar-name" id="js-bar-name"></div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a id="js-bar-book" href="#" class="book-bar-btn" target="_blank" style="display:none">⛵ Book Online</a>
+    <a id="js-bar-phone" href="#" class="book-bar-phone" style="display:none">📞 Call to Book</a>
+  </div>
+</div>
+<script>
+(async function(){
+  const API='https://cybercheck-api-database.vercel.app/api/gcr';
+  const slug=new URLSearchParams(location.search).get('id')||window.GCR_SLUG;
+  if(!slug){document.body.innerHTML='<p style="padding:40px;color:red">No ?id= in URL</p>';return;}
+  let d=null;try{const r=await fetch(`${API}/entity/${encodeURIComponent(slug)}`);if(r.ok)d=await r.json();}catch(e){}
+  if(!d?.entity){document.body.innerHTML=`<p style="padding:40px;color:red">Could not load: ${slug}</p>`;return;}
+  const B=map(d);window.BUSINESS_DATA=B;
+
+  function map(d){
+    const e=d.entity,secs=d.sections||[];
+    const B={name:e.name,slug:e.slug,tagline:e.subtitle,emoji:e.icon||'⛵',phone:(e.phone||'').replace(/\D/g,''),phoneDisplay:e.phone,address:e.address_line_1,city:e.city,state:e.state,zip:e.zip,website:e.website_url,googleMaps:e.directions_url,rating:e.rating,reviewCount:e.review_count,coverImages:e.hero_image_url?[e.hero_image_url]:[],about:{description:'',features:(d.features||[]).map(f=>f.label),perfectFor:(d.perfect_for||[]).map(p=>p.label)},tags:(d.tags||[]).map(t=>t.tag),highlights:[],gallery:[],reviews:[],hours:null,sections:[],packages:[],_fleet:[],_addons:[],_included:[],_requirements:[],_policies:[]};
+    secs.forEach(s=>{
+      const k=s.section_key,t=s.section_type,lb=s.section_label;
+      if(t==='rich_text'){B.about.description=s.content?.body_text||'';B.sections.push({id:'about',label:lb,icon:'ℹ️'});}
+      else if(t==='bullets'){const bs=(s.bullets||[]).map(b=>b.bullet_text);if(k==='highlights'){B.highlights=bs;if(bs.length)B.sections.push({id:'highlights',label:lb,icon:'✦'});}else if(bs.length)B.sections.push({id:k,label:lb,icon:''});}
+      else if(t==='cards'){const cs=s.cards||[];B.packages=B.packages.concat(cs.map(c=>({name:c.title,price:c.price_text,duration:c.subtitle,desc:c.description,badge:c.badge_text})));if(cs.length)B.sections.push({id:'pricing',label:lb,icon:'💰'});}
+      else if(t==='gallery'){B.gallery=(s.photos||[]).map(p=>({url:p.image_url,caption:p.caption}));B.sections.push({id:'gallery',label:lb,icon:'📸'});}
+      else if(t==='reviews'){B.reviews=(s.reviews||[]).map(r=>({author:r.author_name,rating:r.rating,text:r.review_text,date:r.review_date}));B.sections.push({id:'reviews',label:lb,icon:'⭐'});}
+      else if(t==='hours'){B.hours=(s.hours||[]).map(h=>({day:h.day_of_week,open:h.open_time?h.open_time.slice(0,5):null,close:h.close_time?h.close_time.slice(0,5):null,closed:h.is_closed}));if(B.hours.length)B.sections.push({id:'hours',label:lb,icon:'🕐'});}
+      else if(t==='location'){const l=s.location||{};if(l.address_line_1)B.address=l.address_line_1;if(l.city)B.city=l.city;if(l.state)B.state=l.state;if(l.zip)B.zip=l.zip;if(l.directions_url)B.googleMaps=l.directions_url;if(l.phone){B.phoneDisplay=l.phone;B.phone=l.phone.replace(/\D/g,'');}if(l.website_url)B.website=l.website_url;B.sections.push({id:'location',label:lb,icon:'📍'});}
+    });
+    if(B.gallery.length)B.coverImages=B.coverImages.concat(B.gallery.slice(0,3).map(g=>g.url));
+    if(!B.about.description&&e.description)B.about.description=e.description;
+    B.bookingUrl=e.booking_url||null;B.reservationUrl=e.reservation_url||null;
+    B.socialInstagram=e.social_instagram||null;B.socialFacebook=e.social_facebook||null;
+    if(!B.highlights.length&&(d.about_bullets||[]).length){B.highlights=d.about_bullets.map(b=>(b.icon?b.icon+' ':'')+b.text);if(B.highlights.length&&!B.sections.find(s=>s.id==='highlights'))B.sections.unshift({id:'highlights',label:'About',icon:'ℹ️'});}
+    if(!B.gallery.length&&(d.photos||[]).length){B.gallery=d.photos.map(p=>({url:p.image_url,caption:p.caption}));B.coverImages=B.coverImages.concat(B.gallery.slice(0,3).map(g=>g.url));if(!B.sections.find(s=>s.id==='gallery'))B.sections.push({id:'gallery',label:'Photos',icon:'📸'});}
+    const ft=t=>{if(!t)return null;if(t.includes('am')||t.includes('pm'))return t;const[h,m]=t.split(':').map(Number);return(m?`${h%12||12}:${String(m).padStart(2,'0')}`:`${h%12||12}`)+(h>=12?'pm':'am');};
+    if(!B.hours&&(d.hours||[]).length){B.hours=d.hours.map(h=>({day:h.day_of_week?h.day_of_week[0].toUpperCase()+h.day_of_week.slice(1):'',open:ft(h.open_time),close:ft(h.close_time),closed:h.is_closed}));if(B.hours.length&&!B.sections.find(s=>s.id==='hours'))B.sections.push({id:'hours',label:'Hours',icon:'🕐'});}
+    if(!B.packages.length&&(d.pricing||[]).length){B.packages=d.pricing.map(p=>({name:p.package_name,desc:p.description,price:p.price_text||(p.price?'$'+p.price:''),duration:[p.time_slot_start&&p.time_slot_end?p.time_slot_start+'–'+p.time_slot_end:'',p.price_unit].filter(Boolean).join(' · ')}));if(B.packages.length&&!B.sections.find(s=>s.id==='pricing'))B.sections.push({id:'pricing',label:'Pricing',icon:'💰'});}
+    if((d.fleet||[]).length){B._fleet=d.fleet;if(!B.sections.find(s=>s.id==='fleet'))B.sections.unshift({id:'fleet',label:'Our Fleet',icon:'⛵'});}
+    if((d.addons||[]).length){B._addons=d.addons;B.sections.push({id:'addons',label:'Add-ons',icon:'➕'});}
+    if((d.whats_included||[]).length){B._included=d.whats_included;B.sections.push({id:'included',label:"What's Included",icon:'✅'});}
+    if((d.requirements||[]).length){B._requirements=d.requirements;B.sections.push({id:'requirements',label:'Requirements',icon:'📋'});}
+    if((d.policies||[]).length){B._policies=d.policies;B.sections.push({id:'policies',label:'Policies',icon:'📄'});}
+    if(!B.sections.find(s=>s.id==='location')&&(B.address||B.city))B.sections.push({id:'location',label:'Location',icon:'📍'});
+    ['gallery','reviews','hours'].forEach(id=>{const i=B.sections.findIndex(s=>s.id===id);if(i>-1)B.sections.push(B.sections.splice(i,1)[0]);});
+    return B;
+  }
+
+  document.getElementById('page-title').textContent=B.name+' – Gulf Coast Radar';
+  if(B.tagline)document.getElementById('page-desc').setAttribute('content',B.tagline);
+  document.getElementById('js-hero-name').textContent=B.name;
+  if(B.tagline||B.city){const b=document.getElementById('js-hero-badge');b.textContent=B.tagline||(B.city+', '+B.state);b.style.display='inline-flex';}
+  const hm=document.getElementById('js-hero-meta');
+  if(B.rating)hm.innerHTML+=`<span class="cover-hero-rating">★ ${B.rating}${B.reviewCount?` <span style="font-weight:400;color:rgba(255,255,255,.7)">(${B.reviewCount.toLocaleString()})</span>`:''}</span>`;
+  if(B.city)hm.innerHTML+=`<span>📍 ${B.city}, ${B.state}</span>`;
+
+  // Book bar
+  const bar=document.getElementById('js-book-bar');bar.style.display='flex';
+  document.getElementById('js-bar-name').textContent=B.name;
+  const barBook=document.getElementById('js-bar-book');const barPhone=document.getElementById('js-bar-phone');
+  if(B.bookingUrl||B.reservationUrl){barBook.href=B.bookingUrl||B.reservationUrl;barBook.style.display='inline-flex';}
+  if(B.phone){barPhone.href='tel:'+B.phone;barPhone.textContent='📞 '+B.phoneDisplay;barPhone.style.display='inline-flex';}
+
+  const slides=B.coverImages||[];const sEl=document.getElementById('js-slides');const dEl=document.getElementById('js-dots');let cur=0;const cEl=document.getElementById('js-cover-count');
+  if(!slides.length){sEl.innerHTML='<div class="cover-slide active"></div>';document.getElementById('js-prev').style.display='none';document.getElementById('js-next').style.display='none';}
+  else{slides.forEach((src,i)=>{sEl.innerHTML+=`<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#031a20,#074d5e)'"></div>`;if(slides.length>1)dEl.innerHTML+=`<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;});if(slides.length===1){document.getElementById('js-prev').style.display='none';document.getElementById('js-next').style.display='none';}else{cEl.style.display='block';cEl.textContent='1 / '+slides.length;}}
+  function goSlide(n){cur=(n+slides.length)%slides.length;document.querySelectorAll('.cover-slide').forEach((s,i)=>s.classList.toggle('active',i===cur));document.querySelectorAll('.cover-dot').forEach((d,i)=>d.classList.toggle('active',i===cur));if(slides.length>1)cEl.textContent=(cur+1)+' / '+slides.length;}
+  document.getElementById('js-prev').onclick=()=>goSlide(cur-1);document.getElementById('js-next').onclick=()=>goSlide(cur+1);if(slides.length>1)setInterval(()=>goSlide(cur+1),5000);
+
+  document.getElementById('js-emoji').textContent=B.emoji;document.getElementById('js-name').textContent=B.name;
+  const m=document.getElementById('js-meta');
+  if(B.tagline)m.innerHTML+=`<span><em>${B.tagline}</em></span>`;if(B.city)m.innerHTML+=`<span>📍 ${B.city}, ${B.state}</span>`;if(B.phoneDisplay)m.innerHTML+=`<span>📞 ${B.phoneDisplay}</span>`;if(B.rating)m.innerHTML+=`<span>⭐ ${B.rating}${B.reviewCount?' ('+B.reviewCount.toLocaleString()+' reviews)':''}</span>`;
+  const bg=document.getElementById('js-badges');(B.about.features||[]).forEach(f=>{bg.innerHTML+=`<span class="badge">${f}</span>`;});
+  const ct=document.getElementById('js-cta');
+  if(B.bookingUrl||B.reservationUrl)ct.innerHTML+=`<a href="${B.bookingUrl||B.reservationUrl}" target="_blank" class="btn btn-book">⛵ Book Online</a>`;
+  if(B.phone)ct.innerHTML+=`<a href="tel:${B.phone}" class="btn btn-call">📞 Call to Book</a>`;
+  if(B.googleMaps)ct.innerHTML+=`<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
+  if(B.website)ct.innerHTML+=`<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`;
+  const sc=document.getElementById('js-social');
+  if(B.socialInstagram)sc.innerHTML+=`<a href="${B.socialInstagram.startsWith('http')?B.socialInstagram:'https://instagram.com/'+B.socialInstagram.replace('@','')}" target="_blank" class="social-btn" title="Instagram"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>`;
+
+  const tabsEl=document.getElementById('js-tabs');
+  B.sections.forEach(s=>{const b=document.createElement('button');b.className='tab';b.dataset.id=s.id;b.textContent=(s.icon?s.icon+' ':'')+s.label;b.onclick=()=>{const el=document.getElementById('sec-'+s.id);if(!el)return;const hh=getHH(),th=sW?sW.offsetHeight:52;window.scrollTo({top:el.getBoundingClientRect().top+scrollY-hh-th-8,behavior:'smooth'});};tabsEl.appendChild(b);});
+
+  const cont=document.getElementById('js-sections');
+  B.sections.forEach(s=>{
+    if(s.scrollTo)return;
+    const el=document.createElement('section');el.id='sec-'+s.id;
+    let h=`<div class="card"><h2>${s.icon?s.icon+' ':''}${s.label}</h2>`;
+    switch(s.id){
+      case 'about':if(B.about.description)h+=`<p class="about-p">${B.about.description}</p>`;if(B.about.features?.length)h+=`<div class="sub-label">Features</div><div class="tag-row">${B.about.features.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;if(B.about.perfectFor?.length)h+=`<div class="sub-label">Perfect For</div><div class="tag-row">${B.about.perfectFor.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;break;
+      case 'highlights':h+=`<ul style="margin:0;padding:0;list-style:none;display:grid;gap:10px">${B.highlights.map(i=>`<li style="display:flex;gap:10px;font-size:14px;line-height:1.5"><span style="color:var(--accent);flex-shrink:0">✦</span><span>${i}</span></li>`).join('')}</ul>`;break;
+      case 'fleet':h+='</div><div class="fleet-grid">';(B._fleet||[]).forEach(f=>{h+=`<div class="fleet-card"><div class="fleet-body"><div class="fleet-name">${f.item_name}</div>${f.description?`<div class="fleet-desc">${f.description}</div>`:''}<div class="fleet-meta">${f.capacity?`<span>👥 ${f.capacity}</span>`:''}${f.weight?`<span>⚖️ ${f.weight}</span>`:''}${f.dimensions?`<span>📐 ${f.dimensions}</span>`:''}</div></div></div>`;});h+='</div>';el.innerHTML=h;cont.appendChild(el);return;
+      case 'pricing':h+='</div>';if(B.packages.length){h+=`<table class="pricing-table"><thead><tr><th>Option</th><th>Duration</th><th>Price</th></tr></thead><tbody>`;B.packages.forEach(p=>{h+=`<tr><td><strong>${p.name}</strong>${p.desc?`<br><span style="font-size:12px;color:var(--muted)">${p.desc}</span>`:''}</td><td style="color:var(--muted)">${p.duration||'—'}</td><td>${p.price||'Call'}</td></tr>`;});h+=`</tbody></table>`;}el.innerHTML=h;cont.appendChild(el);return;
+      case 'included':h+=`<ul class="included-list">${(B._included||[]).map(i=>`<li><span class="check">✓</span><div><strong>${i.item_name}</strong>${i.description?`<br><span style="color:var(--muted);font-size:13px">${i.description}</span>`:''}</div></li>`).join('')}</ul>`;break;
+      case 'addons':h+='</div><div class="addon-grid">';(B._addons||[]).forEach(a=>{const p=a.price_min!=null&&a.price_max!=null?`$${a.price_min}–$${a.price_max}`:a.price!=null?`$${a.price}`:'';h+=`<div class="addon-item"><div class="addon-name">${a.addon_name}</div>${a.description?`<div class="addon-desc">${a.description}</div>`:''}${p?`<div class="addon-price">${p}</div>`:''}${a.price_type==='included'?'<span style="font-size:12px;background:#f0fdf4;color:#166534;border-radius:999px;padding:2px 8px;font-weight:700;display:inline-block;margin-top:4px">Included</span>':''}</div>`;});h+='</div>';el.innerHTML=h;cont.appendChild(el);return;
+      case 'requirements':h+=`<ul class="req-list">${(B._requirements||[]).map(r=>`<li>${r.requirement_text}</li>`).join('')}</ul>`;break;
+      case 'policies':(B._policies||[]).forEach(p=>{h+=`<div class="policy-block">${p.policy_type?`<div class="policy-type">${p.policy_type.replace(/_/g,' ')}</div>`:''}<div class="policy-text">${p.policy_text}</div></div>`;});break;
+      case 'gallery':h+=`<button class="section-btn" onclick="openGallery()"><span>📸 View Photos (${(B.gallery||[]).length})</span><span>›</span></button>`;break;
+      case 'reviews':h+=`<button class="section-btn" onclick="openReviews()"><span>⭐ Read Reviews (${(B.reviews||[]).length})</span><span>›</span></button>`;break;
+      case 'hours':if(B.hours?.length){const td=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];h+=`<ul style="list-style:none;padding:0;margin:0">${B.hours.map(hr=>`<li style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="font-weight:600;color:${hr.day===td?'var(--accent)':'var(--ink)'}">${hr.day}</span><span style="color:${hr.day===td?'var(--accent)':'var(--muted)'}">${hr.closed?'Closed':(hr.open||'')+(hr.close?' – '+hr.close:'')}</span></li>`).join('')}</ul>`;}break;
+      case 'location':h+=`<div class="loc-addr">📍 ${B.address||''}<br>${[B.city,B.state,B.zip].filter(Boolean).join(', ')}</div><div class="cta-row">${B.googleMaps?`<a href="${B.googleMaps}" target="_blank" class="btn btn-dir">📍 Directions</a>`:''}${B.phone?`<a href="tel:${B.phone}" class="btn btn-call">📞 ${B.phoneDisplay}</a>`:''}${B.website?`<a href="${B.website}" target="_blank" class="btn btn-web">🌐 Website</a>`:''}</div>`;break;
+      default:break;
+    }
+    h+='</div>';el.innerHTML=h;cont.appendChild(el);
+  });
+
+  const sW=document.querySelector('.sticky-wrap');const sPH=document.createElement('div');sPH.style.display='none';sW.parentNode.insertBefore(sPH,sW);
+  function getHH(){const h=document.querySelector('.gcr-header');return h?h.getBoundingClientRect().bottom:64;}
+  let fixed=false;
+  function upSticky(){if(!sW)return;const HH=getHH(),nH=sW.offsetHeight,tY=fixed?sPH.getBoundingClientRect().top+scrollY:sW.getBoundingClientRect().top+scrollY;if(!fixed&&scrollY+HH>=tY){const r=sW.getBoundingClientRect();sPH.style.cssText=`display:block;height:${nH}px;`;sW.style.cssText=`position:fixed;top:${HH}px;left:${r.left}px;width:${r.width}px;z-index:998;`;fixed=true;}else if(fixed&&scrollY+HH<sPH.getBoundingClientRect().top+scrollY){sW.style.cssText='';sPH.style.cssText='display:none;';fixed=false;}}
+  window.addEventListener('scroll',upSticky,{passive:true});window.addEventListener('resize',()=>{fixed=false;sW.style.cssText='';sPH.style.cssText='display:none;';upSticky();},{passive:true});
+  const tabs=document.querySelectorAll('.tab'),SO=getHH()+(sW?sW.offsetHeight:52);
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){const id=e.target.id.replace('sec-','');tabs.forEach(t=>t.classList.toggle('active',t.dataset.id===id));document.querySelector(`.tab[data-id="${id}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});}});},{threshold:.15,rootMargin:`-${SO}px 0px 0px 0px`});
+  document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));if(tabs[0])tabs[0].classList.add('active');
+
+  const GP=10;let gP=0;const gI=B.gallery||[];
+  window.openGallery=()=>{gP=0;rG();document.getElementById('gallery-popup').classList.add('open');document.body.style.overflow='hidden';};
+  window.galleryPage=d=>{gP+=d;rG();};
+  function rG(){const g=document.getElementById('gallery-grid');const t=gI.length,tp=Math.max(1,Math.ceil(t/GP));gP=Math.max(0,Math.min(gP,tp-1));const pg=gI.slice(gP*GP,(gP+1)*GP);g.innerHTML=pg.length?pg.map(i=>`<div><img class="gallery-img" src="${i.url}" alt="${i.caption||''}" loading="lazy">${i.caption?`<div class="gallery-caption">${i.caption}</div>`:''}</div>`).join(''):`<div class="no-content" style="grid-column:1/-1">No photos yet.</div>`;document.getElementById('gallery-page-info').textContent=t?`Page ${gP+1} of ${tp}`:'';document.getElementById('gallery-prev-btn').disabled=gP===0;document.getElementById('gallery-next-btn').disabled=gP>=tp-1;}
+  const RP=10;let rP=0;const rI=B.reviews||[];
+  window.openReviews=()=>{rP=0;rR();document.getElementById('reviews-popup').classList.add('open');document.body.style.overflow='hidden';};
+  window.reviewsPage=d=>{rP+=d;rR();};
+  function rR(){const l=document.getElementById('reviews-list');const t=rI.length,tp=Math.max(1,Math.ceil(t/RP));rP=Math.max(0,Math.min(rP,tp-1));const pg=rI.slice(rP*RP,(rP+1)*RP);l.innerHTML=pg.length?pg.map(r=>`<div class="review-card"><div class="review-top"><span class="review-author">${r.author||'Guest'}</span><span class="review-date">${r.date||''}</span></div><div class="review-stars">${'★'.repeat(r.rating||5)}${'☆'.repeat(5-(r.rating||5))}</div><div class="review-text">${r.text||''}</div></div>`).join(''):`<div class="no-content">No reviews yet.</div>`;document.getElementById('reviews-page-info').textContent=t?`Page ${rP+1} of ${tp}`:'';document.getElementById('reviews-prev-btn').disabled=rP===0;document.getElementById('reviews-next-btn').disabled=rP>=tp-1;}
+  window.closePopup=id=>{document.getElementById(id).classList.remove('open');document.body.style.overflow='';};
+  document.querySelectorAll('.popup-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closePopup(o.id);}));
+})();
+</script>
+<script>function updateHeaderVar(){const h=document.querySelector('.gcr-header');if(h)document.documentElement.style.setProperty('--header-h',Math.ceil(h.getBoundingClientRect().height)+'px');}document.addEventListener('DOMContentLoaded',updateHeaderVar);window.addEventListener('load',updateHeaderVar);window.addEventListener('resize',updateHeaderVar);</script>
+<script src="js/claim-modal.js"></script>
+</body>
+</html>
