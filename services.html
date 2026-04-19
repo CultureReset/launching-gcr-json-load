@@ -1,89 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Services — Gulf Coast Radar</title>
+  <meta name="description" content="Find photographers, wellness, transportation, concierge, and local service providers on the Gulf Coast.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body.services-page{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:#f5f7fb;
+      color:#12263a;
+    }
+    .page{max-width:1240px;margin:0 auto;padding-bottom:32px}
+    .hero{
+      margin:16px 18px 0;
+      border-radius:28px;overflow:hidden;position:relative;min-height:280px;
+      background:
+        linear-gradient(rgba(0,0,0,.24), rgba(0,0,0,.44)),
+        url('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;
+      display:flex;align-items:flex-end;
+    }
+    .hero-content{padding:28px;color:#fff;max-width:760px}
+    .hero h1{margin:0;font-size:56px;line-height:1;font-weight:900;letter-spacing:-.04em}
+    .hero p{margin:10px 0 0;font-size:20px;line-height:1.45;color:rgba(255,255,255,.92)}
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;
+      padding:18px;
+    }
+    .list{display:flex;flex-direction:column;gap:14px}
+    @media (max-width:1080px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{order:2}
+    }
+    @media (max-width:760px){
+      .hero{min-height:220px;margin-left:12px;margin-right:12px}
+      .hero h1{font-size:38px}
+      .hero p{font-size:16px}
+      .layout{padding:12px}
+    }
+  </style>
 </head>
-<body>
+<body class="services-page">
 
-<div class="gcr-header">
-  <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
-      <img src="gcr-logo.png" alt="Gulf Coast Radar">
-      <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
-    </a>
-    <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
-      📲 Install App
-    </button>
-  </div>
-        <div class="gcr-cat-tabs" id="gcrCatTabs">
+  <div class="gcr-header">
+    <div class="gcr-header-top">
+      <a href="index3.html" class="gcr-logo-row">
+        <img src="gcr-logo.png" alt="Gulf Coast Radar">
+        <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
+      </a>
+      <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
+        📲 Install App
+      </button>
+    </div>
+    <div class="gcr-cat-tabs" id="gcrCatTabs">
       <a href="restaurants.html"  class="gcr-cat-tab">🍽️ Restaurants</a>
       <a href="coffee-sweets.html" class="gcr-cat-tab">☕ Coffee &amp; Sweets</a>
       <a href="happy-hours.html"  class="gcr-cat-tab">🍻 Happy Hours</a>
-      
       <a href="events.html"       class="gcr-cat-tab">🎉 Events</a>
       <a href="things-to-do.html" class="gcr-cat-tab">🎯 Things To Do</a>
-      <a href="services.html"    class="gcr-cat-tab">🛠️ Services</a>
-      
-      
-      
-      <a href="public-spots.html"        class="gcr-cat-tab">✨ Public Spots</a>
+      <a href="services.html"     class="gcr-cat-tab gcr-cat-tab--active">🛠️ Services</a>
+      <a href="public-spots.html" class="gcr-cat-tab">✨ Public Spots</a>
       <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
     </div>
     <div class="gcr-action-strip">
-    <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
-    <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
+      <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
+      <button class="gcr-strip-btn gcr-strip-teal" onclick="openCalendarModal()">📅 Master Calendar 🎉</button>
+    </div>
   </div>
-</div>
 
-  <div class="page" style="max-width:1240px;margin:0 auto;padding-bottom:32px;">
-    <section class="hero" style="margin:16px 18px 0;border-radius:28px;overflow:hidden;min-height:240px;background:linear-gradient(rgba(0,0,0,.28),rgba(0,0,0,.48)),url('https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=1800&q=80') center/cover no-repeat;display:flex;align-items:flex-end;">
-      <div style="padding:28px;color:#fff;max-width:760px;">
-        <h1 style="margin:0;font-size:52px;line-height:1;font-weight:900;letter-spacing:-.04em;">Services</h1>
-        <p style="margin:10px 0 0;font-size:18px;line-height:1.45;color:rgba(255,255,255,.92);">Photographers, wellness, transportation, concierge, and local service providers on the Gulf Coast.</p>
+  <div class="page">
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Services</h1>
+        <p>Photographers, wellness, transportation, concierge, and local service providers on the Gulf Coast.</p>
       </div>
     </section>
-    <section class="toolbar" style="margin:14px 18px 0;background:#fff;border:1px solid #e2e8f0;box-shadow:0 10px 28px rgba(15,34,51,.08);border-radius:18px;padding:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-        <div style="font-size:20px;font-weight:800;">Services</div>
-        <div style="color:#66788a;font-weight:600;" id="resultCount">Loading...</div>
+
+    <section class="toolbar">
+      <div class="toolbar-top">
+        <div class="toolbar-title">Services</div>
+        <div class="toolbar-meta" id="resultCount">Loading...</div>
       </div>
-      <div class="tag-row" style="display:flex;gap:10px;overflow-x:auto;padding-top:12px;">
+      <div class="tag-row">
         <button class="tag-btn active" data-filter="all">All</button>
       </div>
     </section>
-    <section class="layout" style="display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;padding:18px;">
+
+    <section class="layout">
       <main>
-        <div style="font-size:34px;font-weight:900;letter-spacing:-.03em;margin:2px 0 14px;">Services</div>
+        <div class="results-title">Services</div>
         <div class="list" id="listingsGrid" data-category="services"></div>
       </main>
-      <aside class="sidebar" style="display:flex;flex-direction:column;gap:14px;">
-        <div class="panel" style="background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);padding:14px;">
-          <h3 style="margin:0 0 12px;font-size:20px;font-weight:900;">Popular Nearby</h3>
+
+      <aside class="sidebar">
+        <div class="panel">
+          <h3>Popular Nearby</h3>
         </div>
-        <div class="panel" style="background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);padding:14px;">
-          <h3 style="margin:0 0 12px;font-size:20px;font-weight:900;">List Your Service</h3>
-          <p style="font-size:14px;color:#66788a;line-height:1.6;margin:0 0 12px;">Photographers, planners, transportation, wellness pros — get listed and connect with Gulf Coast visitors.</p>
-          <a href="claim.html" style="background:linear-gradient(135deg,#0f7c90,#0b6475);color:#fff;border:none;padding:14px 16px;border-radius:16px;font-weight:900;text-align:center;display:block;text-decoration:none;">Claim Your Listing Free</a>
+
+        <div class="panel">
+          <h3>Map</h3>
+          <div style="border-radius:14px;overflow:hidden;height:200px;">
+            <iframe
+              title="Orange Beach & Gulf Shores"
+              width="100%" height="200" style="border:0;display:block;"
+              loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=-87.7200%2C30.2000%2C-87.5500%2C30.3200&layer=mapnik&marker=30.2460%2C-87.6003">
+            </iframe>
+          </div>
+          <a href="https://maps.google.com/?q=Orange+Beach,+AL" target="_blank" rel="noopener"
+             style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:700;color:#0b7a75;text-decoration:none;">
+            Open in Google Maps →
+          </a>
+        </div>
+
+        <div class="panel">
+          <h3>List Your Service</h3>
+          <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Photographers, planners, transportation, wellness pros — get listed and connect with Gulf Coast visitors.</p>
+          <a href="claim.html" class="cta">Claim Your Listing Free</a>
         </div>
       </aside>
     </section>
   </div>
-  <section class="section-sm" style="background:var(--gray-100);"><div class="container">
-    <div class="claim-cta"><h4>Offer a Local Service?</h4>
-    <p>Photographers, planners, drivers, wellness pros — get listed and connect with Gulf Coast visitors.</p>
-    <a href="claim.html" class="btn btn-primary">Claim Your Listing Free</a></div>
-  </div></section>
-  <footer class="site-footer"><div class="container">
-    <div class="footer-bottom" style="border-top:none;padding-top:0">
-      <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
-      <p>Powered by <span class="powered">CyberCheck</span></p>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Gulf<span>Coast</span>Radar</div>
+          <p>The local search engine for Orange Beach, Gulf Shores & the Alabama Gulf Coast.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Categories</h5>
+          <a href="restaurants.html">Restaurants</a>
+          <a href="coffee-sweets.html">Coffee & Sweets</a>
+          <a href="happy-hours.html">Happy Hours</a>
+          <a href="events.html">Events</a>
+          <a href="things-to-do.html">Things To Do</a>
+          <a href="services.html">Services</a>
+        </div>
+        <div class="footer-col">
+          <h5>Locations</h5>
+          <a href="the-wharf.html">The Wharf</a>
+        </div>
+        <div class="footer-col">
+          <h5>For Businesses</h5>
+          <a href="claim.html">Claim Your Listing</a>
+          <a href="search.html">Search</a>
+          <a href="feed.html">Live Feed</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Gulf Coast Radar. Orange Beach · Gulf Shores, AL</p>
+        <p>Powered by <span class="powered">CyberCheck</span></p>
+      </div>
     </div>
-  </div></footer>
-  <script src="js/gcr-api.js"></script><script src="js/app.js"></script>
+  </footer>
+
+  <script src="js/gcr-api.js"></script>
+  <script src="js/app.js"></script>
   <script src="js/gcr-listings.js"></script>
-<script src="js/claim-modal.js"></script>
-</body></html>
+  <script src="js/claim-modal.js"></script>
+  <script src="js/gcr-config.js" data-category="services"></script>
+</body>
+</html>

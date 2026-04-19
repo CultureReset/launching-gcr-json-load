@@ -27,18 +27,30 @@
     .wrap { max-width:980px; margin:0 auto; padding-bottom:64px; }
 
     /* Cover Slideshow */
-    .cover { position:relative; width:100%; aspect-ratio:16/9; background:#0c2d48; overflow:hidden; }
+    .cover { position:relative; width:100%; height:460px; background:#0c2d48; overflow:hidden; }
+    @media (max-width:860px) { .cover { height:300px; } }
+    @media (max-width:480px) { .cover { height:220px; } }
     .cover-slides { position:relative; width:100%; height:100%; }
-    .cover-slide { position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#cfe9ff,#e9f3ff); opacity:0; transition:opacity .5s ease; pointer-events:none; }
+    .cover-slide { position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#0c2d48,#1a4a6e); opacity:0; transition:opacity .5s ease; pointer-events:none; }
     .cover-slide.active { opacity:1; pointer-events:auto; }
-    .cover-slide img { width:100%; height:100%; object-fit:contain; object-position:center center; display:block; background:#0c2d48; }
+    .cover-slide img { width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
+    /* Gradient overlay + hero text */
+    .cover-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.15) 50%, transparent 100%); pointer-events:none; z-index:5; }
+    .cover-hero { position:absolute; bottom:28px; left:20px; right:80px; z-index:10; color:#fff; }
+    @media (max-width:480px) { .cover-hero { bottom:16px; left:14px; right:60px; } }
+    .cover-hero-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,.15); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.25); color:#fff; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; padding:4px 11px; border-radius:999px; margin-bottom:8px; }
+    .cover-hero-name { font-size:clamp(1.4rem,4vw,2.4rem); font-weight:900; line-height:1.15; text-shadow:0 2px 12px rgba(0,0,0,.5); margin-bottom:6px; }
+    .cover-hero-meta { display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:.82rem; color:rgba(255,255,255,.85); }
+    .cover-hero-rating { display:flex; align-items:center; gap:4px; font-weight:700; color:#fbbf24; }
+    .cover-hero-open { background:#22c55e; color:#fff; font-size:.68rem; font-weight:800; padding:2px 9px; border-radius:999px; }
     .cover-arrow { position:absolute; top:50%; transform:translateY(-50%); background:rgba(0,0,0,.45); border:none; color:#fff; font-size:22px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
     .cover-arrow:hover { background:rgba(0,0,0,.7); }
     .cover-prev { left:12px; }
     .cover-next { right:12px; }
-    .cover-dots { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:10; }
-    .cover-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.5); border:none; cursor:pointer; padding:0; transition:background .2s; }
+    .cover-dots { position:absolute; bottom:10px; right:56px; display:flex; gap:6px; z-index:10; }
+    .cover-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); border:none; cursor:pointer; padding:0; transition:background .2s; }
     .cover-dot.active { background:#fff; }
+    .cover-count { position:absolute; bottom:10px; right:14px; background:rgba(0,0,0,.5); color:#fff; font-size:.68rem; font-weight:700; padding:3px 8px; border-radius:999px; z-index:10; }
 
     /* Header */
     .header { padding:16px 20px; background:var(--card); border-bottom:1px solid var(--border); }
@@ -74,6 +86,24 @@
     .tab { white-space:nowrap; padding:8px 14px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; scroll-snap-align:start; transition:all .18s; color:var(--ink); flex-shrink:0; }
     .tab:hover { border-color:var(--accent); color:var(--accent); }
     .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+    /* ── Mobile ── */
+    @media (max-width:480px) {
+      .wrap { padding-bottom:40px; }
+      .info-row { padding:14px 14px 10px; gap:10px; }
+      .meta-row { flex-wrap:wrap; gap:6px; }
+      .meta-item { font-size:13px; }
+      .cta-row { gap:8px; }
+      .btn { padding:11px 16px; font-size:14px; min-height:44px; flex:1; justify-content:center; }
+      .badge-row { gap:6px; }
+      .badge { font-size:12px; padding:5px 8px; }
+      .social-row { gap:8px; }
+      section { padding:14px 14px; }
+      .card { padding:14px; }
+      .tabs { padding:8px 10px; gap:5px; }
+      .tab { padding:7px 12px; font-size:12px; }
+      h2 { font-size:18px; }
+    }
 
     /* Sections — scroll margin = 64px header + ~52px tab bar */
     section { padding:20px; scroll-margin-top:120px; }
@@ -233,9 +263,16 @@
 
   <div class="cover" id="js-cover">
     <div class="cover-slides" id="js-slides"></div>
+    <div class="cover-overlay"></div>
+    <div class="cover-hero">
+      <div class="cover-hero-badge" id="js-hero-badge" style="display:none"></div>
+      <div class="cover-hero-name" id="js-hero-name"></div>
+      <div class="cover-hero-meta" id="js-hero-meta"></div>
+    </div>
     <button class="cover-arrow cover-prev" id="js-prev">&#8249;</button>
     <button class="cover-arrow cover-next" id="js-next">&#8250;</button>
     <div class="cover-dots" id="js-dots"></div>
+    <div class="cover-count" id="js-cover-count" style="display:none"></div>
   </div>
 
   <div class="popup-overlay" id="gallery-popup">
@@ -687,24 +724,39 @@
   document.getElementById('page-title').textContent = B.name + ' – Gulf Coast Radar';
   if (B.tagline) document.getElementById('page-desc').setAttribute('content', B.tagline);
 
+  // ── Hero overlay text ──────────────────────────────────────
+  document.getElementById('js-hero-name').textContent = B.name;
+  if (B.tagline || B.city) {
+    const badge = document.getElementById('js-hero-badge');
+    badge.textContent = B.tagline || (B.city + ', ' + B.state);
+    badge.style.display = 'inline-flex';
+  }
+  const heroMeta = document.getElementById('js-hero-meta');
+  if (B.rating) heroMeta.innerHTML += `<span class="cover-hero-rating">★ ${B.rating}${B.reviewCount ? ' <span style="font-weight:400;color:rgba(255,255,255,.7);">(${B.reviewCount.toLocaleString()})</span>' : ''}</span>`;
+  if (B.city)   heroMeta.innerHTML += `<span>📍 ${B.city}, ${B.state}</span>`;
+
   // ── Cover Slideshow ────────────────────────────────────────
   const slides = B.coverImages || [];
   const slidesEl = document.getElementById('js-slides');
   const dotsEl   = document.getElementById('js-dots');
   let currentSlide = 0;
 
+  const coverCountEl = document.getElementById('js-cover-count');
   if (slides.length === 0) {
-    slidesEl.innerHTML = `<div class="cover-slide"></div>`;
+    slidesEl.innerHTML = `<div class="cover-slide active"></div>`;
     document.getElementById('js-prev').style.display = 'none';
     document.getElementById('js-next').style.display = 'none';
   } else {
     slides.forEach((src, i) => {
-      slidesEl.innerHTML += `<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#cfe9ff,#e9f3ff)'"></div>`;
-      dotsEl.innerHTML  += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
+      slidesEl.innerHTML += `<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#0c2d48,#1a4a6e)'"></div>`;
+      if (slides.length > 1) dotsEl.innerHTML += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
     });
     if (slides.length === 1) {
       document.getElementById('js-prev').style.display = 'none';
       document.getElementById('js-next').style.display = 'none';
+    } else {
+      coverCountEl.style.display = 'block';
+      coverCountEl.textContent = '1 / ' + slides.length;
     }
   }
 
@@ -712,6 +764,7 @@
     currentSlide = (n + slides.length) % slides.length;
     document.querySelectorAll('.cover-slide').forEach((s,i) => s.classList.toggle('active', i === currentSlide));
     document.querySelectorAll('.cover-dot').forEach((d,i) => d.classList.toggle('active', i === currentSlide));
+    if (slides.length > 1) coverCountEl.textContent = (currentSlide + 1) + ' / ' + slides.length;
   }
   document.getElementById('js-prev').onclick = () => goSlide(currentSlide - 1);
   document.getElementById('js-next').onclick = () => goSlide(currentSlide + 1);

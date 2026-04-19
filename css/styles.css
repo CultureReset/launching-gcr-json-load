@@ -190,6 +190,27 @@ p  { color: var(--text-muted); }
 }
 .gcr-strip-teal:hover { box-shadow: 0 6px 20px rgba(11,122,117,.5); }
 
+/* ── Hide sidebar on all listing pages ── */
+.layout > aside,
+.layout > .sidebar,
+section.layout > aside,
+.layout .sidebar {
+  display: none !important;
+}
+.layout {
+  grid-template-columns: 1fr !important;
+}
+
+/* ── GCR Header mobile ── */
+@media (max-width: 480px) {
+  .gcr-header-top { padding: 0 10px 6px; }
+  .gcr-logo-row img { width: 36px; height: 36px; }
+  .gcr-cat-tab { padding: 8px 13px; font-size: .77rem; min-height: 36px; }
+  .gcr-cat-tabs { padding: 0 8px 8px; gap: 6px; }
+  .gcr-action-strip { padding: 0 8px 6px; gap: 5px; }
+  .gcr-strip-btn { padding: 7px 8px; font-size: .68rem; min-height: 34px; }
+}
+
 /* ── Header / Nav ── */
 .site-header {
   position: sticky; top: 0; z-index: 1000;

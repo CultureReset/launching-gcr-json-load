@@ -124,6 +124,16 @@
       .gcr-card-img{min-height:190px;}
       .gcr-card-name{font-size:22px;}
     }
+    @media(max-width:480px){
+      .gcr-card-img{min-height:200px;}
+      .gcr-card-name{font-size:20px;}
+      .gcr-card-body{padding:13px 14px;}
+      .gcr-card-bottom{flex-direction:column;align-items:flex-start;gap:8px;}
+      .gcr-card-actions{width:100%;justify-content:flex-start;}
+      .gcr-btn{padding:10px 14px;font-size:13px;min-height:42px;display:inline-flex;align-items:center;}
+      .gcr-chips{gap:5px;}
+      a.gcr-chip{font-size:11px;padding:5px 9px;}
+    }
   `;
   document.head.appendChild(s);
 })();
@@ -1127,11 +1137,9 @@ function wireFilterChips(_grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    // Happy Hours — if source is already GCR.happyHours, pass through all entries
+    // Happy Hours — ONLY businesses with actual HH data
     if (category === 'happy-hours') {
-      const hhList = window.GCR && GCR.happyHours;
-      if (hhList && hhList.length) return true; // already scoped by /happy-hours endpoint
-      // Fallback: hh_days field set on entity
+      // Must have hh_days schedule
       if (b.hh_days) return true;
       // Fallback: happy_hour tag on entity
       const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().replace(/[\s\-]+/g,'_'));
@@ -1355,10 +1363,7 @@ function initStandardPage() {
   }
 
   function getSource(detail) {
-    if (category === 'happy-hours') {
-      const hh = (detail || window.GCR || {}).happyHours;
-      return hh && hh.length ? hh : (detail || window.GCR || {}).businesses || [];
-    }
+    // Always use full businesses list — getEntitiesForCategory handles the filter
     return (detail || window.GCR || {}).businesses || [];
   }
 
