@@ -609,18 +609,16 @@ function buildHHCard(entity) {
     ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
     : (hasLiveMusicHH ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:600;">🎸 Live Music</div>` : '');
 
-  // Happy Hour Items popup — large button for HH page
+  // Happy Hour Items popup — always show on HH page (entity is from /happy-hours endpoint)
   const hhItemsPopupId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
-  const hhItemsBtn = hhDays
-    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;flex:1;font-size:14px;font-weight:900;padding:12px 16px;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhItemsPopupId}')">🍺 View Happy Hour Items</button>`
-    : '';
-  const hhItemsPopup = hhDays ? `
+  const hhItemsBtn = `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;flex:1;font-size:14px;font-weight:900;padding:12px 16px;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhItemsPopupId}')">🍺 View Happy Hour Items</button>`;
+  const hhItemsPopup = `
     <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:500px;overflow-y:auto;">
-      <div style="font-weight:900;font-size:16px;color:#92400e;margin-bottom:12px;">🍺 Happy Hour Menu</div>
-      <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      <div style="font-weight:900;font-size:16px;color:#92400e;margin-bottom:12px;">🍺 Happy Hour</div>
+      ${hhDays ? `<div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>` : ''}
       ${hhDesc ? `<div style="margin-bottom:14px;font-size:13px;color:#92400e;line-height:1.5;">${esc(hhDesc)}</div>` : ''}
       <div id="${hhItemsPopupId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
-    </div>` : '';
+    </div>`;
 
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
@@ -1137,26 +1135,8 @@ function wireFilterChips(_grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
-    // Happy Hours — ONLY businesses with actual HH data
-    if (category === 'happy-hours') {
-      // Must have hh_days schedule
-      if (b.hh_days) return true;
-      // Fallback: happy_hour tag on entity
-      const tags = (b.tags || []).map(t => (typeof t === 'string' ? t : t.tag || '').toLowerCase().replace(/[\s\-]+/g,'_'));
-      if (tags.includes('happy_hour') || tags.includes('happy_hours')) return true;
-      // Fallback: happyHour / happy_hour field (old format)
-      const hhField = b.happyHour || b.happy_hour;
-      if (hhField === true || (typeof hhField === 'string' && hhField.trim())) return true;
-      // Fallback: entity_specials with special_type=happy_hour
-      const hhSpecials = (window.GCR && GCR.specials || []).filter(s =>
-        (s.special_type || s.type || '').toLowerCase() === 'happy_hour' &&
-        s.is_active !== false
-      );
-      return hhSpecials.some(s =>
-        (s.entity_slug && s.entity_slug === b.slug) ||
-        (s.entity_id && s.entity_id === b.id)
-      );
-    }
+    // Happy Hours — source is already GCR.happyHours (pre-filtered by API), pass all through
+    if (category === 'happy-hours') return true;
 
     // Specials — ONLY businesses that have actual active rows in GCR.specials — skip completeness check
     if (category === 'specials') {
@@ -1363,7 +1343,11 @@ function initStandardPage() {
   }
 
   function getSource(detail) {
-    // Always use full businesses list — getEntitiesForCategory handles the filter
+    if (category === 'happy-hours') {
+      const hh = (detail || window.GCR || {}).happyHours;
+      // HH endpoint returns pre-filtered list — use it directly
+      return hh && hh.length ? hh : (detail || window.GCR || {}).businesses || [];
+    }
     return (detail || window.GCR || {}).businesses || [];
   }
 
