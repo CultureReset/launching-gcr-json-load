@@ -64,10 +64,10 @@
       position:relative;align-self:stretch;
     }
     @media (max-width:768px) {
-      .gcr-card-img { min-height:200px; }
+      .gcr-card-img { min-height:260px; }
     }
     @media (max-width:480px) {
-      .gcr-card-img { min-height:240px; }
+      .gcr-card-img { min-height:300px; }
     }
     .gcr-card-badge{
       position:absolute;left:14px;bottom:14px;
@@ -121,7 +121,7 @@
     .gcr-empty p{font-size:15px;line-height:1.6;margin:0;}
     @media(max-width:760px){
       .gcr-card{grid-template-columns:1fr;}
-      .gcr-card-img{min-height:190px;}
+      .gcr-card-img{min-height:260px;}
       .gcr-card-name{font-size:22px;}
     }
     @media(max-width:480px){
