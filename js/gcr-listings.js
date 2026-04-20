@@ -1588,26 +1588,22 @@ const GCREvents = (() => {
 
 /* ── Set --gcr-header-h CSS variable to actual header height so toolbar sticks correctly ── */
 function setHeaderHeight() {
-  requestAnimationFrame(() => {
-    const header = document.querySelector('.gcr-header');
-    if (header) {
-      const h = header.getBoundingClientRect().height;
-      document.documentElement.style.setProperty('--gcr-header-h', Math.ceil(h) + 'px');
-    }
-  });
+  const header = document.querySelector('.gcr-header');
+  if (!header) return;
+  const h = header.offsetHeight;
+  if (h > 0) document.documentElement.style.setProperty('--gcr-header-h', h + 'px');
 }
 
 /* ── Boot ── */
+setHeaderHeight(); // synchronous — .gcr-header is already in DOM, CSS is applied
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setHeaderHeight();
     initStandardPage();
-    window.addEventListener('load', setHeaderHeight);
-    window.addEventListener('resize', setHeaderHeight);
   });
 } else {
-  setHeaderHeight();
   initStandardPage();
-  window.addEventListener('load', setHeaderHeight);
-  window.addEventListener('resize', setHeaderHeight);
 }
+window.addEventListener('load', setHeaderHeight);
+window.addEventListener('resize', setHeaderHeight);
