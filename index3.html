@@ -383,6 +383,7 @@
   .ct-thingstodo  { background: linear-gradient(135deg,#1a6496,#134f78); }
   .ct-shopping    { background: linear-gradient(135deg,#1e8449,#186038); }
   .ct-other       { background: linear-gradient(135deg,#2e4057,#1a2d44); }
+  .ct-services    { background: linear-gradient(135deg,#6b4f12,#4a3508); }
   .ct-feed        { background: linear-gradient(135deg,#1a7a82,#0f5560); }
   .ct-nightlife   { background: linear-gradient(135deg,#2c1654,#1a0f3d); }
   .ct-artists     { background: linear-gradient(135deg,#b5451b,#8a3213); }
@@ -895,16 +896,6 @@
       <div class="hero-search-dropdown" id="heroDropdown"></div>
     </div>
 
-    <div class="hero-quick-tags">
-      <span class="hero-tag" onclick="doTagSearch('crab legs')">🦀 Crab Legs</span>
-      <span class="hero-tag" onclick="doTagSearch('happy hour')">🍻 Happy Hour</span>
-      <span class="hero-tag" onclick="doTagSearch('seafood')">🐟 Seafood</span>
-      <span class="hero-tag" onclick="doTagSearch('boat rental')">🚤 Boat Rental</span>
-      <span class="hero-tag" onclick="doTagSearch('live music')">🎸 Live Music</span>
-      <span class="hero-tag" onclick="doTagSearch('all you can eat')">🍽️ All You Can Eat</span>
-      <span class="hero-tag" onclick="doTagSearch('family friendly')">👨‍👩‍👧 Family Friendly</span>
-      <span class="hero-tag" onclick="doTagSearch('fishing')">🎣 Fishing</span>
-    </div>
   </div>
   <div class="hero-wave">
     <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -917,7 +908,7 @@
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat-item"><div class="stat-num" id="statBiz">—</div><div class="stat-lbl">Businesses</div></div>
-    <div class="stat-item"><div class="stat-num">11</div><div class="stat-lbl">Categories</div></div>
+    <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Categories</div></div>
     <div class="stat-item"><div class="stat-num" id="statEvents">—</div><div class="stat-lbl">Events This Month</div></div>
     <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Use</div></div>
   </div>
@@ -1003,6 +994,14 @@
           <div class="cat-tile-name">Public Spots</div>
           <div class="cat-tile-desc">Parks, beaches, piers &amp; more</div>
           <span class="cat-tile-count" id="countOther">→</span>
+        </div>
+      </a>
+      <a href="services.html" class="cat-tile">
+        <div class="cat-tile-top ct-services">🛠️</div>
+        <div class="cat-tile-body">
+          <div class="cat-tile-name">Services</div>
+          <div class="cat-tile-desc">Local pros, repairs &amp; home services</div>
+          <span class="cat-tile-count" id="countServices">→</span>
         </div>
       </a>
       <a href="feed.html" class="cat-tile">
@@ -1390,6 +1389,7 @@
     setCount('countShopping',    count('shopping'));
     setCount('countNightlife',   count('nightlife'));
     setCount('countOther',       count('other'));
+    setCount('countServices',    count('services'));
     var artists = GCR.businesses.filter(function(b){ return b.tags && b.tags.includes('local-artist'); }).length;
     setCount('countArtists', artists || '');
 
