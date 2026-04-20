@@ -907,13 +907,16 @@ section.layout > aside,
 
 /* ── TOOLBAR & FILTERS ── */
 .toolbar {
+  position: sticky;
+  top: var(--gcr-header-h, 165px);
+  z-index: 900;
   margin: 14px 18px 0;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow);
   border-radius: var(--radius);
-  padding: 12px 12px 8px;
+  padding: 12px;
 }
 .toolbar-top {
   display: flex;
@@ -921,6 +924,7 @@ section.layout > aside,
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 .toolbar-title {
   font-size: 1.25rem;
@@ -931,21 +935,11 @@ section.layout > aside,
   font-weight: 700;
   font-size: .9rem;
 }
-.tag-bar {
-  position: sticky;
-  top: var(--gcr-header-h, 165px);
-  z-index: 900;
-  background: rgba(255,255,255,.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--gray-200);
-  box-shadow: 0 2px 8px rgba(0,0,0,.07);
-  padding: 0 18px;
-}
 .tag-row {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding: 10px 0;
+  padding-top: 12px;
   scrollbar-width: none;
 }
 .tag-row::-webkit-scrollbar { display: none; }
