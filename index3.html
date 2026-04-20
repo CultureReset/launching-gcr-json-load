@@ -153,20 +153,13 @@
     justify-content: center;
     text-align: center;
     overflow: hidden;
-    background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 30%, #06B6D4 55%, #0b7a75 80%, #3B82F6 100%);
-    background-size: 300% 300%;
-    animation: heroShift 12s ease infinite;
-  }
-  @keyframes heroShift {
-    0%   { background-position: 0% 50%; }
-    50%  { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    background: url('beach-hero.jpg') center center / cover no-repeat;
   }
   .gcr-hero::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,.2);
+    background: rgba(0,20,40,.45);
   }
   .hero-content {
     position: relative;
