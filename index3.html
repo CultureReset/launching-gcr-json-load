@@ -1374,8 +1374,8 @@
     var bizCount = GCR.businesses.length;
     var evCount  = GCR.getUpcomingEvents().length;
     var el;
-    el = document.getElementById('statBiz');    if (el) el.textContent = bizCount ? bizCount + '+' : '—';
-    el = document.getElementById('statEvents'); if (el) el.textContent = evCount  ? evCount  + '+' : '—';
+    el = document.getElementById('statBiz');    if (el) el.textContent = bizCount || '—';
+    el = document.getElementById('statEvents'); if (el) el.textContent = evCount  || '—';
 
     /* ── Category counts ── */
     function count(type) { return GCR.getByCategory(type).length || ''; }
