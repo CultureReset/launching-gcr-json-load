@@ -286,22 +286,22 @@
   .hero-wave { position: absolute; bottom: 0; left: 0; right: 0; line-height: 0; z-index: 1; }
   .hero-wave svg { display: block; }
 
-  /* ══ STATS BAR ══ */
-  .stats-bar {
-    background: #fff;
-    border-bottom: 1px solid #eee;
-    padding: 12px 0;
-  }
-  .stats-inner {
+  /* ══ STATS (inside hero) ══ */
+  .hero-stats {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 36px;
+    gap: 28px;
     flex-wrap: wrap;
+    margin-top: 22px;
+    padding: 12px 20px;
+    background: rgba(0,0,0,.3);
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
   }
   .stat-item { text-align: center; }
-  .stat-num { font-size: 1.3rem; font-weight: 800; color: #0b7a75; }
-  .stat-lbl { font-size: .68rem; color: #888; text-transform: uppercase; letter-spacing: .8px; }
+  .stat-num { font-size: 1.3rem; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  .stat-lbl { font-size: .65rem; color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: .8px; }
 
   /* ══ WEATHER ══ */
   .weather-card {
@@ -891,6 +891,13 @@
       <div class="hero-search-dropdown" id="heroDropdown"></div>
     </div>
 
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num" id="statBiz">—</div><div class="stat-lbl">Businesses</div></div>
+      <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Categories</div></div>
+      <div class="stat-item"><div class="stat-num" id="statEvents">—</div><div class="stat-lbl">Events This Month</div></div>
+      <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Use</div></div>
+    </div>
+
   </div>
   <div class="hero-wave">
     <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -899,18 +906,8 @@
   </div>
 </section>
 
-<!-- ══════════ STATS BAR ══════════ -->
-<div class="stats-bar">
-  <div class="stats-inner">
-    <div class="stat-item"><div class="stat-num" id="statBiz">—</div><div class="stat-lbl">Businesses</div></div>
-    <div class="stat-item"><div class="stat-num">8</div><div class="stat-lbl">Categories</div></div>
-    <div class="stat-item"><div class="stat-num" id="statEvents">—</div><div class="stat-lbl">Events This Month</div></div>
-    <div class="stat-item"><div class="stat-num">Free</div><div class="stat-lbl">To Use</div></div>
-  </div>
-</div>
-
 <!-- ══════════ WEATHER ══════════ -->
-<div style="background:#fff;padding:16px 20px 0;">
+<div style="background:#fff;padding:0 20px 0;">
   <div class="hcont">
     <div class="weather-card" id="weatherCard">
       <div class="weather-main">
