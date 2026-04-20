@@ -1371,7 +1371,12 @@
     if (typeof GCR === 'undefined') return;
 
     /* ── Stats bar ── */
-    var bizCount = GCR.businesses.length;
+    var _shownIds = new Set();
+    ['restaurants','coffee-sweets','things-to-do','other','services'].forEach(function(cat) {
+      GCR.getByCategory(cat).forEach(function(b) { _shownIds.add(b.id || b.slug); });
+    });
+    GCR.getHappyHours().forEach(function(b) { _shownIds.add(b.id || b.slug); });
+    var bizCount = _shownIds.size;
     var evCount  = GCR.getUpcomingEvents().length;
     var el;
     el = document.getElementById('statBiz');    if (el) el.textContent = bizCount || '—';
