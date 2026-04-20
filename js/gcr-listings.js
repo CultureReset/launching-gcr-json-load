@@ -1135,6 +1135,13 @@ function wireFilterChips(_grid) {
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   return businesses.filter(b => {
+    // Hidden from all pages
+    if (b.hidden) return false;
+
+    // If pages array is set, only show on listed pages
+    const secTypes = (b.secondary_types || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    if (secTypes.length) return secTypes.some(s => s === category || s.replace(/_/g,'-') === category);
+
     // Happy Hours — source is already GCR.happyHours (pre-filtered by API), pass all through
     if (category === 'happy-hours') return true;
 
