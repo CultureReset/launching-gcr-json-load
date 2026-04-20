@@ -29,6 +29,22 @@
       padding:10px 0;
       margin:0 !important;
     }
+    .toolbar-top {
+      overflow:hidden;
+      max-height:200px;
+      transition:max-height .18s ease, opacity .18s ease, padding .18s ease;
+    }
+    .toolbar.tags-stuck .toolbar-top {
+      max-height:0 !important;
+      opacity:0 !important;
+      padding:0 !important;
+      margin:0 !important;
+      pointer-events:none !important;
+    }
+    .toolbar.tags-stuck {
+      padding-top:4px !important;
+      padding-bottom:4px !important;
+    }
     .gcr-card {
       display:grid;grid-template-columns:clamp(240px, 35%, 400px) minmax(0,1fr);
       background:#fff;border:1px solid #e2e8f0;border-radius:20px;
@@ -1358,6 +1374,18 @@ function initStandardPage() {
   }
 
   wireFilterChips(grid);
+
+  /* Collapse toolbar title when tag row is sticky */
+  (function initStickyTagRow() {
+    var toolbar = document.querySelector('.toolbar');
+    if (!toolbar) return;
+    var headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gcr-header-h')) || 165;
+    function check() {
+      toolbar.classList.toggle('tags-stuck', toolbar.getBoundingClientRect().top <= headerH + 2);
+    }
+    window.addEventListener('scroll', check, { passive: true });
+    check();
+  })();
 }
 
 /* ============================================================
