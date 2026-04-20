@@ -908,8 +908,8 @@ section.layout > aside,
 /* ── TOOLBAR & FILTERS ── */
 .toolbar {
   position: sticky;
-  top: 140px;
-  z-index: 30;
+  top: var(--gcr-header-h, 165px);
+  z-index: 900;
   margin: 14px 18px 0;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
@@ -1202,7 +1202,7 @@ section.layout > aside,
     font-size: 1rem;
   }
   .toolbar {
-    top: 130px;
+    top: var(--gcr-header-h, 165px);
     margin-left: 12px;
     margin-right: 12px;
   }
