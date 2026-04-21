@@ -434,53 +434,7 @@ function isExactMatch(itemName, q) {
   return (itemName || '').toLowerCase().trim() === q.toLowerCase().trim();
 }
 
-/* ── Build full business card ── */
-function buildBusinessCard(entity, q) {
-  const slug    = entity.slug || entity.subdomain || '';
-  const name    = entity.name || 'Business';
-  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g,' ');
-  const city    = entity.city || '';
-  const state   = entity.state || '';
-  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallback(entity.entity_subtype || entity.type);
-  const rating  = entity.rating;
-  const reviews = entity.review_count || 0;
-  const addr    = entity.address_line_1 || '';
-  const phone   = entity.phone || '';
-  const location = [city, state].filter(Boolean).join(', ');
-  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
-  const hh     = entity.hh_days ? `${esc(entity.hh_days)}${entity.hh_start ? ' · '+esc(entity.hh_start) : ''}${entity.hh_end ? '–'+esc(entity.hh_end) : ''}` : '';
-  const desc   = entity.description || '';
-
-  const tags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean).slice(0, 4);
-  const chips = tags.map(t => {
-    const cl = t.includes('happy') || t.includes('hh') ? 'hh' : (t.includes('kids') || t.includes('pet') || t.includes('live_music') ? 'feature' : '');
-    return `<span class="gcr-search-chip ${cl}">${t.replace(/_/g,' ')}</span>`;
-  }).join('');
-
-  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
-  const mapsUrl    = fullAddr ? `https://maps.google.com/?q=${encodeURIComponent(fullAddr)}` : (entity.directions_url || '');
-
-  const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">View Profile</a>`;
-  const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn">📞 Call</a>` : '';
-  const dirBtn  = mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener" class="gcr-search-btn">📍 Directions</a>` : '';
-
-  return `
-    <div class="gcr-item-card" style="cursor:pointer;" onclick="window.location='${profileUrl}'">
-      <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
-      <div class="gcr-item-card-header">
-        <div class="gcr-item-card-bizname">${esc(name)}</div>
-        <div class="gcr-item-card-meta"><span>${esc(subtype)}</span>${rating ? `<span>${Number(rating).toFixed(1)} ⭐</span>` : ''}${reviews ? `<span>(${reviews})</span>` : ''}</div>
-        ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
-        ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
-      </div>
-      ${desc ? `<div style="padding:10px 16px;font-size:13px;color:#5c6b81;line-height:1.6;border-bottom:1px solid #f0f4f8;">${esc(desc)}</div>` : ''}
-      ${chips ? `<div style="padding:8px 16px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #f0f4f8;">${chips}</div>` : ''}
-      ${hh ? `<div style="padding:8px 16px;font-size:13px;color:#d97706;font-weight:700;border-bottom:1px solid #f0f4f8;">🍺 Happy Hour · ${hh}</div>` : ''}
-      <div class="gcr-item-card-footer" onclick="event.stopPropagation()">${viewBtn}${dirBtn}${callBtn}</div>
-    </div>`;
-}
-
-/* ── Build item result card (centered layout) ── */
+/* ── Build unified result card (shrimp-style layout for everything) ── */
 function buildItemCard(entity, items, q) {
   const slug    = entity.slug || entity.subdomain || '';
   const name    = entity.name || 'Business';
@@ -498,18 +452,17 @@ function buildItemCard(entity, items, q) {
   const priceRange = typeof pr === 'number' ? '$'.repeat(Math.min(pr, 4)) : (pr || '');
   const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
 
-  const ratingStr = rating ? `${Number(rating).toFixed(1)} ⭐` : '';
+  const ratingStr = rating ? `${Number(rating).toFixed(1)} ⭐${reviews ? ` (${reviews})` : ''}` : '';
   const metaItems = [subtype, priceRange, ratingStr].filter(Boolean);
   const metaHtml = metaItems.length > 0 ? `<div class="gcr-item-card-meta">${metaItems.map(m => `<span>${m}</span>`).join('')}</div>` : '';
 
   const mapsUrl = fullAddr ? `https://maps.google.com/?q=${encodeURIComponent(fullAddr)}` : (entity.directions_url || '');
-  const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">View Menu</a>`;
   const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn">📞 Call</a>` : '';
   const dirBtn  = mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener" class="gcr-search-btn">📍 Directions</a>` : '';
 
-  // Deduplicate by name and filter items with no useful data
+  // Deduplicate matched items by name
   const seenNames = new Set();
-  const cleanItems = items.filter(item => {
+  const cleanItems = (items || []).filter(item => {
     const n = (item.item_name || item.special_name || '').trim();
     if (!n || seenNames.has(n.toLowerCase())) return false;
     seenNames.add(n.toLowerCase());
@@ -517,27 +470,91 @@ function buildItemCard(entity, items, q) {
   });
 
   const typeLabel = { menu: 'Menu', drink: 'Drinks', happy_hour: 'Happy Hour' };
-  const itemsHtml = cleanItems.slice(0, 8).map(item => {
-    const iname    = item.item_name || item.special_name || '';
-    const idesc    = item.description || '';
-    const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
-    const itype    = item._type || 'menu';
-    const iimg     = item.image_url || '';
-    const exact    = isExactMatch(iname, q);
-    const typeBadge = `<span class="gcr-item-type-badge ${itype}">${typeLabel[itype] || itype}</span>`;
 
-    return `
-      <div class="gcr-item-row">
-        <div class="gcr-item-img-placeholder" ${iimg ? `style="background-image:url('${iimg}')"` : ''}></div>
-        <div class="gcr-item-content">
-          <div class="gcr-item-name ${exact ? 'exact' : ''}">${esc(iname)} ${typeBadge}</div>
-          ${idesc ? `<div class="gcr-item-desc">${esc(idesc)}</div>` : ''}
-          ${iprice ? `<div class="gcr-item-price-row"><span></span><span class="gcr-item-price">${esc(iprice)}</span></div>` : ''}
-        </div>
-      </div>`;
-  }).join('');
+  let listLabel, listInner, moreCount = 0, viewBtnLabel;
 
-  const moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
+  if (cleanItems.length) {
+    listLabel = '🍴 Matching Items';
+    viewBtnLabel = 'View Menu';
+    listInner = cleanItems.slice(0, 8).map(item => {
+      const iname    = item.item_name || item.special_name || '';
+      const idesc    = item.description || '';
+      const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
+      const itype    = item._type || 'menu';
+      const iimg     = item.image_url || '';
+      const exact    = isExactMatch(iname, q);
+      const typeBadge = `<span class="gcr-item-type-badge ${itype}">${typeLabel[itype] || itype}</span>`;
+      return `
+        <div class="gcr-item-row">
+          <div class="gcr-item-img-placeholder" ${iimg ? `style="background-image:url('${iimg}')"` : ''}></div>
+          <div class="gcr-item-content">
+            <div class="gcr-item-name ${exact ? 'exact' : ''}">${esc(iname)} ${typeBadge}</div>
+            ${idesc ? `<div class="gcr-item-desc">${esc(idesc)}</div>` : ''}
+            ${iprice ? `<div class="gcr-item-price-row"><span></span><span class="gcr-item-price">${esc(iprice)}</span></div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+    moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
+  } else {
+    // No matched items — build rows from whatever business data matched
+    listLabel = '🔍 Matched By';
+    viewBtnLabel = 'View Profile';
+    const rows = [];
+    const ql = (q || '').toLowerCase();
+    const qWords = ql.split(/\s+/).filter(w => w.length > 2);
+
+    // Matching tags
+    const tags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
+    const matchingTags = tags.filter(t => {
+      const tl = t.toLowerCase().replace(/_/g, ' ');
+      return tl.includes(ql) || qWords.some(w => tl.includes(w));
+    });
+    if (matchingTags.length) {
+      rows.push(`
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-name">🏷️ Tags</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">${matchingTags.slice(0, 8).map(t => `<span class="gcr-search-chip feature">${esc(t.replace(/_/g,' '))}</span>`).join('')}</div>
+          </div>
+        </div>`);
+    }
+
+    // Description (if query appears in it or nothing else matched)
+    const desc = entity.description || '';
+    if (desc && (desc.toLowerCase().includes(ql) || qWords.some(w => desc.toLowerCase().includes(w)) || !matchingTags.length)) {
+      rows.push(`
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-name">📝 About</div>
+            <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
+          </div>
+        </div>`);
+    }
+
+    // Happy Hour
+    if (entity.hh_days) {
+      const hh = `${esc(entity.hh_days)}${entity.hh_start ? ' · '+esc(entity.hh_start) : ''}${entity.hh_end ? '–'+esc(entity.hh_end) : ''}`;
+      rows.push(`
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-name" style="color:#d97706;">🍺 Happy Hour</div>
+            <div class="gcr-item-desc">${hh}</div>
+          </div>
+        </div>`);
+    }
+
+    if (!rows.length) {
+      rows.push(`
+        <div class="gcr-item-row" style="justify-content:center;">
+          <div class="gcr-item-content" style="text-align:center;color:#8fa3b1;font-style:italic;padding:10px 0;">
+            No matching items for "${esc(q)}" — matched by business name or category
+          </div>
+        </div>`);
+    }
+    listInner = rows.join('');
+  }
+
+  const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">${viewBtnLabel}</a>`;
 
   return `
     <div class="gcr-item-card" style="cursor:pointer;" onclick="window.location='${profileUrl}'">
@@ -549,8 +566,8 @@ function buildItemCard(entity, items, q) {
         ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
       </div>
       <div class="gcr-item-list" onclick="event.stopPropagation()">
-        <div class="gcr-item-label">🍴 Matching Items</div>
-        ${itemsHtml}
+        <div class="gcr-item-label">${listLabel}</div>
+        ${listInner}
         ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
       </div>
       <div class="gcr-item-card-footer" onclick="event.stopPropagation()">${viewBtn}${dirBtn}${callBtn}</div>
@@ -577,7 +594,7 @@ function renderResult(entity, q, tab) {
   const drinkItems = allItems.filter(i => i._type === 'drink');
   const hhItems    = allItems.filter(i => i._type === 'happy_hour');
 
-  if (tab === 'businesses') return buildBusinessCard(entity, q);
+  if (tab === 'businesses') return buildItemCard(entity, [], q);
 
   if (tab === 'drinks') {
     if (!drinkItems.length) return '';
@@ -594,10 +611,10 @@ function renderResult(entity, q, tab) {
     return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
   }
 
-  // "all" tab: prefer item card if items matched, fallback to business card
+  // "all" tab: prefer items if matched, otherwise show business-detail rows
   if (allItems.length) return buildItemCard(entity, allItems, q);
   if (hasSpecials) return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
-  return buildBusinessCard(entity, q);
+  return buildItemCard(entity, [], q);
 }
 
 /* ── Render visible slice ── */
@@ -804,7 +821,7 @@ function renderResults() {
   if (similarResults.length && currentTab === 'all') {
     html += `<div class="similar-section">
       <div class="similar-label">📍 Similar — you might also like</div>
-      ${similarResults.map(e => buildBusinessCard(e, lastQuery)).join('')}
+      ${similarResults.map(e => buildItemCard(e, [], lastQuery)).join('')}
     </div>`;
   }
 
