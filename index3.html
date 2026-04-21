@@ -1382,11 +1382,11 @@
     setCount('countCoffee',      count('coffee-sweets'));
     setCount('countHappy',       GCR.getHappyHours().length || '');
     setCount('countSpecials',    GCR.getSpecials().length || '');
-    setCount('eventsCount',      evCount ? evCount + ' this month' : '');
+    setCount('eventsCount',      evCount || '');
     setCount('countThingsToDo',  count('things-to-do'));
     setCount('countShopping',    count('shopping'));
     setCount('countNightlife',   count('nightlife'));
-    setCount('countOther',       count('other'));
+    setCount('countOther',       count('public-spots'));
     setCount('countServices',    count('services'));
     var artists = GCR.businesses.filter(function(b){ return b.tags && b.tags.includes('local-artist'); }).length;
     setCount('countArtists', artists || '');
