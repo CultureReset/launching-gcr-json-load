@@ -506,22 +506,18 @@ function buildBusinessCard(entity, q) {
   const hhBtn      = hh   ? `<span class="gcr-search-btn amber" style="pointer-events:none;">🍺 HH ${hh}</span>` : '';
 
   return `
-    <a href="${profileUrl}" class="gcr-search-card">
-      <div class="gcr-search-card-inner">
-        <div class="gcr-search-card-img" style="background-image:url('${hero}')">
-          ${subtype ? `<div class="gcr-search-card-badge">${icon} ${esc(subtype)}</div>` : ''}
-          ${openBadge}
-        </div>
-        <div class="gcr-search-card-body">
-          <div class="gcr-search-card-name">${esc(name)}</div>
-          ${sub || location ? `<div class="gcr-search-card-sub">${esc([sub,location].filter(Boolean).join(' · '))}</div>` : ''}
-          ${desc ? `<div class="gcr-search-card-desc">${esc(desc)}</div>` : ''}
-          ${ratingBlock}
-          ${chips ? `<div class="gcr-search-chips">${chips}</div>` : ''}
-          ${fullAddr ? `<div style="font-size:12px;color:#8fa3b1;font-weight:600;margin-top:2px;">📍 ${esc(fullAddr)}</div>` : ''}
-          <div class="gcr-search-card-footer">${viewBtn}${hhBtn}${dirBtn}${callBtn}</div>
-        </div>
+    <a href="${profileUrl}" class="gcr-item-card" style="text-decoration:none;color:inherit;display:block;">
+      <div class="gcr-item-card-header">
+        <div class="gcr-item-card-bizname">${esc(name)}</div>
+        <div class="gcr-item-card-meta"><span>${esc(subtype)}</span>${rating ? `<span>${Number(rating).toFixed(1)} ⭐</span>` : ''}${reviews ? `<span>(${reviews})</span>` : ''}</div>
+        ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
+        ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
+        <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
       </div>
+      ${desc ? `<div style="padding:10px 16px;font-size:13px;color:#5c6b81;line-height:1.6;border-bottom:1px solid #f0f4f8;">${esc(desc)}</div>` : ''}
+      ${chips ? `<div style="padding:8px 16px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #f0f4f8;">${chips}</div>` : ''}
+      ${hh ? `<div style="padding:8px 16px;font-size:13px;color:#d97706;font-weight:700;border-bottom:1px solid #f0f4f8;">🍺 Happy Hour · ${hh}</div>` : ''}
+      <div class="gcr-item-card-footer">${viewBtn}${dirBtn}${callBtn}</div>
     </a>`;
 }
 
