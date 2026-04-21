@@ -1830,17 +1830,9 @@ document.addEventListener('gcr:loaded', function() {
       var tile = top.closest('.cat-tile');
       if (!tile) return;
 
-      // Update background of tile-top div
-      if (c.image_url) {
-        top.style.background = 'url(' + c.image_url + ') center/cover no-repeat';
-        top.textContent = '';
-      } else if (c.color_gradient) {
-        top.style.background = c.color_gradient;
-        if (c.emoji) top.textContent = c.emoji;
-      } else if (c.emoji) {
-        top.textContent = c.emoji;
-      }
-
+      // Keep all tiles visually consistent — only update text from DB.
+      // (Ignoring c.image_url intentionally so every tile uses the same
+      // gradient+emoji style defined in the CSS ct-* classes.)
       var nameEl = tile.querySelector('.cat-tile-name');
       var descEl = tile.querySelector('.cat-tile-desc');
       if (nameEl && c.label) nameEl.textContent = c.label;
