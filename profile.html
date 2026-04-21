@@ -33,7 +33,7 @@
     .cover-slides { position:relative; width:100%; height:100%; }
     .cover-slide { position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#0c2d48,#1a4a6e); opacity:0; transition:opacity .5s ease; pointer-events:none; }
     .cover-slide.active { opacity:1; pointer-events:auto; }
-    .cover-slide img { width:100%; height:100%; object-fit:cover; object-position:center center; display:block; }
+    .cover-slide img { width:100%; height:100%; object-fit:contain; object-position:center center; display:block; background:#0c2d48; }
     /* Gradient overlay + hero text */
     .cover-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.15) 50%, transparent 100%); pointer-events:none; z-index:5; }
     .cover-hero { position:absolute; bottom:28px; left:20px; right:80px; z-index:10; color:#fff; }

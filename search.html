@@ -546,8 +546,17 @@ function buildItemCard(entity, items, q) {
   const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary" onclick="event.stopPropagation()">View Menu</a>`;
   const callBtn = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-search-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
 
+  // Deduplicate by name and filter items with no useful data
+  const seenNames = new Set();
+  const cleanItems = items.filter(item => {
+    const n = (item.item_name || item.special_name || '').trim();
+    if (!n || seenNames.has(n.toLowerCase())) return false;
+    seenNames.add(n.toLowerCase());
+    return true;
+  });
+
   const typeLabel = { menu: 'Menu', drink: 'Drinks', happy_hour: 'Happy Hour' };
-  const itemsHtml = items.slice(0, 8).map(item => {
+  const itemsHtml = cleanItems.slice(0, 8).map(item => {
     const iname    = item.item_name || item.special_name || '';
     const idesc    = item.description || '';
     const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
@@ -567,7 +576,7 @@ function buildItemCard(entity, items, q) {
       </div>`;
   }).join('');
 
-  const moreCount = items.length > 8 ? items.length - 8 : 0;
+  const moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
 
   return `
     <div class="gcr-item-card">
