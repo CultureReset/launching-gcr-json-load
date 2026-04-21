@@ -1727,53 +1727,81 @@ document.addEventListener('gcr:loaded', function() {
 
 /* ── Weather ── */
 (function loadWeather() {
+  const WEATHER_CACHE_KEY = 'gcr:weather:v1';
+  const WEATHER_TTL = 30 * 60 * 1000; // 30 min
+
+  const icons = [
+    [0,'☀️','Clear'],[1,'🌤️','Mostly Clear'],[2,'⛅','Partly Cloudy'],[3,'☁️','Overcast'],
+    [45,'🌫️','Foggy'],[51,'🌦️','Drizzle'],[61,'🌧️','Rain'],
+    [65,'🌧️','Heavy Rain'],[71,'❄️','Snow'],[80,'🌦️','Showers'],[95,'⛈️','Thunderstorm']
+  ];
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  function render(d) {
+    const cw = d.current_weather;
+    if (!cw) return false;
+    const tempF   = Math.round(cw.temperature);
+    const windMph = Math.round(cw.windspeed);
+    const hiF     = d.daily && d.daily.temperature_2m_max ? Math.round(d.daily.temperature_2m_max[0]) : tempF;
+    const loF     = d.daily && d.daily.temperature_2m_min ? Math.round(d.daily.temperature_2m_min[0]) : tempF;
+
+    const nowHour  = new Date().getHours();
+    const feelsArr = d.hourly && (d.hourly.apparent_temperature || []);
+    const humArr   = d.hourly && (d.hourly.relative_humidity_2m || d.hourly.relativehumidity_2m || []);
+    const feelsF   = feelsArr.length ? Math.round(feelsArr[nowHour] ?? feelsArr[0] ?? tempF) : tempF;
+    const humidity = humArr.length   ? Math.round(humArr[nowHour]   ?? humArr[0]   ?? 0)     : null;
+
+    const wInfo = [...icons].reverse().find(([code]) => cw.weathercode >= code) || [0,'🌤️','Clear'];
+
+    set('wTemp',  `${tempF}°F`);
+    set('wCond',  wInfo[2]);
+    set('wIcon',  wInfo[1]);
+    set('wHi',    `${hiF}°`);
+    set('wLo',    `${loF}°`);
+    set('wWind',  `${windMph} mph`);
+    set('wFeels', `Feels ${feelsF}°F`);
+    if (humidity !== null) set('wHumid', `${humidity}%`);
+    set('wBeachFlag', windMph > 20 ? '🚩 Check Beach Flags' : '🏖️ Beach Open');
+    return true;
+  }
+
+  // 1. Paint from cache first (instant, even if stale)
+  try {
+    const raw = localStorage.getItem(WEATHER_CACHE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const fresh = (Date.now() - parsed.ts) < WEATHER_TTL;
+      render(parsed.data);
+      if (fresh) return; // skip network — cache is fresh enough
+    }
+  } catch (e) {}
+
+  // 2. Fetch fresh (with one retry on failure)
   const url = 'https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.6003' +
     '&current_weather=true' +
-    '&hourly=relativehumidity_2m,apparent_temperature' +
+    '&hourly=relative_humidity_2m,apparent_temperature' +
     '&daily=temperature_2m_max,temperature_2m_min' +
     '&temperature_unit=fahrenheit&windspeed_unit=mph' +
     '&timezone=America%2FChicago&forecast_days=1';
 
-  fetch(url)
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(d => {
-      const cw      = d.current_weather;
-      const tempF   = Math.round(cw.temperature);
-      const windMph = Math.round(cw.windspeed);
-      const hiF     = Math.round(d.daily.temperature_2m_max[0]);
-      const loF     = Math.round(d.daily.temperature_2m_min[0]);
-
-      // Find current hour index in hourly arrays
-      const nowHour  = new Date().getHours();
-      const feelsArr = d.hourly && d.hourly.apparent_temperature;
-      const humArr   = d.hourly && d.hourly.relativehumidity_2m;
-      const feelsF   = feelsArr ? Math.round(feelsArr[nowHour] ?? feelsArr[0] ?? tempF) : tempF;
-      const humidity = humArr   ? Math.round(humArr[nowHour]   ?? humArr[0]   ?? 0)     : null;
-
-      const icons = [
-        [0,'☀️','Clear'],[1,'🌤️','Mostly Clear'],[2,'⛅','Partly Cloudy'],[3,'☁️','Overcast'],
-        [45,'🌫️','Foggy'],[51,'🌦️','Drizzle'],[61,'🌧️','Rain'],
-        [65,'🌧️','Heavy Rain'],[71,'❄️','Snow'],[80,'🌦️','Showers'],[95,'⛈️','Thunderstorm']
-      ];
-      const wc    = cw.weathercode;
-      const wInfo = [...icons].reverse().find(([code]) => wc >= code) || [0,'🌤️','Clear'];
-
-      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-      set('wTemp',      `${tempF}°F`);
-      set('wCond',      wInfo[2]);
-      set('wIcon',      wInfo[1]);
-      set('wHi',        `${hiF}°`);
-      set('wLo',        `${loF}°`);
-      set('wWind',      `${windMph} mph`);
-      set('wFeels',     `Feels ${feelsF}°F`);
-      if (humidity !== null) set('wHumid', `${humidity}%`);
-      if (windMph > 20) set('wBeachFlag', '🚩 Check Beach Flags');
-      else              set('wBeachFlag', '🏖️ Beach Open');
-    })
-    .catch(() => {
-      const el = document.getElementById('wCond');
-      if (el) el.textContent = 'Weather unavailable';
-    });
+  function tryFetch(attempt) {
+    return fetch(url)
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(d => {
+        if (render(d)) {
+          try { localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: d })); } catch (e) {}
+        }
+      })
+      .catch(err => {
+        if (attempt < 2) return new Promise(r => setTimeout(r, 1500)).then(() => tryFetch(attempt + 1));
+        // Only show "unavailable" if we never rendered from cache
+        const condEl = document.getElementById('wCond');
+        if (condEl && (condEl.textContent === 'Loading…' || condEl.textContent === '')) {
+          condEl.textContent = 'Weather unavailable';
+        }
+      });
+  }
+  tryFetch(1);
 })();
 </script>
 <script src="js/claim-modal.js"></script>
