@@ -6,6 +6,33 @@
 
 const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
 
+/* ── Cache layer ──────────────────────────────────────────────
+   Stale-while-revalidate: pages render from cache instantly,
+   fresh data fetched in background to update cache for next visit.
+   Bump GCR_CACHE_VERSION to force-invalidate everyone's cache. */
+const GCR_CACHE_VERSION = 'v1';
+const GCR_CACHE_TTL_MS  = 10 * 60 * 1000; // 10 minutes — data considered fresh
+
+function _gcrCacheGet(key) {
+  try {
+    const raw = localStorage.getItem('gcr:' + GCR_CACHE_VERSION + ':' + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return { stale: (Date.now() - parsed.ts) > GCR_CACHE_TTL_MS, data: parsed.data };
+  } catch (e) { return null; }
+}
+function _gcrCacheSet(key, data) {
+  try {
+    localStorage.setItem('gcr:' + GCR_CACHE_VERSION + ':' + key, JSON.stringify({ ts: Date.now(), data }));
+  } catch (e) { /* quota exceeded or disabled — silent */ }
+}
+function gcrCacheClear() {
+  try {
+    Object.keys(localStorage).forEach(k => { if (k.startsWith('gcr:')) localStorage.removeItem(k); });
+  } catch (e) {}
+}
+window.gcrCacheClear = gcrCacheClear; // expose for debugging
+
 const GCR = {
   businesses: [],
   events: [],
@@ -28,7 +55,63 @@ const GCR = {
   ],
 
   /* ── LOAD ALL DATA ── */
-  async load() {
+  // Filter out test/spam entities
+  _isTestEntity(b) {
+    const s = (b.slug || b.subdomain || '').toLowerCase();
+    const n = (b.name || '').toLowerCase();
+    const a = (b.address_line_1 || b.address || '').toLowerCase();
+    return s.startsWith('gcr-upload-test') || s.startsWith('888') ||
+           n.includes('upload test') || n.startsWith('888') ||
+           a.includes('test lane');
+  },
+
+  _dedupeBusinesses(raw) {
+    const slugSet = new Set();
+    return raw.filter(b => {
+      const s = b.slug || b.subdomain || '';
+      if (slugSet.has(s)) return false;
+      if (s.match(/-1$/) && raw.some(o => (o.slug || o.subdomain) === s.replace(/-1$/, ''))) return false;
+      slugSet.add(s);
+      return true;
+    });
+  },
+
+  async load(forceRefresh) {
+    // 1. Hydrate from cache first — instant render
+    const cachedBiz = _gcrCacheGet('entities');
+    const cachedEv  = _gcrCacheGet('events');
+    const cachedSp  = _gcrCacheGet('specials');
+    const cachedHh  = _gcrCacheGet('happy-hours');
+
+    if (cachedBiz) this.businesses = cachedBiz.data;
+    if (cachedEv)  this.events     = cachedEv.data;
+    if (cachedSp)  this.specials   = cachedSp.data;
+    if (cachedHh)  this.happyHours = cachedHh.data;
+
+    const haveCache = cachedBiz && cachedEv && cachedSp && cachedHh;
+    const allFresh  = haveCache && !cachedBiz.stale && !cachedEv.stale && !cachedSp.stale && !cachedHh.stale;
+
+    // If we have a complete fresh cache and no force, use it and skip network entirely
+    if (allFresh && !forceRefresh) {
+      this.loaded = true;
+      document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
+      return;
+    }
+
+    // If we have cache (even stale), dispatch loaded NOW so pages render —
+    // then refresh in background (stale-while-revalidate).
+    if (haveCache && !forceRefresh) {
+      this.loaded = true;
+      document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
+      this._refreshInBackground();
+      return;
+    }
+
+    // No cache — do the full fetch and block until done
+    await this._fetchAndPopulate(true);
+  },
+
+  async _fetchAndPopulate(dispatchLoaded) {
     try {
       const [bizRes, evRes, spRes, hhRes] = await Promise.all([
         fetch(GCR_API + '/entities?limit=500').catch(() => null),
@@ -37,48 +120,39 @@ const GCR = {
         fetch(GCR_API + '/happy-hours').catch(() => null),
       ]);
 
-      // Filter out test/spam entities
-      const isTestEntity = b => {
-        const s = (b.slug || b.subdomain || '').toLowerCase();
-        const n = (b.name || '').toLowerCase();
-        const a = (b.address_line_1 || b.address || '').toLowerCase();
-        return s.startsWith('gcr-upload-test') || s.startsWith('888') ||
-               n.includes('upload test') || n.startsWith('888') ||
-               a.includes('test lane');
-      };
-
       if (bizRes && bizRes.ok) {
         const data = await bizRes.json();
-        const raw = (data.entities || data.businesses || []).filter(b => !isTestEntity(b));
-        // Deduplicate: remove -1 suffix duplicates (keep the base slug version)
-        const slugSet = new Set();
-        this.businesses = raw.filter(b => {
-          const s = b.slug || b.subdomain || '';
-          if (slugSet.has(s)) return false;
-          // If this is a -1 slug and the base slug exists, skip it
-          if (s.match(/-1$/) && raw.some(o => (o.slug || o.subdomain) === s.replace(/-1$/, ''))) return false;
-          slugSet.add(s);
-          return true;
-        });
+        const raw = (data.entities || data.businesses || []).filter(b => !this._isTestEntity(b));
+        this.businesses = this._dedupeBusinesses(raw);
+        _gcrCacheSet('entities', this.businesses);
       }
       if (evRes && evRes.ok) {
         this.events = await evRes.json();
+        _gcrCacheSet('events', this.events);
       }
       if (spRes && spRes.ok) {
         this.specials = await spRes.json();
+        _gcrCacheSet('specials', this.specials);
       }
       if (hhRes && hhRes.ok) {
         const hhRaw = await hhRes.json();
-        this.happyHours = (Array.isArray(hhRaw) ? hhRaw : []).filter(b => !isTestEntity(b));
+        this.happyHours = (Array.isArray(hhRaw) ? hhRaw : []).filter(b => !this._isTestEntity(b));
+        _gcrCacheSet('happy-hours', this.happyHours);
       }
 
       this.loaded = true;
-      document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
+      if (dispatchLoaded) document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
+      else document.dispatchEvent(new CustomEvent('gcr:refreshed', { detail: this }));
     } catch(e) {
-      console.warn('GCR API unavailable, using empty data:', e.message);
+      console.warn('GCR API unavailable:', e.message);
       this.loaded = true;
-      document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
+      if (dispatchLoaded) document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: this }));
     }
+  },
+
+  async _refreshInBackground() {
+    // Fire and forget — page has already rendered from cache
+    await this._fetchAndPopulate(false);
   },
 
   /* ── HELPERS (same interface as data.js) ── */
@@ -179,14 +253,20 @@ const GCR = {
   },
 
   /* ── Fetch full profile (fleet, pricing, addons, reviews, etc.) ── */
-  async loadProfile(slug) {
+  async loadProfile(slug, forceRefresh) {
+    const key = 'profile:' + slug;
+    const cached = _gcrCacheGet(key);
+    if (cached && !cached.stale && !forceRefresh) return cached.data;
+
     try {
       const res = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`);
-      if (!res.ok) return null;
-      return await res.json();
+      if (!res.ok) return cached ? cached.data : null;
+      const data = await res.json();
+      _gcrCacheSet(key, data);
+      return data;
     } catch(e) {
       console.warn('GCR profile load failed:', e.message);
-      return null;
+      return cached ? cached.data : null;
     }
   },
 };
