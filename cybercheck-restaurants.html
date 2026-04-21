@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CyberCheck for Restaurants — Text-Driven Menu & Update Automation</title>
+  <meta name="description" content="Stop forcing your staff into software. CyberCheck sends automated daily update links so restaurants can update menus, specials, pricing, and hours in seconds — then syncs everything automatically.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0f172a;
+      --navy-mid:   #1e293b;
+      --navy-light: #334155;
+      --teal:       #00ada8;
+      --teal-dark:  #009590;
+      --teal-light: #5dd9d4;
+      --amber:      #f59e0b;
+      --amber-light:#fef3c7;
+      --red:        #ef4444;
+      --green:      #22c55e;
+      --dark:       #1a1a1a;
+      --gray:       #4b5563;
+      --gray-light: #9ca3af;
+      --border:     #e5e7eb;
+      --bg-off:     #f8fafc;
+      --white:      #ffffff;
+      --radius:     12px;
+      --radius-lg:  20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ══ NAV ══ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--navy);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,0,0,.3);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--teal);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-logo-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.3px;
+    }
+
+    .nav-logo-text span { color: var(--teal-light); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-link {
+      font-size: .85rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.55);
+      transition: color .15s;
+    }
+
+    .nav-link:hover { color: #fff; }
+
+    .nav-cta {
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+
+    .nav-cta:hover { background: var(--teal-dark); }
+
+    /* ══ HERO ══ */
+    .hero {
+      background: var(--navy);
+      padding: 90px 20px 120px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(0,173,168,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--white);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,173,168,.15);
+      border: 1px solid rgba(0,173,168,.35);
+      color: var(--teal-light);
+      font-weight: 700;
+      font-size: .75rem;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 span { color: var(--teal-light); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,.7);
+      max-width: 620px;
+      margin: 0 auto 44px;
+      font-weight: 500;
+      line-height: 1.65;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 16px 32px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 24px rgba(0,173,168,.45);
+      transition: all .2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(0,173,168,.55);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.85);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 16px 28px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,.2);
+      transition: all .2s;
+    }
+
+    .btn-ghost:hover { background: rgba(255,255,255,.14); }
+
+    .hero-note {
+      margin-top: 18px;
+      font-size: .8rem;
+      color: rgba(255,255,255,.4);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ══ SECTION SHARED ══ */
+    .section-label {
+      display: inline-block;
+      font-size: .73rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--teal-dark);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--gray);
+      max-width: 580px;
+      margin: 0 auto 48px;
+      line-height: 1.65;
+    }
+
+    /* ══ THE BIG PROBLEM ══ */
+    .problem {
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .workflow-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .workflow-card {
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      text-align: left;
+    }
+
+    .workflow-card.bad {
+      background: #fff5f5;
+      border: 1.5px solid #fecaca;
+    }
+
+    .workflow-card.good {
+      background: #f0fdfa;
+      border: 1.5px solid #99f6e4;
+    }
+
+    .workflow-card-label {
+      font-size: .72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .workflow-card.bad .workflow-card-label { color: #dc2626; }
+    .workflow-card.good .workflow-card-label { color: #0d9488; }
+
+    .workflow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .88rem;
+      color: var(--dark);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .workflow-step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .7rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .workflow-card.bad .workflow-step-num {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .workflow-card.good .workflow-step-num {
+      background: #ccfbf1;
+      color: #0d9488;
+    }
+
+    /* ══ HOW IT WORKS ══ */
+    .how {
+      background: var(--navy);
+      padding: 90px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .how::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,173,168,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .how .section-label { color: var(--teal-light); }
+    .how .section-title { color: #fff; }
+    .how .section-sub { color: rgba(255,255,255,.65); }
+
+    /* SMS DEMO */
+    .sms-demo {
+      max-width: 360px;
+      margin: 0 auto 60px;
+      background: var(--navy-mid);
+      border-radius: 20px;
+      border: 1px solid var(--navy-light);
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,.4);
+    }
+
+    .sms-demo-bar {
+      background: var(--navy-light);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sms-demo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    .sms-demo-name {
+      font-size: .8rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.8);
+    }
+
+    .sms-demo-sub {
+      font-size: .7rem;
+      color: var(--gray-light);
+    }
+
+    .sms-demo-body { padding: 20px 16px 24px; }
+
+    .sms-bubble {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px 16px 16px 4px;
+      padding: 14px 16px;
+      font-size: .85rem;
+      color: rgba(255,255,255,.85);
+      line-height: 1.55;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .sms-link {
+      color: var(--teal-light);
+      font-weight: 700;
+    }
+
+    .sms-time {
+      font-size: .68rem;
+      color: rgba(255,255,255,.35);
+      text-align: center;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .flow-step {
+      text-align: center;
+    }
+
+    .flow-num {
+      width: 52px;
+      height: 52px;
+      background: var(--teal);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 16px rgba(0,173,168,.3);
+    }
+
+    .flow-step h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .flow-step p {
+      font-size: .85rem;
+      color: rgba(255,255,255,.6);
+      line-height: 1.55;
+    }
+
+    /* ══ WHAT THEY UPDATE ══ */
+    .update-section {
+      padding: 80px 20px;
+    }
+
+    .update-section-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .update-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .update-card {
+      background: var(--bg-off);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 28px 24px;
+    }
+
+    .update-card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .update-card h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      color: var(--dark);
+    }
+
+    .update-tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .update-tag {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: .78rem;
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    /* ══ QR MENU ══ */
+    .qr-section {
+      background: linear-gradient(160deg, var(--navy) 0%, #0d2137 50%, var(--navy) 100%);
+      padding: 90px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .qr-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 50% 60% at 80% 50%, rgba(0,173,168,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .qr-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .qr-content .section-label { color: var(--teal-light); }
+    .qr-content .section-title { color: #fff; }
+
+    .qr-content p {
+      font-size: .95rem;
+      color: rgba(255,255,255,.7);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .9rem;
+      color: rgba(255,255,255,.85);
+    }
+
+    .check-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-dot svg { width: 11px; height: 11px; }
+
+    /* QR MOCKUP */
+    .qr-mockup {
+      background: var(--navy-mid);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--navy-light);
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+
+    .qr-mockup-header {
+      background: var(--teal);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qr-mockup-title {
+      font-weight: 800;
+      font-size: .9rem;
+      color: #fff;
+    }
+
+    .qr-mockup-sub {
+      font-size: .72rem;
+      color: rgba(255,255,255,.75);
+    }
+
+    .live-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      margin-left: auto;
+      box-shadow: 0 0 6px #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .4; }
+    }
+
+    .live-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: #4ade80;
+      margin-left: 4px;
+    }
+
+    .qr-mockup-body { padding: 16px; }
+
+    .menu-section-label {
+      font-size: .65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray-light);
+      margin: 12px 0 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.04);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    .menu-item-name {
+      font-size: .82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,.85);
+    }
+
+    .menu-item-desc {
+      font-size: .7rem;
+      color: rgba(255,255,255,.4);
+      margin-top: 2px;
+    }
+
+    .menu-item-price {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--teal-light);
+      white-space: nowrap;
+    }
+
+    .menu-item-badge {
+      font-size: .62rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+    }
+
+    .badge-fresh { background: rgba(0,173,168,.2); color: var(--teal-light); }
+    .badge-out { background: rgba(239,68,68,.2); color: #f87171; }
+
+    .price-updated {
+      color: #4ade80;
+      position: relative;
+    }
+
+    .price-updated::after {
+      content: '↑';
+      font-size: .6rem;
+      color: #4ade80;
+      position: absolute;
+      top: -4px;
+      right: -8px;
+      opacity: .8;
+    }
+
+    .updated-stamp {
+      text-align: center;
+      font-size: .68rem;
+      color: rgba(255,255,255,.3);
+      padding: 12px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      margin-top: 8px;
+    }
+
+    .updated-stamp span { color: #4ade80; font-weight: 600; }
+
+    /* ══ BOOKING AUTOMATION ══ */
+    .booking-section {
+      padding: 80px 20px;
+      background: var(--bg-off);
+    }
+
+    .booking-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .booking-content p {
+      font-size: .95rem;
+      color: var(--gray);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .booking-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .booking-flow-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    .booking-flow-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .icon-blue   { background: #eff6ff; }
+    .icon-teal   { background: #f0fdfa; }
+    .icon-amber  { background: #fffbeb; }
+    .icon-purple { background: #faf5ff; }
+
+    .booking-flow-text h4 {
+      font-size: .88rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .booking-flow-text p {
+      font-size: .78rem;
+      color: var(--gray);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    /* SMS flow mockup */
+    .sms-flow-mockup {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sms-flow-msg {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+
+    .sms-flow-trigger {
+      font-size: .68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--gray-light);
+      margin-bottom: 6px;
+    }
+
+    .sms-flow-bubble {
+      background: #e7f3ff;
+      border-radius: 10px 10px 10px 3px;
+      padding: 10px 14px;
+      font-size: .82rem;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+
+    .sms-flow-bubble.teal { background: #f0fdfa; color: #0d9488; }
+    .sms-flow-bubble.amber { background: #fffbeb; color: #92400e; }
+    .sms-flow-bubble.purple { background: #faf5ff; color: #6d28d9; }
+
+    /* ══ WHO IT'S FOR ══ */
+    .who {
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .biz-chip {
+      background: var(--bg-off);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 14px;
+      text-align: center;
+      transition: all .2s;
+    }
+
+    .biz-chip:hover {
+      border-color: var(--teal);
+      background: #f0fdfa;
+    }
+
+    .biz-chip-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .biz-chip-name { font-size: .85rem; font-weight: 700; color: var(--dark); }
+    .biz-chip-desc { font-size: .72rem; color: var(--gray); margin-top: 3px; }
+
+    /* ══ SURFACES ══ */
+    .surfaces {
+      background: var(--bg-off);
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .surface-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .surface-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+
+    .surface-card-icon { font-size: 1.8rem; margin-bottom: 12px; }
+
+    .surface-card h4 {
+      font-size: .9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .surface-card p {
+      font-size: .78rem;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    .surface-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--teal);
+      font-weight: 900;
+      margin-bottom: 24px;
+    }
+
+    .one-update-pill {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--teal-light);
+      font-size: .85rem;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    /* ══ CTA ══ */
+    .cta-section {
+      background: var(--navy);
+      padding: 100px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(0,173,168,.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .cta-section .section-label { color: var(--teal-light); }
+
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-section h2 span { color: var(--teal-light); }
+
+    .cta-section p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.65);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ══ FOOTER ══ */
+    .footer {
+      background: #080e1a;
+      padding: 32px 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+
+    .footer p { font-size: .8rem; color: rgba(255,255,255,.3); }
+    .footer a { color: var(--teal-light); font-weight: 600; }
+
+    /* ══ FAB ══ */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: .9rem;
+      padding: 14px 22px;
+      border-radius: 100px;
+      box-shadow: 0 6px 24px rgba(0,173,168,.5);
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .2s;
+    }
+
+    .fab:hover { background: var(--teal-dark); transform: translateY(-2px); }
+
+    /* ══ MODAL ══ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,.3);
+      animation: slideUp .25s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px 0;
+    }
+
+    .modal-header h3 { font-size: 1.2rem; font-weight: 800; color: var(--dark); }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-light);
+      padding: 4px;
+      border-radius: 6px;
+      transition: color .15s;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--dark); }
+
+    .modal-sub { font-size: .85rem; color: var(--gray); padding: 6px 28px 20px; }
+    .modal-body { padding: 0 28px 28px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-off);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--dark);
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .form-input::placeholder { color: var(--gray-light); }
+    .form-input:focus { border-color: var(--teal); background: #fff; }
+
+    .form-select {
+      width: 100%;
+      background: var(--bg-off);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--gray);
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .form-select:focus { border-color: var(--teal); }
+
+    .form-submit {
+      width: 100%;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 16px rgba(0,173,168,.35);
+      transition: all .2s;
+      margin-top: 4px;
+    }
+
+    .form-submit:hover { background: var(--teal-dark); transform: translateY(-1px); }
+
+    .form-disclaimer { font-size: .72rem; color: var(--gray-light); margin-top: 10px; text-align: center; }
+
+    .modal-success { display: none; text-align: center; padding: 48px 28px; }
+    .modal-success.show { display: block; }
+    .modal-body.hidden, .modal-header.hidden, .modal-sub.hidden { display: none; }
+
+    .success-icon {
+      width: 64px; height: 64px;
+      background: #f0fdfa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .modal-success h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; }
+    .modal-success p { font-size: .9rem; color: var(--gray); line-height: 1.6; }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 700px) {
+      .workflow-compare { grid-template-columns: 1fr; }
+      .qr-inner { grid-template-columns: 1fr; gap: 40px; }
+      .booking-inner { grid-template-columns: 1fr; gap: 40px; }
+      .nav-right .nav-link { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Cyber<span>Check</span> Restaurants</span>
+    </div>
+    <div class="nav-right">
+      <a href="#how-it-works" class="nav-link">How It Works</a>
+      <a href="#who" class="nav-link">Who It's For</a>
+      <button onclick="openModal()" class="nav-cta">Get Set Up</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+      Text-Driven Restaurant Automation
+    </div>
+    <h1>Your staff gets a text.<br>They tap and update.<br><span>Everything syncs.</span></h1>
+    <p class="hero-sub">CyberCheck sends your team an automated daily update link — catch of the day, specials, pricing, hours, events. They change what changed. It publishes everywhere. No dashboard hunting required.</p>
+    <div class="hero-actions">
+      <button onclick="openModal()" class="btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Get Set Up for My Restaurant
+      </button>
+      <a href="#how-it-works" class="btn-ghost">See How It Works</a>
+    </div>
+    <p class="hero-note">We set it up for you. Your team never needs to log in.</p>
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section class="problem">
+    <div class="container">
+      <span class="section-label">The real problem</span>
+      <h2 class="section-title">Your staff won't log in to<br>update a dashboard. They never do.</h2>
+      <p class="section-sub">So the QR menu is a week out of date. The special isn't posted. The website still shows last season's hours. Customers show up for something you stopped serving.</p>
+      <div class="workflow-compare">
+        <div class="workflow-card bad">
+          <div class="workflow-card-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Every other system
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">1</div>Remember to log in
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">2</div>Find the right menu editor
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">3</div>Navigate to the right section
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">4</div>Make the update
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">5</div>Update the website separately
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">6</div>Update the QR menu separately
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">7</div>Update the listing separately
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">8</div>Hope you remembered all of them
+          </div>
+        </div>
+        <div class="workflow-card good">
+          <div class="workflow-card-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            CyberCheck
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">1</div>Get a text at 9:30 AM
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">2</div>Tap the link
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">3</div>Update what changed
+          </div>
+          <div class="workflow-step">
+            <div class="workflow-step-num">4</div>Submit
+          </div>
+          <div class="workflow-step" style="color:var(--teal-dark);font-weight:600">
+            <div class="workflow-step-num" style="background:#ccfbf1;color:#0d9488">✓</div>Everything syncs automatically
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how-it-works">
+    <div class="container">
+      <span class="section-label">How it works</span>
+      <h2 class="section-title">A scheduled text. A quick form.<br>Done for the day.</h2>
+      <p class="section-sub">We set up the system for your restaurant once. After that, it runs on autopilot.</p>
+
+      <!-- SMS Demo -->
+      <div class="sms-demo">
+        <div class="sms-demo-bar">
+          <div class="sms-demo-dot" style="background:#22c55e"></div>
+          <div>
+            <div class="sms-demo-name">CyberCheck</div>
+            <div class="sms-demo-sub">Daily Update · 9:30 AM</div>
+          </div>
+        </div>
+        <div class="sms-demo-body">
+          <div class="sms-bubble">
+            Good morning! Time for your daily update.<br><br>
+            Tap below to update today's catch, specials, market prices, hours, and event info.<br><br>
+            <span class="sms-link">cybercheck.app/update/wharf-daily-x9k2</span>
+          </div>
+          <div class="sms-time">Today 9:30 AM · Automated · Link expires tonight</div>
+        </div>
+      </div>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <h3>We set it up</h3>
+          <p>Menu structure, sections, timing, who gets the link, which days, what they can edit. Done once. You don't touch it again.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <h3>Daily link goes out</h3>
+          <p>CyberCheck texts the right people at the right time — owner, GM, kitchen lead, whoever you choose. On your schedule.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <h3>They update what changed</h3>
+          <p>Tap the link. Update today's catch, swap a special, pull a sold-out item, change hours. If nothing changed, do nothing.</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <h3>It publishes everywhere</h3>
+          <p>One submit pushes the update to your QR menu, restaurant page, website, and Gulf Coast Radar listing. Automatically.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT THEY CAN UPDATE -->
+  <section class="update-section">
+    <div class="container">
+      <div class="update-section-header">
+        <span class="section-label">What gets updated</span>
+        <h2 class="section-title">Every part of your restaurant<br>that changes daily.</h2>
+        <p class="section-sub" style="margin:0 auto">You choose which sections are editable and who can edit them. CyberCheck handles the rest.</p>
+      </div>
+      <div class="update-grid">
+        <div class="update-card">
+          <div class="update-card-icon">🍽️</div>
+          <h3>Menu Content</h3>
+          <div class="update-tag-list">
+            <span class="update-tag">Item names</span>
+            <span class="update-tag">Descriptions</span>
+            <span class="update-tag">Pricing</span>
+            <span class="update-tag">Market price</span>
+            <span class="update-tag">Categories</span>
+            <span class="update-tag">Item availability</span>
+            <span class="update-tag">Photos</span>
+            <span class="update-tag">Featured items</span>
+            <span class="update-tag">Seasonal items</span>
+          </div>
+        </div>
+        <div class="update-card">
+          <div class="update-card-icon">⭐</div>
+          <h3>Daily & Rotating Content</h3>
+          <div class="update-tag-list">
+            <span class="update-tag">Catch of the day</span>
+            <span class="update-tag">Soup of the day</span>
+            <span class="update-tag">Lunch special</span>
+            <span class="update-tag">Dinner special</span>
+            <span class="update-tag">Bartender special</span>
+            <span class="update-tag">Happy hour offers</span>
+            <span class="update-tag">Limited-time items</span>
+            <span class="update-tag">Oyster price</span>
+          </div>
+        </div>
+        <div class="update-card">
+          <div class="update-card-icon">🕐</div>
+          <h3>Business Info</h3>
+          <div class="update-tag-list">
+            <span class="update-tag">Hours</span>
+            <span class="update-tag">Holiday hours</span>
+            <span class="update-tag">Early closure</span>
+            <span class="update-tag">Special events</span>
+            <span class="update-tag">Live music</span>
+            <span class="update-tag">Featured performer</span>
+            <span class="update-tag">Reservation notes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QR MENU -->
+  <section class="qr-section">
+    <div class="qr-inner">
+      <div class="qr-content">
+        <span class="section-label">Live QR menus</span>
+        <h2 class="section-title">The QR code on every table<br>shows today's menu. Not last week's.</h2>
+        <p>When your GM updates the catch of the day and pulls a sold-out item at 9 AM, every customer who scans a QR code at lunch sees the current version. No reprinting. No outdated PDFs.</p>
+        <p>That matters most for:</p>
+        <div class="check-list">
+          <div class="check-item">
+            <div class="check-dot">
+              <svg viewBox="0 0 12 9" fill="none"><path d="M1 4L4.5 7.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Seafood restaurants with daily market prices
+          </div>
+          <div class="check-item">
+            <div class="check-dot">
+              <svg viewBox="0 0 12 9" fill="none"><path d="M1 4L4.5 7.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Bars and happy hour menus that change daily
+          </div>
+          <div class="check-item">
+            <div class="check-dot">
+              <svg viewBox="0 0 12 9" fill="none"><path d="M1 4L4.5 7.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Live music venues with rotating schedules
+          </div>
+          <div class="check-item">
+            <div class="check-dot">
+              <svg viewBox="0 0 12 9" fill="none"><path d="M1 4L4.5 7.5L11 1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Any spot with frequent 86'd items or availability changes
+          </div>
+        </div>
+      </div>
+      <div class="qr-mockup">
+        <div class="qr-mockup-header">
+          <div>
+            <div class="qr-mockup-title">The Wharf Kitchen</div>
+            <div class="qr-mockup-sub">Live Menu</div>
+          </div>
+          <div class="live-dot"></div>
+          <span class="live-label">LIVE</span>
+        </div>
+        <div class="qr-mockup-body">
+          <div class="menu-section-label">Today's Fresh Catch</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Gulf Red Snapper <span class="menu-item-badge badge-fresh">Fresh Today</span></div>
+              <div class="menu-item-desc">Grilled or fried · caught this morning</div>
+            </div>
+            <div class="menu-item-price price-updated" title="Updated this morning">$34</div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Gulf Shrimp Platter</div>
+              <div class="menu-item-desc">Steamed, fried or grilled · half or full</div>
+            </div>
+            <div class="menu-item-price price-updated" title="Updated this morning">$26</div>
+          </div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Gulf Oysters <span class="menu-item-badge badge-fresh">½ Shell</span></div>
+              <div class="menu-item-desc">Per dozen · sourced daily</div>
+            </div>
+            <div class="menu-item-price price-updated" title="Updated this morning">$18</div>
+          </div>
+          <div class="menu-section-label">Today's Specials</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Blackened Shrimp Po'Boy <span class="menu-item-badge badge-fresh">Lunch</span></div>
+              <div class="menu-item-desc">Served until 3 PM · includes side</div>
+            </div>
+            <div class="menu-item-price">$14</div>
+          </div>
+          <div class="menu-item" style="opacity:.4">
+            <div>
+              <div class="menu-item-name">Oyster Rockefeller <span class="menu-item-badge badge-out">86'd</span></div>
+              <div class="menu-item-desc">Unavailable today</div>
+            </div>
+            <div class="menu-item-price">—</div>
+          </div>
+          <div class="menu-section-label">Happy Hour · 3–6 PM</div>
+          <div class="menu-item">
+            <div>
+              <div class="menu-item-name">Draft Beer</div>
+              <div class="menu-item-desc">All drafts during happy hour</div>
+            </div>
+            <div class="menu-item-price">$4</div>
+          </div>
+        </div>
+        <div class="updated-stamp">
+          <span style="color:var(--teal-light);font-weight:700">↑ Prices updated</span> · Last synced <span>today at 9:47 AM</span> by GM
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOOKING AUTOMATION -->
+  <section class="booking-section">
+    <div class="container">
+      <div class="booking-inner">
+        <div class="booking-content">
+          <span class="section-label">Reservation messaging</span>
+          <h2 class="section-title">Automated texts for every<br>reservation. Hands-free.</h2>
+          <p>CyberCheck also handles the customer communication side of reservations — confirmation texts, day-before reminders, and follow-up messages after the visit. All automated. All on your schedule.</p>
+          <div class="booking-flow">
+            <div class="booking-flow-item">
+              <div class="booking-flow-icon icon-blue">📅</div>
+              <div class="booking-flow-text">
+                <h4>Booking confirmation</h4>
+                <p>Customer reserves a table → instant confirmation text with date, time, and reservation details.</p>
+              </div>
+            </div>
+            <div class="booking-flow-item">
+              <div class="booking-flow-icon icon-teal">⏰</div>
+              <div class="booking-flow-text">
+                <h4>Reminder before the visit</h4>
+                <p>Day-before or morning-of reminder text so they don't forget and you don't have empty tables.</p>
+              </div>
+            </div>
+            <div class="booking-flow-item">
+              <div class="booking-flow-icon icon-amber">⭐</div>
+              <div class="booking-flow-text">
+                <h4>Post-visit follow-up</h4>
+                <p>After their visit, a thank-you message, loyalty prompt, or verified review request — automatically.</p>
+              </div>
+            </div>
+            <div class="booking-flow-item">
+              <div class="booking-flow-icon icon-purple">🔄</div>
+              <div class="booking-flow-text">
+                <h4>Return-visit prompt</h4>
+                <p>Bring them back. Set a follow-up window — 30 days, 60 days — and CyberCheck texts them a reason to return.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sms-flow-mockup">
+          <div class="sms-flow-msg">
+            <div class="sms-flow-trigger">On booking confirmed</div>
+            <div class="sms-flow-bubble">
+              You're confirmed at The Wharf Kitchen! 🎉<br>
+              <strong>Saturday, July 19 · 7:00 PM · Party of 4</strong><br>
+              Reply CHANGE to modify or CANCEL to cancel.
+            </div>
+          </div>
+          <div class="sms-flow-msg">
+            <div class="sms-flow-trigger">24 hours before</div>
+            <div class="sms-flow-bubble teal">
+              Reminder: Your reservation at The Wharf is tomorrow at 7 PM. We'll see you there — don't forget to ask about tonight's fresh catch! 🐟
+            </div>
+          </div>
+          <div class="sms-flow-msg">
+            <div class="sms-flow-trigger">2 hours after visit</div>
+            <div class="sms-flow-bubble amber">
+              Thanks for coming in tonight, Sarah! Hope you enjoyed everything. Leave us a quick review — it means a lot to our team. 🙏<br>
+              <strong>cybercheck.app/review/wharf-x9k</strong>
+            </div>
+          </div>
+          <div class="sms-flow-msg">
+            <div class="sms-flow-trigger">45 days after visit</div>
+            <div class="sms-flow-bubble purple">
+              Hey Sarah! It's been a while since your last visit at The Wharf. This weekend we've got live music Friday + Saturday and a new catch menu. Come back and see us 🎸
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section class="who" id="who">
+    <div class="container">
+      <span class="section-label">Who it's for</span>
+      <h2 class="section-title">Best for restaurants where<br>things change every single day.</h2>
+      <p class="section-sub" style="margin:0 auto 40px">If your menu, specials, hours, or entertainment lineup changes frequently — CyberCheck is built for you.</p>
+      <div class="biz-grid">
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🦞</div>
+          <div class="biz-chip-name">Seafood</div>
+          <div class="biz-chip-desc">Daily catch, market price, availability</div>
+        </div>
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🍹</div>
+          <div class="biz-chip-name">Bars & Waterfront</div>
+          <div class="biz-chip-desc">Happy hour, rotating taps, events</div>
+        </div>
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🎸</div>
+          <div class="biz-chip-name">Live Music Venues</div>
+          <div class="biz-chip-desc">Performer lineup, event schedules</div>
+        </div>
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🏖️</div>
+          <div class="biz-chip-name">Beach Restaurants</div>
+          <div class="biz-chip-desc">Seasonal hours, specials, events</div>
+        </div>
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🍴</div>
+          <div class="biz-chip-name">Daily Special Spots</div>
+          <div class="biz-chip-desc">Rotating menu, soup, lunch deals</div>
+        </div>
+        <div class="biz-chip">
+          <div class="biz-chip-icon">🦪</div>
+          <div class="biz-chip-name">Raw Bars</div>
+          <div class="biz-chip-desc">Oyster pricing, availability, sourcing</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHERE IT PUBLISHES -->
+  <section class="surfaces">
+    <div class="container">
+      <span class="section-label">One update. Every surface.</span>
+      <h2 class="section-title">They submit once.<br>Everything stays in sync.</h2>
+      <p class="section-sub" style="margin:0 auto 16px">No logging into each platform separately. No forgetting to update the QR menu. No outdated listing.</p>
+      <div class="one-update-pill">1 submission by your GM at 9:47 AM →</div>
+      <div class="surface-grid">
+        <div class="surface-card">
+          <div class="surface-card-icon">📱</div>
+          <h4>QR Menu</h4>
+          <p>Every table scan shows the current version — live catch, pulled items, updated prices.</p>
+        </div>
+        <div class="surface-card">
+          <div class="surface-card-icon">🌐</div>
+          <h4>Restaurant Website</h4>
+          <p>Your menu page, specials section, and hours stay current automatically.</p>
+        </div>
+        <div class="surface-card">
+          <div class="surface-card-icon">📡</div>
+          <h4>Gulf Coast Radar</h4>
+          <p>Your GCR listing reflects today's happy hour, events, and live music in real time.</p>
+        </div>
+        <div class="surface-card">
+          <div class="surface-card-icon">📄</div>
+          <h4>Restaurant Profile Page</h4>
+          <p>Your CyberCheck public page — shareable, bookmarkable, always accurate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <span class="section-label">Get set up</span>
+      <h2>We build it for you.<br><span>Your team just taps and updates.</span></h2>
+      <p>Tell us about your restaurant and we'll set up your daily update flow, QR menu, and booking messages. Ready in days, not weeks.</p>
+      <button onclick="openModal()" class="btn-primary" style="margin:0 auto;position:relative;z-index:1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Get Set Up for My Restaurant
+      </button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p style="margin-bottom:8px;color:rgba(255,255,255,.55);font-weight:600">CyberCheck LLC</p>
+    <p style="margin-bottom:6px">
+      <a href="tel:2058104950">(205) 810-4950</a>
+      &nbsp;&middot;&nbsp;
+      <a href="mailto:info@cybercheckinc.com">info@cybercheckinc.com</a>
+    </p>
+    <p>CyberCheck Restaurants · <a href="index3.html">Gulf Coast Radar</a> · <a href="gulf-coast-bookings.html">CyberCheck Bookings</a> · <a href="checkmate-reviews.html">CyberCheck Reviews</a></p>
+  </footer>
+
+  <!-- FAB -->
+  <button class="fab" onclick="openModal()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Get Set Up
+  </button>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <div class="modal-header" id="modalHeader">
+        <h3>Set Up My Restaurant</h3>
+        <button class="modal-close" onclick="closeModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-sub" id="modalSub">Tell us about your restaurant and what you need. We'll reach out within 24 hours to get everything configured for you.</p>
+      <div class="modal-body" id="modalBody">
+        <div class="form-row">
+          <input class="form-input" id="f-name" type="text" placeholder="Your name" />
+          <input class="form-input" id="f-biz" type="text" placeholder="Restaurant name" />
+        </div>
+        <input class="form-input" id="f-phone" type="tel" placeholder="Phone number (we'll text you)" style="margin-bottom:10px;width:100%" />
+        <select class="form-select" id="f-type">
+          <option value="" disabled selected>What type of restaurant?</option>
+          <option>Seafood / Raw Bar</option>
+          <option>Bar / Waterfront Bar</option>
+          <option>Live Music Venue</option>
+          <option>Beach / Casual Dining</option>
+          <option>Fine Dining</option>
+          <option>Fast Casual / Counter Service</option>
+          <option>Other</option>
+        </select>
+        <select class="form-select" id="f-need">
+          <option value="" disabled selected>What's your biggest pain point?</option>
+          <option>Keeping the menu and specials current</option>
+          <option>QR menu always out of date</option>
+          <option>Reservation reminders and no-shows</option>
+          <option>Staff not updating anything</option>
+          <option>All of the above</option>
+        </select>
+        <input class="form-input" id="f-website" type="url" placeholder="Restaurant website (if you have one)" style="margin-bottom:10px;width:100%" />
+        <button class="form-submit" id="submitBtn" onclick="submitForm()">Let's Get Started</button>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
+          <input type="checkbox" id="f-consent" style="margin-top:3px;flex-shrink:0;accent-color:var(--teal)" />
+          <span style="font-size:.72rem;color:var(--gray);line-height:1.5">
+            By checking this box and submitting, I agree to receive SMS text messages from <strong>CyberCheck LLC</strong> regarding my account setup and updates. Message frequency varies. Msg &amp; data rates may apply. Reply <strong>STOP</strong> to opt out, <strong>HELP</strong> for help.
+            <a href="privacy.html" style="color:var(--teal);font-weight:600" target="_blank">Privacy Policy</a> &middot;
+            <a href="terms.html" style="color:var(--teal);font-weight:600" target="_blank">Terms of Service</a>
+          </span>
+        </label>
+      </div>
+      <div class="modal-success" id="modalSuccess">
+        <div class="success-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3>We'll be in touch!</h3>
+        <p>We'll text you within 24 hours to get your daily update flow, QR menu, and booking messages configured. Your team will love it.<br><br>
+        Questions? Call <a href="tel:2058104950" style="color:var(--teal);font-weight:700">(205) 810-4950</a> or email <a href="mailto:info@cybercheckinc.com" style="color:var(--teal);font-weight:700">info@cybercheckinc.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    function showSuccess() {
+      document.getElementById('modalHeader').classList.add('hidden');
+      document.getElementById('modalSub').classList.add('hidden');
+      document.getElementById('modalBody').classList.add('hidden');
+      document.getElementById('modalSuccess').classList.add('show');
+    }
+
+    function submitForm() {
+      var name    = document.getElementById('f-name').value.trim();
+      var biz     = document.getElementById('f-biz').value.trim();
+      var phone   = document.getElementById('f-phone').value.trim();
+      var type    = document.getElementById('f-type').value;
+      var need    = document.getElementById('f-need').value;
+      var website = document.getElementById('f-website').value.trim();
+      var consent = document.getElementById('f-consent').checked;
+
+      if (!name || !biz || !phone) {
+        alert('Please fill in your name, restaurant name, and phone number.');
+        return;
+      }
+      if (!consent) {
+        alert('Please agree to receive SMS messages to continue.');
+        return;
+      }
+
+      var btn = document.getElementById('submitBtn');
+      btn.textContent = 'Submitting...';
+      btn.disabled = true;
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'CyberCheck Restaurants',
+          name: name,
+          business: biz,
+          phone: phone,
+          type: type,
+          need: need,
+          website: website,
+          sms_consent: true
+        })
+      }).catch(function() {}).finally(function() { showSuccess(); });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>

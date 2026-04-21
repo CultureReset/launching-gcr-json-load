@@ -1833,6 +1833,25 @@
     }
 
     document.body.appendChild(overlay);
+
+    // WhatsApp alert to the 601 notification number stored on the CircleBoat dashboard profile.
+    // No phone config needed here — server looks it up from messaging_settings for this site.
+    (function() {
+      var siteId = CONFIG.subdomain || window.SUBDOMAIN || '';
+      if (!siteId) return;
+      var waApiBase = window.WHATSAPP_API_BASE || 'https://cybercheck-login.vercel.app';
+      var waMsg = 'NEW BOOKING - CircleBoat!\n' +
+        'Customer: ' + name + '\n' +
+        'Booking: ' + desc + '\n' +
+        'Total: $' + (total > 0 ? (total.toFixed ? total.toFixed(2) : total) : '0') + '\n' +
+        'Confirmation: ' + confirmNum + '\n' +
+        'Email: ' + email;
+      fetch(waApiBase + '/api/whatsapp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ site_id: siteId, message: waMsg })
+      }).catch(function() {});
+    }());
   }
 
   function closeBooking() {

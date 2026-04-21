@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CyberCheck Bookings — Free Online Booking for Gulf Coast Businesses</title>
+  <meta name="description" content="Free online booking platform for Gulf Coast businesses. Fishing charters, boat rentals, salons, tours and more. Get found, get booked, get real reviews.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #4A90E2;
+      --blue-dark: #3a7bd5;
+      --teal: #14B8A6;
+      --teal-dark: #0d9488;
+      --teal-light: #5dd9d4;
+      --sky: #87CEEB;
+      --dark: #1a1a1a;
+      --gray: #4b5563;
+      --gray-light: #9ca3af;
+      --border: #e5e7eb;
+      --bg-off: #f8fafc;
+      --white: #ffffff;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ══ NAV ══ */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, #3a7bd5 0%, #4A90E2 100%);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 16px rgba(0,0,0,.2);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-logo-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.3px;
+    }
+
+    .nav-logo-text span { color: var(--teal-light); }
+
+    .nav-cta {
+      background: var(--teal);
+      color: #fff;
+      font-weight: 700;
+      font-size: .85rem;
+      padding: 9px 18px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(20,184,166,.4);
+      transition: background .2s;
+      white-space: nowrap;
+    }
+
+    .nav-cta:hover { background: var(--teal-dark); }
+
+    /* ══ HERO ══ */
+    .hero {
+      background: linear-gradient(160deg, #87CEEB 0%, #B0E0E6 25%, #4A90E2 60%, #3a7bd5 100%);
+      padding: 80px 20px 100px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--white);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.25);
+      border: 1px solid rgba(255,255,255,.5);
+      color: #fff;
+      font-weight: 700;
+      font-size: .78rem;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.15);
+    }
+
+    .hero h1 span { color: var(--teal-light); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: rgba(255,255,255,.9);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      font-weight: 500;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 16px 32px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(20,184,166,.5);
+      transition: all .2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--teal-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(20,184,166,.6);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,.2);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 16px 28px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,.5);
+      transition: all .2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.3);
+    }
+
+    .hero-note {
+      margin-top: 16px;
+      font-size: .82rem;
+      color: rgba(255,255,255,.75);
+      font-weight: 500;
+    }
+
+    /* ══ TRUST BAR ══ */
+    .trust-bar {
+      background: var(--bg-off);
+      border-bottom: 1px solid var(--border);
+      padding: 20px;
+      text-align: center;
+    }
+
+    .trust-bar p {
+      font-size: .85rem;
+      color: var(--gray);
+      font-weight: 500;
+    }
+
+    .trust-bar strong { color: var(--dark); }
+
+    /* ══ PROBLEM ══ */
+    .problem {
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--teal-dark);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--gray);
+      max-width: 560px;
+      margin: 0 auto 48px;
+    }
+
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .pain-card {
+      background: #fff5f5;
+      border: 1px solid #fecaca;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: left;
+    }
+
+    .pain-icon {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .pain-card h4 {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #dc2626;
+      margin-bottom: 6px;
+    }
+
+    .pain-card p {
+      font-size: .85rem;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    /* ══ HOW IT WORKS ══ */
+    .how {
+      background: var(--bg-off);
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step {
+      position: relative;
+    }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 auto 16px;
+      box-shadow: 0 4px 16px rgba(74,144,226,.3);
+    }
+
+    .step h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: .88rem;
+      color: var(--gray);
+      line-height: 1.55;
+    }
+
+    /* ══ FEATURES ══ */
+    .features {
+      padding: 80px 20px;
+    }
+
+    .features-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .feature-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      max-width: 960px;
+      margin: 0 auto 80px;
+    }
+
+    .feature-block.reverse { direction: rtl; }
+    .feature-block.reverse > * { direction: ltr; }
+
+    .feature-visual {
+      background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      border: 1px solid #BFDBFE;
+    }
+
+    .feature-visual.teal-bg {
+      background: linear-gradient(135deg, #F0FDFA, #CCFBF1);
+      border-color: #99F6E4;
+    }
+
+    .feature-visual.purple-bg {
+      background: linear-gradient(135deg, #FAF5FF, #EDE9FE);
+      border-color: #DDD6FE;
+    }
+
+    .mock-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.08);
+      margin-bottom: 12px;
+    }
+
+    .mock-card:last-child { margin-bottom: 0; }
+
+    .mock-label {
+      font-size: .7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--gray-light);
+      margin-bottom: 6px;
+    }
+
+    .mock-value {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .mock-badge {
+      display: inline-block;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-top: 6px;
+    }
+
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-blue { background: #dbeafe; color: #2563eb; }
+    .badge-teal { background: #ccfbf1; color: #0d9488; }
+    .badge-orange { background: #fff7ed; color: #ea580c; }
+
+    .sms-bubble {
+      background: #e7f3ff;
+      border-radius: 14px 14px 14px 4px;
+      padding: 12px 16px;
+      font-size: .85rem;
+      color: #1e40af;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .sms-meta {
+      font-size: .72rem;
+      color: var(--gray-light);
+      margin-bottom: 12px;
+    }
+
+    .review-stars {
+      color: #f59e0b;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .review-q {
+      font-size: .78rem;
+      color: var(--gray);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .review-a {
+      font-size: .82rem;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+
+    .verified-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: .7rem;
+      font-weight: 700;
+      color: #16a34a;
+      background: #dcfce7;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .avail-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0fdf4;
+      font-size: .85rem;
+    }
+
+    .avail-row:last-child { border-bottom: none; }
+
+    .avail-name { font-weight: 600; color: var(--dark); }
+    .avail-slots { color: var(--gray); font-size: .78rem; }
+    .avail-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+    .avail-dot.limited { background: #f59e0b; }
+
+    .feature-content { }
+
+    .feature-tag {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #dbeafe;
+      color: #2563eb;
+      margin-bottom: 14px;
+    }
+
+    .feature-tag.teal { background: #ccfbf1; color: #0d9488; }
+    .feature-tag.purple { background: #ede9fe; color: #7c3aed; }
+
+    .feature-content h2 {
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: -.4px;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .feature-content p {
+      font-size: .95rem;
+      color: var(--gray);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .9rem;
+      color: var(--dark);
+    }
+
+    .check-item::before {
+      content: '';
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--teal);
+      flex-shrink: 0;
+      margin-top: 2px;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='9' viewBox='0 0 12 9' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4L4.5 7.5L11 1' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    /* ══ WHO IT'S FOR ══ */
+    .who {
+      background: linear-gradient(160deg, #3a7bd5 0%, #4A90E2 50%, #14B8A6 100%);
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .who .section-label { color: var(--teal-light); }
+    .who .section-title { color: #fff; }
+    .who .section-sub { color: rgba(255,255,255,.8); }
+
+    .biz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .biz-chip {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      color: #fff;
+      font-weight: 600;
+      font-size: .88rem;
+      backdrop-filter: blur(4px);
+      transition: background .2s;
+    }
+
+    .biz-chip:hover { background: rgba(255,255,255,.28); }
+
+    .biz-chip-icon {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+    }
+
+    /* ══ REVIEW PLATFORM ══ */
+    .reviews-section {
+      padding: 80px 20px;
+      background: var(--bg-off);
+      text-align: center;
+    }
+
+    .review-platform-card {
+      max-width: 780px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 48px 40px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.06);
+    }
+
+    .review-platform-card .feature-tag {
+      margin-bottom: 20px;
+    }
+
+    .review-platform-card h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -.4px;
+      margin-bottom: 16px;
+    }
+
+    .review-platform-card p {
+      font-size: .95rem;
+      color: var(--gray);
+      max-width: 520px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+    }
+
+    .review-flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 20px;
+      text-align: left;
+    }
+
+    .review-flow-step {
+      background: var(--bg-off);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      border: 1px solid var(--border);
+    }
+
+    .flow-icon {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .review-flow-step h4 {
+      font-size: .88rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .review-flow-step p {
+      font-size: .78rem;
+      color: var(--gray);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ══ EMBED ══ */
+    .embed-section {
+      padding: 70px 20px;
+      text-align: center;
+    }
+
+    .embed-code-block {
+      display: inline-block;
+      background: #0f172a;
+      color: #7dd3fc;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: .82rem;
+      padding: 20px 28px;
+      border-radius: var(--radius);
+      margin: 24px auto;
+      text-align: left;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .embed-code-block .code-comment { color: #475569; }
+    .embed-code-block .code-tag { color: #f472b6; }
+    .embed-code-block .code-attr { color: #a5f3fc; }
+    .embed-code-block .code-val { color: #86efac; }
+
+    /* ══ FREE CTA ══ */
+    .cta-section {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+      padding: 100px 20px;
+      text-align: center;
+    }
+
+    .cta-section .section-label { color: var(--teal-light); }
+
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .cta-section h2 span { color: var(--teal-light); }
+
+    .cta-section p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.7);
+      max-width: 500px;
+      margin: 0 auto 40px;
+    }
+
+    .cta-perks {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .cta-perk {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .88rem;
+      color: rgba(255,255,255,.8);
+      font-weight: 500;
+    }
+
+    .cta-perk::before {
+      content: '✓';
+      color: var(--teal-light);
+      font-weight: 800;
+    }
+
+    /* ══ FLOATING CTA ══ */
+    .fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 90;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: .92rem;
+      padding: 14px 22px;
+      border-radius: 100px;
+      box-shadow: 0 6px 24px rgba(20,184,166,.5);
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all .2s;
+    }
+
+    .fab:hover {
+      background: var(--teal-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(20,184,166,.6);
+    }
+
+    /* ══ MODAL ══ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,.25);
+      animation: slideUp .25s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 28px 0;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-light);
+      padding: 4px;
+      border-radius: 6px;
+      transition: color .15s;
+      line-height: 1;
+    }
+
+    .modal-close:hover { color: var(--dark); }
+
+    .modal-sub {
+      font-size: .85rem;
+      color: var(--gray);
+      padding: 6px 28px 20px;
+    }
+
+    .modal-body {
+      padding: 0 28px 28px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-off);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--dark);
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border .2s;
+    }
+
+    .form-input::placeholder { color: var(--gray-light); }
+    .form-input:focus { border-color: var(--teal); background: #fff; }
+
+    .form-select {
+      width: 100%;
+      background: var(--bg-off);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--gray);
+      font-size: .9rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .form-select:focus { border-color: var(--teal); }
+
+    .form-submit {
+      width: 100%;
+      background: var(--teal);
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 16px rgba(20,184,166,.35);
+      transition: all .2s;
+      margin-top: 4px;
+    }
+
+    .form-submit:hover {
+      background: var(--teal-dark);
+      transform: translateY(-1px);
+    }
+
+    .form-disclaimer {
+      font-size: .72rem;
+      color: var(--gray-light);
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* Success state */
+    .modal-success {
+      display: none;
+      text-align: center;
+      padding: 48px 28px;
+    }
+
+    .modal-success.show { display: block; }
+    .modal-body.hidden { display: none; }
+    .modal-header.hidden { display: none; }
+    .modal-sub.hidden { display: none; }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .modal-success h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .modal-success p {
+      font-size: .9rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    /* ══ FOOTER ══ */
+    .footer {
+      background: #0f172a;
+      padding: 32px 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .footer p {
+      font-size: .82rem;
+      color: rgba(255,255,255,.35);
+    }
+
+    .footer a {
+      color: var(--teal-light);
+      font-weight: 600;
+    }
+
+    /* ══ RESPONSIVE ══ */
+    @media (max-width: 700px) {
+      .feature-block {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .feature-block.reverse { direction: ltr; }
+      .review-platform-card { padding: 32px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <span class="nav-logo-text">Cyber<span>Check</span> Bookings</span>
+    </div>
+    <button onclick="openModal()" class="nav-cta" style="border:none;cursor:pointer">Get Started Free</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><circle cx="12" cy="11" r="3"/></svg>
+      Built for Gulf Coast Businesses
+    </div>
+    <h1>Get Found.<br>Get Booked.<br><span>Get Real Reviews.</span></h1>
+    <p class="hero-sub">Stop losing customers to voicemail and DMs. Online booking, SMS alerts, real-time availability, and verified reviews — all free.</p>
+    <div class="hero-actions">
+      <button onclick="openModal()" class="btn-primary" style="border:none;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Claim Your Free Spot
+      </button>
+      <a href="#how-it-works" class="btn-secondary">See How It Works</a>
+    </div>
+    <p class="hero-note">No credit card. No contract. Free for Gulf Coast businesses.</p>
+  </section>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <p>Serving <strong>Orange Beach · Gulf Shores · Foley · Fairhope · Perdido Key</strong> and surrounding Gulf Coast communities</p>
+  </div>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="container">
+      <span class="section-label">Sound familiar?</span>
+      <h2 class="section-title">Running your bookings on<br>voicemail and Instagram DMs?</h2>
+      <p class="section-sub">Most Gulf Coast businesses are leaving money on the table every single day. Here's what's costing you.</p>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <div class="pain-icon">📵</div>
+          <h4>Missed calls = missed revenue</h4>
+          <p>Customers don't leave voicemails anymore. If you don't answer, they find someone who does.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">📱</div>
+          <h4>DMs aren't a booking system</h4>
+          <p>Back-and-forth texts to confirm dates, times, and payment wastes hours and loses bookings.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">🤷</div>
+          <h4>No way to collect reviews</h4>
+          <p>Happy customers don't leave reviews on their own. And fake reviews are everywhere.</p>
+        </div>
+        <div class="pain-card">
+          <div class="pain-icon">👻</div>
+          <h4>No-shows with no warning</h4>
+          <p>Without automated reminders, no-shows happen constantly and you can't fill the slot.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how" id="how-it-works">
+    <div class="container">
+      <span class="section-label">How it works</span>
+      <h2 class="section-title">Up and running in minutes</h2>
+      <p class="section-sub">No tech experience needed. We set it up with you.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Claim your free listing</h3>
+          <p>Fill out the form below. We build your booking page and listing on Gulf Coast Radar — your business, your availability, live online.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Customers book online</h3>
+          <p>They pick their date, time, group size, and pay. You get an instant SMS. No more phone tag.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Reviews come automatically</h3>
+          <p>After their experience, your customer gets a one-time SMS link. They leave a real review. It posts to your listing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="container">
+      <div class="features-header">
+        <span class="section-label">Everything included</span>
+        <h2 class="section-title">Your whole booking operation,<br>handled.</h2>
+      </div>
+
+      <!-- Feature 1: Real-time availability -->
+      <div class="feature-block">
+        <div class="feature-visual">
+          <div class="mock-card">
+            <div class="mock-label">Gulf Coast Radar — Live Availability</div>
+            <div class="avail-row">
+              <div>
+                <div class="avail-name">Blue Water Charters</div>
+                <div class="avail-slots">4 slots open today</div>
+              </div>
+              <div class="avail-dot"></div>
+            </div>
+            <div class="avail-row">
+              <div>
+                <div class="avail-name">Orange Beach Kayak Co.</div>
+                <div class="avail-slots">2 slots left this weekend</div>
+              </div>
+              <div class="avail-dot limited"></div>
+            </div>
+            <div class="avail-row">
+              <div>
+                <div class="avail-name">Gulf Pontoon Rentals</div>
+                <div class="avail-slots">Open tomorrow 8am–4pm</div>
+              </div>
+              <div class="avail-dot"></div>
+            </div>
+            <div class="avail-row">
+              <div>
+                <div class="avail-name">Sunrise Paddle Tours</div>
+                <div class="avail-slots">Fully booked this weekend</div>
+              </div>
+              <div class="avail-dot" style="background:#ef4444"></div>
+            </div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-label">Customer searches "boat rental today"</div>
+            <div class="mock-value" style="color:var(--teal-dark)">Your business shows up — with open slots.</div>
+          </div>
+        </div>
+        <div class="feature-content">
+          <span class="feature-tag">Real-Time Availability</span>
+          <h2>Get discovered when customers are ready to book</h2>
+          <p>Your availability shows live on Gulf Coast Radar. When someone searches for a fishing charter, boat rental, or tour today — they see exactly who's open right now and can book in seconds.</p>
+          <div class="check-list">
+            <div class="check-item">Live availability synced with your calendar</div>
+            <div class="check-item">Show up in "available today" searches</div>
+            <div class="check-item">More last-minute bookings, fewer empty slots</div>
+            <div class="check-item">Listed alongside every Gulf Coast business on the radar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: SMS notifications -->
+      <div class="feature-block reverse">
+        <div class="feature-visual teal-bg">
+          <div class="mock-card">
+            <div class="mock-label">New Booking — SMS Alert</div>
+            <div class="sms-bubble">
+              New booking! 🎣<br>
+              <strong>Jake M.</strong> — 4-hr Fishing Charter<br>
+              6 people · Sat June 14 · 6:00 AM<br>
+              Paid: $480
+            </div>
+            <div class="sms-meta">Just now · Gulf Coast Bookings</div>
+            <div class="mock-badge badge-green">Confirmed</div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-label">Reminder sent automatically</div>
+            <div class="sms-bubble" style="background:#f0fdf4;color:#166534">
+              Reminder: Your charter is tomorrow at 6am! Meet at the dock on Canal Rd. Reply STOP to cancel.
+            </div>
+            <div class="sms-meta">24 hours before · Auto-sent</div>
+          </div>
+        </div>
+        <div class="feature-content">
+          <span class="feature-tag teal">SMS Notifications</span>
+          <h2>Know the moment a booking lands. No app needed.</h2>
+          <p>Every new booking sends you an instant text with all the details — who, when, how many, and how much. Your customer gets an automatic reminder so they actually show up.</p>
+          <div class="check-list">
+            <div class="check-item">Instant SMS to you when a booking is made</div>
+            <div class="check-item">Automatic reminder texts to your customers</div>
+            <div class="check-item">No-show rate drops dramatically</div>
+            <div class="check-item">Works on any phone — no app required</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Verified Reviews -->
+      <div class="feature-block">
+        <div class="feature-visual purple-bg">
+          <div class="mock-card">
+            <div class="mock-label">Review Request — Post-Experience SMS</div>
+            <div class="sms-bubble" style="background:#faf5ff;color:#5b21b6">
+              Hey Sarah! Hope you had a great time on your 4-hr snorkel tour. Leave a quick review — your link is only for you:<br>
+              <strong style="color:#7c3aed">gcr.link/review/xt92k</strong>
+            </div>
+            <div class="sms-meta">Sent 2 hrs after tour ended · One-time link</div>
+          </div>
+          <div class="mock-card">
+            <div class="review-stars">★★★★★</div>
+            <div class="review-q">How was the experience overall?</div>
+            <div class="review-a">"Absolutely incredible. Captain was so knowledgeable."</div>
+            <div class="review-q">What did you do?</div>
+            <div class="review-a">4-hr Snorkel Tour · 3 people</div>
+            <span class="verified-tag">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Verified Booking
+            </span>
+          </div>
+        </div>
+        <div class="feature-content">
+          <span class="feature-tag purple">Verified Reviews</span>
+          <h2>Real reviews from real customers. Automatically.</h2>
+          <p>After every experience, your customer gets a one-time SMS link — only they can use it. They answer your custom questions. The review shows exactly what they booked and when. No fake reviews. Ever.</p>
+          <div class="check-list">
+            <div class="check-item">One-time link tied to their real booking</div>
+            <div class="check-item">Your custom review questions — not generic stars</div>
+            <div class="check-item">Itemized context: what they did, how many people</div>
+            <div class="check-item">100% verified — only actual customers can review</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section class="who">
+    <div class="container">
+      <span class="section-label">Who it's for</span>
+      <h2 class="section-title">Any Gulf Coast business<br>that takes appointments or reservations</h2>
+      <p class="section-sub" style="margin-bottom:40px">If you take bookings, rentals, or appointments — this is built for you.</p>
+      <div class="biz-grid">
+        <div class="biz-chip"><div class="biz-chip-icon">🎣</div>Fishing Charters</div>
+        <div class="biz-chip"><div class="biz-chip-icon">⛵</div>Boat Rentals</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🛶</div>Kayak & Paddle Tours</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🏖️</div>Beach Chair Rentals</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🤿</div>Snorkel & Dive Tours</div>
+        <div class="biz-chip"><div class="biz-chip-icon">💇</div>Hair & Nail Salons</div>
+        <div class="biz-chip"><div class="biz-chip-icon">💆</div>Massage & Spa</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🏄</div>Surf & Water Sports</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🐬</div>Dolphin Tours</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🚤</div>Jet Ski Rentals</div>
+        <div class="biz-chip"><div class="biz-chip-icon">🦞</div>Seafood Experiences</div>
+        <div class="biz-chip"><div class="biz-chip-icon">📸</div>Photography Sessions</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW PLATFORM -->
+  <section class="reviews-section">
+    <div class="container">
+      <span class="section-label">The review platform</span>
+      <h2 class="section-title">The only reviews that actually mean something</h2>
+      <p class="section-sub">Reviews on Gulf Coast Radar are verified. Every single one came from a real booking. Not a competitor. Not a bot. A real customer.</p>
+      <div class="review-platform-card">
+        <span class="feature-tag purple">How Verified Reviews Work</span>
+        <h2>From booking to review in 4 steps</h2>
+        <p>We handle the entire review funnel automatically. You just focus on delivering a great experience.</p>
+        <div class="review-flow">
+          <div class="review-flow-step">
+            <div class="flow-icon">📅</div>
+            <h4>Booking confirmed</h4>
+            <p>Customer books and pays. Their booking ID is recorded.</p>
+          </div>
+          <div class="review-flow-step">
+            <div class="flow-icon">✅</div>
+            <h4>Experience complete</h4>
+            <p>After their appointment or rental ends, the system triggers automatically.</p>
+          </div>
+          <div class="review-flow-step">
+            <div class="flow-icon">📲</div>
+            <h4>One-time SMS link</h4>
+            <p>They get a unique link tied to their booking. Only they can use it.</p>
+          </div>
+          <div class="review-flow-step">
+            <div class="flow-icon">⭐</div>
+            <h4>Verified review posted</h4>
+            <p>Their review shows their booking details. 100% authentic. Publicly visible.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EMBED -->
+  <section class="embed-section">
+    <div class="container">
+      <span class="section-label">Embed anywhere</span>
+      <h2 class="section-title">Add booking to your existing website<br>in one line of code</h2>
+      <p class="section-sub" style="max-width:520px;margin:0 auto">Already have a website? Drop one snippet in and your booking calendar, availability, and reviews show up right on your site.</p>
+      <div class="embed-code-block">
+        <span class="code-comment">&lt;!-- Paste this where you want your booking widget --&gt;</span><br>
+        <span class="code-tag">&lt;div</span> <span class="code-attr">id</span>=<span class="code-val">"gcb-widget"</span><span class="code-tag">&gt;&lt;/div&gt;</span><br>
+        <span class="code-tag">&lt;script</span> <span class="code-attr">src</span>=<span class="code-val">"https://gcr.app/embed.js?id=your-business"</span><span class="code-tag">&gt;&lt;/script&gt;</span>
+      </div>
+      <p style="font-size:.85rem;color:var(--gray-light)">We'll give you your custom embed code when you sign up. No developer needed.</p>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="cta-section" id="get-started">
+    <div class="container">
+      <span class="section-label">Free for Gulf Coast businesses</span>
+      <h2>Ready to stop losing<br><span>bookings to voicemail?</span></h2>
+      <p>Claim your free listing on Gulf Coast Radar and get your booking page live. We'll reach out within 24 hours to get you set up.</p>
+      <div class="cta-perks">
+        <span class="cta-perk">Free forever for Gulf Coast businesses</span>
+        <span class="cta-perk">Live in under 24 hours</span>
+        <span class="cta-perk">No credit card</span>
+      </div>
+      <button class="btn-primary" onclick="openModal()" style="margin:0 auto">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Claim My Free Spot
+      </button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p style="margin-bottom:8px;color:rgba(255,255,255,.55);font-weight:600">CyberCheck LLC</p>
+    <p style="margin-bottom:6px">
+      <a href="tel:2058104950">(205) 810-4950</a>
+      &nbsp;&middot;&nbsp;
+      <a href="mailto:info@cybercheckinc.com">info@cybercheckinc.com</a>
+    </p>
+    <p>CyberCheck Bookings is part of <a href="index3.html">Gulf Coast Radar</a> &mdash; the local guide for Orange Beach, Gulf Shores &amp; beyond.</p>
+  </footer>
+
+  <!-- FLOATING ACTION BUTTON -->
+  <button class="fab" onclick="openModal()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Get Started Free
+  </button>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header" id="modalHeader">
+        <h3>Claim Your Free Spot</h3>
+        <button class="modal-close" onclick="closeModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-sub" id="modalSub">We'll build your listing and booking page — free. We'll text you within 24 hours.</p>
+      <div class="modal-body" id="modalBody">
+        <div class="form-row">
+          <input class="form-input" id="f-name" type="text" placeholder="Your name" />
+          <input class="form-input" id="f-biz" type="text" placeholder="Business name" />
+        </div>
+        <input class="form-input" id="f-phone" type="tel" placeholder="Phone number (we'll text you)" style="margin-bottom:10px;width:100%" />
+        <select class="form-select" id="f-type">
+          <option value="" disabled selected>What type of business?</option>
+          <option>Fishing Charter</option>
+          <option>Boat / Pontoon Rental</option>
+          <option>Kayak / Paddle Tour</option>
+          <option>Jet Ski Rental</option>
+          <option>Beach Chair / Umbrella Rental</option>
+          <option>Snorkel / Dive Tour</option>
+          <option>Dolphin / Wildlife Tour</option>
+          <option>Hair / Nail Salon</option>
+          <option>Massage / Spa</option>
+          <option>Photography</option>
+          <option>Other</option>
+        </select>
+        <input class="form-input" id="f-website" type="url" placeholder="Website (optional)" style="margin-bottom:10px;width:100%" />
+        <button class="form-submit" type="button" id="submitBtn" onclick="submitForm()">Claim My Free Spot</button>
+        <label style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer">
+          <input type="checkbox" id="f-consent" style="margin-top:3px;flex-shrink:0;accent-color:var(--teal)" />
+          <span style="font-size:.72rem;color:var(--gray);line-height:1.5">
+            By checking this box and submitting, I agree to receive SMS text messages from <strong>CyberCheck LLC</strong> regarding my account setup and updates. Message frequency varies. Msg &amp; data rates may apply. Reply <strong>STOP</strong> to opt out, <strong>HELP</strong> for help.
+            <a href="privacy.html" style="color:var(--teal);font-weight:600" target="_blank">Privacy Policy</a> &middot;
+            <a href="terms.html" style="color:var(--teal);font-weight:600" target="_blank">Terms of Service</a>
+          </span>
+        </label>
+      </div>
+      <!-- Success -->
+      <div class="modal-success" id="modalSuccess">
+        <div class="success-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3>You're on the list!</h3>
+        <p>We'll text you within 24 hours to get your listing and booking page live. Welcome aboard.<br><br>
+        Questions? Call <a href="tel:2058104950" style="color:var(--teal);font-weight:700">(205) 810-4950</a> or email <a href="mailto:info@cybercheckinc.com" style="color:var(--teal);font-weight:700">info@cybercheckinc.com</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    function showSuccess() {
+      document.getElementById('modalHeader').classList.add('hidden');
+      document.getElementById('modalSub').classList.add('hidden');
+      document.getElementById('modalBody').classList.add('hidden');
+      document.getElementById('modalSuccess').classList.add('show');
+    }
+
+    function submitForm() {
+      var name    = document.getElementById('f-name').value.trim();
+      var biz     = document.getElementById('f-biz').value.trim();
+      var phone   = document.getElementById('f-phone').value.trim();
+      var type    = document.getElementById('f-type').value;
+      var website = document.getElementById('f-website').value.trim();
+      var consent = document.getElementById('f-consent').checked;
+
+      if (!name || !biz || !phone) {
+        alert('Please fill in your name, business name, and phone number.');
+        return;
+      }
+      if (!consent) {
+        alert('Please agree to receive SMS messages to continue.');
+        return;
+      }
+
+      var btn = document.getElementById('submitBtn');
+      btn.textContent = 'Submitting...';
+      btn.disabled = true;
+
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'CyberCheck Bookings',
+          name: name,
+          business: biz,
+          phone: phone,
+          type: type,
+          website: website,
+          sms_consent: true
+        })
+      }).catch(function() {}).finally(function() { showSuccess(); });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    document.querySelectorAll('a[href="#get-started"]').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal();
+      });
+    });
+  </script>
+
+</body>
+</html>
