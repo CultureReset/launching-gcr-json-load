@@ -112,7 +112,7 @@
     .gcr-item-card-thumb {
       width: 100%; height: 220px; border-radius: 0;
       background-size: cover; background-position: center; background-repeat: no-repeat;
-      border-top: none; border-bottom: 1px solid #e8eef4; margin: 10px 0 0;
+      border-bottom: 1px solid #e8eef4;
     }
 
     /* Items list */
@@ -507,12 +507,12 @@ function buildBusinessCard(entity, q) {
 
   return `
     <a href="${profileUrl}" class="gcr-item-card" style="text-decoration:none;color:inherit;display:block;">
+      <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
       <div class="gcr-item-card-header">
         <div class="gcr-item-card-bizname">${esc(name)}</div>
         <div class="gcr-item-card-meta"><span>${esc(subtype)}</span>${rating ? `<span>${Number(rating).toFixed(1)} ⭐</span>` : ''}${reviews ? `<span>(${reviews})</span>` : ''}</div>
         ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
         ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
-        <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
       </div>
       ${desc ? `<div style="padding:10px 16px;font-size:13px;color:#5c6b81;line-height:1.6;border-bottom:1px solid #f0f4f8;">${esc(desc)}</div>` : ''}
       ${chips ? `<div style="padding:8px 16px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #f0f4f8;">${chips}</div>` : ''}
@@ -571,12 +571,12 @@ function buildItemCard(entity, items, q) {
 
   return `
     <div class="gcr-item-card">
+      <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
       <div class="gcr-item-card-header">
         <div class="gcr-item-card-bizname">${esc(name)}</div>
         ${metaHtml}
         ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
         ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
-        <div class="gcr-item-card-thumb" style="background-image:url('${hero}')"></div>
       </div>
       <div class="gcr-item-list">
         <div class="gcr-item-label">🍴 Matching Items</div>
