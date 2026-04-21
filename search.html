@@ -36,10 +36,10 @@
       display: block; text-decoration: none; color: inherit;
     }
     .gcr-search-card:hover { box-shadow: 0 8px 32px rgba(11,122,117,.13); transform: translateY(-2px); }
-    .gcr-search-card-inner { display: grid; grid-template-columns: clamp(220px, 35%, 400px) 1fr; }
+    .gcr-search-card-inner { display: flex; flex-direction: column; }
     .gcr-search-card-img {
-      min-height: 240px; height: 100%; background-size: cover; background-position: center;
-      position: relative; align-self: stretch;
+      width: 100%; min-height: 260px; background-size: cover; background-position: center;
+      position: relative;
     }
     .gcr-search-card-badge {
       position: absolute; top: 10px; left: 10px;
@@ -254,7 +254,6 @@
       .gcr-item-card-actions { display: none; }
     }
     @media (max-width: 760px) {
-      .gcr-search-card-inner { grid-template-columns: 160px 1fr; }
       .gcr-search-card-img { min-height: 200px; }
       .gcr-search-card-name { font-size: 20px; }
     }
