@@ -346,8 +346,8 @@
   .section-head { margin-bottom: 32px; }
 
   /* ══ CATEGORY TILES ══ */
-  .cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-  @media(max-width:640px) { .cat-grid { grid-template-columns: repeat(2,1fr); gap: 10px; } }
+  .cat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; grid-auto-rows: 1fr; }
+  @media(max-width:640px) { .cat-grid { grid-template-columns: repeat(2,1fr); gap: 10px; grid-auto-rows: 1fr; } }
   .cat-tile {
     background: #fff;
     border-radius: 14px;
