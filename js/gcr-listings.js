@@ -29,13 +29,8 @@
       padding:10px 0;
       margin:0 !important;
     }
-    .toolbar.tags-stuck .toolbar-top {
-      display:none !important;
-    }
-    .toolbar.tags-stuck {
-      padding-top:6px !important;
-      padding-bottom:6px !important;
-    }
+    .toolbar.is-stuck .toolbar-top { display:none !important; }
+    .toolbar.is-stuck { padding:6px 12px !important; }
     .gcr-card {
       display:grid;grid-template-columns:clamp(240px, 35%, 400px) minmax(0,1fr);
       background:#fff;border:1px solid #e2e8f0;border-radius:20px;
@@ -1370,12 +1365,10 @@ function initStandardPage() {
     var toolbar = document.querySelector('.toolbar');
     if (!toolbar) return;
     var headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gcr-header-h')) || 165;
-    var naturalTop = toolbar.offsetTop;
-    function check() {
-      toolbar.classList.toggle('tags-stuck', window.scrollY >= naturalTop - headerH);
-    }
-    window.addEventListener('scroll', check, { passive: true });
-    check();
+    var naturalTop = toolbar.getBoundingClientRect().top + window.scrollY;
+    window.addEventListener('scroll', function() {
+      toolbar.classList.toggle('is-stuck', window.scrollY >= naturalTop - headerH);
+    }, { passive: true });
   })();
 }
 
