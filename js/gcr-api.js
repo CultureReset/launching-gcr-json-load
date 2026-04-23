@@ -179,15 +179,15 @@ const GCR = {
     return this.businesses.filter(b => b.featured);
   },
   getHappyHours() {
+    // Prefer the dedicated happy-hours endpoint data (most complete)
+    if (this.happyHours && this.happyHours.length) return this.happyHours;
+    // Fallback: filter businesses for any hh fields
     return this.businesses.filter(b => {
-      // New DB fields
       if (b.hh_days && b.hh_days.trim()) return true;
-      // Old field aliases
       const hh = b.happyHour || b.happy_hour;
       if (!hh) return false;
       if (hh === true) return true;
       if (typeof hh === 'string' && hh.trim().length > 0) return true;
-      // Check tags
       const tags = (b.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).map(t => t.toLowerCase());
       return tags.includes('happy_hour') || tags.includes('happy hour');
     });
@@ -211,9 +211,27 @@ const GCR = {
   getUpcomingEvents(limit) {
     const today = new Date().toISOString().split('T')[0];
     const upcoming = this.events
-      .filter(e => (e.date || e.event_date || '') >= today)
+      .filter(e => {
+        const d = e.date || e.event_date || '';
+        const dow = (e.day_of_week || '').trim();
+        return d >= today || dow.length > 0;
+      })
       .sort((a, b) => (a.date || a.event_date || '').localeCompare(b.date || b.event_date || ''));
     return limit ? upcoming.slice(0, limit) : upcoming;
+  },
+  getRecurringEvents() {
+    return this.events.filter(e => (e.day_of_week || '').trim().length > 0);
+  },
+  getOneTimeEvents(limit) {
+    const today = new Date().toISOString().split('T')[0];
+    const events = this.events
+      .filter(e => {
+        const d = e.date || e.event_date || '';
+        const dow = (e.day_of_week || '').trim();
+        return d >= today && !dow;
+      })
+      .sort((a, b) => (a.date || a.event_date || '').localeCompare(b.date || b.event_date || ''));
+    return limit ? events.slice(0, limit) : events;
   },
   // Full search — hits backend which queries entity, menu_items, drink_items, specials, events, tags, activities
   async search(q) {

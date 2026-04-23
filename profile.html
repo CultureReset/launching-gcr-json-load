@@ -633,9 +633,17 @@
       }
     }
 
-    // Events from entity_events
+    // Events from entity_events — skip policy/info entries (no type, date, or day)
     if (!B.events.length && (data.events || []).length) {
-      B.events = data.events.map(ev => ({
+      const seenEvNames = new Set();
+      B.events = data.events.filter(ev => {
+        const hasSchedule = ev.event_type || ev.event_date || ev.day_of_week || ev.recurring;
+        if (!hasSchedule) return false;
+        const key = (ev.event_name || '').toLowerCase().trim();
+        if (seenEvNames.has(key)) return false;
+        seenEvNames.add(key);
+        return true;
+      }).map(ev => ({
         name: ev.event_name,
         desc: ev.description || (ev.artist_name ? 'Featuring ' + ev.artist_name : ''),
         badge: ev.event_type || (ev.recurring ? 'Every ' + ev.day_of_week : ev.event_date || ''),
@@ -656,9 +664,14 @@
         B.sections.push({ id: 'specials', label: 'Specials', icon: '⭐' });
     }
 
-    // Things To Do — pricing
+    // Things To Do — pricing (dedupe by time+price)
     if (!B.packages.length && (data.pricing || []).length) {
-      B.packages = data.pricing.map(p => ({
+      const seenPkg = new Set();
+      B.packages = data.pricing.filter(p => {
+        const key = (p.time_slot_start||'') + '|' + (p.price_text||p.price||'') + '|' + (p.package_name||'');
+        if (seenPkg.has(key)) return false;
+        seenPkg.add(key); return true;
+      }).map(p => ({
         name: p.package_name, desc: p.description,
         price: p.price_text || (p.price ? '$' + p.price : ''),
         duration: [p.time_slot_start && p.time_slot_end ? p.time_slot_start + '–' + p.time_slot_end : '', p.price_unit].filter(Boolean).join(' · '),
@@ -978,17 +991,17 @@
         html += '</div>';
         let schedHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
 
-        // Group schedules by ticket structure to avoid duplication
+        // Group schedules by ticket structure, dedupe duplicate times
         const ticketKey = s => JSON.stringify((s.tickets||[]).map(t => `${t.name}:${t.price}`).sort());
         const grouped = {};
         (B.schedules || []).forEach(s => {
           const key = ticketKey(s);
-          if (!grouped[key]) grouped[key] = { times: [], tickets: s.tickets || [] };
-          grouped[key].times.push(s);
+          if (!grouped[key]) grouped[key] = { times: new Set(), tickets: s.tickets || [] };
+          if (s.time) grouped[key].times.add(s.time);
         });
 
         Object.values(grouped).forEach(group => {
-          const times = group.times.map(s => s.time).join(', ');
+          const times = [...group.times].join(', ');
           schedHTML += `<div class="card" style="margin-bottom:12px">
             <div style="margin-bottom:12px">
               <div style="font-size:16px;font-weight:800">${times}</div>
@@ -1098,22 +1111,32 @@
         html += `</ul>`;
         break;
 
-      case 'requirements':
+      case 'requirements': {
+        const seenReq = new Set();
         html += `<ul style="margin:0;padding-left:18px;display:grid;gap:8px">`;
         (B._requirements || []).forEach(r => {
+          const norm = (r.requirement_text||'').trim().toLowerCase().replace(/\s+/g,' ');
+          if (!norm || seenReq.has(norm)) return;
+          seenReq.add(norm);
           html += `<li style="font-size:14px;color:var(--muted);line-height:1.5">${r.requirement_text}</li>`;
         });
         html += `</ul>`;
         break;
+      }
 
-      case 'policies':
+      case 'policies': {
+        const seenPol = new Set();
         (B._policies || []).forEach(p => {
+          const norm = (p.policy_text||'').trim().toLowerCase().replace(/\s+/g,' ');
+          if (!norm || seenPol.has(norm)) return;
+          seenPol.add(norm);
           html += `<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)">
             ${p.policy_type ? `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:4px">${p.policy_type.replace(/_/g,' ')}</div>` : ''}
             <div style="font-size:14px;color:var(--muted);line-height:1.6">${p.policy_text}</div>
           </div>`;
         });
         break;
+      }
 
       case 'meetingpoint': {
         const mp = B._meetingPoint || {};

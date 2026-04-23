@@ -403,7 +403,9 @@ function buildCard(entity) {
     usedUrls.add(key);
     return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
   };
-  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const profileUrl = isActivity
+    ? `activity-profile.html?id=${encodeURIComponent(slug)}`
+    : `profile.html?id=${encodeURIComponent(slug)}`;
   const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
   const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ View Menu</a>`;
   const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';

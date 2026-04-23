@@ -16,6 +16,7 @@
 
   <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; max-width: 100%; }
   body { font-family: 'Inter', -apple-system, sans-serif; background: #fff; color: #1a1a1a; }
 
   /* ══ HEADER ══ */
@@ -374,7 +375,7 @@
     .cat-tile-top  { height: 64px; font-size: 1.6rem; }
     .cat-tile-desc { display: none; }
     .cat-tile-name { font-size: .82rem; }
-    .cat-tile-body { padding: 8px 10px 10px; }
+    .cat-tile-body { padding: 8px 10px 10px; justify-content: flex-start; gap: 4px; }
   }
   .ct-restaurants { background: linear-gradient(135deg,#0b7a75,#065f5b); }
   .ct-coffee      { background: linear-gradient(135deg,#7c4f2a,#5d3a1f); }
@@ -1629,6 +1630,18 @@ document.addEventListener('gcr:loaded', function() {
 
   function setEl(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
 
+  function to12hr(t) {
+    if (!t) return '';
+    var s = String(t).trim();
+    if (/[ap]m/i.test(s)) return s; // already 12-hour format — pass through
+    var parts = s.split(':');
+    var h = parseInt(parts[0], 10), m = parseInt(parts[1] || '0', 10);
+    if (isNaN(h)) return t;
+    var suffix = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + (m ? ':' + String(m).padStart(2,'0') : '') + ' ' + suffix;
+  }
+
   // ── Live Music Tonight ──
   var musicEvents = (GCR.events || []).filter(function(e) {
     const t = (e.event_type || e.type || '').toLowerCase();
@@ -1644,7 +1657,7 @@ document.addEventListener('gcr:loaded', function() {
   if (musicEvents.length) {
     setEl('hn-music', musicEvents.map(function(e) {
       const venue = e.businessName || e.venue_location || '';
-      const time  = e.start_time || e.time || '';
+      const time  = to12hr(e.start_time || e.time || '');
       return '<div style="margin-bottom:5px;">🎵 <strong>' + (e.name || e.event_name || 'Live Music') + '</strong>' +
         (venue ? ' · ' + venue : '') + (time ? ' · ' + time : '') + '</div>';
     }).join(''));
@@ -1653,17 +1666,28 @@ document.addEventListener('gcr:loaded', function() {
   }
 
   // ── Happy Hours Open Now ──
-  var openHH = (GCR.businesses || []).filter(function(b) {
+  var hhSource = (GCR.happyHours && GCR.happyHours.length) ? GCR.happyHours : GCR.businesses;
+  var openHH = (hhSource || []).filter(function(b) {
     if (!b.hh_days && !b.hh_start) return false;
     const days = (b.hh_days || '').toLowerCase();
-    const dayMatch = days.includes(dayName.slice(0,3)) || days.includes('daily') || days.includes('every') || days.includes('mon-fri') || days.includes('weekday');
+    const dayMatch = days.includes(dayName.slice(0,3)) || days.includes('daily') || days.includes('every') || days.includes('mon-fri') || days.includes('weekday') || days.includes('monday') || days.includes('tuesday') || days.includes('wednesday') || days.includes('thursday') || days.includes('friday') || days.includes('saturday') || days.includes('sunday');
     if (!dayMatch) return false;
+    // If we have start/end times, check if open right now
     if (b.hh_start && b.hh_end) {
       try {
-        const start = parseInt(b.hh_start.replace(':',''));
-        const end   = parseInt(b.hh_end.replace(':',''));
-        const now4  = hour * 100 + now.getMinutes();
-        return now4 >= start && now4 <= end;
+        // Normalize to 24h for comparison
+        function toMins(ts) {
+          var s = String(ts).trim();
+          var isPM = /pm/i.test(s); var isAM = /am/i.test(s);
+          s = s.replace(/[apm\s]/gi,'');
+          var p = s.split(':'); var hh = parseInt(p[0]); var mm = parseInt(p[1]||'0');
+          if (isPM && hh !== 12) hh += 12;
+          if (isAM && hh === 12) hh = 0;
+          return hh * 60 + mm;
+        }
+        var startM = toMins(b.hh_start), endM = toMins(b.hh_end);
+        var nowM   = hour * 60 + now.getMinutes();
+        return nowM >= startM && nowM <= endM;
       } catch(e) { return true; }
     }
     return true;
@@ -1671,17 +1695,17 @@ document.addEventListener('gcr:loaded', function() {
 
   if (openHH.length) {
     setEl('hn-happyhour', openHH.map(function(b) {
-      const time = (b.hh_start && b.hh_end) ? b.hh_start + '–' + b.hh_end : '';
+      const time = (b.hh_start && b.hh_end) ? to12hr(b.hh_start) + '–' + to12hr(b.hh_end) : '';
       return '<div style="margin-bottom:5px;">🟢 <strong>' + b.name + '</strong>' + (time ? ' · ' + time : '') + '</div>';
     }).join(''));
   } else {
     // Show upcoming happy hours for today
-    var upcomingHH = (GCR.businesses || []).filter(function(b) {
+    var upcomingHH = (hhSource || []).filter(function(b) {
       return b.hh_days && (b.hh_days.toLowerCase().includes(dayName.slice(0,3)) || b.hh_days.toLowerCase().includes('daily'));
     }).slice(0, 3);
     if (upcomingHH.length) {
       setEl('hn-happyhour', upcomingHH.map(function(b) {
-        return '<div style="margin-bottom:5px;">🕐 <strong>' + b.name + '</strong>' + (b.hh_start ? ' starts ' + b.hh_start : '') + '</div>';
+        return '<div style="margin-bottom:5px;">🕐 <strong>' + b.name + '</strong>' + (b.hh_start ? ' starts ' + to12hr(b.hh_start) : '') + '</div>';
       }).join(''));
     } else {
       setEl('hn-happyhour', '<span style="color:rgba(255,255,255,.5);font-size:.82rem;">Check individual listings for happy hour times</span>');

@@ -318,7 +318,7 @@
           </div>
           ${desc?`<div style="margin-top:8px;color:#50677a;font-size:13px;line-height:1.5;">${esc(desc)}</div>`:''}
           <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            ${ev.recurring?'<span style="background:#eef2ff;color:var(--purple);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>':''}
+            ${(ev.recurring||(ev.day_of_week||'').trim())?'<span style="background:#eef2ff;color:var(--purple);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>':''}
             ${ev.cover_charge?'<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>':''}
             <div style="margin-left:auto;display:flex;gap:6px;">
               ${profileUrl?`<a href="${profileUrl}" style="background:var(--brand);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;text-decoration:none;">View Venue →</a>`:''}
@@ -390,8 +390,8 @@
     const todayStr  = now.toISOString().split('T')[0];
     const todayName = DAYS[now.getDay()];
     let events = allEvents.filter(e => {
-      const isToday    = e.event_date === todayStr;
-      const isRecurring = e.recurring && (e.day_of_week||'').toLowerCase() === todayName;
+      const isToday     = e.event_date === todayStr;
+      const isRecurring = (e.recurring || (e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName;
       return isToday || isRecurring;
     }).filter(matchesFilter);
     events.sort((a,b) => (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
@@ -411,7 +411,7 @@
 
   function renderWeekly() {
     const grid = document.getElementById('weeklyGrid');
-    let events = allEvents.filter(e => e.recurring).filter(matchesFilter);
+    let events = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim()).filter(matchesFilter);
     document.getElementById('resultCount').textContent = `${events.length} recurring events`;
     if (!events.length) { grid.innerHTML = `<div style="padding:52px 24px;text-align:center;color:#66788a;"><div style="font-size:3rem;margin-bottom:12px;">🗓️</div><h3 style="font-weight:800;margin:0 0 8px;">No weekly schedules yet</h3></div>`; return; }
     const dayOrder = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
@@ -608,7 +608,7 @@
     const now = new Date();
     const todayStr  = now.toISOString().split('T')[0];
     const todayName = DAYS[now.getDay()];
-    const todayCount = allEvents.filter(e => e.event_date===todayStr || (e.recurring&&(e.day_of_week||'').toLowerCase()===todayName)).length;
+    const todayCount = allEvents.filter(e => e.event_date===todayStr || ((e.recurring||(e.day_of_week||'').trim())&&(e.day_of_week||'').toLowerCase()===todayName)).length;
     const musicCount = allEvents.filter(e => (e.event_type||'').includes('live')||(e.event_type||'').includes('music')).length;
     const livebox = document.querySelector('.livebox');
     if (livebox) {
@@ -634,7 +634,7 @@
 
     // Featured Tonight: events happening today, sorted soonest first
     const featured = allEvents.filter(e =>
-      e.event_date === today || (e.recurring && (e.day_of_week||'').toLowerCase() === todayName)
+      e.event_date === today || ((e.recurring||(e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName)
     ).slice(0, 3);
 
     const featuredPanel = document.getElementById('featuredTonightPanel');
@@ -654,8 +654,8 @@
       featuredPanel.style.display = '';
     }
 
-    // Recurring: events with recurring=true
-    const recurring = allEvents.filter(e => e.recurring).slice(0, 3);
+    // Recurring: events with recurring flag OR day_of_week set
+    const recurring = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim()).slice(0, 5);
     const recurringPanel = document.getElementById('recurringPanel');
     const recurringList  = document.getElementById('recurringList');
     if (recurring.length && recurringPanel && recurringList) {
