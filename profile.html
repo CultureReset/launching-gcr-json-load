@@ -385,10 +385,10 @@
       coverImages: e.hero_image_url ? [e.hero_image_url] : [],
       about: {
         description: '',
-        features: (data.features || []).map(f => f.label),
-        perfectFor: (data.perfect_for || []).map(p => p.label),
+        features: [...new Set((data.features || []).map(f => f.label).filter(Boolean))],
+        perfectFor: [...new Set((data.perfect_for || []).map(p => p.label).filter(Boolean))],
       },
-      tags: (data.tags || []).map(t => t.tag),
+      tags: [...new Set((data.tags || []).map(t => t.tag).filter(Boolean))],
       highlights: [],
       restrictions: [],
       schedules: [],
@@ -739,8 +739,14 @@
     if (!B.sections.find(s => s.id === 'location') && (B.address || B.city))
       B.sections.push({ id: 'location', label: 'Location', icon: '📍' });
 
-    // Move photos and hours to the end regardless of API order
-    const moveToEnd = ['gallery', 'hours'];
+    // Tags / Features / Perfect For section — always at the very bottom
+    if ((B.about?.features?.length || B.about?.perfectFor?.length || B.tags?.length)
+        && !B.sections.find(s => s.id === 'tags')) {
+      B.sections.push({ id: 'tags', label: 'Tags & Features', icon: '🏷️' });
+    }
+
+    // Move photos, hours, and tags to the end regardless of API order
+    const moveToEnd = ['gallery', 'hours', 'tags'];
     moveToEnd.forEach(id => {
       const idx = B.sections.findIndex(s => s.id === id);
       if (idx > -1) B.sections.push(B.sections.splice(idx, 1)[0]);
@@ -884,17 +890,18 @@
     switch (sec.id) {
 
       case 'about':
-        if (B.about) {
-          if (B.about.description) html += `<p class="about-p">${B.about.description}</p>`;
-          if (B.about.features?.length) {
-            html += `<div class="sub-label">Features</div><div class="tag-row">${B.about.features.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
-          }
-          if (B.about.perfectFor?.length) {
-            html += `<div class="sub-label">Perfect For</div><div class="tag-row">${B.about.perfectFor.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
-          }
-          if (B.tags?.length) {
-            html += `<div class="sub-label">Categories</div><div class="tag-row">${B.tags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t}</span>`).join('')}</div>`;
-          }
+        if (B.about && B.about.description) html += `<p class="about-p">${B.about.description}</p>`;
+        break;
+
+      case 'tags':
+        if (B.about?.features?.length) {
+          html += `<div class="sub-label">Features</div><div class="tag-row">${B.about.features.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
+        }
+        if (B.about?.perfectFor?.length) {
+          html += `<div class="sub-label">Perfect For</div><div class="tag-row">${B.about.perfectFor.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
+        }
+        if (B.tags?.length) {
+          html += `<div class="sub-label">Categories</div><div class="tag-row">${B.tags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t}</span>`).join('')}</div>`;
         }
         break;
 
