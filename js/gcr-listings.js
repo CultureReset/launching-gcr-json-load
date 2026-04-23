@@ -488,6 +488,10 @@ function buildCard(entity) {
     ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
     : (hasLiveMusic ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:600;">🎸 Live Music</div>` : '');
 
+  // Cache entity for save button
+  if (window.GCRSaves) window.GCRSaves.cacheEntity(entity);
+  const saveBtn = window.GCRSaves ? window.GCRSaves.saveBtnHtml(slug) : '';
+
   return `
     <a href="profile.html?id=${encodeURIComponent(slug)}"
        style="text-decoration:none;color:inherit;"
@@ -497,9 +501,10 @@ function buildCard(entity) {
        data-hh="${entity.hh_days ? '1' : '0'}"
        data-live="${hasLiveMusic ? '1' : '0'}">
       <div class="gcr-card">
-        <div class="gcr-card-img" style="background-image:url('${hero}')">
+        <div class="gcr-card-img" style="background-image:url('${hero}');position:relative;">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
+          ${saveBtn}
           ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
         </div>
         <div class="gcr-card-body">
