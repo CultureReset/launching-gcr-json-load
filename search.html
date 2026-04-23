@@ -496,62 +496,18 @@ function buildItemCard(entity, items, q) {
     }).join('');
     moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
   } else {
-    // No matched items — build rows from whatever business data matched
-    listLabel = '🔍 Matched By';
-    viewBtnLabel = 'View Profile';
-    const rows = [];
-    const ql = (q || '').toLowerCase();
-    const qWords = ql.split(/\s+/).filter(w => w.length > 2);
-
-    // Matching tags
-    const tags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
-    const matchingTags = tags.filter(t => {
-      const tl = t.toLowerCase().replace(/_/g, ' ');
-      return tl.includes(ql) || qWords.some(w => tl.includes(w));
-    });
-    if (matchingTags.length) {
-      rows.push(`
-        <div class="gcr-item-row">
-          <div class="gcr-item-content">
-            <div class="gcr-item-name">🏷️ Tags</div>
-            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">${matchingTags.slice(0, 8).map(t => `<span class="gcr-search-chip feature">${esc(t.replace(/_/g,' '))}</span>`).join('')}</div>
-          </div>
-        </div>`);
-    }
-
-    // Description (if query appears in it or nothing else matched)
+    // No matched items — only show if business has a description
     const desc = entity.description || '';
-    if (desc && (desc.toLowerCase().includes(ql) || qWords.some(w => desc.toLowerCase().includes(w)) || !matchingTags.length)) {
-      rows.push(`
-        <div class="gcr-item-row">
-          <div class="gcr-item-content">
-            <div class="gcr-item-name">📝 About</div>
-            <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
-          </div>
-        </div>`);
-    }
+    if (!desc) return '';
 
-    // Happy Hour
-    if (entity.hh_days) {
-      const hh = `${esc(entity.hh_days)}${entity.hh_start ? ' · '+esc(entity.hh_start) : ''}${entity.hh_end ? '–'+esc(entity.hh_end) : ''}`;
-      rows.push(`
-        <div class="gcr-item-row">
-          <div class="gcr-item-content">
-            <div class="gcr-item-name" style="color:#d97706;">🍺 Happy Hour</div>
-            <div class="gcr-item-desc">${hh}</div>
-          </div>
-        </div>`);
-    }
-
-    if (!rows.length) {
-      rows.push(`
-        <div class="gcr-item-row" style="justify-content:center;">
-          <div class="gcr-item-content" style="text-align:center;color:#8fa3b1;font-style:italic;padding:10px 0;">
-            No matching items for "${esc(q)}" — matched by business name or category
-          </div>
-        </div>`);
-    }
-    listInner = rows.join('');
+    listLabel = '📝 About';
+    viewBtnLabel = 'View Profile';
+    listInner = `
+      <div class="gcr-item-row">
+        <div class="gcr-item-content">
+          <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
+        </div>
+      </div>`;
   }
 
   const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">${viewBtnLabel}</a>`;
