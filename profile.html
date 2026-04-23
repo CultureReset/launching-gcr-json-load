@@ -345,6 +345,21 @@
     return;
   }
 
+  // ── Redirect activity types to activity-profile.html ──────
+  const ACTIVITY_SUBTYPES = new Set([
+    'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
+    'dolphin-cruises-tours','dolphin_cruise','dolphin_cruises_tours','jet-ski-rentals-tours',
+    'jet_ski','jet_ski_rentals_tours','canoe-kayak-paddleboard-rentals','canoe_kayak_paddleboard',
+    'banana-boat-rides','banana_boat','helicopter-airplane-tours','sunset-cruises-tours',
+    'boat-tours','boat_tours','watersports','attraction','attractions','tour',
+    'snorkeling','paddleboard','kayak_rental','fishing-charters','activities','activity','things-to-do'
+  ]);
+  const rawSub = (entityData.entity.entity_subtype || '').toLowerCase();
+  if (ACTIVITY_SUBTYPES.has(rawSub) || ACTIVITY_SUBTYPES.has(rawSub.replace(/-/g,'_'))) {
+    window.location.replace('activity-profile.html?id=' + encodeURIComponent(slug));
+    return;
+  }
+
   // ── Map entity API → BUSINESS_DATA ────────────────────────
   const B = mapEntityToBusinessData(entityData);
   window.BUSINESS_DATA = B;
