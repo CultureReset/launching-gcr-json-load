@@ -165,7 +165,6 @@ const GCR = {
       'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery'],
       'services':      ['services','service','salon','spa','photographer','photography','wellness','transportation'],
       'other':         ['other','misc','miscellaneous','hotel','condo','resort','vacation_rental','parking','boat_launch','beach_access','park'],
-      'public-spots':  ['public-spots','public_spot','public-spot','park','parks','parking','parking-lot','parking_lot','beach_access','beach-access','boat_launch','boat-launch','pier','pier-fishing','pier_fishing','park-facility-rental','park_facility_rental','public_beach','public-beach','nature_refuge','wildlife_refuge','amusement-park','amusement_park'],
     };
     const valid = aliases[cat] || [cat];
     return this.businesses.filter(b => {

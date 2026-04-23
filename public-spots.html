@@ -206,6 +206,12 @@
         <h1>Beach Access & Public Spots</h1>
         <p>Find beach accesses, boat launches, fishing spots, public restrooms, parking, parks, and other useful public amenities across the Gulf Coast.</p>
       </div>
+      <div class="livebox">
+        <strong>Today's Highlights</strong>
+        <span id="spotCount">28 public spots listed</span>
+        <span id="beachCount">12 beach accesses</span>
+        <span id="facilityCount">8 facilities with restrooms</span>
+      </div>
     </section>
 
     <section class="toolbar">
@@ -236,7 +242,9 @@
 
     <section class="layout">
       <main>
-        <div class="list" id="listingsGrid" data-category="public-spots"></div>
+        <div id="spotsContainer">
+          <!-- Spots rendered by JavaScript -->
+        </div>
       </main>
 
       <aside class="sidebar">
