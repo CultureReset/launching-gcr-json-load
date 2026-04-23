@@ -395,6 +395,17 @@ function buildCard(entity) {
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
+  // Detect activity type — must match profile.html redirect list exactly
+  const ACTIVITY_SUBTYPES = new Set([
+    'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
+    'dolphin-cruises-tours','dolphin_cruise','dolphin_cruises_tours','jet-ski-rentals-tours',
+    'jet_ski','jet_ski_rentals_tours','canoe-kayak-paddleboard-rentals','canoe_kayak_paddleboard',
+    'banana-boat-rides','banana_boat','helicopter-airplane-tours','sunset-cruises-tours',
+    'boat-tours','boat_tours','watersports','snorkeling','paddleboard','kayak_rental','fishing-charters'
+  ]);
+  const rawSubtype = (entity.entity_subtype || entity.type || '').toLowerCase();
+  const isActivity = ACTIVITY_SUBTYPES.has(rawSubtype) || ACTIVITY_SUBTYPES.has(rawSubtype.replace(/-/g,'_'));
+
   const usedUrls = new Set();
   const dedupeBtn = (url, label, style) => {
     if (!url) return '';
@@ -425,18 +436,6 @@ function buildCard(entity) {
       <div style="font-size:13px;color:#78350f;font-weight:600;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
       ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
     </div>` : '';
-
-  // Detect activity type
-  const ACTIVITY_SUBTYPES = new Set([
-    'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
-    'dolphin-cruises-tours','dolphin_cruise','dolphin_cruises_tours','jet-ski-rentals-tours',
-    'jet_ski','jet_ski_rentals_tours','canoe-kayak-paddleboard-rentals','canoe_kayak_paddleboard',
-    'banana-boat-rides','banana_boat','helicopter-airplane-tours','sunset-cruises-tours',
-    'boat-tours','boat_tours','watersports','rentals','attraction','attractions','tour',
-    'snorkeling','paddleboard','kayak_rental'
-  ]);
-  const rawSubtype = (entity.entity_subtype || entity.type || '').toLowerCase();
-  const isActivity = ACTIVITY_SUBTYPES.has(rawSubtype) || ACTIVITY_SUBTYPES.has(rawSubtype.replace(/-/g,'_'));
 
   // About — 3 lines, no fallback
   const aboutBlock = desc
