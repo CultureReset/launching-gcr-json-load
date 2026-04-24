@@ -57,6 +57,7 @@ const GCR = {
   /* ── LOAD ALL DATA ── */
   // Filter out test/spam entities
   _isTestEntity(b) {
+    if (b.is_active === false) return true;
     const s = (b.slug || b.subdomain || '').toLowerCase();
     const n = (b.name || '').toLowerCase();
     const a = (b.address_line_1 || b.address || '').toLowerCase();

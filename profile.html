@@ -345,6 +345,11 @@
     return;
   }
 
+  if (entityData.entity.is_active === false) {
+    window.location.replace('index3.html');
+    return;
+  }
+
   // ── Redirect specific water sport / tour activity types to activity-profile.html ──────
   const ACTIVITY_SUBTYPES = new Set([
     'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',

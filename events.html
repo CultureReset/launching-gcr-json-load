@@ -604,7 +604,20 @@
   }
 
   function init() {
-    allEvents = GCR.events || [];
+    const rawEvents = GCR.events || [];
+    const seen = new Set();
+    allEvents = rawEvents.filter(e => {
+      const key = [
+        (e.event_name||'').toLowerCase().trim(),
+        e.entity_id || e.entity_slug || e.venue_location || '',
+        e.start_time || '',
+        e.event_date || e.date || '',
+        (e.day_of_week||'').toLowerCase()
+      ].join('|');
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     const now = new Date();
     const todayStr  = now.toISOString().split('T')[0];
     const todayName = DAYS[now.getDay()];
