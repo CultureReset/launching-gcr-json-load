@@ -160,7 +160,7 @@ const GCR = {
   getByCategory(cat) {
     const aliases = {
       'restaurants':    ['restaurants','restaurant','food','dining','seafood','bar_grill','steakhouse','pizza','mexican','southern','breakfast_spot','beach_bar','casual_dining','hybrid_venue','seafood_restaurant'],
-      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','kayak_rental','canoe-kayak-paddleboard','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour','helicopter-airplane-tours','helicopter_airplane_tours','helicopter','airplane'],
+      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','boat-tours','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','sunset-cruises-tours','kayak_rental','canoe-kayak-paddleboard','canoe-kayak-paddleboard-rentals','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour','helicopter-airplane-tours','helicopter_airplane_tours','helicopter','airplane','car-rentals-transportation'],
       'nightlife':     ['nightlife','bar','bars','club','clubs','bar_club','nightclub','sports_bar','lounge','rooftop_bar'],
       'coffee-sweets': ['coffee-sweets','coffee','cafe','coffee_shop','sweets','desserts','bakery','ice_cream','dessert_bar','smoothie'],
       'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery'],
