@@ -773,7 +773,10 @@
   }
   const heroMeta = document.getElementById('js-hero-meta');
   if (B.rating) heroMeta.innerHTML += `<span class="cover-hero-rating">★ ${B.rating}${B.reviewCount ? ' <span style="font-weight:400;color:rgba(255,255,255,.7);">(${B.reviewCount.toLocaleString()})</span>' : ''}</span>`;
-  if (B.city)   heroMeta.innerHTML += `<span>📍 ${B.city}, ${B.state}</span>`;
+  if (B.address || B.city) {
+    const loc = [B.address, B.city, B.state].filter(Boolean).join(', ');
+    heroMeta.innerHTML += `<span>📍 ${loc}</span>`;
+  }
 
   // ── Cover Slideshow ────────────────────────────────────────
   const slides = B.coverImages || [];
