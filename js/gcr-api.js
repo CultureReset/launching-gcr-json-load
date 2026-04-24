@@ -160,7 +160,7 @@ const GCR = {
   getByCategory(cat) {
     const aliases = {
       'restaurants':    ['restaurants','restaurant','food','dining','seafood','bar_grill','steakhouse','pizza','mexican','southern','breakfast_spot','beach_bar','casual_dining','hybrid_venue','seafood_restaurant'],
-      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','kayak_rental','canoe-kayak-paddleboard','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour'],
+      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','kayak_rental','canoe-kayak-paddleboard','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour','helicopter-airplane-tours','helicopter_airplane_tours','helicopter','airplane'],
       'nightlife':     ['nightlife','bar','bars','club','clubs','bar_club','nightclub','sports_bar','lounge','rooftop_bar'],
       'coffee-sweets': ['coffee-sweets','coffee','cafe','coffee_shop','sweets','desserts','bakery','ice_cream','dessert_bar','smoothie'],
       'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery'],
@@ -168,12 +168,26 @@ const GCR = {
       'other':         ['other','misc','miscellaneous','hotel','condo','resort','vacation_rental','parking','boat_launch','beach_access','park'],
     };
     const valid = aliases[cat] || [cat];
+
+    // Build set of every subtype claimed by some non-"other" category
+    const claimedByOther = new Set();
+    for (const [k, list] of Object.entries(aliases)) {
+      if (k === 'other') continue;
+      list.forEach(v => { claimedByOther.add(v); claimedByOther.add(v.replace(/-/g,'_')); });
+    }
+
     return this.businesses.filter(b => {
       const t = (b.type || '').toLowerCase();
       const c = (b.category || '').toLowerCase();
       const sub = (b.entity_subtype || '').toLowerCase();
-      return valid.includes(t) || valid.includes(c) || valid.includes(sub) ||
-             valid.includes(t.replace(/-/g,'_')) || valid.includes(sub.replace(/-/g,'_'));
+      const matches = valid.includes(t) || valid.includes(c) || valid.includes(sub) ||
+                      valid.includes(t.replace(/-/g,'_')) || valid.includes(sub.replace(/-/g,'_'));
+      if (matches) return true;
+      // "other" catch-all: anything whose subtype isn't claimed by another category
+      if (cat === 'other' && sub && !claimedByOther.has(sub) && !claimedByOther.has(sub.replace(/-/g,'_'))) {
+        return true;
+      }
+      return false;
     });
   },
   getFeatured() {
