@@ -10,7 +10,7 @@ const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
    Stale-while-revalidate: pages render from cache instantly,
    fresh data fetched in background to update cache for next visit.
    Bump GCR_CACHE_VERSION to force-invalidate everyone's cache. */
-const GCR_CACHE_VERSION = 'v2';
+const GCR_CACHE_VERSION = 'v3';
 const GCR_CACHE_TTL_MS  = 10 * 60 * 1000; // 10 minutes — data considered fresh
 
 function _gcrCacheGet(key) {
