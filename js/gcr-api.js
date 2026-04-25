@@ -160,12 +160,13 @@ const GCR = {
   getByCategory(cat) {
     const aliases = {
       'restaurants':    ['restaurants','restaurant','food','dining','seafood','bar_grill','steakhouse','pizza','mexican','southern','breakfast_spot','beach_bar','casual_dining','hybrid_venue','seafood_restaurant'],
-      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','parasailing','boat_rental','boat-rentals','boat-tours','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','sunset-cruises-tours','kayak_rental','canoe-kayak-paddleboard','canoe-kayak-paddleboard-rentals','fishing_charter','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour','helicopter-airplane-tours','helicopter_airplane_tours','helicopter','airplane','car-rentals-transportation'],
+      'things-to-do':  ['things-to-do','rental','rentals','activities','tours','activity','attraction','attractions','parasailing','boat_rental','boat-rentals','boat-tours','jet_ski','jet-ski-rentals-tours','dolphin_cruise','dolphin-cruises-tours','sunset-cruises-tours','kayak_rental','canoe-kayak-paddleboard','canoe-kayak-paddleboard-rentals','fishing_charter','charter-fishing','charter_fishing','snorkeling','paddleboard','banana-boat-rides','banana_boat','tour','helicopter-airplane-tours','helicopter_airplane_tours','helicopter','airplane','car-rentals-transportation','marina','marina-and-rentals','watersports','entertainment','cinema','amusement-park','amusement_park','golf-course','golf_course','pier','park-facility-rental','tourism-destination','festival','park','beach_access'],
       'nightlife':     ['nightlife','bar','bars','club','clubs','bar_club','nightclub','sports_bar','lounge','rooftop_bar'],
-      'coffee-sweets': ['coffee-sweets','coffee','cafe','coffee_shop','sweets','desserts','bakery','ice_cream','dessert_bar','smoothie'],
-      'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery'],
-      'services':      ['services','service','salon','spa','photographer','photography','wellness','transportation'],
-      'other':         ['other','misc','miscellaneous','hotel','condo','resort','vacation_rental','parking','boat_launch','beach_access','park'],
+      'coffee-sweets': ['coffee-sweets','coffee','cafe','coffee_shop','sweets','desserts','bakery','ice_cream','dessert_bar','smoothie','catering'],
+      'shopping':      ['shopping','shop','retail','boutique','souvenir','surf_shop','gift_shop','clothing','art_gallery','liquor-store','liquor_store','florist','pharmacy','pharmacy-retail','convenience-store','convenience_store','gas-station','gas_station'],
+      'services':      ['services','service','salon','spa','salon-spa','salon_spa','spa-wellness','spa_wellness','beauty-salon','beauty_salon','photographer','photography','wellness','transportation','laundry-service','laundromat','car-wash','car_wash','cleaning-services','cleaning_services','restoration-services','fitness','medical-practice','medical_practice','real-estate','real_estate','real-estate-agent','financial-services','financial_services','agency','artist','influencer'],
+      'hotels':        ['hotels','hotel','condo','resort','vacation_rental','vacation-rental','vacation-rental-resort','bed-and-breakfast','bed_and_breakfast','rv-resort','RV Resort','apartment-community','condominium-association'],
+      'other':         ['other','misc','miscellaneous','parking','parking-lot','boat_launch','government','municipal-government','government-services','bank'],
     };
     const valid = aliases[cat] || [cat];
 
