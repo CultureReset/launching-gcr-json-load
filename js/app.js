@@ -5,6 +5,30 @@
    gcr:loaded event from gcr-api.js
    ============================================ */
 
+/* ── Analytics: fires once per page load ── */
+(function gcrAnalytics() {
+  var API = 'https://cybercheck-api-database.vercel.app';
+  var sess = sessionStorage.getItem('gcr_sess_id');
+  if (!sess) { sess = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('gcr_sess_id', sess); }
+  var qs = new URLSearchParams(location.search);
+  var utm = {};
+  ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function(k) {
+    var v = qs.get(k) || sessionStorage.getItem('gcr_' + k);
+    if (v) { utm[k] = v; sessionStorage.setItem('gcr_' + k, v); }
+  });
+  var device = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+  var t0 = Date.now();
+  function send(extra) {
+    fetch(API + '/api/gcr/track', {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ page_path: location.pathname, page_title: document.title, referrer: document.referrer || null, session_id: sess, device_type: device, source: 'gcr' }, utm, extra || {}))
+    }).catch(function(){});
+  }
+  if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', send); } else { send(); }
+  window.addEventListener('pagehide', function() { var s = Math.round((Date.now()-t0)/1000); if (s >= 3) send({ duration_secs: s }); });
+})();
+
 /* ══════════════════════════════════════════
    GLOBAL SEARCH HELPERS (called from HTML onclick)
 ══════════════════════════════════════════ */

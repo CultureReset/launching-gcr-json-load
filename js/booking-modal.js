@@ -151,8 +151,20 @@
     selectedSlot: null,
     extras: [],
     selectedExtras: {},
-    step: 1
+    step: 1,
+    funnelRef: Math.random().toString(36).slice(2) + Date.now().toString(36)
   };
+
+  var _TRACK_API = 'https://cybercheck-api-database.vercel.app';
+  var _stepNames = { 1: 'date_selected', 2: 'boat_time_selected', 3: 'extras_viewed', 4: 'checkout_opened' };
+  function _trackFunnel(step, stepName, meta) {
+    var sess = sessionStorage.getItem('gcr_sess_id') || _bookingState.funnelRef;
+    fetch(_TRACK_API + '/api/public/funnel?subdomain=' + encodeURIComponent(_bookingState.slug || ''), {
+      method: 'POST', keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sess, booking_ref: _bookingState.funnelRef, step: step, step_name: stepName || _stepNames[step] || 'step_' + step, metadata: meta || null, device_type: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'mobile' : 'desktop' })
+    }).catch(function(){});
+  }
 
   // Create modal HTML
   var modal = document.createElement('div');
@@ -308,6 +320,7 @@
       else if (i + 1 < n) t.classList.add('done');
     });
     updateButtons();
+    _trackFunnel(n);
   }
 
   function nextStep() {
@@ -334,6 +347,7 @@
       alert('Please fill in all required fields');
       return;
     }
+    _trackFunnel(5, 'booking_completed', { date: _bookingState.selectedDate, name: name });
     alert('Booking submitted! We will call you to confirm.\n\nDate: ' + _bookingState.selectedDate + '\nName: ' + name + '\nPhone: ' + phone);
     closeBooking();
   }
@@ -341,11 +355,13 @@
   // Global functions
   window.openBooking = function(slug) {
     _bookingState.slug = slug;
+    _bookingState.funnelRef = Math.random().toString(36).slice(2) + Date.now().toString(36);
     document.getElementById('bookingOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
     renderCalendar();
     loadBookingData();
     goToStep(1);
+    _trackFunnel(0, 'booking_opened');
   };
 
   window.closeBooking = function() {
