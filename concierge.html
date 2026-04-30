@@ -407,15 +407,13 @@
 
   async function transcribeWithOpenAI(audioBlob) {
     const formData = new FormData();
-    formData.append('file', audioBlob, 'audio.wav');
-    formData.append('model', 'whisper-1');
+    formData.append('audio', audioBlob, 'audio.wav');
 
     try {
       console.log('🔵 Starting Whisper transcription...');
       showTyping();
-      const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+      const whisperRes = await fetch(`${API}/transcribe`, {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer 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' },
         body: formData
       });
       console.log('Whisper response status:', whisperRes.status);
@@ -459,10 +457,10 @@
   async function speakWithOpenAI(text) {
     try {
       console.log('Speaking:', text);
-      const res = await fetch('https://api.openai.com/v1/audio/speech', {
+      const res = await fetch(`${API}/speak`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
-        body: JSON.stringify({ model: 'tts-1', input: text, voice: 'alloy' })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: 'alloy' })
       });
       if (!res.ok) {
         const err = await res.json();
@@ -482,10 +480,10 @@
   async function speakWithOpenAIAndListen(text) {
     try {
       console.log('🔊 TTS: Speaking text:', text.substring(0, 50) + '...');
-      const res = await fetch('https://api.openai.com/v1/audio/speech', {
+      const res = await fetch(`${API}/speak`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
-        body: JSON.stringify({ model: 'tts-1', input: text, voice: 'alloy' })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: 'alloy' })
       });
       console.log('TTS response status:', res.status);
       if (!res.ok) {
