@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // Load master database
 const dbPath = path.join(__dirname, "../tools/gcr-master-database.json");
@@ -316,8 +317,69 @@ app.get("/api/gcr/search", (req, res) => {
 });
 
 // Single business detail
-app.get("/api/gcr/business/:id", (req, res) => {
-  const business = masterDatabase.find((b) => b.id === req.params.id);
+app.get("/api/gcr/business/:id", async (req, res) => {
+  const id = req.params.id;
+
+  // Special handling for Circle Boats — pull from CyberCheck website content
+  if (id === "beachside-circle-boats") {
+    try {
+      const [siteRes, addonsRes] = await Promise.all([
+        fetch("https://cybercheck-api-database.vercel.app/api/site-data"),
+        fetch("https://cybercheck-api-database.vercel.app/api/dashboard/addons")
+      ]);
+
+      const siteData = await siteRes.json();
+      const addons = await addonsRes.json();
+
+      // Build Circle Boats profile from website content
+      const circleBoats = {
+        id: "beachside-circle-boats",
+        name: siteData.business?.name || "Beachside Circle Boats",
+        tagline: siteData.hero?.subtitle || "Portable Electric Circle Boat Rentals",
+        description: siteData.about?.text || "",
+        rating: siteData.business?.rating || 4.9,
+        reviewCount: siteData.reviews?.length || 0,
+        phone: siteData.business?.phone || "(601) 325-1205",
+        phoneDisplay: siteData.business?.phone || "(601) 325-1205",
+        website: siteData.business?.website || "https://beachsidecircleboats.com",
+        email: siteData.business?.email || "",
+        address: siteData.business?.address || "25856 Canal Road, Unit A",
+        city: siteData.business?.city || "Orange Beach",
+        state: siteData.business?.state || "AL",
+        zip: siteData.business?.zip || "36561",
+        emoji: "🚤",
+        coverImages: siteData.gallery?.map(g => g.image) || [],
+        gallery: siteData.gallery || [],
+        reviews: siteData.reviews || [],
+        about: { description: siteData.about?.text || "", features: siteData.features?.map(f => f.title) || [] },
+        packages: siteData.products || [],
+        sections: [
+          { id: "about", label: "About", icon: "ℹ️" },
+          ...(siteData.products?.length ? [{ id: "packages", label: "Boats & Pricing", icon: "🚤" }] : []),
+          ...(siteData.gallery?.length ? [{ id: "gallery", label: "Photos", icon: "📸" }] : []),
+          { id: "hours", label: "Hours", icon: "🕐" },
+          ...(siteData.docks?.length ? [{ id: "fleet", label: "Docks", icon: "🛟" }] : []),
+          ...(addons?.length ? [{ id: "addons", label: "Add-ons", icon: "➕" }] : []),
+          { id: "location", label: "Location", icon: "📍" },
+          ...(siteData.qna?.length ? [{ id: "qna", label: "FAQ", icon: "❓" }] : [])
+        ],
+        hours: siteData.business?.hours || [],
+        _fleet: siteData.docks || [],
+        _addons: addons || [],
+        _qna: siteData.qna || [],
+        googleMaps: siteData.business?.googleMaps || "",
+        socialInstagram: siteData.business?.socialInstagram || "",
+        socialFacebook: siteData.business?.socialFacebook || ""
+      };
+
+      return res.json(circleBoats);
+    } catch (err) {
+      console.error("Error fetching Circle Boats data:", err);
+      return res.status(500).json({ error: "Failed to load Circle Boats data" });
+    }
+  }
+
+  const business = masterDatabase.find((b) => b.id === id);
 
   if (!business) {
     return res.status(404).json({ error: "Business not found" });
