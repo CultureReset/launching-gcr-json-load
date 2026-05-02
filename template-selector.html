@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GCR Template Selector | CyberCheck</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Inter, sans-serif; background: #f5f7fb; color: #0e1726; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    h1 { margin-bottom: 30px; font-size: 32px; }
+    .templates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .template-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+    .template-card:hover { border-color: #0ea5e9; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1); }
+    .template-preview { height: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; }
+    .template-info { padding: 16px; }
+    .template-name { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+    .template-desc { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+    .template-use { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 4px; }
+    .btn { display: inline-block; padding: 10px 16px; background: #0ea5e9; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn:hover { background: #0284c7; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 GCR Profile Templates</h1>
+    <p style="margin-bottom: 30px; color: #64748b;">Choose a design for any business. All templates work with any data structure.</p>
+
+    <div class="templates-grid" id="templates">
+      <div class="template-card">
+        <div class="template-preview">📸</div>
+        <div class="template-info">
+          <div class="template-name">Photographer</div>
+          <div class="template-desc">Modern dark theme with portfolio focus. Great for photographers, artists, videographers.</div>
+          <div class="template-use">photographer-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-preview">🚤</div>
+        <div class="template-info">
+          <div class="template-name">Rental</div>
+          <div class="template-desc">Teal/blue theme focused on fleet, pricing, and locations. Perfect for rentals and equipment.</div>
+          <div class="template-use">rental-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-preview">🍽️</div>
+        <div class="template-info">
+          <div class="template-name">Restaurant</div>
+          <div class="template-desc">Warm theme with menu and dining focus. Works for restaurants, cafes, bars.</div>
+          <div class="template-use">restaurant-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-preview">🔧</div>
+        <div class="template-info">
+          <div class="template-name">Service</div>
+          <div class="template-desc">Professional theme for services. Ideal for contractors, consultants, agencies.</div>
+          <div class="template-use">service-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-preview">🎣</div>
+        <div class="template-info">
+          <div class="template-name">Fishing Charter</div>
+          <div class="template-desc">Adventure-focused theme. Great for charters, tours, experiences.</div>
+          <div class="template-use">fishing-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-preview">🎨</div>
+        <div class="template-info">
+          <div class="template-name">Artist</div>
+          <div class="template-desc">Creative theme with gallery focus. Perfect for artists, designers, creatives.</div>
+          <div class="template-use">artist-template.html</div>
+          <button class="btn" style="margin-top: 10px;" onclick="alert('Use this template for any business')">View</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 60px; padding: 20px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+      <h3 style="margin-bottom: 10px;">📋 How to Use</h3>
+      <ol style="margin-left: 20px; color: #475569; font-size: 14px; line-height: 1.8;">
+        <li>Choose a template design above</li>
+        <li>Select it in CyberCheck dashboard for your business</li>
+        <li>Template loads with your business data</li>
+        <li>Sections auto-hide if data is missing</li>
+        <li>All templates work for any industry</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

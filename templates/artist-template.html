@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artist Profile | CyberCheck + Gulf Coast Radar</title>
+  <meta name="description" content="A mobile-first artist profile page for musicians, performers, DJs, creators, and entertainers. Includes events, booking, music links, tips, photos, and social links." />
+
+  <style>
+    :root {
+      --bg: #050914;
+      --bg2: #0a1324;
+      --card: rgba(255,255,255,0.075);
+      --card2: rgba(255,255,255,0.11);
+      --border: rgba(255,255,255,0.14);
+      --text: #ffffff;
+      --muted: #b8c2d6;
+      --purple: #875cff;
+      --pink: #ff4fa3;
+      --blue: #1fa8ff;
+      --orange: #ff7a28;
+      --green: #39d98a;
+      --gold: #ffc857;
+      --radius: 28px;
+      --shadow: 0 28px 80px rgba(0,0,0,0.42);
+      --max: 1120px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(135,92,255,0.24), transparent 30%),
+        radial-gradient(circle at 80% 10%, rgba(255,79,163,0.18), transparent 28%),
+        radial-gradient(circle at 60% 100%, rgba(31,168,255,0.16), transparent 32%),
+        linear-gradient(180deg, #050914 0%, #081426 45%, #050914 100%);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(180deg, rgba(5,9,20,0.20), rgba(5,9,20,0.94)),
+        url("https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=2200&q=80");
+      background-size: cover;
+      background-position: center top;
+      opacity: 0.45;
+    }
+
+    .page-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(5,9,20,0.94), rgba(5,9,20,0.45), rgba(5,9,20,0.94)),
+        radial-gradient(circle at 50% 35%, rgba(135,92,255,0.20), transparent 34%);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(5, 9, 20, 0.72);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 42px rgba(135,92,255,0.35);
+      font-size: 24px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 0 22px;
+      border-radius: 999px;
+      font-weight: 950;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: 0.22s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--pink), var(--orange));
+      color: white;
+      box-shadow: 0 18px 44px rgba(135,92,255,0.35);
+    }
+
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.16);
+      color: white;
+    }
+
+    .hero {
+      padding: 76px 0 54px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 42px;
+      align-items: center;
+    }
+
+    .artist-card {
+      border-radius: 38px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: var(--shadow);
+    }
+
+    .artist-photo {
+      height: 520px;
+      background:
+        linear-gradient(180deg, transparent 35%, rgba(5,9,20,0.90) 100%),
+        url("https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1300&q=80");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .artist-badges {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.42);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      font-weight: 900;
+      font-size: 13px;
+    }
+
+    .artist-overlay {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 28px;
+    }
+
+    .artist-overlay h1 {
+      font-size: clamp(42px, 6vw, 76px);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+      margin-bottom: 12px;
+    }
+
+    .artist-overlay p {
+      color: #e7edf8;
+      font-size: 18px;
+      max-width: 520px;
+    }
+
+    .hero-copy h2 {
+      font-size: clamp(40px, 5.5vw, 76px);
+      line-height: 0.98;
+      letter-spacing: -0.06em;
+      margin-bottom: 20px;
+    }
+
+    .gradient {
+      background: linear-gradient(90deg, white, #9f7aff, #ff7a28);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-copy p {
+      color: #dce5f5;
+      font-size: 20px;
+      margin-bottom: 24px;
+      max-width: 700px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 720px;
+    }
+
+    .stat {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 23px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    section {
+      padding: 64px 0;
+    }
+
+    .section-head {
+      max-width: 820px;
+      margin-bottom: 28px;
+    }
+
+    .section-head.center {
+      text-align: center;
+      margin-inline: auto;
+    }
+
+    .kicker {
+      color: #9fbcff;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+      margin-bottom: 14px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .link-card {
+      min-height: 126px;
+      padding: 22px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: 0.22s ease;
+    }
+
+    .link-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.12);
+    }
+
+    .link-card .icon {
+      font-size: 30px;
+      margin-bottom: 14px;
+    }
+
+    .link-card b {
+      font-size: 18px;
+    }
+
+    .link-card span {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: 30px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+    }
+
+    .panel-pad {
+      padding: 28px;
+    }
+
+    .panel h3 {
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .panel p {
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .event-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .event {
+      display: grid;
+      grid-template-columns: 76px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .date-box {
+      min-height: 70px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--purple), var(--pink));
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 950;
+      line-height: 1.05;
+    }
+
+    .date-box span {
+      display: block;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .event h4 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .event p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .event .btn {
+      min-height: 42px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
+
+    .music-player {
+      padding: 26px;
+      background:
+        linear-gradient(145deg, rgba(135,92,255,0.24), rgba(31,168,255,0.11)),
+        rgba(255,255,255,0.06);
+    }
+
+    .track {
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .track:last-child {
+      border-bottom: 0;
+    }
+
+    .play {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
+      font-weight: 950;
+    }
+
+    .track b {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .track span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr 0.7fr;
+      gap: 14px;
+      height: 420px;
+    }
+
+    .photo {
+      border-radius: 26px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      min-height: 190px;
+    }
+
+    .photo.large {
+      grid-row: span 2;
+    }
+
+    .photo:nth-child(1) {
+      background-image: url("https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80");
+    }
+
+    .photo:nth-child(2) {
+      background-image: url("https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .photo:nth-child(3) {
+      background-image: url("https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .photo:nth-child(4) {
+      background-image: url("https://images.unsplash.com/photo-1521334726092-b509a19597c6?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .photo:nth-child(5) {
+      background-image: url("https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .booking-card {
+      padding: 24px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .booking-card h3 {
+      font-size: 23px;
+      margin-bottom: 8px;
+    }
+
+    .booking-card p {
+      color: var(--muted);
+      margin-bottom: 18px;
+      min-height: 78px;
+    }
+
+    .booking-card .price {
+      display: block;
+      font-size: 26px;
+      font-weight: 950;
+      margin-bottom: 18px;
+    }
+
+    .contact-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 18px;
+      padding: 15px 16px;
+      font: inherit;
+      outline: none;
+    }
+
+    .input::placeholder,
+    textarea::placeholder {
+      color: rgba(255,255,255,0.55);
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+    }
+
+    select option {
+      color: #111;
+    }
+
+    .cta {
+      padding: 48px;
+      border-radius: 36px;
+      background:
+        linear-gradient(135deg, rgba(135,92,255,0.32), rgba(255,79,163,0.20), rgba(255,122,40,0.18)),
+        rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .cta h2 {
+      margin-bottom: 8px;
+    }
+
+    .cta p {
+      color: #dce5f5;
+      font-size: 18px;
+    }
+
+    footer {
+      padding: 42px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 980px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid,
+      .content-grid,
+      .cta {
+        grid-template-columns: 1fr;
+      }
+
+      .artist-photo {
+        height: 460px;
+      }
+
+      .link-grid,
+      .booking-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .gallery {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+      }
+
+      .photo.large {
+        grid-column: span 2;
+        min-height: 330px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        width: min(100% - 28px, var(--max));
+      }
+
+      .nav .btn {
+        display: none;
+      }
+
+      .brand {
+        font-size: 14px;
+      }
+
+      .hero {
+        padding-top: 44px;
+      }
+
+      .hero-copy h2 {
+        font-size: 44px;
+      }
+
+      .artist-photo {
+        height: 470px;
+      }
+
+      .artist-overlay {
+        padding: 22px;
+      }
+
+      .artist-overlay h1 {
+        font-size: 48px;
+      }
+
+      .quick-stats,
+      .link-grid,
+      .booking-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .event {
+        grid-template-columns: 64px 1fr;
+      }
+
+      .event .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .photo.large {
+        grid-column: auto;
+      }
+
+      .photo {
+        min-height: 260px;
+      }
+
+      .hero-actions .btn,
+      .cta .btn,
+      .booking-card .btn {
+        width: 100%;
+      }
+
+      .cta {
+        padding: 30px;
+      }
+    }
+  
+    /* ── page nav dropdown ── */
+    .pnav-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: white;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .pnav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4,16,29,0.97);
+      z-index: 999;
+      padding: 24px;
+      overflow-y: auto;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pnav-overlay.open { display: flex; }
+    .pnav-close {
+      align-self: flex-end;
+      font-size: 30px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    .pnav-overlay a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: white !important;
+      font-size: 17px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .pnav-overlay a:hover { background: rgba(255,255,255,0.12); }
+    .pnav-overlay a .ni { font-size: 22px; min-width: 28px; text-align: center; }
+    .pnav-title {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      padding: 8px 4px 4px;
+    }
+
+  
+    .pnav-btn { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: white; font-size: 22px; cursor: pointer; flex-shrink: 0; }
+  </style>
+</head>
+
+<body>
+  <div class="page-bg"></div>
+
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">
+        <div class="brand-logo">🎤</div>
+        <div>
+          Artist Profile
+          <small>Powered by CyberCheck</small>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#music">Music</a>
+        <a href="#events">Shows</a>
+        <a href="#booking">Booking</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <a class="btn btn-primary" href="#booking">Book Artist</a>
+    <button class="pnav-btn" id="pnavBtn">☰</button>
+    </div>
+  </header>
+
+  <div class="pnav-overlay" id="pnavOverlay">
+    <div class="pnav-close" id="pnavClose">✕</div>
+    <div class="pnav-title">All Pages</div>
+    <a href="gulf-coastal-hub-homepage.html"><span class="ni">🏠</span> Home</a>
+    <a href="gulf-coast-radar-trip-swipe-sales-page.html"><span class="ni">🌊</span> Gulf Coast Radar</a>
+    <a href="gulf-coast-radar-trip-swipe-sales-page.html"><span class="ni">💜</span> Trip Swipe</a>
+    <a href="booking-platform-cybercheck-gulf-coast-radar.html"><span class="ni">📅</span> Booking Platform</a>
+    <a href="structured-data-engine-cybercheck-gcr.html"><span class="ni">🧬</span> Structured Data</a>
+    <a href="cybercheck_restaurant_sales_page 2.html"><span class="ni">🍽️</span> Restaurants</a>
+    <a href="artist-profile-cybercheck-page.html"><span class="ni">🎤</span> Artists</a>
+    <a href="fishing-charter-profile-gulf-coast-radar.html"><span class="ni">🎣</span> Fishing Charters</a>
+    <a href="photographer-profile-gulf-coast-radar.html"><span class="ni">📸</span> Photographers</a>
+    <a href="rental-business-profile-gulf-coast-radar.html"><span class="ni">🏖️</span> Rentals</a>
+    <a href="service-business-profile-gulf-coast-radar.html"><span class="ni">🛠️</span> Services</a>
+    <a href="restaurant-profile-gulf-coast-radar.html"><span class="ni">⭐</span> Live Profile Example</a>
+    <a href="cybercheck_sales_page.html"><span class="ni">📲</span> CyberCheck Platform</a>
+  </div>
+
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <article class="artist-card">
+          <div class="artist-photo">
+            <div class="artist-badges">
+              <span class="pill">⭐ 4.9 Fan Rating</span>
+              <span class="pill">✅ Verified Artist</span>
+            </div>
+
+            <div class="artist-overlay">
+              <h1>Artist Name</h1>
+              <p>Live music, private events, beach venues, weddings, restaurants, festivals, and custom performances.</p>
+            </div>
+          </div>
+        </article>
+
+        <div class="hero-copy">
+          <div class="kicker">Musician • Performer • Entertainer</div>
+          <h2>One page for your <span class="gradient">music, shows, booking & fans.</span></h2>
+          <p>
+            A mobile-first artist profile built for musicians, DJs, performers, creators, and entertainers.
+            Share your music, promote shows, collect bookings, sell merch, take tips, and connect with fans from one clean page.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#events">See Upcoming Shows</a>
+            <a class="btn btn-secondary" href="#music">Listen Now</a>
+            <a class="btn btn-secondary" href="#contact">Contact / Booking</a>
+          </div>
+
+          <div class="quick-stats">
+            <div class="stat">
+              <strong>124K+</strong>
+              <span>Streams / Views</span>
+            </div>
+            <div class="stat">
+              <strong>85+</strong>
+              <span>Shows Played</span>
+            </div>
+            <div class="stat">
+              <strong>4.9★</strong>
+              <span>Fan Rating</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Artist quick links">
+      <div class="container">
+        <div class="link-grid">
+          <a class="link-card" href="#music">
+            <div>
+              <div class="icon">🎧</div>
+              <b>Listen</b>
+            </div>
+            <span>Spotify, Apple, YouTube</span>
+          </a>
+
+          <a class="link-card" href="#events">
+            <div>
+              <div class="icon">📅</div>
+              <b>Upcoming Shows</b>
+            </div>
+            <span>Live dates & venues</span>
+          </a>
+
+          <a class="link-card" href="#booking">
+            <div>
+              <div class="icon">🎟️</div>
+              <b>Book Me</b>
+            </div>
+            <span>Private events & venues</span>
+          </a>
+
+          <a class="link-card" href="#tip">
+            <div>
+              <div class="icon">💸</div>
+              <b>Tip Jar</b>
+            </div>
+            <span>Cash App, Venmo, PayPal</span>
+          </a>
+
+          <a class="link-card" href="#gallery">
+            <div>
+              <div class="icon">📸</div>
+              <b>Photos</b>
+            </div>
+            <span>Live shots & media kit</span>
+          </a>
+
+          <a class="link-card" href="#merch">
+            <div>
+              <div class="icon">👕</div>
+              <b>Merch</b>
+            </div>
+            <span>Shirts, hats, posters</span>
+          </a>
+
+          <a class="link-card" href="#social">
+            <div>
+              <div class="icon">📲</div>
+              <b>Follow</b>
+            </div>
+            <span>TikTok, Instagram, Facebook</span>
+          </a>
+
+          <a class="link-card" href="#fanclub">
+            <div>
+              <div class="icon">💬</div>
+              <b>Text Club</b>
+            </div>
+            <span>Get show alerts</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="music">
+      <div class="container content-grid">
+        <div class="panel music-player">
+          <div class="panel-pad">
+            <div class="kicker">Featured music</div>
+            <h3>Listen before you book.</h3>
+            <p>Add your Spotify, Apple Music, YouTube, SoundCloud, or original tracks here.</p>
+
+            <div class="track">
+              <div class="play">▶</div>
+              <div>
+                <b>Featured Song One</b>
+                <span>Original single • 3:24</span>
+              </div>
+              <span>🎵</span>
+            </div>
+
+            <div class="track">
+              <div class="play">▶</div>
+              <div>
+                <b>Live Acoustic Sample</b>
+                <span>Recorded live • 2:58</span>
+              </div>
+              <span>🎸</span>
+            </div>
+
+            <div class="track">
+              <div class="play">▶</div>
+              <div>
+                <b>Party / Cover Set Preview</b>
+                <span>Venue demo • 4:12</span>
+              </div>
+              <span>🔥</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Artist bio</div>
+            <h3>About the artist</h3>
+            <p>
+              Use this section to tell your story. Talk about your sound, where you perform,
+              what kind of crowd you fit, your biggest shows, your style, and why venues or fans should follow you.
+            </p>
+            <p>
+              Example: “A high-energy Gulf Coast performer blending country, rock, beach music, and crowd favorites.
+              Available for restaurants, bars, weddings, private parties, festivals, and corporate events.”
+            </p>
+            <a class="btn btn-secondary" href="#contact">Request Media Kit</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="events">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Upcoming shows</div>
+          <h2>Where to catch the next performance.</h2>
+          <p>Fans can see your schedule. Venues can see that you are active. Gulf Coast Radar can also pull these events into local discovery.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="event-list">
+              <article class="event">
+                <div class="date-box">24<span>APR</span></div>
+                <div>
+                  <h4>Live at The Waterfront Stage</h4>
+                  <p>Orange Beach, AL • 7:00 PM – 10:00 PM</p>
+                </div>
+                <a class="btn btn-secondary" href="#">Details</a>
+              </article>
+
+              <article class="event">
+                <div class="date-box">01<span>MAY</span></div>
+                <div>
+                  <h4>Acoustic Night at Local Bar</h4>
+                  <p>Gulf Shores, AL • 6:00 PM – 9:00 PM</p>
+                </div>
+                <a class="btn btn-secondary" href="#">Details</a>
+              </article>
+
+              <article class="event">
+                <div class="date-box">10<span>MAY</span></div>
+                <div>
+                  <h4>Private Event / Wedding Reception</h4>
+                  <p>Perdido Key, FL • Booked</p>
+                </div>
+                <a class="btn btn-secondary" href="#">View Calendar</a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="container">
+        <div class="section-head center">
+          <div class="kicker">Photos & media</div>
+          <h2>Make the profile feel alive.</h2>
+          <p>Add live-performance photos, crowd shots, promo images, press photos, flyers, and video thumbnails.</p>
+        </div>
+
+        <div class="gallery">
+          <div class="photo large" aria-label="Live concert photo"></div>
+          <div class="photo" aria-label="Stage lights photo"></div>
+          <div class="photo" aria-label="Singer photo"></div>
+          <div class="photo" aria-label="Crowd photo"></div>
+          <div class="photo" aria-label="Band photo"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="booking">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Booking options</div>
+          <h2>Let venues and fans book the right type of performance.</h2>
+          <p>Use this section for public rates, starting prices, or “request quote” options.</p>
+        </div>
+
+        <div class="booking-grid">
+          <article class="booking-card">
+            <h3>Restaurant / Bar Set</h3>
+            <p>Perfect for waterfront venues, happy hour, dinner crowds, acoustic nights, and weekend entertainment.</p>
+            <span class="price">From $350</span>
+            <a class="btn btn-secondary" href="#contact">Request Date</a>
+          </article>
+
+          <article class="booking-card">
+            <h3>Private Party</h3>
+            <p>Birthdays, beach houses, corporate events, family gatherings, and private celebrations.</p>
+            <span class="price">From $500</span>
+            <a class="btn btn-primary" href="#contact">Book Event</a>
+          </article>
+
+          <article class="booking-card">
+            <h3>Wedding / Festival</h3>
+            <p>Longer sets, ceremony music, reception entertainment, festivals, and large events.</p>
+            <span class="price">Custom Quote</span>
+            <a class="btn btn-secondary" href="#contact">Get Quote</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="tip">
+      <div class="container content-grid">
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Fan support</div>
+            <h3>Tip Jar</h3>
+            <p>Add Cash App, Venmo, PayPal, Stripe, or other payment links so fans can support you during or after shows.</p>
+            <div class="hero-actions">
+              <a class="btn btn-secondary" href="#">Cash App</a>
+              <a class="btn btn-secondary" href="#">Venmo</a>
+              <a class="btn btn-secondary" href="#">PayPal</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="fanclub">
+          <div class="panel-pad">
+            <div class="kicker">SMS fan club</div>
+            <h3>Get show alerts</h3>
+            <p>Fans can join your text list for upcoming shows, new music, merch drops, and last-minute announcements.</p>
+            <form class="contact-form">
+              <input class="input" type="text" placeholder="Your name" />
+              <input class="input" type="tel" placeholder="Phone number" />
+              <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer;margin-top:4px;">
+                <input type="checkbox" name="sms_consent_fan" style="margin-top:3px;flex-shrink:0;accent-color:#875cff;">
+                <span style="color:rgba(255,255,255,0.55);">I agree to receive SMS show alerts from CyberCheck Inc. Msg &amp; data rates may apply. Reply STOP to opt out. See <a href="https://gulfcoastalhub.com/privacy" style="color:#9fbcff;">Privacy Policy</a>.</span>
+              </label>
+              <button class="btn btn-primary" type="button" id="cc-fan-btn">Join Text Club</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="merch">
+      <div class="container">
+        <div class="cta">
+          <div>
+            <div class="kicker">Merch / offers</div>
+            <h2>Sell merch, tickets, music, or VIP experiences.</h2>
+            <p>
+              This page can link to your store, ticket platform, digital downloads, meet-and-greets,
+              private lessons, or custom packages.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="#">Shop Merch</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="social">
+      <div class="container">
+        <div class="section-head center">
+          <div class="kicker">Social links</div>
+          <h2>One clean place for every platform.</h2>
+          <p>Replace scattered links with one profile that connects fans to everything you do.</p>
+        </div>
+
+        <div class="link-grid">
+          <a class="link-card" href="#"><div><div class="icon">🎵</div><b>TikTok</b></div><span>Short videos & clips</span></a>
+          <a class="link-card" href="#"><div><div class="icon">📷</div><b>Instagram</b></div><span>Photos & reels</span></a>
+          <a class="link-card" href="#"><div><div class="icon">▶️</div><b>YouTube</b></div><span>Videos & live sets</span></a>
+          <a class="link-card" href="#"><div><div class="icon">🎧</div><b>Spotify</b></div><span>Streaming profile</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="container content-grid">
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Booking inquiry</div>
+            <h3>Book Artist Name</h3>
+            <p>Use this form for venues, private parties, weddings, festivals, restaurants, and local events.</p>
+
+            <form class="contact-form">
+              <input class="input" type="text" placeholder="Your name" />
+              <input class="input" type="email" placeholder="Email address" />
+              <input class="input" type="tel" placeholder="Phone number" />
+              <select>
+                <option>Type of event</option>
+                <option>Restaurant / Bar</option>
+                <option>Private Party</option>
+                <option>Wedding</option>
+                <option>Festival</option>
+                <option>Corporate Event</option>
+              </select>
+              <input class="input" type="text" placeholder="Event date / location" />
+              <textarea placeholder="Tell me about the event..."></textarea>
+              <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer;margin-top:4px;">
+                <input type="checkbox" name="sms_consent" style="margin-top:3px;flex-shrink:0;accent-color:#875cff;">
+                <span style="color:rgba(255,255,255,0.55);">I agree to receive SMS messages from CyberCheck Inc. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out or HELP for help. See <a href="https://gulfcoastalhub.com/privacy" style="color:#9fbcff;">Privacy Policy</a>.</span>
+              </label>
+              <button class="btn btn-primary" type="button" id="cc-book-btn">Send Booking Request</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Why this page works</div>
+            <h3>Built for artists who need more than a Linktree.</h3>
+            <p>
+              This is a full artist profile, not just a stack of links. It gives fans, venues,
+              and event planners everything they need in one place.
+            </p>
+
+            <div class="feature-list" style="display:grid;gap:12px;color:#dce5f5;font-weight:800;">
+              <div>✅ Music links</div>
+              <div>✅ Upcoming shows</div>
+              <div>✅ Booking packages</div>
+              <div>✅ Tip jar</div>
+              <div>✅ Photo gallery</div>
+              <div>✅ Merch links</div>
+              <div>✅ SMS fan club</div>
+              <div>✅ Contact / booking form</div>
+              <div>✅ Gulf Coast Radar event visibility</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="cta">
+          <div>
+            <h2>Turn your artist profile into a booking engine.</h2>
+            <p>
+              Share one link that promotes your music, shows, social pages, bookings,
+              merch, tips, and fan list — all from one mobile-first page.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="#contact">Book / Contact</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <div>
+        <div>© 2026 CyberCheck Inc. &nbsp;·&nbsp; <a href="https://gulfcoastalhub.com/" style="color:inherit;">gulfcoastalhub.com</a> &nbsp;·&nbsp; <a href="mailto:info@cybercheckinc.com" style="color:inherit;">info@cybercheckinc.com</a> &nbsp;·&nbsp; (205) 810-4950</div>
+        <div style="margin-top:6px;font-size:13px;"><a href="https://gulfcoastalhub.com/privacy" style="color:inherit;">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://gulfcoastalhub.com/terms" style="color:inherit;">Terms of Service</a></div>
+        <div style="margin-top:6px;font-size:11px;opacity:0.5;">SMS: Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out or HELP for help.</div>
+      </div>
+      <div class="footer-links">
+        <a href="#music">Music</a>
+        <a href="#events">Shows</a>
+        <a href="#booking">Booking</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const API='https://cybercheck-api-database.vercel.app';
+  const src='artist-profile';
+  function wireBtn(btnId,isLoyalty){
+    const btn=document.getElementById(btnId);const form=btn&&btn.closest('form');
+    if(!btn||!form)return;
+    btn.addEventListener('click',async function(){
+      const g=s=>(form.querySelector(s)||{}).value||'';
+      const name=g('input[placeholder*="name" i]'),phone=g('input[type="tel"]'),email=g('input[type="email"]'),msg=g('textarea'),sel=g('select');
+      const consent=(form.querySelector('input[type="checkbox"]')||{}).checked;
+      if(!name&&!phone&&!email)return;
+      if(phone&&!consent){alert('Please check the SMS consent box.');return;}
+      const orig=btn.textContent;btn.disabled=true;btn.textContent='Sending…';
+      try{
+        await fetch(API+'/api/gcr/lead-notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,email,business_type:sel,message:msg,interests:isLoyalty?['fan-club']:[],source:src})});
+        form.innerHTML='<p style="padding:22px;color:#39d98a;font-weight:800;font-size:17px;text-align:center;">✓ Sent! We\'ll be in touch shortly.</p>';
+      }catch(e){btn.disabled=false;btn.textContent=orig;}
+    });
+  }
+  wireBtn('cc-fan-btn',true);
+  wireBtn('cc-book-btn',false);
+})();
+</script>
+
+<script>
+  (function(){
+    var btn = document.getElementById('pnavBtn');
+    var overlay = document.getElementById('pnavOverlay');
+    var close = document.getElementById('pnavClose');
+    if(btn) btn.onclick = function(){ overlay.classList.add('open'); };
+    if(close) close.onclick = function(){ overlay.classList.remove('open'); };
+    if(overlay) overlay.querySelectorAll('a').forEach(function(a){
+      a.onclick = function(){ overlay.classList.remove('open'); };
+    });
+  })();
+</script>
+
+</body>
+</html>

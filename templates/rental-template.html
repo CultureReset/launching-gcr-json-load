@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rental Business Profile | Gulf Coast Radar + CyberCheck</title>
+  <meta name="description" content="A mobile-first rental business profile page for Gulf Coast Radar and CyberCheck with rental inventory, pricing, availability, delivery, booking requests, reviews, gallery, and text alerts." />
+
+  <style>
+    :root {
+      --bg: #03111f;
+      --bg2: #071c31;
+      --card: rgba(255,255,255,0.078);
+      --border: rgba(255,255,255,0.14);
+      --text: #ffffff;
+      --muted: #b8c5d8;
+      --blue: #1199d6;
+      --teal: #00b8c8;
+      --aqua: #56e5ff;
+      --orange: #f47b2a;
+      --gold: #ffc857;
+      --green: #39d98a;
+      --red: #ff5b6e;
+      --purple: #7657ff;
+      --shadow: 0 28px 80px rgba(0,0,0,0.42);
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(17,153,214,0.22), transparent 30%),
+        radial-gradient(circle at 82% 7%, rgba(244,123,42,0.15), transparent 30%),
+        radial-gradient(circle at 50% 100%, rgba(0,184,200,0.16), transparent 32%),
+        linear-gradient(180deg, #03111f 0%, #071c31 46%, #030912 100%);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    .container {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+    }
+
+    .page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(180deg, rgba(3,17,31,0.10), rgba(3,17,31,0.96)),
+        url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=80");
+      background-size: cover;
+      background-position: center;
+      opacity: 0.36;
+    }
+
+    .page-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(3,17,31,0.96), rgba(3,17,31,0.36), rgba(3,17,31,0.96)),
+        radial-gradient(circle at 50% 34%, rgba(86,229,255,0.14), transparent 36%);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(3, 17, 31, 0.74);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .nav {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 17px;
+      background: linear-gradient(135deg, var(--blue), var(--teal));
+      display: grid;
+      place-items: center;
+      box-shadow: 0 18px 42px rgba(17,153,214,0.34);
+      font-size: 24px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .nav-links a:hover { color: white; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 50px;
+      padding: 0 22px;
+      border-radius: 999px;
+      font-weight: 950;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: 0.22s ease;
+      white-space: nowrap;
+      text-align: center;
+      font: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blue), var(--teal), var(--orange));
+      color: white;
+      box-shadow: 0 18px 44px rgba(17,153,214,0.32);
+    }
+
+    .btn-primary:hover, .btn-secondary:hover { transform: translateY(-2px); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.16);
+      color: white;
+    }
+
+    .hero { padding: 62px 0 38px; }
+
+    .profile-card {
+      border-radius: 42px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-photo {
+      min-height: 560px;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(3,17,31,0.22) 38%, rgba(3,17,31,0.96) 100%),
+        url("https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2200&q=80");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .top-actions {
+      position: absolute;
+      top: 22px;
+      left: 22px;
+      right: 22px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(0,0,0,0.42);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(14px);
+      font-size: 22px;
+    }
+
+    .hero-content {
+      width: 100%;
+      padding: 34px;
+      display: grid;
+      grid-template-columns: 140px 1fr auto;
+      gap: 24px;
+      align-items: end;
+    }
+
+    .logo-box {
+      width: 140px;
+      height: 140px;
+      border-radius: 32px;
+      background:
+        linear-gradient(135deg, rgba(17,153,214,0.22), rgba(255,255,255,0.08)),
+        #071c31;
+      border: 1px solid rgba(255,255,255,0.20);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    }
+
+    .rental-info h1 {
+      font-size: clamp(42px, 6vw, 78px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+      margin-bottom: 10px;
+    }
+
+    .gradient {
+      background: linear-gradient(90deg, white, #56e5ff, #ff8a3d);
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: #e5eefb;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .rating { color: var(--gold); }
+    .verified { color: #62a8ff; }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 950;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .tag.blue { background: rgba(17,153,214,0.30); }
+    .tag.green { background: rgba(57,217,138,0.22); }
+    .tag.purple { background: rgba(118,87,255,0.28); }
+    .tag.orange { background: rgba(244,123,42,0.28); }
+
+    .status-card {
+      min-width: 250px;
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(16px);
+    }
+
+    .status-card strong {
+      color: var(--green);
+      display: block;
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .status-card span {
+      color: #e6edf8;
+      font-weight: 800;
+    }
+
+    .action-bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      padding: 16px;
+      background: rgba(0,0,0,0.16);
+      border-top: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .action {
+      min-height: 82px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.11);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #e8effb;
+      font-weight: 850;
+      transition: 0.22s ease;
+    }
+
+    .action:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.12);
+    }
+
+    .action span {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    section { padding: 58px 0; }
+
+    .section-head {
+      max-width: 850px;
+      margin-bottom: 28px;
+    }
+
+    .section-head.center {
+      text-align: center;
+      margin-inline: auto;
+    }
+
+    .kicker {
+      color: #88dfff;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+      margin-bottom: 14px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      border-radius: 30px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+    }
+
+    .panel-pad { padding: 28px; }
+
+    .panel h3 {
+      font-size: 28px;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .panel p {
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .feature-pill {
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      font-weight: 850;
+      color: #e7effb;
+    }
+
+    .map-preview {
+      min-height: 250px;
+      background:
+        linear-gradient(135deg, rgba(17,153,214,0.22), rgba(244,123,42,0.12)),
+        url("https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80");
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .map-pin {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -70%);
+      width: 56px;
+      height: 56px;
+      border-radius: 50% 50% 50% 0;
+      background: var(--red);
+      rotate: -45deg;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.38);
+    }
+
+    .map-pin::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      left: 17px;
+      top: 17px;
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .inventory-card {
+      border-radius: 28px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.078);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inventory-card.featured {
+      background: linear-gradient(180deg, rgba(17,153,214,0.24), rgba(255,255,255,0.078));
+      border-color: rgba(86,229,255,0.42);
+      box-shadow: 0 26px 70px rgba(17,153,214,0.16);
+      transform: translateY(-6px);
+    }
+
+    .item-img {
+      height: 190px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .inventory-card:nth-child(1) .item-img {
+      background-image: url("https://images.unsplash.com/photo-1558980664-10e7170b5df9?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .inventory-card:nth-child(2) .item-img {
+      background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .inventory-card:nth-child(3) .item-img {
+      background-image: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80");
+    }
+
+    .badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.50);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      font-weight: 950;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .inventory-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .inventory-body h3 {
+      font-size: 25px;
+      line-height: 1.1;
+    }
+
+    .inventory-body p {
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .item-meta {
+      display: grid;
+      gap: 8px;
+      color: #e8effb;
+      font-weight: 850;
+      font-size: 14px;
+    }
+
+    .price {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 950;
+      color: var(--gold);
+      letter-spacing: -0.03em;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .category-card {
+      min-height: 160px;
+      padding: 20px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .category-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,0.76));
+      z-index: 1;
+    }
+
+    .category-card > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    .category-card:nth-child(1) { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80"); background-size: cover; background-position: center; }
+    .category-card:nth-child(2) { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"); background-size: cover; background-position: center; }
+    .category-card:nth-child(3) { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=900&q=80"); background-size: cover; background-position: center; }
+    .category-card:nth-child(4) { background: linear-gradient(180deg, transparent, rgba(0,0,0,0.8)), url("https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=900&q=80"); background-size: cover; background-position: center; }
+
+    .category-card b {
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+
+    .category-card span {
+      color: #dfe8fb;
+      font-weight: 750;
+      font-size: 14px;
+    }
+
+    .included-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .included {
+      padding: 20px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .included .icon {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .included b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 18px;
+    }
+
+    .included p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .time {
+      color: var(--aqua);
+      font-weight: 950;
+    }
+
+    .timeline-item b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr 0.7fr;
+      gap: 14px;
+      height: 420px;
+    }
+
+    .photo {
+      border-radius: 26px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      min-height: 190px;
+    }
+
+    .photo.large { grid-row: span 2; }
+
+    .photo:nth-child(1) { background-image: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80"); }
+    .photo:nth-child(2) { background-image: url("https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=900&q=80"); }
+    .photo:nth-child(3) { background-image: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=900&q=80"); }
+    .photo:nth-child(4) { background-image: url("https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=900&q=80"); }
+    .photo:nth-child(5) { background-image: url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=80"); }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 24px;
+    }
+
+    .rating-box {
+      padding: 30px;
+      border-radius: 30px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+      text-align: center;
+    }
+
+    .big-rating {
+      font-size: 78px;
+      font-weight: 950;
+      line-height: 1;
+      letter-spacing: -0.06em;
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 24px;
+      margin: 12px 0;
+      letter-spacing: 3px;
+    }
+
+    .review-cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .review {
+      padding: 22px;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: #e7effb;
+      font-weight: 950;
+    }
+
+    .review p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .input, textarea, select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border-radius: 18px;
+      padding: 15px 16px;
+      font: inherit;
+      outline: none;
+    }
+
+    .input::placeholder, textarea::placeholder {
+      color: rgba(255,255,255,0.55);
+    }
+
+    select option { color: #111; }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+      grid-column: 1 / -1;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    .cta {
+      padding: 48px;
+      border-radius: 36px;
+      background:
+        linear-gradient(135deg, rgba(17,153,214,0.30), rgba(0,184,200,0.22), rgba(244,123,42,0.19)),
+        rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .cta h2 { margin-bottom: 8px; }
+
+    .cta p {
+      color: #dce5f5;
+      font-size: 18px;
+    }
+
+    footer {
+      padding: 42px 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 980px) {
+      .nav-links { display: none; }
+
+      .hero-content {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .logo-box {
+        width: 112px;
+        height: 112px;
+      }
+
+      .status-card { width: 100%; }
+
+      .action-bar { grid-template-columns: repeat(3, 1fr); }
+
+      .content-grid, .review-grid, .cta {
+        grid-template-columns: 1fr;
+      }
+
+      .inventory-grid, .category-grid, .included-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .gallery {
+        grid-template-columns: 1fr 1fr;
+        height: auto;
+      }
+
+      .photo.large {
+        grid-column: span 2;
+        min-height: 330px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(100% - 28px, var(--max)); }
+
+      .nav .btn { display: none; }
+
+      .brand { font-size: 14px; }
+
+      .hero { padding-top: 34px; }
+
+      .hero-photo { min-height: 660px; }
+
+      .hero-content { padding: 22px; }
+
+      .rental-info h1 { font-size: 46px; }
+
+      .action-bar { grid-template-columns: repeat(2, 1fr); }
+
+      .action { min-height: 76px; }
+
+      section { padding: 48px 0; }
+
+      .inventory-grid, .category-grid, .included-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .inventory-card.featured { transform: none; }
+
+      .timeline-item { grid-template-columns: 1fr; }
+
+      .gallery { grid-template-columns: 1fr; }
+
+      .photo.large { grid-column: auto; }
+
+      .photo { min-height: 260px; }
+
+      .form-grid { grid-template-columns: 1fr; }
+
+      textarea, .wide { grid-column: auto; }
+
+      .cta { padding: 30px; }
+
+      .cta .btn, .btn { width: 100%; }
+    }
+  
+    /* ── page nav dropdown ── */
+    .pnav-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: white;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .pnav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4,16,29,0.97);
+      z-index: 999;
+      padding: 24px;
+      overflow-y: auto;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pnav-overlay.open { display: flex; }
+    .pnav-close {
+      align-self: flex-end;
+      font-size: 30px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      padding: 8px;
+      margin-bottom: 8px;
+    }
+    .pnav-overlay a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: white !important;
+      font-size: 17px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .pnav-overlay a:hover { background: rgba(255,255,255,0.12); }
+    .pnav-overlay a .ni { font-size: 22px; min-width: 28px; text-align: center; }
+    .pnav-title {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      padding: 8px 4px 4px;
+    }
+
+  
+    .pnav-btn { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: white; font-size: 22px; cursor: pointer; flex-shrink: 0; }
+  </style>
+</head>
+
+<body>
+  <div class="page-bg"></div>
+
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">
+        <div class="brand-logo">🏖️</div>
+        <div>
+          Rental Business
+          <small>Powered by Gulf Coast Radar</small>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#inventory">Rentals</a>
+        <a href="#about">About</a>
+        <a href="#included">Included</a>
+        <a href="#gallery">Photos</a>
+        <a href="#reviews">Reviews</a>
+      </nav>
+
+      <a class="btn btn-primary" href="#book">Reserve Rental</a>
+    <button class="pnav-btn" id="pnavBtn">☰</button>
+    </div>
+  </header>
+
+  <div class="pnav-overlay" id="pnavOverlay">
+    <div class="pnav-close" id="pnavClose">✕</div>
+    <div class="pnav-title">All Pages</div>
+    <a href="gulf-coastal-hub-homepage.html"><span class="ni">🏠</span> Home</a>
+    <a href="gulf-coast-radar-trip-swipe-sales-page.html"><span class="ni">🌊</span> Gulf Coast Radar</a>
+    <a href="gulf-coast-radar-trip-swipe-sales-page.html"><span class="ni">💜</span> Trip Swipe</a>
+    <a href="booking-platform-cybercheck-gulf-coast-radar.html"><span class="ni">📅</span> Booking Platform</a>
+    <a href="structured-data-engine-cybercheck-gcr.html"><span class="ni">🧬</span> Structured Data</a>
+    <a href="cybercheck_restaurant_sales_page 2.html"><span class="ni">🍽️</span> Restaurants</a>
+    <a href="artist-profile-cybercheck-page.html"><span class="ni">🎤</span> Artists</a>
+    <a href="fishing-charter-profile-gulf-coast-radar.html"><span class="ni">🎣</span> Fishing Charters</a>
+    <a href="photographer-profile-gulf-coast-radar.html"><span class="ni">📸</span> Photographers</a>
+    <a href="rental-business-profile-gulf-coast-radar.html"><span class="ni">🏖️</span> Rentals</a>
+    <a href="service-business-profile-gulf-coast-radar.html"><span class="ni">🛠️</span> Services</a>
+    <a href="restaurant-profile-gulf-coast-radar.html"><span class="ni">⭐</span> Live Profile Example</a>
+    <a href="cybercheck_sales_page.html"><span class="ni">📲</span> CyberCheck Platform</a>
+  </div>
+
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <article class="profile-card">
+          <div class="hero-photo">
+            <div class="top-actions">
+              <a class="icon-btn" href="#" aria-label="Back">‹</a>
+              <div style="display:flex; gap:10px;">
+                <a class="icon-btn" href="#" aria-label="Save">♡</a>
+                <a class="icon-btn" href="#" aria-label="Share">⇧</a>
+              </div>
+            </div>
+
+            <div class="hero-content">
+              <div class="logo-box">
+                RENTAL<br />LOGO
+              </div>
+
+              <div class="rental-info">
+                <h1>Gulf Coast <span class="gradient">Rentals</span></h1>
+                <div class="meta">
+                  <span>📍 Orange Beach & Gulf Shores</span>
+                  <span>• Beach / Water / Vacation Rentals</span>
+                  <span>• Delivery Available</span>
+                  <span class="rating">★ 4.9</span>
+                  <span>(147 reviews)</span>
+                  <span class="verified">✅ Verified Business</span>
+                </div>
+
+                <div class="tags">
+                  <span class="tag blue">Beach Gear</span>
+                  <span class="tag green">Delivery</span>
+                  <span class="tag purple">Daily / Weekly</span>
+                  <span class="tag orange">Family Friendly</span>
+                  <span class="tag">Vacation Ready</span>
+                </div>
+              </div>
+
+              <div class="status-card">
+                <strong>Available Today</strong>
+                <span>Same-day rentals and delivery options</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar">
+            <a class="action" href="tel:+12515551234"><span>☎</span>Call</a>
+            <a class="action" href="#book"><span>📅</span>Reserve</a>
+            <a class="action" href="#"><span>➤</span>Directions</a>
+            <a class="action" href="#inventory"><span>🏖</span>Rentals</a>
+            <a class="action" href="#"><span>⇧</span>Share</a>
+            <a class="action" href="#"><span>♡</span>Save</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container content-grid">
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">About the rental business</div>
+            <h3>Make vacation easier with beach gear, water gear, bikes, carts, chairs, umbrellas, and delivery.</h3>
+            <p>
+              Use this section for the business story, rental categories, service area, delivery details,
+              pickup rules, deposit policy, safety requirements, and what makes this rental company easier than the rest.
+            </p>
+            <p>
+              Example: “Vacation rental company serving Orange Beach, Gulf Shores, Fort Morgan, and Perdido Key with beach chairs,
+              umbrellas, paddleboards, kayaks, bikes, coolers, carts, baby gear, and condo-friendly delivery.”
+            </p>
+
+            <div class="feature-pills">
+              <span class="feature-pill">🚚 Delivery Available</span>
+              <span class="feature-pill">🏖 Beach Gear</span>
+              <span class="feature-pill">🚲 Bikes & Carts</span>
+              <span class="feature-pill">🛶 Kayaks / Paddleboards</span>
+              <span class="feature-pill">👶 Baby Gear</span>
+              <span class="feature-pill">📅 Daily / Weekly</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="map-preview">
+            <div class="map-pin"></div>
+          </div>
+          <div class="panel-pad">
+            <h3>Service Area</h3>
+            <p>Orange Beach, Gulf Shores, Fort Morgan, Perdido Key, condos, beach houses, and local resorts.</p>
+            <a class="btn btn-secondary" href="#">Check Delivery Area</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="inventory">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Rental inventory</div>
+          <h2>Show what is available before they call.</h2>
+          <p>List rental categories, daily/weekly pricing, delivery options, quantity, rules, and availability.</p>
+        </div>
+
+        <div class="inventory-grid">
+          <article class="inventory-card">
+            <div class="item-img">
+              <span class="badge">Beach Favorite</span>
+            </div>
+            <div class="inventory-body">
+              <h3>Beach Chair & Umbrella Set</h3>
+              <p>Two chairs and one umbrella delivered to your condo, beach house, or pickup location.</p>
+              <div class="item-meta">
+                <span>⏱ Daily or weekly rental</span>
+                <span>🚚 Delivery available</span>
+                <span>🏖 Best for families and couples</span>
+              </div>
+              <span class="price">From $45/day</span>
+              <a class="btn btn-secondary" href="#book">Reserve Set</a>
+            </div>
+          </article>
+
+          <article class="inventory-card featured">
+            <div class="item-img">
+              <span class="badge">Most Popular</span>
+            </div>
+            <div class="inventory-body">
+              <h3>Paddleboard / Kayak Rental</h3>
+              <p>Perfect for calm water, bayside exploring, family activities, and vacation adventure days.</p>
+              <div class="item-meta">
+                <span>⏱ Half-day, daily, or weekly</span>
+                <span>🛶 Includes paddle and safety gear</span>
+                <span>🚚 Delivery or pickup</span>
+              </div>
+              <span class="price">From $65/day</span>
+              <a class="btn btn-primary" href="#book">Book Rental</a>
+            </div>
+          </article>
+
+          <article class="inventory-card">
+            <div class="item-img">
+              <span class="badge">Vacation Ready</span>
+            </div>
+            <div class="inventory-body">
+              <h3>Beach Wagon / Cart</h3>
+              <p>Carry chairs, coolers, kids’ gear, towels, toys, and beach bags without the struggle.</p>
+              <div class="item-meta">
+                <span>⏱ Daily or weekly rental</span>
+                <span>👨‍👩‍👧 Family friendly</span>
+                <span>📦 Bundle with chairs and cooler</span>
+              </div>
+              <span class="price">From $30/day</span>
+              <a class="btn btn-secondary" href="#book">Reserve Cart</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories">
+      <div class="container">
+        <div class="section-head center">
+          <div class="kicker">Rental categories</div>
+          <h2>One profile can handle every rental type.</h2>
+          <p>Use this for beach gear, water gear, bikes, golf carts, baby gear, vacation equipment, party rentals, and more.</p>
+        </div>
+
+        <div class="category-grid">
+          <article class="category-card">
+            <b>Beach Gear</b>
+            <span>Chairs, umbrellas, coolers, wagons</span>
+          </article>
+
+          <article class="category-card">
+            <b>Water Gear</b>
+            <span>Kayaks, paddleboards, floats</span>
+          </article>
+
+          <article class="category-card">
+            <b>Bikes / Carts</b>
+            <span>Beach cruisers, carts, family gear</span>
+          </article>
+
+          <article class="category-card">
+            <b>Vacation Gear</b>
+            <span>Baby gear, games, tents, add-ons</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="included">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">What customers need to know</div>
+          <h2>Answer rental questions before they ask.</h2>
+          <p>Rental pages convert better when rules, pickup, delivery, deposits, cancellations, and safety details are clear.</p>
+        </div>
+
+        <div class="included-grid">
+          <article class="included">
+            <div class="icon">🚚</div>
+            <b>Delivery Options</b>
+            <p>Deliver to condos, beach houses, resorts, or pickup points.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">📍</div>
+            <b>Service Area</b>
+            <p>Show exact cities, neighborhoods, resorts, and delivery limits.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">💳</div>
+            <b>Deposit Policy</b>
+            <p>Explain deposits, damage rules, late returns, and payment terms.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">🌦️</div>
+            <b>Weather Policy</b>
+            <p>Clarify rain, wind, water conditions, cancellations, and reschedules.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">🧼</div>
+            <b>Clean Equipment</b>
+            <p>Tell customers how rentals are cleaned, inspected, and prepared.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">🛟</div>
+            <b>Safety Gear</b>
+            <p>Life jackets, rules, age limits, and safety instructions.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">📲</div>
+            <b>Text Updates</b>
+            <p>Send delivery confirmations, reminders, and pickup instructions.</p>
+          </article>
+
+          <article class="included">
+            <div class="icon">📦</div>
+            <b>Bundles</b>
+            <p>Create vacation bundles for families, condos, groups, and events.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <div class="container content-grid">
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Rental flow</div>
+            <h3>How the rental process works.</h3>
+
+            <div class="timeline">
+              <div class="timeline-item">
+                <div class="time">Pick</div>
+                <div>
+                  <b>Choose rental items</b>
+                  <p>Customers select chairs, umbrellas, paddleboards, bikes, carts, baby gear, or bundles.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="time">Date</div>
+                <div>
+                  <b>Select dates and location</b>
+                  <p>Customer adds rental dates, condo/beach house address, delivery window, and notes.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="time">Pay</div>
+                <div>
+                  <b>Confirm rental request</b>
+                  <p>Collect deposit, payment, booking request, or direct checkout depending on setup.</p>
+                </div>
+              </div>
+
+              <div class="timeline-item">
+                <div class="time">Enjoy</div>
+                <div>
+                  <b>Delivery, pickup, and reminders</b>
+                  <p>Send SMS updates, delivery instructions, pickup time, and review request after rental.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Smart rental profile</div>
+            <h3>More than a basic listing.</h3>
+            <p>
+              This profile can feed Gulf Coast Radar search, Trip Swipe, AI itinerary planning,
+              rental booking requests, QR codes, availability, reviews, and SMS follow-up.
+            </p>
+
+            <div class="feature-pills">
+              <span class="feature-pill">📲 Save to Trip</span>
+              <span class="feature-pill">🏖 Rental Inventory</span>
+              <span class="feature-pill">📅 Booking Requests</span>
+              <span class="feature-pill">⭐ Verified Reviews</span>
+              <span class="feature-pill">🚚 Delivery Info</span>
+              <span class="feature-pill">💬 SMS Follow-Up</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="container">
+        <div class="section-head center">
+          <div class="kicker">Photos</div>
+          <h2>Show the equipment and the vacation experience.</h2>
+          <p>Customers want to see clean gear, real beach setups, families using rentals, delivery examples, and bundle options.</p>
+        </div>
+
+        <div class="gallery">
+          <div class="photo large" aria-label="Beach rental setup photo"></div>
+          <div class="photo" aria-label="Water gear photo"></div>
+          <div class="photo" aria-label="Beach photo"></div>
+          <div class="photo" aria-label="Rental gear photo"></div>
+          <div class="photo" aria-label="Delivery location photo"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviews">
+      <div class="container">
+        <div class="section-head">
+          <div class="kicker">Customer reviews</div>
+          <h2>Trust matters when families are planning vacation rentals.</h2>
+          <p>Reviews can be verified through bookings, delivery confirmations, QR scans, or post-rental SMS prompts.</p>
+        </div>
+
+        <div class="review-grid">
+          <div class="rating-box">
+            <div class="big-rating">4.9</div>
+            <div class="stars">★★★★★</div>
+            <p>Based on 147 customer reviews</p>
+            <a class="btn btn-secondary" href="#">View All Reviews</a>
+          </div>
+
+          <div class="review-cards">
+            <article class="review">
+              <div class="review-header">
+                <span>Lauren M.</span>
+                <span class="rating">★★★★★</span>
+              </div>
+              <p>“Chairs and umbrella were waiting when we arrived. Super easy and worth every penny.”</p>
+            </article>
+
+            <article class="review">
+              <div class="review-header">
+                <span>David R.</span>
+                <span class="rating">★★★★★</span>
+              </div>
+              <p>“The paddleboards were clean, delivery was on time, and the text updates made it simple.”</p>
+            </article>
+
+            <article class="review">
+              <div class="review-header">
+                <span>Kelly T.</span>
+                <span class="rating">★★★★★</span>
+              </div>
+              <p>“We rented a beach wagon, chairs, and cooler for the week. Made the whole trip easier.”</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="book">
+      <div class="container content-grid">
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Rental request</div>
+            <h3>Reserve rental items</h3>
+            <p>Use this form for rental dates, delivery address, item selection, group size, and special requests.</p>
+
+            <form class="form-grid">
+              <input class="input" type="text" placeholder="Your name" />
+              <input class="input" type="tel" placeholder="Phone number" />
+              <input class="input" type="email" placeholder="Email address" />
+              <input class="input" type="text" placeholder="Rental dates" />
+
+              <select>
+                <option>Rental type</option>
+                <option>Beach chairs / umbrella</option>
+                <option>Paddleboard / kayak</option>
+                <option>Bike / cart / wagon</option>
+                <option>Baby gear</option>
+                <option>Vacation bundle</option>
+              </select>
+
+              <select>
+                <option>Delivery option</option>
+                <option>Delivery to condo / house</option>
+                <option>Pickup from location</option>
+                <option>Not sure yet</option>
+              </select>
+
+              <textarea placeholder="Tell us what you need, delivery address, number of people, and any questions..."></textarea>
+              <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer;grid-column:1/-1;margin-top:4px;">
+                <input type="checkbox" name="sms_consent" style="margin-top:3px;flex-shrink:0;accent-color:#39d98a;">
+                <span style="color:rgba(255,255,255,0.55);">I agree to receive SMS messages from CyberCheck Inc. Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out or HELP for help. See <a href="https://gulfcoastalhub.com/privacy" style="color:#88dfff;">Privacy Policy</a>.</span>
+              </label>
+              <button class="btn btn-primary wide" type="button" id="cc-main-btn">Send Rental Request</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-pad">
+            <div class="kicker">Text alerts</div>
+            <h3>Get availability, delivery updates, and last-minute rental deals.</h3>
+            <p>Let tourists opt into SMS alerts for openings, delivery confirmations, weather updates, and weekly rental specials.</p>
+
+            <form class="form-grid">
+              <input class="input wide" type="text" placeholder="Your name" />
+              <input class="input wide" type="tel" placeholder="Phone number" />
+              <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer;margin-top:4px;">
+                <input type="checkbox" name="sms_consent_alerts" style="margin-top:3px;flex-shrink:0;accent-color:#39d98a;">
+                <span style="color:rgba(255,255,255,0.55);">I agree to receive SMS rental alerts from CyberCheck Inc. Msg &amp; data rates may apply. Reply STOP to opt out. See <a href="https://gulfcoastalhub.com/privacy" style="color:#88dfff;">Privacy Policy</a>.</span>
+              </label>
+              <button class="btn btn-secondary wide" type="button" id="cc-loyalty-btn">Join Rental Alerts</button>
+            </form>
+
+            <div class="feature-pills">
+              <span class="feature-pill">🏖 Open Rentals</span>
+              <span class="feature-pill">🚚 Delivery Updates</span>
+              <span class="feature-pill">🌦 Weather Alerts</span>
+              <span class="feature-pill">💸 Last-Minute Deals</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <div class="cta">
+          <div>
+            <h2>Rental businesses need pages that show inventory, pricing, and availability clearly.</h2>
+            <p>
+              This profile can power Gulf Coast Radar search, Trip Swipe cards, rental packages,
+              booking requests, reviews, SMS follow-up, delivery instructions, and AI trip planning from one structured rental page.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="#book">Reserve Rental</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <div>
+        <div>© 2026 CyberCheck Inc. &nbsp;·&nbsp; <a href="https://gulfcoastalhub.com/" style="color:inherit;">gulfcoastalhub.com</a> &nbsp;·&nbsp; <a href="mailto:info@cybercheckinc.com" style="color:inherit;">info@cybercheckinc.com</a> &nbsp;·&nbsp; (205) 810-4950</div>
+        <div style="margin-top:6px;font-size:13px;"><a href="https://gulfcoastalhub.com/privacy" style="color:inherit;">Privacy Policy</a> &nbsp;·&nbsp; <a href="https://gulfcoastalhub.com/terms" style="color:inherit;">Terms of Service</a></div>
+        <div style="margin-top:6px;font-size:11px;opacity:0.5;">SMS: Msg &amp; data rates may apply. Msg frequency varies. Reply STOP to opt out or HELP for help.</div>
+      </div>
+      <div class="footer-links">
+        <a href="#inventory">Rentals</a>
+        <a href="#about">About</a>
+        <a href="#included">Included</a>
+        <a href="#gallery">Photos</a>
+        <a href="#reviews">Reviews</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const API='https://cybercheck-api-database.vercel.app';
+  const src='rental-profile';
+  function wireBtn(btnId,isLoyalty){
+    const btn=document.getElementById(btnId);const form=btn&&btn.closest('form');
+    if(!btn||!form)return;
+    btn.addEventListener('click',async function(){
+      const g=s=>(form.querySelector(s)||{}).value||'';
+      const name=g('input[placeholder*="name" i]'),phone=g('input[type="tel"]'),email=g('input[type="email"]'),msg=g('textarea'),sel=g('select');
+      const consent=(form.querySelector('input[type="checkbox"]')||{}).checked;
+      if(!name&&!phone&&!email)return;
+      if(phone&&!consent){alert('Please check the SMS consent box.');return;}
+      const orig=btn.textContent;btn.disabled=true;btn.textContent='Sending…';
+      try{
+        await fetch(API+'/api/gcr/lead-notify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,email,business_type:sel,message:msg,interests:isLoyalty?['loyalty']:[],source:src})});
+        form.innerHTML='<p style="padding:22px;color:#39d98a;font-weight:800;font-size:17px;text-align:center;">✓ Sent! We\'ll be in touch shortly.</p>';
+      }catch(e){btn.disabled=false;btn.textContent=orig;}
+    });
+  }
+  wireBtn('cc-main-btn',false);wireBtn('cc-loyalty-btn',true);
+})();
+</script>
+
+<script>
+  (function(){
+    var btn = document.getElementById('pnavBtn');
+    var overlay = document.getElementById('pnavOverlay');
+    var close = document.getElementById('pnavClose');
+    if(btn) btn.onclick = function(){ overlay.classList.add('open'); };
+    if(close) close.onclick = function(){ overlay.classList.remove('open'); };
+    if(overlay) overlay.querySelectorAll('a').forEach(function(a){
+      a.onclick = function(){ overlay.classList.remove('open'); };
+    });
+  })();
+</script>
+
+</body>
+</html>
