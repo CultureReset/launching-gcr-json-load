@@ -350,6 +350,13 @@
     return;
   }
 
+  // ── Redirect to assigned GCR template if set ──────────────────────────────
+  const assignedTemplate = entityData.entity.gcr_template;
+  if (assignedTemplate) {
+    window.location.replace('templates/' + assignedTemplate + '.html?id=' + encodeURIComponent(slug));
+    return;
+  }
+
   // ── Redirect specific water sport / tour activity types to activity-profile.html ──────
   const ACTIVITY_SUBTYPES = new Set([
     'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
