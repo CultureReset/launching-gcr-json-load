@@ -277,6 +277,126 @@ app.get("/api/gcr/specials", (req, res) => {
   });
 });
 
+// Single entity detail (for profile pages)
+app.get("/api/gcr/entity/:slug", async (req, res) => {
+  const slug = req.params.slug;
+
+  // Special handling for Circle Boats — pull from CyberCheck website content
+  if (slug === "beachside-circle-boats") {
+    try {
+      const [siteRes, addonsRes] = await Promise.all([
+        fetch("https://cybercheck-api-database.vercel.app/api/site-data"),
+        fetch("https://cybercheck-api-database.vercel.app/api/dashboard/addons")
+      ]);
+
+      const siteData = await siteRes.json();
+      const addons = await addonsRes.json();
+
+      // Map to activity-profile expected format
+      const response = {
+        entity: {
+          name: siteData.business?.name || "Beachside Circle Boats",
+          slug: "beachside-circle-boats",
+          subtitle: siteData.hero?.subtitle || "Portable Electric Circle Boat Rentals",
+          description: siteData.about?.text || "",
+          icon: "🚤",
+          rating: siteData.business?.rating || 4.9,
+          review_count: siteData.reviews?.length || 0,
+          phone: siteData.business?.phone || "(601) 325-1205",
+          address_line_1: siteData.business?.address || "25856 Canal Road, Unit A",
+          city: siteData.business?.city || "Orange Beach",
+          state: siteData.business?.state || "AL",
+          zip: siteData.business?.zip || "36561",
+          website_url: siteData.business?.website || "https://beachsidecircleboats.com",
+          directions_url: siteData.business?.googleMaps || "",
+          hero_image_url: siteData.gallery?.[0]?.image || "",
+          booking_url: siteData.business?.bookingUrl || null,
+          social_instagram: siteData.business?.socialInstagram || null,
+          social_facebook: siteData.business?.socialFacebook || null,
+          is_active: true
+        },
+        sections: [],
+        features: (siteData.features || []).map(f => ({ label: f.title || f })),
+        perfect_for: [],
+        tags: [],
+        about_bullets: [],
+        photos: (siteData.gallery || []).map(g => ({ image_url: g.image, caption: g.caption })),
+        hours: (siteData.business?.hours || []).map(day => {
+          const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+          const hours = siteData.business?.hours || {};
+          const h = hours[day] || { open: null, close: null, closed: false };
+          return {
+            day_of_week: day,
+            open_time: h.open || null,
+            close_time: h.close || null,
+            is_closed: h.closed || false
+          };
+        }),
+        pricing: (siteData.products || []).map(p => ({
+          package_name: p.name,
+          description: p.desc,
+          price: p.price,
+          price_text: p.price,
+          time_slot_start: p.start,
+          time_slot_end: p.end,
+          price_unit: p.unit
+        })),
+        activities: [],
+        fleet: (siteData.docks || []).map(d => ({
+          item_name: d.name,
+          description: d.description,
+          capacity: d.capacity,
+          weight: d.weight,
+          dimensions: d.dimensions
+        })),
+        addons: (addons || []).map(a => ({
+          addon_name: a.name,
+          description: a.description,
+          price: a.price,
+          price_type: a.category
+        })),
+        whats_included: (siteData.whats_included || []).map(w => ({
+          item_name: w.name || w,
+          description: w.description || ""
+        })),
+        requirements: (siteData.requirements || []).map(r => ({
+          requirement_text: r.name || r
+        })),
+        policies: (siteData.policies || []).map(p => ({
+          policy_type: p.type || "Policy",
+          policy_text: p.text || p
+        })),
+        meeting_points: (siteData.locations || []).map(l => ({
+          location_name: l.name,
+          address: l.address,
+          parking_info: l.parking,
+          checkin_instructions: l.checkin,
+          what_to_bring: l.bring
+        })),
+        qna: (siteData.qna || []).map(q => ({
+          question: q.question,
+          answer: q.answer,
+          section_label: q.section || "FAQ"
+        })),
+        reviews: (siteData.reviews || []).map(r => ({
+          author_name: r.author,
+          rating: r.rating,
+          review_text: r.text,
+          review_date: r.date
+        }))
+      };
+
+      return res.json(response);
+    } catch (err) {
+      console.error("Error fetching Circle Boats data:", err);
+      return res.status(500).json({ error: "Failed to load Circle Boats data" });
+    }
+  }
+
+  // For other entities, return not found
+  return res.status(404).json({ error: "Entity not found" });
+});
+
 // Search - query any business
 app.get("/api/gcr/search", (req, res) => {
   const { q, category, minRating } = req.query;

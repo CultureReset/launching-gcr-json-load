@@ -1142,7 +1142,12 @@ function wireFilterChips(_grid) {
 
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
+  const seenSlugs = new Set();
   return businesses.filter(b => {
+    const slug = b.slug || b.id || b.site_id;
+    if (slug && seenSlugs.has(slug)) return false;
+    if (slug) seenSlugs.add(slug);
+
     // Never surface hidden businesses publicly
     if (b.hidden) return false;
 
