@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Property – Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #f4f6f9; color: #0e1726; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    .top-nav { background: #0b1f3a; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 1.1rem; letter-spacing: .5px; }
+    .nav-logo span { color: #38bdf8; }
+    .nav-back { color: #94a3b8; font-size: .85rem; font-weight: 600; cursor: pointer; }
+    .nav-back:hover { color: #fff; }
+
+    /* ── CAROUSEL ── */
+    .carousel { position: relative; width: 100%; height: 520px; background: #0c2d48; overflow: hidden; }
+    .carousel-slides { width: 100%; height: 100%; position: relative; }
+    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
+    .carousel-slide.active { opacity: 1; }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-slide .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 6rem; background: linear-gradient(135deg, #0c2d48, #1a4a6e); }
+    .car-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 50%); pointer-events: none; }
+    .car-hero-text { position: absolute; bottom: 40px; left: 32px; z-index: 10; color: #fff; }
+    .car-hero-badge { display: inline-block; background: #0b7a75; color: #fff; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 999px; margin-bottom: 10px; }
+    .car-hero-name { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; line-height: 1.15; text-shadow: 0 2px 12px rgba(0,0,0,.4); }
+    .car-hero-addr { font-size: .9rem; color: rgba(255,255,255,.8); margin-top: 6px; }
+    .car-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.45); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; z-index: 10; }
+    .car-btn:hover { background: rgba(0,0,0,.8); }
+    .car-prev { left: 16px; }
+    .car-next { right: 16px; }
+    .car-dots { position: absolute; bottom: 14px; right: 60px; display: flex; gap: 6px; z-index: 10; }
+    .car-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.45); border: none; cursor: pointer; padding: 0; transition: background .2s; }
+    .car-dot.active { background: #fff; }
+    .car-count { position: absolute; bottom: 14px; right: 16px; background: rgba(0,0,0,.55); color: #fff; font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 10; }
+
+    /* ── LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+    .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 28px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } .carousel { height: 300px; } .car-hero-text { bottom: 20px; left: 20px; } }
+    @media (max-width: 480px) {
+      .carousel { height: 220px; }
+      .car-hero { bottom: 16px; left: 16px; right: 16px; }
+      .car-hero-name { font-size: 1.4rem; }
+      .section { padding: 14px; border-radius: 12px; }
+      .page-wrap { padding: 14px 12px 90px; }
+      .action-bar { padding: 0 8px; }
+      .action-tab { padding: 12px 14px; font-size: .78rem; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .hh-banner { padding: 14px; }
+      .hh-icon { font-size: 1.6rem; }
+      .biz-filter { padding: 0 8px; }
+      .biz-filter-btn { padding: 7px 14px; font-size: .78rem; }
+      .stats-bar { flex-wrap: wrap; gap: 8px; padding: 14px; }
+      .stat-item { min-width: 80px; }
+      .fleet-card { padding: 16px; }
+      .price-row { font-size: .78rem; }
+      .book-bar { padding: 12px 16px; }
+      .top-nav { padding: 12px 16px; }
+    }
+
+    /* ── QUICK STATS ── */
+    .stats-bar { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
+    .stat-box { flex: 1; min-width: 100px; padding: 16px 10px; text-align: center; border-right: 1px solid #e2e8f0; }
+    .stat-box:last-child { border-right: none; }
+    .stat-icon { font-size: 1.3rem; }
+    .stat-val { font-size: 1.15rem; font-weight: 900; color: #0b1f3a; margin-top: 3px; }
+    .stat-lbl { font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 600; margin-top: 2px; }
+
+    /* ── SECTION ── */
+    .section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #0b1f3a; margin-bottom: 16px; }
+
+    /* ── DESCRIPTION ── */
+    .prop-desc { font-size: .92rem; color: #475569; line-height: 1.8; }
+
+    /* ── POOLS / FACILITY HIGHLIGHTS ── */
+    .facility-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .facility-card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #f8fafc; display: flex; flex-direction: column; gap: 6px; }
+    .facility-icon { font-size: 1.8rem; }
+    .facility-name { font-size: .88rem; font-weight: 800; color: #0b1f3a; }
+    .facility-detail { font-size: .78rem; color: #64748b; }
+    .facility-badge { display: inline-block; background: #dcfce7; color: #166534; font-size: .65rem; font-weight: 700; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; margin-top: 2px; align-self: flex-start; }
+
+    /* ── AMENITIES ── */
+    .amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+    .amenity { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; font-size: .82rem; font-weight: 600; color: #334155; }
+    .amenity-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── UNIT TYPES (for condos) ── */
+    .units-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+    .unit-card { border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+    .unit-card:hover { border-color: #0b7a75; box-shadow: 0 4px 16px rgba(11,122,117,.12); }
+    .unit-card-img { height: 140px; background: linear-gradient(135deg, #0c2d48, #1a5276); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .unit-card-body { padding: 14px; background: #fff; }
+    .unit-card-name { font-weight: 800; font-size: .92rem; color: #0b1f3a; }
+    .unit-card-meta { font-size: .78rem; color: #64748b; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .unit-card-price { font-size: .85rem; font-weight: 700; color: #0b7a75; margin-top: 8px; }
+    .unit-card-btn { display: block; margin-top: 10px; background: #0b7a75; color: #fff; text-align: center; padding: 8px; border-radius: 8px; font-size: .8rem; font-weight: 700; transition: background .2s; }
+    .unit-card-btn:hover { background: #096560; }
+
+    /* ── PHOTO GRID ── */
+    .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 600px) { .photo-grid { grid-template-columns: repeat(2, 1fr); } }
+    .photo-thumb { aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .photo-thumb .ph-sm { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(135deg, #dbeafe, #eff6ff); transition: transform .2s; }
+    .photo-thumb:hover .ph-sm { transform: scale(1.05); }
+
+    /* ── NEARBY ── */
+    .nearby-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+    .nearby-cat-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; font-size: .8rem; font-weight: 700; cursor: pointer; transition: all .15s; color: #475569; }
+    .nearby-cat-btn.active, .nearby-cat-btn:hover { background: #0b1f3a; color: #fff; border-color: #0b1f3a; }
+    .nearby-list { display: flex; flex-direction: column; gap: 8px; }
+    .nearby-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .nearby-icon { font-size: 1.2rem; flex-shrink: 0; width: 32px; text-align: center; }
+    .nearby-name { font-size: .88rem; font-weight: 700; color: #0b1f3a; }
+    .nearby-dist { font-size: .75rem; color: #94a3b8; margin-top: 2px; }
+
+    /* ── REVIEWS ── */
+    .rating-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .rating-num { font-size: 3rem; font-weight: 900; color: #0b1f3a; }
+    .rating-stars { color: #f59e0b; font-size: 1.2rem; }
+    .rating-total { font-size: .82rem; color: #94a3b8; margin-top: 2px; }
+    .review-item { padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+    .review-item:last-child { border-bottom: none; }
+    .rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rev-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0b7a75, #38bdf8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .9rem; flex-shrink: 0; }
+    .rev-name { font-weight: 700; font-size: .88rem; }
+    .rev-date { font-size: .74rem; color: #94a3b8; }
+    .rev-stars { color: #f59e0b; font-size: .82rem; margin-bottom: 5px; }
+    .rev-text { font-size: .85rem; color: #475569; line-height: 1.65; }
+
+    /* ── LOCATION ── */
+    .map-ph { width: 100%; height: 240px; border-radius: 14px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); display: flex; align-items: center; justify-content: center; font-size: .9rem; color: #3b82f6; font-weight: 700; gap: 8px; margin-bottom: 16px; }
+    .loc-list { display: flex; flex-direction: column; gap: 8px; }
+    .loc-row { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: #475569; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; position: sticky; top: 80px; }
+    .sc-title { font-size: .75rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
+    .sc-price { font-size: 2rem; font-weight: 900; color: #0b1f3a; }
+    .sc-price span { font-size: .88rem; font-weight: 500; color: #94a3b8; }
+    .sc-compare { font-size: .8rem; color: #94a3b8; margin-bottom: 18px; }
+    .sc-compare s { color: #ef4444; }
+    .sc-field { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+    .sc-field label { display: block; font-size: .63rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 700; margin-bottom: 3px; }
+    .sc-field input, .sc-field select { border: none; outline: none; font-family: inherit; font-size: .88rem; font-weight: 600; color: #0b1f3a; width: 100%; background: transparent; }
+    .sc-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .sc-dates .sc-field { margin-bottom: 0; }
+    .sc-book { width: 100%; background: #0b7a75; color: #fff; border: none; border-radius: 12px; padding: 14px; font-family: inherit; font-size: .95rem; font-weight: 800; cursor: pointer; transition: background .2s; margin-top: 8px; }
+    .sc-book:hover { background: #096560; }
+    .sc-inquire { width: 100%; background: transparent; color: #0b1f3a; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; margin-top: 8px; transition: border-color .2s; }
+    .sc-inquire:hover { border-color: #94a3b8; }
+    .sc-perks { margin-top: 16px; display: flex; flex-direction: column; gap: 7px; }
+    .sc-perk { font-size: .78rem; color: #475569; display: flex; align-items: center; gap: 6px; }
+    .sc-divider { border: none; border-top: 1px solid #f1f5f9; margin: 18px 0; }
+    .sc-contact { display: flex; flex-direction: column; gap: 8px; }
+    .sc-contact-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; border-radius: 10px; font-size: .82rem; font-weight: 700; cursor: pointer; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #0b1f3a; transition: all .15s; }
+    .sc-contact-btn:hover { background: #0b1f3a; color: #fff; border-color: #0b1f3a; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">GULF<span>COAST</span>RADAR</div>
+    <span class="nav-back" onclick="history.back()">← Back to listings</span>
+  </nav>
+
+  <!-- CAROUSEL -->
+  <div class="carousel">
+    <div class="carousel-slides" id="carSlides"></div>
+    <div class="car-overlay"></div>
+    <div class="car-hero-text">
+      <div class="car-hero-badge" id="heroBadge">Beachfront</div>
+      <div class="car-hero-name" id="heroName">Loading...</div>
+      <div class="car-hero-addr" id="heroAddr"></div>
+    </div>
+    <button class="car-btn car-prev" onclick="slideCarousel(-1)">&#8592;</button>
+    <button class="car-btn car-next" onclick="slideCarousel(1)">&#8594;</button>
+    <div class="car-dots" id="carDots"></div>
+    <div class="car-count" id="carCount"></div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="two-col">
+
+      <!-- LEFT -->
+      <div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar">
+          <div class="stat-box"><div class="stat-icon">🏊</div><div class="stat-val" id="sPools">–</div><div class="stat-lbl">Pools</div></div>
+          <div class="stat-box"><div class="stat-icon">🛏️</div><div class="stat-val" id="sUnits">–</div><div class="stat-lbl">Units</div></div>
+          <div class="stat-box"><div class="stat-icon">👥</div><div class="stat-val" id="sSleeps">–</div><div class="stat-lbl">Max Sleeps</div></div>
+          <div class="stat-box"><div class="stat-icon">🏖️</div><div class="stat-val" id="sBeach">–</div><div class="stat-lbl">Beach</div></div>
+          <div class="stat-box"><div class="stat-icon">🏢</div><div class="stat-val" id="sFloors">–</div><div class="stat-lbl">Floors</div></div>
+        </div>
+
+        <!-- Description -->
+        <div class="section">
+          <div class="section-title">📝 About This Property</div>
+          <div class="prop-desc" id="propDesc"></div>
+        </div>
+
+        <!-- Pools & Facilities -->
+        <div class="section">
+          <div class="section-title">🏊 Pools &amp; Facilities</div>
+          <div class="facility-grid" id="facilityGrid"></div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="section">
+          <div class="section-title">✨ Amenities</div>
+          <div class="amenities-grid" id="amenitiesGrid"></div>
+        </div>
+
+        <!-- Unit Types — shown for condos, hidden for hotels -->
+        <div class="section" id="unitsSection" style="display:none;">
+          <div class="section-title">🏠 Available Units</div>
+          <div class="units-grid" id="unitsGrid"></div>
+        </div>
+
+        <!-- Photo Grid -->
+        <div class="section">
+          <div class="section-title">📸 Photo Gallery</div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <!-- Nearby -->
+        <div class="section">
+          <div class="section-title">📍 Nearby</div>
+          <div class="nearby-cats" id="nearbyCats"></div>
+          <div class="nearby-list" id="nearbyList"></div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="section">
+          <div class="section-title">⭐ Guest Reviews</div>
+          <div class="rating-row">
+            <div class="rating-num" id="ratingNum">–</div>
+            <div>
+              <div class="rating-stars" id="ratingStars"></div>
+              <div class="rating-total" id="ratingTotal"></div>
+            </div>
+          </div>
+          <div id="reviewsList"></div>
+        </div>
+
+        <!-- Location -->
+        <div class="section">
+          <div class="section-title">🗺️ Location</div>
+          <div class="map-ph">🗺️ Interactive Map</div>
+          <div class="loc-list" id="locList"></div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="sidebar-card">
+          <div class="sc-title">Starting from</div>
+          <div class="sc-price"><span id="scPrice">$–</span> <span>/ night</span></div>
+          <div class="sc-compare" id="scCompare"></div>
+
+          <div class="sc-dates">
+            <div class="sc-field"><label>Check In</label><input type="date" id="checkIn"></div>
+            <div class="sc-field"><label>Check Out</label><input type="date" id="checkOut"></div>
+          </div>
+          <div class="sc-field">
+            <label>Guests</label>
+            <select>
+              <option>1 guest</option><option>2 guests</option>
+              <option selected>4 guests</option><option>6 guests</option>
+              <option>8 guests</option>
+            </select>
+          </div>
+
+          <button class="sc-book" id="bookBtn" onclick="handleBook()">Book Now</button>
+          <button class="sc-inquire" onclick="handleInquire()">💬 Send Inquiry</button>
+
+          <div class="sc-perks">
+            <div class="sc-perk">✅ Free cancellation up to 30 days</div>
+            <div class="sc-perk">🔒 Secure booking</div>
+            <div class="sc-perk">📞 24/7 guest support</div>
+            <div class="sc-perk">🏆 Best rate guarantee</div>
+          </div>
+
+          <hr class="sc-divider">
+
+          <div class="sc-contact">
+            <div class="sc-contact-btn" onclick="handleCall()">📞 Call Us</div>
+            <div class="sc-contact-btn" onclick="handleEmail()">✉️ Email</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slug = new URLSearchParams(window.location.search).get('slug') || 'phoenix-all-suites-west';
+      const s = document.createElement('script');
+      s.src = 'data/' + slug + '.js';
+      s.onload = function() { render(window.BUSINESS_DATA); };
+      document.head.appendChild(s);
+    })();
+  </script>
+  <script>
+    let BUILDING;
+
+    // ── RENDER ─────────────────────────────────────────────────────
+    function render(data) {
+      BUILDING = data;
+      const B = data;
+      document.title = B.name + ' – Gulf Coast Radar';
+      document.getElementById('heroBadge').textContent = B.badge;
+      document.getElementById('heroName').textContent  = B.name;
+      document.getElementById('heroAddr').textContent  = B.address;
+      document.getElementById('sPools').textContent    = B.pools;
+      document.getElementById('sUnits').textContent    = B.totalUnits + '+';
+      document.getElementById('sSleeps').textContent   = B.maxSleeps;
+      document.getElementById('sBeach').textContent    = B.beach;
+      document.getElementById('sFloors').textContent   = B.floors;
+      document.getElementById('propDesc').textContent  = B.description;
+      document.getElementById('scPrice').textContent   = '$' + B.priceFrom;
+      document.getElementById('ratingNum').textContent = B.rating.toFixed(1);
+      document.getElementById('ratingStars').textContent = '★'.repeat(Math.round(B.rating)) + '☆'.repeat(5 - Math.round(B.rating));
+      document.getElementById('ratingTotal').textContent = B.reviewCount + ' reviews';
+      if (B.comparePriceFrom)
+        document.getElementById('scCompare').innerHTML = 'Compare at <s>$' + B.comparePriceFrom + '/night</s>';
+
+      // Carousel
+      const slidesEl = document.getElementById('carSlides');
+      const dotsEl   = document.getElementById('carDots');
+      B.photos.forEach((ph, i) => {
+        const s = document.createElement('div');
+        s.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+        s.innerHTML = ph.url ? `<img src="${ph.url}" alt="${ph.label}">` : `<div class="ph">${ph.emoji}</div>`;
+        slidesEl.appendChild(s);
+        const d = document.createElement('button');
+        d.className = 'car-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dotsEl.appendChild(d);
+      });
+      updateCount();
+
+      // Photo grid
+      B.photos.forEach(ph => {
+        const t = document.createElement('div');
+        t.className = 'photo-thumb';
+        t.innerHTML = ph.url ? `<img src="${ph.url}" alt="${ph.label}" style="width:100%;height:100%;object-fit:cover;">` : `<div class="ph-sm">${ph.emoji}</div>`;
+        document.getElementById('photoGrid').appendChild(t);
+      });
+
+      // Facilities
+      B.facilities.forEach(f => {
+        document.getElementById('facilityGrid').innerHTML +=
+          `<div class="facility-card"><div class="facility-icon">${f.icon}</div><div class="facility-name">${f.name}</div><div class="facility-detail">${f.detail}</div><span class="facility-badge">${f.badge}</span></div>`;
+      });
+
+      // Amenities
+      B.amenities.forEach(a => {
+        document.getElementById('amenitiesGrid').innerHTML +=
+          `<div class="amenity"><span class="amenity-icon">${a.icon}</span>${a.name}</div>`;
+      });
+
+      // Units (condo only)
+      if (B.type === 'condo' && B.units && B.units.length) {
+        document.getElementById('unitsSection').style.display = 'block';
+        B.units.forEach(u => {
+          document.getElementById('unitsGrid').innerHTML +=
+            `<div class="unit-card" onclick="location.href='property.html?id=${u.id}'">
+              <div class="unit-card-img">${u.emoji}</div>
+              <div class="unit-card-body">
+                <div class="unit-card-name">${u.name}</div>
+                <div class="unit-card-meta">
+                  <span>🛏️ ${u.beds} bed</span>
+                  <span>🚿 ${u.baths} bath</span>
+                  <span>👥 Sleeps ${u.sleeps}</span>
+                  <span>🏢 Floor ${u.floor}</span>
+                </div>
+                <div class="unit-card-price">From $${u.priceFrom}/night</div>
+                <span class="unit-card-btn">View Unit →</span>
+              </div>
+            </div>`;
+        });
+      }
+
+      // Nearby
+      const cats = Object.keys(B.nearby);
+      let activeNearby = cats[0];
+      const catEl = document.getElementById('nearbyCats');
+      cats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'nearby-cat-btn' + (cat === activeNearby ? ' active' : '');
+        btn.textContent = cat;
+        btn.onclick = () => {
+          activeNearby = cat;
+          document.querySelectorAll('.nearby-cat-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderNearby(B.nearby[cat]);
+        };
+        catEl.appendChild(btn);
+      });
+      renderNearby(B.nearby[activeNearby]);
+
+      // Reviews
+      B.reviews.forEach(r => {
+        document.getElementById('reviewsList').innerHTML +=
+          `<div class="review-item">
+            <div class="rev-top"><div class="rev-avatar">${r.initials}</div><div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date}</div></div></div>
+            <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            <div class="rev-text">${r.text}</div>
+          </div>`;
+      });
+
+      // Location
+      B.location.forEach(l => {
+        document.getElementById('locList').innerHTML +=
+          `<div class="loc-row"><span style="font-size:1rem;width:20px;text-align:center;">${l.icon}</span>${l.label}</div>`;
+      });
+    }
+
+    function renderNearby(items) {
+      document.getElementById('nearbyList').innerHTML = items.map(n =>
+        `<div class="nearby-item"><div class="nearby-icon">${n.icon}</div><div><div class="nearby-name">${n.name}</div><div class="nearby-dist">${n.dist}</div></div></div>`
+      ).join('');
+    }
+
+    // ── CAROUSEL ───────────────────────────────────────────────────
+    let cur = 0;
+    function goTo(n) {
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dots   = document.querySelectorAll('.car-dot');
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
+      updateCount();
+    }
+    function slideCarousel(dir) { goTo(cur + dir); }
+    function updateCount() {
+      const total = document.querySelectorAll('.carousel-slide').length;
+      document.getElementById('carCount').textContent = (cur + 1) + ' / ' + total;
+    }
+    setInterval(() => slideCarousel(1), 5000);
+
+    // ── BOOKING ────────────────────────────────────────────────────
+    function handleBook()    { if (BUILDING.bookingUrl) window.open(BUILDING.bookingUrl, '_blank'); }
+    function handleInquire() { alert('Inquiry form coming soon!'); }
+    function handleCall()    { window.location.href = 'tel:' + BUILDING.phone; }
+    function handleEmail()   { alert('Email form coming soon!'); }
+
+    const today = new Date(); const co = new Date(today); co.setDate(today.getDate() + 4);
+    document.getElementById('checkIn').value  = today.toISOString().split('T')[0];
+    document.getElementById('checkOut').value = co.toISOString().split('T')[0];
+
+    // Hide Book Now if no bookingUrl
+    // render() called by slug loader onload
+  </script>
+</body>
+</html>

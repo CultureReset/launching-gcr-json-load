@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photographer – Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #fafafa; color: #0e1726; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    .top-nav { background: #111; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 1.1rem; letter-spacing: .5px; }
+    .nav-logo span { color: #f59e0b; }
+    .nav-back { color: #888; font-size: .85rem; font-weight: 600; cursor: pointer; }
+    .nav-back:hover { color: #fff; }
+
+    /* ── HERO ── */
+    .hero { position: relative; width: 100%; height: 540px; background: #111; overflow: hidden; }
+    .hero-slides { width: 100%; height: 100%; position: relative; }
+    .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; }
+    .hero-slide.active { opacity: 1; }
+    .hero-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-slide .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 8rem; background: linear-gradient(135deg, #111 0%, #2d1b00 50%, #111 100%); }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.2) 50%, transparent 100%); pointer-events: none; }
+    .hero-content { position: absolute; bottom: 44px; left: 36px; z-index: 10; color: #fff; }
+    .hero-badge { display: inline-block; background: rgba(245,158,11,.9); color: #fff; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.8px; padding: 5px 14px; border-radius: 999px; margin-bottom: 12px; }
+    .hero-name { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; line-height: 1.05; text-shadow: 0 2px 20px rgba(0,0,0,.6); letter-spacing: -.5px; margin-bottom: 8px; }
+    .hero-tagline { font-size: .95rem; color: rgba(255,255,255,.8); font-style: italic; }
+    .hero-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .2s; }
+    .hero-btn:hover { background: rgba(0,0,0,.85); }
+    .hero-prev { left: 16px; } .hero-next { right: 16px; }
+    .hero-dots { position: absolute; bottom: 14px; right: 60px; display: flex; gap: 6px; z-index: 10; }
+    .hero-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; padding: 0; transition: all .2s; }
+    .hero-dot.active { background: #f59e0b; width: 18px; border-radius: 3px; }
+    .hero-count { position: absolute; bottom: 14px; right: 16px; background: rgba(0,0,0,.5); color: #fff; font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 10; }
+
+    /* ── LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; }
+    .two-col { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } .hero { height: 320px; } .hero-content { bottom: 20px; left: 20px; } }
+    @media (max-width: 480px) {
+      .hero { height: 240px; }
+      .hero-name { font-size: 1.6rem; }
+      .section { padding: 14px; border-radius: 12px; }
+      .page-wrap { padding: 12px 10px 80px; }
+      .specialties-grid { grid-template-columns: 1fr; }
+      .packages-grid { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: repeat(2, 1fr); }
+      .addons-grid { grid-template-columns: 1fr; }
+      .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; overflow: hidden; margin-bottom: 22px; }
+    .stat-box { flex: 1; min-width: 90px; padding: 16px 10px; text-align: center; border-right: 1px solid #e5e7eb; }
+    .stat-box:last-child { border-right: none; }
+    .stat-val { font-size: 1.15rem; font-weight: 900; color: #111; }
+    .stat-lbl { font-size: .67rem; text-transform: uppercase; letter-spacing: .8px; color: #9ca3af; font-weight: 600; margin-top: 2px; }
+
+    /* ── SECTIONS ── */
+    .section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #111; margin-bottom: 16px; }
+
+    /* ── ABOUT ── */
+    .about-text { font-size: .92rem; color: #4b5563; line-height: 1.85; }
+    .service-area { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; background: #fefce8; border: 1px solid #fde68a; border-radius: 999px; padding: 5px 14px; font-size: .78rem; font-weight: 700; color: #92400e; }
+
+    /* ── SPECIALTIES ── */
+    .specialties-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .specialty-card { background: #f9fafb; border: 1.5px solid #e5e7eb; border-radius: 14px; padding: 16px; transition: border-color .2s, box-shadow .2s; cursor: default; }
+    .specialty-card:hover { border-color: #f59e0b; box-shadow: 0 4px 16px rgba(245,158,11,.12); }
+    .spec-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .spec-name { font-size: .88rem; font-weight: 800; color: #111; margin-bottom: 3px; }
+    .spec-badge { display: inline-block; background: #fef3c7; color: #92400e; font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 2px 8px; border-radius: 999px; margin-bottom: 6px; }
+    .spec-desc { font-size: .76rem; color: #6b7280; line-height: 1.55; }
+
+    /* ── PACKAGES ── */
+    .packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .pkg-card { border: 2px solid #e5e7eb; border-radius: 16px; padding: 20px; position: relative; transition: border-color .2s, box-shadow .2s; background: #fff; }
+    .pkg-card.highlight { border-color: #f59e0b; background: linear-gradient(160deg, #fffbeb 0%, #fff 60%); }
+    .pkg-card.highlight .pkg-popular { display: block; }
+    .pkg-popular { display: none; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: #fff; font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 3px 14px; border-radius: 999px; white-space: nowrap; }
+    .pkg-duration { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #9ca3af; margin-bottom: 6px; }
+    .pkg-name { font-size: 1rem; font-weight: 800; color: #111; margin-bottom: 6px; }
+    .pkg-price { font-size: 1.6rem; font-weight: 900; color: #111; margin-bottom: 4px; }
+    .pkg-photos { font-size: .78rem; font-weight: 600; color: #f59e0b; margin-bottom: 4px; }
+    .pkg-ideal { font-size: .74rem; color: #9ca3af; margin-bottom: 14px; font-style: italic; }
+    .pkg-divider { border: none; border-top: 1px solid #f3f4f6; margin: 12px 0; }
+    .pkg-includes { display: flex; flex-direction: column; gap: 6px; }
+    .pkg-include { font-size: .78rem; color: #374151; display: flex; align-items: flex-start; gap: 7px; }
+    .pkg-include::before { content: '✓'; color: #f59e0b; font-weight: 900; flex-shrink: 0; }
+    .pkg-book { display: block; margin-top: 16px; background: #111; color: #fff; text-align: center; padding: 10px; border-radius: 10px; font-size: .82rem; font-weight: 800; transition: background .2s; cursor: pointer; border: none; width: 100%; font-family: inherit; }
+    .pkg-card.highlight .pkg-book { background: #f59e0b; }
+    .pkg-book:hover { opacity: .85; }
+
+    /* ── ADD-ONS ── */
+    .addons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+    .addon-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .addon-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .addon-info { flex: 1; }
+    .addon-name { font-size: .85rem; font-weight: 800; color: #111; }
+    .addon-price { font-size: .8rem; font-weight: 700; color: #f59e0b; margin-bottom: 3px; }
+    .addon-desc { font-size: .74rem; color: #6b7280; line-height: 1.5; }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    @media (max-width: 700px) { .steps-grid { grid-template-columns: repeat(2, 1fr); } }
+    .step-card { text-align: center; padding: 18px 12px; background: #f9fafb; border-radius: 14px; border: 1px solid #e5e7eb; }
+    .step-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #f59e0b; color: #fff; font-size: .8rem; font-weight: 900; border-radius: 50%; margin-bottom: 8px; }
+    .step-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .step-title { font-size: .82rem; font-weight: 800; color: #111; margin-bottom: 5px; }
+    .step-desc { font-size: .74rem; color: #6b7280; line-height: 1.55; }
+
+    /* ── PORTFOLIO ── */
+    .portfolio-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    @media (max-width: 600px) { .portfolio-grid { grid-template-columns: repeat(3, 1fr); } }
+    .port-thumb { aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; }
+    .port-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+    .port-thumb:hover img { transform: scale(1.08); }
+    .port-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(135deg, #fef3c7, #fde68a); transition: transform .3s; }
+    .port-thumb:hover .port-ph { transform: scale(1.05); }
+
+    /* ── REVIEWS ── */
+    .rating-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .rating-num { font-size: 3rem; font-weight: 900; color: #111; line-height: 1; }
+    .rating-stars { color: #f59e0b; font-size: 1.2rem; }
+    .rating-count { font-size: .82rem; color: #9ca3af; margin-top: 2px; }
+    .review-item { padding: 16px 0; border-bottom: 1px solid #f3f4f6; }
+    .review-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rev-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .9rem; flex-shrink: 0; }
+    .rev-name { font-weight: 700; font-size: .88rem; color: #111; }
+    .rev-date { font-size: .74rem; color: #9ca3af; }
+    .rev-stars { color: #f59e0b; font-size: .82rem; margin-bottom: 5px; }
+    .rev-text { font-size: .85rem; color: #4b5563; line-height: 1.65; }
+
+    /* ── LOCATION ── */
+    .loc-list { display: flex; flex-direction: column; gap: 10px; }
+    .loc-row { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; color: #4b5563; }
+    .loc-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 22px; position: sticky; top: 80px; }
+    .sc-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 12px; }
+    .sc-name { font-size: 1.05rem; font-weight: 900; color: #111; }
+    .sc-handle { font-size: .78rem; color: #9ca3af; margin-bottom: 14px; }
+    .sc-price-from { margin-bottom: 14px; }
+    .sc-price-lbl { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #9ca3af; margin-bottom: 2px; }
+    .sc-price-val { font-size: 1.8rem; font-weight: 900; color: #111; }
+    .sc-price-unit { font-size: .82rem; color: #9ca3af; }
+    .sc-book { display: block; width: 100%; background: #f59e0b; color: #fff; border: none; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .92rem; font-weight: 800; cursor: pointer; transition: background .2s; text-align: center; margin-bottom: 8px; }
+    .sc-book:hover { background: #d97706; }
+    .sc-divider { border: none; border-top: 1px solid #f3f4f6; margin: 14px 0; }
+    .sc-contact-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; font-size: .82rem; font-weight: 700; cursor: pointer; border: 1.5px solid #e5e7eb; background: #f9fafb; color: #111; transition: all .15s; margin-bottom: 8px; text-decoration: none; }
+    .sc-contact-btn:hover { background: #111; color: #fff; border-color: #111; }
+    .sc-rating-mini { display: flex; align-items: center; gap: 8px; background: #fefce8; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; }
+    .sc-rating-num { font-size: 1.2rem; font-weight: 900; color: #92400e; }
+    .sc-rating-stars { color: #f59e0b; font-size: .88rem; }
+    .sc-rating-cnt { font-size: .72rem; color: #92400e; font-weight: 600; }
+    .sc-perks { display: flex; flex-direction: column; gap: 6px; }
+    .sc-perk { font-size: .77rem; color: #4b5563; display: flex; align-items: center; gap: 7px; }
+    .sc-social { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; }
+    .sc-social-btn { display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; font-size: .75rem; font-weight: 700; border: 1.5px solid #e5e7eb; background: #f9fafb; color: #111; cursor: pointer; transition: all .15s; text-decoration: none; gap: 4px; }
+    .sc-social-btn:hover { background: #111; color: #fff; border-color: #111; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">GULF<span>COAST</span>RADAR</div>
+    <span class="nav-back" onclick="history.back()">← Back to listings</span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-slides" id="heroSlides"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-badge" id="heroBadge">Photographer</div>
+      <div class="hero-name" id="heroName">Loading…</div>
+      <div class="hero-tagline" id="heroTagline"></div>
+    </div>
+    <button class="hero-btn hero-prev" onclick="slideHero(-1)">&#8592;</button>
+    <button class="hero-btn hero-next" onclick="slideHero(1)">&#8594;</button>
+    <div class="hero-dots" id="heroDots"></div>
+    <div class="hero-count" id="heroCount"></div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="two-col">
+
+      <!-- LEFT COLUMN -->
+      <div>
+
+        <!-- Stats -->
+        <div class="stats-bar" id="statsBar"></div>
+
+        <!-- About -->
+        <div class="section">
+          <div class="section-title">📷 About</div>
+          <p class="about-text" id="aboutText"></p>
+          <div class="service-area" id="serviceArea"></div>
+        </div>
+
+        <!-- Specialties -->
+        <div class="section">
+          <div class="section-title">🎨 Specialties</div>
+          <div class="specialties-grid" id="specialtiesGrid"></div>
+        </div>
+
+        <!-- Packages -->
+        <div class="section">
+          <div class="section-title">💼 Packages &amp; Pricing</div>
+          <div class="packages-grid" id="packagesGrid"></div>
+        </div>
+
+        <!-- Add-ons -->
+        <div class="section">
+          <div class="section-title">✨ Add-Ons</div>
+          <div class="addons-grid" id="addonsGrid"></div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section">
+          <div class="section-title">📋 How It Works</div>
+          <div class="steps-grid" id="stepsGrid"></div>
+        </div>
+
+        <!-- Portfolio -->
+        <div class="section">
+          <div class="section-title">🖼️ Portfolio</div>
+          <div class="portfolio-grid" id="portfolioGrid"></div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="section">
+          <div class="section-title">⭐ Reviews</div>
+          <div class="rating-row">
+            <div class="rating-num" id="ratingNum">–</div>
+            <div>
+              <div class="rating-stars" id="ratingStars"></div>
+              <div class="rating-count" id="ratingCount"></div>
+            </div>
+          </div>
+          <div id="reviewsList"></div>
+        </div>
+
+        <!-- Location / Service Area -->
+        <div class="section">
+          <div class="section-title">🗺️ Location &amp; Service Area</div>
+          <div class="loc-list" id="locList"></div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="sidebar-card">
+          <div class="sc-avatar" id="scAvatar">📷</div>
+          <div class="sc-name" id="scName">–</div>
+          <div class="sc-handle" id="scHandle">–</div>
+
+          <div class="sc-rating-mini">
+            <span class="sc-rating-num" id="scRatingNum">–</span>
+            <span class="sc-rating-stars" id="scRatingStars"></span>
+            <span class="sc-rating-cnt" id="scRatingCnt"></span>
+          </div>
+
+          <div class="sc-price-from">
+            <div class="sc-price-lbl">Sessions starting from</div>
+            <span class="sc-price-val" id="scPrice">$–</span>
+          </div>
+
+          <button class="sc-book" id="bookBtn" onclick="handleBook()">Book a Session →</button>
+
+          <hr class="sc-divider">
+
+          <a class="sc-contact-btn" id="callBtn" href="#">📞 Call / Text</a>
+          <a class="sc-contact-btn" id="emailBtn" href="#">✉️ Email</a>
+
+          <hr class="sc-divider">
+
+          <div class="sc-perks" id="scPerks">
+            <div class="sc-perk">📸 48-hour gallery delivery</div>
+            <div class="sc-perk">🌅 Golden hour & sunrise available</div>
+            <div class="sc-perk">🐾 Kids & pets always welcome</div>
+            <div class="sc-perk">✈️ Destination sessions available</div>
+          </div>
+
+          <div class="sc-social" id="scSocial"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slug = new URLSearchParams(window.location.search).get('slug') || 'photographer';
+      const s = document.createElement('script');
+      s.src = 'data/' + slug + '.js';
+      s.onload = function() { render(window.BUSINESS_DATA); };
+      document.head.appendChild(s);
+    })();
+  </script>
+  <script>
+    let D;
+
+    function render(data) {
+      D = data;
+      document.title = D.name + ' – Gulf Coast Radar';
+
+      // Hero
+      document.getElementById('heroBadge').textContent   = D.badge;
+      document.getElementById('heroName').textContent    = D.name;
+      document.getElementById('heroTagline').textContent = D.tagline;
+
+      // Carousel from portfolio
+      const slidesEl = document.getElementById('heroSlides');
+      const dotsEl   = document.getElementById('heroDots');
+      D.portfolio.forEach((ph, i) => {
+        const s = document.createElement('div');
+        s.className = 'hero-slide' + (i === 0 ? ' active' : '');
+        s.innerHTML = ph.url
+          ? `<img src="${ph.url}" alt="${ph.label}">`
+          : `<div class="ph">${ph.emoji}</div>`;
+        slidesEl.appendChild(s);
+        const d = document.createElement('button');
+        d.className = 'hero-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dotsEl.appendChild(d);
+      });
+      updateCount();
+
+      // Stats
+      D.stats.forEach(s => {
+        document.getElementById('statsBar').innerHTML +=
+          `<div class="stat-box"><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`;
+      });
+
+      // About
+      document.getElementById('aboutText').textContent = D.description;
+      document.getElementById('serviceArea').innerHTML = `📍 ${D.serviceArea}`;
+
+      // Specialties
+      const specEl = document.getElementById('specialtiesGrid');
+      D.specialties.forEach(s => {
+        specEl.innerHTML +=
+          `<div class="specialty-card">
+            <div class="spec-icon">${s.icon}</div>
+            <div class="spec-name">${s.name}</div>
+            ${s.badge ? `<div class="spec-badge">${s.badge}</div>` : ''}
+            <div class="spec-desc">${s.desc}</div>
+          </div>`;
+      });
+
+      // Packages
+      const pkgEl = document.getElementById('packagesGrid');
+      D.packages.forEach(p => {
+        const incl = p.includes.map(i => `<div class="pkg-include">${i}</div>`).join('');
+        pkgEl.innerHTML +=
+          `<div class="pkg-card${p.highlight ? ' highlight' : ''}">
+            <div class="pkg-popular">Most Popular</div>
+            <div class="pkg-duration">${p.duration}</div>
+            <div class="pkg-name">${p.name}</div>
+            <div class="pkg-price">${p.price}</div>
+            <div class="pkg-photos">${p.photos}</div>
+            <div class="pkg-ideal">${p.ideal}</div>
+            <div class="pkg-divider"></div>
+            <div class="pkg-includes">${incl}</div>
+            <button class="pkg-book" onclick="handleBook()">Book This Package</button>
+          </div>`;
+      });
+
+      // Add-ons
+      const addEl = document.getElementById('addonsGrid');
+      D.addons.forEach(a => {
+        addEl.innerHTML +=
+          `<div class="addon-card">
+            <div class="addon-icon">${a.icon}</div>
+            <div class="addon-info">
+              <div class="addon-name">${a.name}</div>
+              <div class="addon-price">${a.price}</div>
+              <div class="addon-desc">${a.desc}</div>
+            </div>
+          </div>`;
+      });
+
+      // Steps
+      const stepsEl = document.getElementById('stepsGrid');
+      D.steps.forEach(s => {
+        stepsEl.innerHTML +=
+          `<div class="step-card">
+            <div class="step-num">${s.num}</div>
+            <div class="step-icon">${s.icon}</div>
+            <div class="step-title">${s.title}</div>
+            <div class="step-desc">${s.desc}</div>
+          </div>`;
+      });
+
+      // Portfolio grid
+      const portEl = document.getElementById('portfolioGrid');
+      D.portfolio.forEach(ph => {
+        portEl.innerHTML += ph.url
+          ? `<div class="port-thumb"><img src="${ph.url}" alt="${ph.label}"></div>`
+          : `<div class="port-thumb"><div class="port-ph">${ph.emoji}</div></div>`;
+      });
+
+      // Reviews
+      document.getElementById('ratingNum').textContent   = D.rating.toFixed(1);
+      document.getElementById('ratingStars').textContent = '★'.repeat(Math.round(D.rating)) + '☆'.repeat(5 - Math.round(D.rating));
+      document.getElementById('ratingCount').textContent = D.reviewCount + ' reviews on Google';
+      D.reviews.forEach(r => {
+        document.getElementById('reviewsList').innerHTML +=
+          `<div class="review-item">
+            <div class="rev-top">
+              <div class="rev-avatar">${r.initials}</div>
+              <div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date}</div></div>
+            </div>
+            <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+            <div class="rev-text">${r.text}</div>
+          </div>`;
+      });
+
+      // Location
+      D.location.forEach(l => {
+        document.getElementById('locList').innerHTML +=
+          `<div class="loc-row"><span class="loc-icon">${l.icon}</span><span>${l.label}</span></div>`;
+      });
+
+      // Sidebar
+      document.getElementById('scName').textContent      = D.name;
+      document.getElementById('scHandle').textContent    = D.website || D.email;
+      document.getElementById('scRatingNum').textContent = D.rating.toFixed(1);
+      document.getElementById('scRatingStars').textContent = '★'.repeat(Math.round(D.rating));
+      document.getElementById('scRatingCnt').textContent = D.reviewCount + ' reviews';
+      document.getElementById('scPrice').textContent     = '$' + D.priceFrom;
+      document.getElementById('callBtn').href  = 'tel:' + D.phone.replace(/\D/g,'');
+      document.getElementById('emailBtn').href = 'mailto:' + D.email;
+
+      if (!D.bookingUrl) document.getElementById('bookBtn').style.background = '#374151';
+
+      // Social
+      if (D.social) {
+        const socEl = document.getElementById('scSocial');
+        if (D.social.instagram) socEl.innerHTML += `<a class="sc-social-btn" href="${D.social.instagram}" target="_blank" rel="noopener">📷 IG</a>`;
+        if (D.social.facebook)  socEl.innerHTML += `<a class="sc-social-btn" href="${D.social.facebook}" target="_blank" rel="noopener">📘 FB</a>`;
+        if (D.social.tiktok)    socEl.innerHTML += `<a class="sc-social-btn" href="${D.social.tiktok}" target="_blank" rel="noopener">🎵 TT</a>`;
+      }
+    }
+
+    function handleBook() {
+      if (D.bookingUrl) window.open(D.bookingUrl, '_blank');
+      else window.location.href = 'mailto:' + D.email;
+    }
+
+    // ── CAROUSEL ──────────────────────────────────────────────────
+    let cur = 0;
+    function goTo(n) {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots   = document.querySelectorAll('.hero-dot');
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
+      updateCount();
+    }
+    function slideHero(dir) { goTo(cur + dir); }
+    function updateCount() {
+      const total = document.querySelectorAll('.hero-slide').length;
+      document.getElementById('heroCount').textContent = (cur + 1) + ' / ' + total;
+    }
+    setInterval(() => slideHero(1), 4000);
+  </script>
+</body>
+</html>

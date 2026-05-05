@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Menu · Loading…</title>
+  <meta name="theme-color" content="#0f172a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="application/ld+json" id="schema-ld"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --border: #e2e8f0;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --accent: #f97316;
+      --accent2: #0ea5e9;
+      --green: #22c55e;
+      --red: #ef4444;
+      --hh: #8b5cf6;
+      --radius: 14px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    html { background: var(--bg); }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); min-height: 100dvh; max-width: 680px; margin: 0 auto; }
+
+    /* ─── Loading ─── */
+    #loading { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60dvh; gap: 12px; color: var(--muted); }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Hero header ─── */
+    #hero {
+      position: relative;
+      background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
+      color: #fff;
+      padding: 20px 20px 0;
+      padding-top: max(20px, env(safe-area-inset-top));
+    }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: .18; }
+    .hero-inner { position: relative; z-index: 1; }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); text-decoration: none; margin-bottom: 16px; }
+    .back-btn:hover { color: #fff; }
+    .biz-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .biz-icon { font-size: 36px; flex-shrink: 0; }
+    .biz-info h1 { font-size: 22px; font-weight: 800; line-height: 1.2; }
+    .biz-info .biz-sub { font-size: 13px; color: rgba(255,255,255,.65); margin-top: 3px; }
+    .status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+    .badge-open { background: rgba(34,197,94,.2); color: #4ade80; }
+    .badge-closed { background: rgba(239,68,68,.2); color: #fca5a5; }
+    .badge-hh { background: rgba(139,92,246,.25); color: #c4b5fd; }
+    .badge-hh-active { background: rgba(139,92,246,.4); color: #fff; animation: pulse-hh 2s infinite; }
+    @keyframes pulse-hh { 0%,100% { opacity:1 } 50% { opacity:.75 } }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .hero-actions { display: flex; gap: 10px; padding: 14px 0 0; }
+    .hero-action { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255,255,255,.1); border-radius: 10px; font-size: 13px; font-weight: 600; color: #fff; text-decoration: none; border: 1px solid rgba(255,255,255,.15); }
+    .hero-action:hover { background: rgba(255,255,255,.18); }
+
+    /* ─── HH banner ─── */
+    #hh-banner { display: none; background: linear-gradient(90deg, #7c3aed, #8b5cf6); color: #fff; padding: 12px 20px; font-size: 14px; font-weight: 700; align-items: center; gap: 8px; }
+    #hh-banner.show { display: flex; }
+    #hh-banner .hh-time { font-weight: 500; opacity: .85; margin-left: auto; font-size: 13px; }
+
+    /* ─── Specials strip ─── */
+    #specials-strip { display: none; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    #specials-strip.show { display: block; }
+    .special-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--accent); margin-bottom: 8px; }
+    .special-scroller { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .special-scroller::-webkit-scrollbar { display: none; }
+    .special-card { flex-shrink: 0; background: #fff9f5; border: 1px solid #fed7aa; border-radius: 10px; padding: 10px 14px; min-width: 180px; }
+    .special-card .s-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+    .special-card .s-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .special-card .s-price { font-size: 14px; font-weight: 800; color: var(--accent); margin-top: 4px; }
+
+    /* ─── Tab bar ─── */
+    #tab-bar { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .tab-scroller { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+    .tab-scroller::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      flex-shrink: 0; padding: 13px 18px; font-size: 13px; font-weight: 600; color: var(--muted);
+      border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent;
+      white-space: nowrap; transition: color .15s, border-color .15s;
+    }
+    .tab-btn.active { color: var(--ink); border-bottom-color: var(--accent); }
+    .tab-btn.hh-tab { color: var(--hh); }
+    .tab-btn.hh-tab.active { border-bottom-color: var(--hh); }
+    .tab-now { display: inline-block; width: 7px; height: 7px; background: var(--green); border-radius: 50%; margin-left: 5px; vertical-align: middle; }
+
+    /* ─── Refresh bar ─── */
+    #refresh-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; background: #f0fdf4; border-bottom: 1px solid #bbf7d0; font-size: 12px; color: #166534; }
+    #refresh-bar button { font-size: 12px; font-weight: 700; color: #16a34a; background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+    /* ─── Menu body ─── */
+    #menu-body { padding: 0 0 calc(80px + var(--safe-bottom)); }
+
+    /* ─── Section ─── */
+    .menu-section { padding: 24px 20px 0; }
+    .section-header { margin-bottom: 14px; }
+    .section-title { font-size: 18px; font-weight: 800; color: var(--ink); }
+    .section-timing { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; margin-top: 6px; }
+    .section-timing.now { color: var(--green); border-color: #bbf7d0; background: #f0fdf4; }
+    .section-desc { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .section-note { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+
+    /* ─── Sub-sections ─── */
+    .sub-section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); padding: 16px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+
+    /* ─── Items grid ─── */
+    .items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (min-width: 500px) { .items-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .item-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; cursor: pointer; transition: transform .12s, box-shadow .12s;
+      position: relative;
+    }
+    .item-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.08); }
+    .item-card.sold-out { opacity: .55; }
+    .item-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--surface); display: block; }
+    .item-img-placeholder { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; background: var(--surface); font-size: 30px; }
+    .item-body { padding: 10px 10px 12px; }
+    .item-name { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+    .item-desc { font-size: 11px; color: var(--muted); margin-top: 3px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .item-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .item-price { font-size: 14px; font-weight: 800; color: var(--accent); }
+    .item-price.hh-price { color: var(--hh); }
+    .item-price-orig { font-size: 11px; text-decoration: line-through; color: var(--muted); }
+    .allergen-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+    .adot { font-size: 11px; }
+    .sold-out-badge { position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,.9); color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: .3px; }
+    .item-tap-hint { display: none; }
+
+    /* ─── List view (for drinks / dense sections) ─── */
+    .items-list { display: flex; flex-direction: column; gap: 0; }
+    .list-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .list-item:last-child { border-bottom: none; }
+    .list-img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: var(--surface); }
+    .list-img-ph { width: 64px; height: 64px; border-radius: 10px; flex-shrink: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .list-info { flex: 1; min-width: 0; }
+    .list-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .list-desc { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .list-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+    .tag-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+    .tag-pill.hh { background: #f3f0ff; border-color: #c4b5fd; color: var(--hh); }
+    .list-price-col { text-align: right; flex-shrink: 0; }
+    .list-price { font-size: 15px; font-weight: 800; color: var(--accent); }
+    .list-price.hh-p { color: var(--hh); }
+    .list-orig { font-size: 11px; text-decoration: line-through; color: var(--muted); }
+    .list-so-badge { display: inline-block; font-size: 10px; font-weight: 800; background: rgba(239,68,68,.1); color: var(--red); padding: 2px 7px; border-radius: 20px; margin-top: 4px; }
+
+    /* ─── Empty section ─── */
+    .section-empty { text-align: center; padding: 30px; color: var(--muted); font-size: 14px; }
+
+    /* ─── HH section ─── */
+    .hh-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .hh-header .section-title { color: var(--hh); }
+    .hh-time-badge { font-size: 12px; font-weight: 700; background: #f3f0ff; color: var(--hh); border: 1px solid #c4b5fd; padding: 4px 12px; border-radius: 20px; }
+    .hh-days { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+    /* ─── Divider ─── */
+    .section-divider { height: 1px; background: var(--border); margin: 24px 20px 0; }
+
+    /* ─── Item detail modal ─── */
+    #modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(15,23,42,.55); backdrop-filter: blur(4px);
+      align-items: flex-end; justify-content: center;
+    }
+    #modal-overlay.open { display: flex; animation: fade-in .2s; }
+    @keyframes fade-in { from { opacity:0 } to { opacity:1 } }
+    #modal {
+      background: var(--bg); border-radius: 24px 24px 0 0; width: 100%; max-width: 680px;
+      max-height: 90dvh; overflow-y: auto; padding-bottom: calc(24px + var(--safe-bottom));
+      animation: slide-up .25s cubic-bezier(.25,.46,.45,.94);
+    }
+    @keyframes slide-up { from { transform: translateY(100%) } to { transform: translateY(0) } }
+    .modal-drag { width: 40px; height: 4px; background: var(--border); border-radius: 4px; margin: 12px auto 0; }
+    .modal-img { width: 100%; max-height: 260px; object-fit: cover; display: block; }
+    .modal-body { padding: 20px 20px 8px; }
+    .modal-name { font-size: 22px; font-weight: 900; color: var(--ink); line-height: 1.2; }
+    .modal-price-row { display: flex; align-items: baseline; gap: 10px; margin: 10px 0; }
+    .modal-price { font-size: 26px; font-weight: 900; color: var(--accent); }
+    .modal-price.hh { color: var(--hh); }
+    .modal-orig-price { font-size: 16px; text-decoration: line-through; color: var(--muted); }
+    .modal-desc { font-size: 15px; color: #374151; line-height: 1.6; }
+    .modal-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 18px 0 8px; }
+    .allergen-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .allergen-chip { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; padding: 6px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; color: var(--ink); }
+    .modal-style { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .modal-brewery { font-size: 13px; font-weight: 600; color: var(--ink); margin-top: 4px; }
+    .modal-so-notice { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 700; color: var(--red); margin-top: 14px; text-align: center; }
+    .modal-close { display: block; width: calc(100% - 40px); margin: 16px 20px 0; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-weight: 700; color: var(--ink); cursor: pointer; text-align: center; }
+    .modal-close:hover { background: var(--border); }
+
+    /* ─── Empty state ─── */
+    #empty { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 40dvh; padding: 40px 20px; text-align: center; gap: 12px; }
+    #empty.show { display: flex; }
+    #empty .empty-icon { font-size: 48px; }
+    #empty h2 { font-size: 20px; font-weight: 800; }
+    #empty p { font-size: 14px; color: var(--muted); }
+
+    /* ─── Footer ─── */
+    #footer { padding: 24px 20px; text-align: center; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+    #footer a { color: var(--accent2); font-weight: 600; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><span>Loading menu…</span></div>
+
+<div id="app" style="display:none">
+
+  <!-- Hero header -->
+  <div id="hero">
+    <div class="hero-bg" id="hero-bg"></div>
+    <div class="hero-inner">
+      <a href="#" id="back-btn" class="back-btn">← View Full Profile</a>
+      <div class="biz-row">
+        <div class="biz-icon" id="biz-icon">🍽️</div>
+        <div class="biz-info">
+          <h1 id="biz-name">Loading…</h1>
+          <div class="biz-sub" id="biz-address"></div>
+        </div>
+      </div>
+      <div class="status-row">
+        <span class="badge" id="open-badge"></span>
+        <span class="badge badge-hh" id="hh-badge" style="display:none"></span>
+      </div>
+      <div class="hero-actions">
+        <a href="#" id="call-btn" class="hero-action" style="display:none">📞 Call</a>
+        <a href="#" id="dir-btn" class="hero-action" target="_blank" style="display:none">📍 Directions</a>
+        <button class="hero-action" id="share-btn" onclick="shareMenu()">⬆ Share Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Happy Hour Banner -->
+  <div id="hh-banner">
+    🍻 Happy Hour is Active Now!
+    <span class="hh-time" id="hh-time-text"></span>
+  </div>
+
+  <!-- Specials strip -->
+  <div id="specials-strip">
+    <div class="special-label">🔥 Today's Specials</div>
+    <div class="special-scroller" id="specials-list"></div>
+  </div>
+
+  <!-- Refresh bar -->
+  <div id="refresh-bar">
+    <span id="last-refresh-text">Live menu — updates automatically</span>
+    <button onclick="loadMenu(true)">Refresh Now</button>
+  </div>
+
+  <!-- Tab bar -->
+  <div id="tab-bar">
+    <div class="tab-scroller" id="tab-scroller"></div>
+  </div>
+
+  <!-- Menu body -->
+  <div id="menu-body"></div>
+
+  <div id="empty">
+    <div class="empty-icon">🍽️</div>
+    <h2>No menu items yet</h2>
+    <p>Check back soon — this restaurant hasn't added their menu yet.</p>
+  </div>
+
+  <div id="footer">
+    <a href="#" id="profile-link">View Full Profile →</a><br><br>
+    <span id="powered-by">Powered by Gulf Coast Radar</span>
+  </div>
+
+</div>
+
+<!-- Item detail modal -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <div class="modal-drag"></div>
+    <img id="modal-img" class="modal-img" style="display:none" alt="">
+    <div class="modal-body">
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-price-row">
+        <div class="modal-price" id="modal-price"></div>
+        <div class="modal-orig-price" id="modal-orig" style="display:none"></div>
+      </div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <div id="modal-style-block" style="display:none">
+        <div class="modal-section-title">Style / Type</div>
+        <div class="modal-style" id="modal-style"></div>
+        <div class="modal-brewery" id="modal-brewery"></div>
+      </div>
+      <div id="modal-allergens-block" style="display:none">
+        <div class="modal-section-title">Allergens &amp; Dietary</div>
+        <div class="allergen-grid" id="modal-allergens"></div>
+      </div>
+      <div id="modal-so-notice" class="modal-so-notice" style="display:none">⛔ Currently Sold Out</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+const ALLERGEN_ICONS = {
+  gluten: '🌾', wheat: '🌾', dairy: '🥛', milk: '🥛', eggs: '🥚', egg: '🥚',
+  nuts: '🥜', peanuts: '🥜', peanut: '🥜', tree_nuts: '🌰', shellfish: '🦐',
+  fish: '🐟', soy: '🫘', sesame: '🫙', sulfites: '🍷', vegetarian: '🥦',
+  vegan: '🌱', 'gluten-free': '✅', gf: '✅', spicy: '🌶️', halal: '🌙', kosher: '✡️',
+};
+
+let entity = null;
+let slug = '';
+let allSections = [];
+let activeTab = 'all';
+let refreshTimer = null;
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  const params = new URLSearchParams(location.search);
+  slug = params.get('id') || params.get('slug') || '';
+  if (!slug) { showError('No menu specified.'); return; }
+  loadMenu();
+  refreshTimer = setInterval(() => loadMenu(false), REFRESH_INTERVAL);
+})();
+
+// ─── Load menu data ──────────────────────────────────────────────────────────
+async function loadMenu(showRefreshAnim = false) {
+  try {
+    const r = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`, { cache: 'no-store' });
+    if (!r.ok) throw new Error('Not found');
+    const data = await r.json();
+    entity = data;
+    render(data);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = '';
+    const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('last-refresh-text').textContent = `Live menu · Updated ${t}`;
+  } catch (e) {
+    console.error(e);
+    if (!entity) showError(e.message);
+  }
+}
+
+// ─── Main render ────────────────────────────────────────────────────────────
+function render(d) {
+  const e = d.entity;
+  document.title = `Menu · ${e.name}`;
+
+  // Hero
+  document.getElementById('biz-name').textContent = e.name;
+  document.getElementById('biz-icon').textContent = e.icon || '🍽️';
+  if (e.hero_image_url) {
+    document.getElementById('hero-bg').style.backgroundImage = `url(${e.hero_image_url})`;
+  }
+  const addr = [e.address_line_1, e.city, e.state].filter(Boolean).join(', ');
+  document.getElementById('biz-address').textContent = addr;
+  document.getElementById('back-btn').href = `profile.html?id=${slug}`;
+  document.getElementById('profile-link').href = `profile.html?id=${slug}`;
+  if (e.call_url || e.phone) {
+    const cb = document.getElementById('call-btn');
+    cb.href = e.call_url || `tel:${e.phone}`;
+    cb.style.display = '';
+  }
+  if (e.directions_url) {
+    const db = document.getElementById('dir-btn');
+    db.href = e.directions_url;
+    db.style.display = '';
+  }
+
+  // Open/closed status
+  renderStatus(d.hours, e);
+
+  // Happy hour
+  const hhActive = renderHappyHour(e, d.happy_hour);
+
+  // Specials
+  renderSpecials(d.specials);
+
+  // Build tab list + sections
+  allSections = buildSections(d, hhActive);
+  renderTabs();
+  renderBody(activeTab);
+
+  // Schema.org
+  renderSchema(e, d);
+}
+
+// ─── Open/Closed ────────────────────────────────────────────────────────────
+function renderStatus(hours, e) {
+  const badge = document.getElementById('open-badge');
+  if (!hours || !hours.length) { badge.style.display = 'none'; return; }
+  const now = new Date();
+  const dayIdx = now.getDay(); // 0=Sun
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+  const todayHours = hours.find(h => (h.day_of_week ?? h.day) === dayIdx);
+  if (!todayHours || todayHours.closed || todayHours.is_closed) {
+    badge.className = 'badge badge-closed';
+    badge.innerHTML = '<span class="badge-dot"></span> Closed Today';
+    return;
+  }
+  const open = timeToMin(todayHours.open_time || todayHours.open);
+  const close = timeToMin(todayHours.close_time || todayHours.close);
+  const isOpen = hhmm >= open && hhmm < close;
+  badge.className = isOpen ? 'badge badge-open' : 'badge badge-closed';
+  const openStr = fmtTime(todayHours.open_time || todayHours.open);
+  const closeStr = fmtTime(todayHours.close_time || todayHours.close);
+  badge.innerHTML = isOpen
+    ? `<span class="badge-dot"></span> Open · Closes ${closeStr}`
+    : `<span class="badge-dot"></span> Closed · Opens ${openStr}`;
+}
+
+// ─── Happy Hour ──────────────────────────────────────────────────────────────
+function renderHappyHour(e, hhData) {
+  if (!e.hh_start && !(hhData?.items?.length || hhData?.sections?.length)) return false;
+  const now = new Date();
+  const dayName = ['sun','mon','tue','wed','thu','fri','sat'][now.getDay()];
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+  const hhStart = timeToMin(e.hh_start);
+  const hhEnd = timeToMin(e.hh_end);
+  const daysMatch = !e.hh_days || e.hh_days.toLowerCase().includes(dayName);
+  const timeMatch = hhStart !== null && hhEnd !== null && hhmm >= hhStart && hhmm < hhEnd;
+  const active = daysMatch && timeMatch;
+
+  const hhBadge = document.getElementById('hh-badge');
+  if (e.hh_start) {
+    hhBadge.style.display = '';
+    hhBadge.className = active ? 'badge badge-hh-active' : 'badge badge-hh';
+    hhBadge.innerHTML = active
+      ? `🍻 Happy Hour Active · ends ${fmtTime(e.hh_end)}`
+      : `🍻 Happy Hour ${fmtTime(e.hh_start)}–${fmtTime(e.hh_end)}`;
+  }
+
+  const banner = document.getElementById('hh-banner');
+  const timeText = document.getElementById('hh-time-text');
+  if (active) {
+    banner.classList.add('show');
+    timeText.textContent = `Ends at ${fmtTime(e.hh_end)}`;
+  } else {
+    banner.classList.remove('show');
+  }
+  return active;
+}
+
+// ─── Specials ────────────────────────────────────────────────────────────────
+function renderSpecials(specials) {
+  const today = new Date().toISOString().slice(0,10);
+  const active = (specials || []).filter(s => {
+    if (!s.is_active) return false;
+    if (s.special_type === 'happy_hour') return false;
+    if (s.start_date && s.start_date > today) return false;
+    if (s.end_date && s.end_date < today) return false;
+    return true;
+  });
+  if (!active.length) return;
+  const strip = document.getElementById('specials-strip');
+  const list = document.getElementById('specials-list');
+  strip.classList.add('show');
+  list.innerHTML = active.map(s => `
+    <div class="special-card">
+      <div class="s-name">${esc(s.title || s.special_name || '')}</div>
+      <div class="s-desc">${esc(s.description || '')}</div>
+      ${s.price_text || s.price ? `<div class="s-price">${esc(s.price_text || '$'+s.price)}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+// ─── Build sections list ─────────────────────────────────────────────────────
+function buildSections(d, hhActive) {
+  const now = new Date();
+  const hhmm = now.getHours() * 60 + now.getMinutes();
+  const dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][now.getDay()];
+  const sections = [];
+
+  // Food menu sections
+  (d.menu?.sections || []).forEach(sec => {
+    const items = (d.menu?.items || []).filter(i => i.menu_section_id === sec.id);
+    if (!items.length) return;
+    const start = timeToMin(sec.available_start);
+    const end = timeToMin(sec.available_end);
+    const servedNow = start !== null && end !== null ? (hhmm >= start && hhmm < end) : true;
+    const daysOk = !sec.available_days || sec.available_days.includes(dayName.slice(0,3));
+    sections.push({
+      id: `food-${sec.id}`,
+      tab: 'food',
+      title: sec.section_name,
+      icon: sec.icon || '🍽️',
+      desc: sec.section_description,
+      note: sec.section_note,
+      timingLabel: sec.available_start ? `${fmtTime(sec.available_start)}–${fmtTime(sec.available_end)}` : null,
+      servedNow: servedNow && daysOk,
+      items,
+      type: 'grid',
+    });
+  });
+
+  // Drink sections
+  (d.drinks?.sections || []).forEach(sec => {
+    const items = (d.drinks?.items || []).filter(i => i.drink_section_id === sec.id || i.section_id === sec.id);
+    if (!items.length) return;
+    sections.push({
+      id: `drink-${sec.id}`,
+      tab: 'drinks',
+      title: sec.section_name,
+      icon: sec.icon || '🍺',
+      desc: sec.section_description || sec.section_note,
+      note: null,
+      timingLabel: sec.available_start ? `${fmtTime(sec.available_start)}–${fmtTime(sec.available_end)}` : null,
+      servedNow: true,
+      items,
+      type: 'list',
+    });
+  });
+
+  // Happy hour items (as their own section)
+  const hhItems = d.happy_hour?.items || [];
+  if (hhItems.length) {
+    const hhSections = d.happy_hour?.sections || [];
+    if (hhSections.length) {
+      hhSections.forEach(sec => {
+        const items = hhItems.filter(i => i.happy_hour_section_id === sec.id || i.section_id === sec.id);
+        if (!items.length) return;
+        sections.push({
+          id: `hh-${sec.id}`,
+          tab: 'happyhour',
+          title: sec.section_name || 'Happy Hour',
+          icon: '🍻',
+          desc: null, note: null,
+          timingLabel: entity?.entity?.hh_start ? `${fmtTime(entity.entity.hh_start)}–${fmtTime(entity.entity.hh_end)}` : null,
+          servedNow: hhActive,
+          items,
+          type: 'list',
+          isHH: true,
+        });
+      });
+    } else {
+      sections.push({
+        id: 'hh-all',
+        tab: 'happyhour',
+        title: 'Happy Hour Deals',
+        icon: '🍻',
+        desc: entity?.entity?.hh_description || null,
+        note: null,
+        timingLabel: entity?.entity?.hh_start ? `${fmtTime(entity.entity.hh_start)}–${fmtTime(entity.entity.hh_end)}` : null,
+        servedNow: hhActive,
+        items: hhItems,
+        type: 'list',
+        isHH: true,
+      });
+    }
+  }
+
+  return sections;
+}
+
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const tabs = [{ key: 'all', label: 'All' }];
+  const hasFoodNow = allSections.some(s => s.tab === 'food' && s.servedNow);
+  const hasFoodLater = allSections.some(s => s.tab === 'food' && !s.servedNow);
+  if (allSections.some(s => s.tab === 'food')) tabs.push({ key: 'food', label: 'Food', now: hasFoodNow });
+  if (allSections.some(s => s.tab === 'drinks')) tabs.push({ key: 'drinks', label: 'Drinks', now: true });
+  if (allSections.some(s => s.tab === 'happyhour')) tabs.push({ key: 'happyhour', label: '🍻 Happy Hour', hh: true });
+
+  const scroller = document.getElementById('tab-scroller');
+  scroller.innerHTML = tabs.map(t => `
+    <button
+      class="tab-btn ${t.hh ? 'hh-tab' : ''} ${t.key === activeTab ? 'active' : ''}"
+      onclick="setTab('${t.key}')"
+    >${t.label}${t.now ? '<span class="tab-now"></span>' : ''}</button>
+  `).join('');
+}
+
+function setTab(tab) {
+  activeTab = tab;
+  renderTabs();
+  renderBody(tab);
+  // Scroll to top of menu body
+  document.getElementById('menu-body').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Body ─────────────────────────────────────────────────────────────────────
+function renderBody(tab) {
+  const visible = tab === 'all' ? allSections : allSections.filter(s => s.tab === tab);
+  const body = document.getElementById('menu-body');
+  const empty = document.getElementById('empty');
+
+  if (!visible.length) {
+    body.innerHTML = '';
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  body.innerHTML = visible.map((sec, i) => `
+    <div class="menu-section" id="${sec.id}">
+      <div class="section-header">
+        <div class="section-title">${sec.icon ? sec.icon + ' ' : ''}${esc(sec.title)}</div>
+        ${sec.timingLabel ? `
+          <div class="section-timing ${sec.servedNow ? 'now' : ''}">
+            ${sec.servedNow ? '🟢 Serving Now' : '🕐'} ${esc(sec.timingLabel)}
+          </div>` : ''}
+        ${sec.desc ? `<div class="section-desc">${esc(sec.desc)}</div>` : ''}
+        ${sec.note ? `<div class="section-note">📝 ${esc(sec.note)}</div>` : ''}
+      </div>
+      ${sec.type === 'grid' ? renderGrid(sec) : renderList(sec)}
+    </div>
+    ${i < visible.length - 1 ? '<div class="section-divider"></div>' : ''}
+  `).join('');
+}
+
+function renderGrid(sec) {
+  if (!sec.items.length) return '<div class="section-empty">No items available</div>';
+  return `<div class="items-grid">${sec.items.map(item => renderGridCard(item, sec.isHH)).join('')}</div>`;
+}
+
+function renderGridCard(item, isHH) {
+  const avail = item.is_available !== false;
+  const price = item.price_text || (item.price ? '$' + Number(item.price).toFixed(2) : '');
+  const hhPrice = item.hh_price ? '$' + Number(item.hh_price).toFixed(2) : '';
+  return `
+    <div class="item-card ${avail ? '' : 'sold-out'}" onclick='openModal(${JSON.stringify(item)}, ${isHH || false})'>
+      ${item.image_url
+        ? `<img class="item-img" src="${esc(item.image_url)}" alt="${esc(item.item_name || item.name || '')}" loading="lazy">`
+        : `<div class="item-img-placeholder">${item.emoji || '🍽️'}</div>`}
+      <div class="item-body">
+        <div class="item-name">${esc(item.item_name || item.name || '')}</div>
+        ${item.description || item.item_description ? `<div class="item-desc">${esc(item.description || item.item_description)}</div>` : ''}
+        <div class="item-foot">
+          <div>
+            ${hhPrice && isHH ? `<div class="item-price hh-price">${hhPrice}</div><div class="item-price-orig">${price}</div>`
+              : price ? `<div class="item-price">${price}</div>` : ''}
+          </div>
+          <div class="allergen-dots">${renderAllergenDots(item.allergens)}</div>
+        </div>
+      </div>
+      ${!avail ? '<div class="sold-out-badge">Sold Out</div>' : ''}
+    </div>`;
+}
+
+function renderList(sec) {
+  if (!sec.items.length) return '<div class="section-empty">No items available</div>';
+  return `<div class="items-list">${sec.items.map(item => renderListItem(item, sec.isHH)).join('')}</div>`;
+}
+
+function renderListItem(item, isHH) {
+  const avail = item.is_available !== false;
+  const price = item.price_text || (item.price ? '$' + Number(item.price).toFixed(2) : '');
+  const hhPrice = item.hh_price ? '$' + Number(item.hh_price).toFixed(2) : '';
+  const tags = [];
+  if (item.item_style) tags.push(item.item_style);
+  if (item.brewery) tags.push(item.brewery);
+  return `
+    <div class="list-item" onclick='openModal(${JSON.stringify(item)}, ${isHH || false})'>
+      ${item.image_url
+        ? `<img class="list-img" src="${esc(item.image_url)}" alt="${esc(item.item_name || item.name || '')}" loading="lazy">`
+        : `<div class="list-img-ph">${item.emoji || (isHH ? '🍻' : '🥤')}</div>`}
+      <div class="list-info">
+        <div class="list-name">${esc(item.item_name || item.name || '')}</div>
+        ${item.description || item.item_description ? `<div class="list-desc">${esc(item.description || item.item_description)}</div>` : ''}
+        ${tags.length ? `<div class="list-tags">${tags.map(t => `<span class="tag-pill ${isHH?'hh':''}">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${!avail ? '<span class="list-so-badge">Sold Out</span>' : ''}
+      </div>
+      <div class="list-price-col">
+        ${hhPrice && isHH
+          ? `<div class="list-price hh-p">${hhPrice}</div><div class="list-orig">${price}</div>`
+          : price ? `<div class="list-price">${price}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+// ─── Allergen helpers ─────────────────────────────────────────────────────────
+function renderAllergenDots(allergens) {
+  if (!allergens) return '';
+  const list = Array.isArray(allergens) ? allergens : String(allergens).split(/[,;]/);
+  return list.slice(0,3).map(a => {
+    const key = a.trim().toLowerCase().replace(/\s+/g,'-');
+    const icon = ALLERGEN_ICONS[key] || ALLERGEN_ICONS[a.trim().toLowerCase()] || '⚠️';
+    return `<span class="adot" title="${esc(a.trim())}">${icon}</span>`;
+  }).join('');
+}
+
+function renderAllergenChips(allergens) {
+  if (!allergens) return '';
+  const list = Array.isArray(allergens) ? allergens : String(allergens).split(/[,;]/);
+  return list.map(a => {
+    const key = a.trim().toLowerCase().replace(/\s+/g,'-');
+    const icon = ALLERGEN_ICONS[key] || ALLERGEN_ICONS[a.trim().toLowerCase()] || '⚠️';
+    return `<div class="allergen-chip">${icon} ${esc(a.trim())}</div>`;
+  }).join('');
+}
+
+// ─── Modal ───────────────────────────────────────────────────────────────────
+function openModal(item, isHH) {
+  const price = item.price_text || (item.price ? '$' + Number(item.price).toFixed(2) : '');
+  const hhPrice = item.hh_price ? '$' + Number(item.hh_price).toFixed(2) : '';
+  const displayPrice = (isHH && hhPrice) ? hhPrice : price;
+  const origPrice = (isHH && hhPrice && price) ? price : null;
+  const name = item.item_name || item.name || '';
+  const desc = item.description || item.item_description || '';
+  const avail = item.is_available !== false;
+
+  document.getElementById('modal-name').textContent = name;
+  document.getElementById('modal-price').textContent = displayPrice;
+  document.getElementById('modal-price').className = `modal-price${isHH && hhPrice ? ' hh' : ''}`;
+  const origEl = document.getElementById('modal-orig');
+  if (origPrice) { origEl.textContent = origPrice; origEl.style.display = ''; }
+  else origEl.style.display = 'none';
+
+  document.getElementById('modal-desc').textContent = desc;
+
+  const imgEl = document.getElementById('modal-img');
+  if (item.image_url) { imgEl.src = item.image_url; imgEl.alt = name; imgEl.style.display = ''; }
+  else imgEl.style.display = 'none';
+
+  const styleBlock = document.getElementById('modal-style-block');
+  if (item.item_style || item.brewery) {
+    document.getElementById('modal-style').textContent = item.item_style || '';
+    document.getElementById('modal-brewery').textContent = item.brewery ? `By ${item.brewery}` : '';
+    styleBlock.style.display = '';
+  } else styleBlock.style.display = 'none';
+
+  const allergensBlock = document.getElementById('modal-allergens-block');
+  if (item.allergens) {
+    document.getElementById('modal-allergens').innerHTML = renderAllergenChips(item.allergens);
+    allergensBlock.style.display = '';
+  } else allergensBlock.style.display = 'none';
+
+  document.getElementById('modal-so-notice').style.display = avail ? 'none' : '';
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay') && e.type !== 'click') return;
+  if (e && e.target === document.getElementById('modal')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── Schema.org ──────────────────────────────────────────────────────────────
+function renderSchema(e, d) {
+  const menuItems = (d.menu?.items || []).map(i => ({
+    '@type': 'MenuItem',
+    name: i.item_name || i.name,
+    description: i.description || i.item_description || undefined,
+    offers: (i.price || i.price_text) ? { '@type': 'Offer', price: i.price || i.price_text, priceCurrency: 'USD' } : undefined,
+  }));
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: e.name,
+    address: { '@type': 'PostalAddress', streetAddress: e.address_line_1, addressLocality: e.city, addressRegion: e.state },
+    telephone: e.phone,
+    menu: menuItems.length ? { '@type': 'Menu', hasMenuSection: [{ '@type': 'MenuSection', hasMenuItem: menuItems }] } : undefined,
+  };
+  document.getElementById('schema-ld').textContent = JSON.stringify(schema, null, 0);
+}
+
+// ─── Share ───────────────────────────────────────────────────────────────────
+function shareMenu() {
+  const url = location.href;
+  const name = entity?.entity?.name || 'Menu';
+  if (navigator.share) { navigator.share({ title: `${name} – Menu`, url }); }
+  else { navigator.clipboard.writeText(url).then(() => alert('Menu link copied!')); }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function timeToMin(t) {
+  if (!t) return null;
+  const [h, m] = String(t).split(':').map(Number);
+  if (isNaN(h)) return null;
+  return h * 60 + (m || 0);
+}
+
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = String(t).split(':').map(Number);
+  if (isNaN(h)) return t;
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const hh = h % 12 || 12;
+  return m ? `${hh}:${String(m).padStart(2,'0')}${ampm}` : `${hh}${ampm}`;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showError(msg) {
+  document.getElementById('loading').innerHTML = `<div style="text-align:center;padding:40px;color:#64748b"><div style="font-size:48px;margin-bottom:16px">😕</div><div style="font-size:18px;font-weight:700;color:#0f172a">Menu unavailable</div><div style="margin-top:8px;font-size:14px">${msg}</div></div>`;
+}
+
+// Close modal on back button (mobile)
+window.addEventListener('popstate', () => closeModal());
+document.getElementById('modal').addEventListener('click', e => e.stopPropagation());
+</script>
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restaurant (with Images) – Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #f4f6f9; color: #0e1726; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    .top-nav { background: #0b1f3a; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 1.1rem; letter-spacing: .5px; }
+    .nav-logo span { color: #38bdf8; }
+    .nav-back { color: #94a3b8; font-size: .85rem; font-weight: 600; cursor: pointer; }
+    .nav-back:hover { color: #fff; }
+
+    /* ── CAROUSEL ── */
+    .carousel { position: relative; width: 100%; height: 460px; background: #0c2d48; overflow: hidden; }
+    .carousel-slides { width: 100%; height: 100%; position: relative; }
+    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
+    .carousel-slide.active { opacity: 1; }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-slide .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 6rem; }
+    .car-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%); pointer-events: none; }
+    .car-hero { position: absolute; bottom: 32px; left: 32px; z-index: 10; color: #fff; }
+    .car-hero-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.15); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; padding: 5px 12px; border-radius: 999px; margin-bottom: 10px; }
+    .car-hero-name { font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 900; line-height: 1.15; text-shadow: 0 2px 12px rgba(0,0,0,.4); margin-bottom: 8px; }
+    .car-hero-meta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .car-hero-rating { display: flex; align-items: center; gap: 5px; font-size: .88rem; font-weight: 700; }
+    .car-hero-addr { font-size: .82rem; color: rgba(255,255,255,.75); }
+    .car-hero-open { background: #22c55e; color: #fff; font-size: .7rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+    .car-hero-open.closed { background: #ef4444; }
+    .car-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.45); border: none; color: #fff; width: 42px; height: 42px; border-radius: 50%; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .2s; }
+    .car-btn:hover { background: rgba(0,0,0,.75); }
+    .car-prev { left: 16px; } .car-next { right: 16px; }
+    .car-dots { position: absolute; bottom: 14px; right: 60px; display: flex; gap: 6px; z-index: 10; }
+    .car-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.45); border: none; cursor: pointer; padding: 0; transition: background .2s; }
+    .car-dot.active { background: #fff; }
+    .car-count { position: absolute; bottom: 14px; right: 16px; background: rgba(0,0,0,.5); color: #fff; font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 10; }
+
+    /* ── QUICK ACTIONS BAR ── */
+    .action-bar { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 0 24px; display: flex; gap: 0; overflow-x: auto; }
+    .action-tab { padding: 14px 20px; font-size: .82rem; font-weight: 700; color: #64748b; border-bottom: 2.5px solid transparent; cursor: pointer; white-space: nowrap; transition: all .15s; }
+    .action-tab:hover { color: #0b1f3a; }
+    .action-tab.active { color: #0b1f3a; border-bottom-color: #0b7a75; }
+
+    /* ── LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 100px; }
+    .two-col { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } .carousel { height: 280px; } }
+    @media (max-width: 480px) {
+      .carousel { height: 220px; }
+      .car-hero { bottom: 16px; left: 16px; right: 16px; }
+      .car-hero-name { font-size: 1.4rem; }
+      .section { padding: 14px; border-radius: 12px; }
+      .page-wrap { padding: 14px 12px 90px; }
+      .action-bar { padding: 0 8px; }
+      .action-tab { padding: 12px 14px; font-size: .78rem; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+      .hh-banner { padding: 14px; }
+      .hh-icon { font-size: 1.6rem; }
+    }
+
+    /* ── SECTION ── */
+    .section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #0b1f3a; margin-bottom: 16px; }
+
+    /* ── ABOUT ── */
+    .about-text { font-size: .92rem; color: #475569; line-height: 1.8; }
+    .about-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .about-chip { background: #f1f5f9; color: #475569; font-size: .78rem; font-weight: 600; padding: 5px 12px; border-radius: 999px; border: 1px solid #e2e8f0; }
+
+    /* ── MENU ── */
+    .menu-section-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .menu-tab { padding: 7px 16px; border-radius: 999px; border: 1.5px solid #e2e8f0; background: #fff; font-size: .8rem; font-weight: 700; cursor: pointer; transition: all .15s; color: #475569; }
+    .menu-tab.active, .menu-tab:hover { background: #0b1f3a; color: #fff; border-color: #0b1f3a; }
+    .menu-items { display: flex; flex-direction: column; gap: 0; }
+    .menu-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #f8fafc; }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item-left { flex: 1; }
+    .menu-item-name { font-size: .92rem; font-weight: 700; color: #0b1f3a; margin-bottom: 3px; }
+    .menu-item-desc { font-size: .78rem; color: #64748b; line-height: 1.5; }
+    .menu-item-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+    .menu-tag { font-size: .65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+
+    .menu-item-price { font-size: .95rem; font-weight: 900; color: #0b7a75; white-space: nowrap; padding-top: 2px; }
+
+    /* ── HAPPY HOUR ── */
+    .hh-banner { background: linear-gradient(135deg, #78350f, #d97706); border-radius: 14px; padding: 20px 22px; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; }
+    .hh-icon { font-size: 2.2rem; flex-shrink: 0; }
+    .hh-title { font-size: 1rem; font-weight: 900; margin-bottom: 3px; }
+    .hh-time { font-size: .85rem; color: rgba(255,255,255,.85); }
+    .hh-items { display: flex; flex-direction: column; gap: 0; }
+    .hh-item { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #fef3c7; }
+    .hh-item:last-child { border-bottom: none; }
+    .hh-item-name { font-size: .88rem; font-weight: 700; color: #78350f; }
+    .hh-item-desc { font-size: .75rem; color: #92400e; margin-top: 2px; }
+    .hh-item-price { font-size: .88rem; font-weight: 800; color: #d97706; white-space: nowrap; }
+
+    /* ── SPECIALS ── */
+    .specials-list { display: flex; flex-direction: column; gap: 10px; }
+    .special-card { display: flex; align-items: flex-start; gap: 14px; padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .special-day { background: #0b1f3a; color: #fff; font-size: .7rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; white-space: nowrap; margin-top: 2px; }
+    .special-name { font-size: .9rem; font-weight: 800; color: #0b1f3a; margin-bottom: 3px; }
+    .special-desc { font-size: .78rem; color: #64748b; line-height: 1.5; }
+
+    /* ── EVENTS ── */
+    .events-list { display: flex; flex-direction: column; gap: 10px; }
+    .event-card { display: flex; gap: 14px; padding: 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; align-items: flex-start; }
+    .event-date-box { background: #0b1f3a; color: #fff; border-radius: 10px; padding: 8px 12px; text-align: center; min-width: 52px; flex-shrink: 0; }
+    .event-date-month { font-size: .62rem; text-transform: uppercase; letter-spacing: 1px; color: #38bdf8; font-weight: 700; }
+    .event-date-day { font-size: 1.3rem; font-weight: 900; line-height: 1; }
+    .event-name { font-size: .9rem; font-weight: 800; color: #0b1f3a; margin-bottom: 3px; }
+    .event-detail { font-size: .78rem; color: #64748b; line-height: 1.5; }
+    .event-time { font-size: .75rem; font-weight: 700; color: #0b7a75; margin-top: 4px; }
+
+    /* ── PHOTOS ── */
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-thumb { aspect-ratio: 1; border-radius: 10px; overflow: hidden; cursor: pointer; }
+    .photo-thumb .ph-sm { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #dbeafe, #eff6ff); transition: transform .2s; }
+    .photo-thumb:hover .ph-sm { transform: scale(1.05); }
+
+    /* ── REVIEWS ── */
+    .review-item { padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
+    .review-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+    .rev-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #0b7a75, #38bdf8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .85rem; flex-shrink: 0; }
+    .rev-name { font-weight: 700; font-size: .86rem; }
+    .rev-date { font-size: .72rem; color: #94a3b8; }
+    .rev-stars { color: #f59e0b; font-size: .82rem; margin-bottom: 5px; }
+    .rev-text { font-size: .83rem; color: #475569; line-height: 1.65; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 14px; position: sticky; top: 80px; }
+    .sc-section { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #f1f5f9; }
+    .sc-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .sc-title { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; margin-bottom: 10px; }
+    .sc-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px; border-radius: 10px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; border: none; margin-bottom: 8px; transition: all .15s; }
+    .sc-btn:last-child { margin-bottom: 0; }
+    .sc-btn-primary { background: #0b7a75; color: #fff; }
+    .sc-btn-primary:hover { background: #096560; }
+    .sc-btn-outline { background: transparent; color: #0b1f3a; border: 1.5px solid #e2e8f0; }
+    .sc-btn-outline:hover { background: #0b1f3a; color: #fff; border-color: #0b1f3a; }
+    .sc-btn-green { background: #22c55e; color: #fff; }
+    .sc-btn-green:hover { background: #16a34a; }
+    .hours-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: .82rem; border-bottom: 1px solid #f8fafc; }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-day { font-weight: 600; color: #334155; }
+    .hours-time { color: #64748b; }
+    .hours-row.today .hours-day { color: #0b7a75; font-weight: 800; }
+    .hours-row.today .hours-time { color: #0b7a75; font-weight: 700; }
+    .social-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .social-btn { flex: 1; min-width: 70px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 10px; border-radius: 8px; font-size: .75rem; font-weight: 700; cursor: pointer; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #334155; transition: all .15s; }
+    .social-btn:hover { background: #0b1f3a; color: #fff; border-color: #0b1f3a; }
+    .info-row { display: flex; align-items: flex-start; gap: 8px; font-size: .82rem; color: #475569; padding: 5px 0; }
+    .info-icon { font-size: .9rem; width: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── LOCATION ── */
+    .map-ph { width: 100%; height: 200px; border-radius: 12px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); display: flex; align-items: center; justify-content: center; font-size: .88rem; color: #3b82f6; font-weight: 700; gap: 8px; margin-bottom: 14px; }
+  
+    /* ── ALLERGENS ── */
+    .allergy-notice { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 14px 16px; font-size: .82rem; color: #92400e; line-height: 1.6; margin-bottom: 16px; }
+    .allergy-labels { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+    .allergy-label  { display: flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; font-size: .78rem; font-weight: 600; color: #334155; }
+    .allergy-label-tag { font-size: .65rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: #0b1f3a; color: #fff; }
+    .allergy-common { display: flex; flex-wrap: wrap; gap: 6px; }
+    .allergy-common-chip { background: #fef2f2; color: #dc2626; font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 1px solid #fecaca; }
+  
+    /* ── MENU ITEM IMAGE ── */
+    .menu-item-img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 2rem; overflow: hidden; }
+    .menu-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 480px) { .menu-item-img { width: 64px; height: 64px; } }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">GULF<span>COAST</span>RADAR</div>
+    <span class="nav-back" onclick="history.back()">← Back</span>
+  </nav>
+
+  <!-- CAROUSEL -->
+  <div class="carousel">
+    <div class="carousel-slides" id="carSlides"></div>
+    <div class="car-overlay"></div>
+    <div class="car-hero">
+      <div class="car-hero-badge" id="heroBadge"></div>
+      <div class="car-hero-name" id="heroName">Loading...</div>
+      <div class="car-hero-meta">
+        <div class="car-hero-rating" id="heroRating"></div>
+        <div class="car-hero-addr" id="heroAddr"></div>
+        <span class="car-hero-open" id="heroOpen"></span>
+      </div>
+    </div>
+    <button class="car-btn car-prev" onclick="slideCarousel(-1)">&#8592;</button>
+    <button class="car-btn car-next" onclick="slideCarousel(1)">&#8594;</button>
+    <div class="car-dots" id="carDots"></div>
+    <div class="car-count" id="carCount"></div>
+  </div>
+
+  <!-- ACTION TABS -->
+  <div class="action-bar">
+    <div class="action-tab active" onclick="scrollToSection('about')">About</div>
+    <div class="action-tab" onclick="scrollToSection('menu')">Menu</div>
+    <div class="action-tab" onclick="scrollToSection('happyHour')">Happy Hour</div>
+    <div class="action-tab" onclick="scrollToSection('specials')">Specials</div>
+    <div class="action-tab" onclick="scrollToSection('events')">Events</div>
+    <div class="action-tab" onclick="scrollToSection('photos')">Photos</div>
+    <div class="action-tab" onclick="scrollToSection('reviews')">Reviews</div>
+    <div class="action-tab" onclick="scrollToSection('allergens')">Allergens</div>
+    <div class="action-tab" onclick="scrollToSection('location')">Location</div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="two-col">
+
+      <!-- LEFT -->
+      <div>
+
+        <div class="section" id="about">
+          <div class="section-title">📖 About</div>
+          <div class="about-text" id="aboutText"></div>
+          <div class="about-chips" id="aboutChips"></div>
+        </div>
+
+        <div class="section" id="menu">
+          <div class="section-title">🍽️ Menu</div>
+          <div class="menu-section-tabs" id="menuTabs"></div>
+          <div class="menu-items" id="menuItems"></div>
+        </div>
+
+        <div class="section" id="happyHour">
+          <div class="section-title">🍺 Happy Hour</div>
+          <div class="hh-banner" id="hhBanner"></div>
+          <div class="hh-items" id="hhItems"></div>
+        </div>
+
+        <div class="section" id="specials">
+          <div class="section-title">🏷️ Daily Specials</div>
+          <div class="specials-list" id="specialsList"></div>
+        </div>
+
+        <div class="section" id="events">
+          <div class="section-title">🎉 Upcoming Events</div>
+          <div class="events-list" id="eventsList"></div>
+        </div>
+
+        <div class="section" id="photos">
+          <div class="section-title">📸 Photos</div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <div class="section" id="reviews">
+          <div class="section-title">⭐ Reviews</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+            <div style="font-size:2.8rem;font-weight:900;color:#0b1f3a;" id="revScore">–</div>
+            <div>
+              <div style="color:#f59e0b;font-size:1.1rem;" id="revStars"></div>
+              <div style="font-size:.8rem;color:#94a3b8;margin-top:2px;" id="revCount"></div>
+            </div>
+          </div>
+          <div id="reviewsList"></div>
+        </div>
+
+
+        <div class="section" id="allergens">
+          <div class="section-title">⚠️ Allergen Info</div>
+          <div class="allergy-notice" id="allergyNotice"></div>
+          <div class="allergy-labels" id="allergyLabels"></div>
+          <div style="font-size:.82rem;font-weight:700;color:#475569;margin-bottom:8px;">Common allergens on menu:</div>
+          <div class="allergy-common" id="allergyCommon"></div>
+        </div>
+
+        <div class="section" id="location">
+          <div class="section-title">📍 Location</div>
+          <div class="map-ph">🗺️ Interactive Map</div>
+          <div id="locDetails"></div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="sidebar-card">
+
+          <div class="sc-section">
+            <button class="sc-btn sc-btn-primary" id="reserveBtn" onclick="handleReserve()">🍽️ Reservations</button>
+            <button class="sc-btn sc-btn-outline" onclick="handleOrder()">🛵 Order Online</button>
+            <button class="sc-btn sc-btn-green"   onclick="handleCall()">📞 Call Now</button>
+          </div>
+
+          <div class="sc-section">
+            <div class="sc-title">Hours</div>
+            <div id="hoursRows"></div>
+          </div>
+
+          <div class="sc-section">
+            <div class="sc-title">Info</div>
+            <div id="infoRows"></div>
+          </div>
+
+          <div class="sc-section">
+            <div class="sc-title">Social</div>
+            <div class="social-row" id="socialRow"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── RESTAURANT DATA — swap for API ─────────────────────────────
+    const RESTAURANT = {
+      name:        "Cobalt, The Restaurant",
+      badge:       "🍽️ Contemporary Coastal",
+      cuisine:     "Contemporary Coastal Cuisine",
+      address:     "28099 Perdido Beach Blvd, Orange Beach, AL 36561",
+      phone:       "251-923-5300",
+      website:        "cobaltrestaurant.net",
+      bookingUrl:     null,  // set to reservations URL
+      orderUrl:       null,  // set to online ordering URL
+      rating:      4.7,
+      reviewCount: 892,
+      description: "Unlike any other. Cobalt, The Restaurant sits beneath the Perdido Pass Bridge adjacent to Caribe Resort, offering breathtaking bay views from every table. Helmed by acclaimed chefs across three distinct kitchens, Cobalt delivers contemporary coastal cuisine with a casual and relaxing waterfront atmosphere. From fresh Gulf seafood to handcrafted cocktails, every visit is an experience.",
+      chips:       ["Waterfront Dining", "Live Music", "Boat Slips Available", "Catering", "Sunday Brunch", "Happy Hour Daily"],
+
+      photos: [
+        { emoji: "🌊", label: "Waterfront View" },
+        { emoji: "🦐", label: "Gulf Shrimp" },
+        { emoji: "🌅", label: "Bay at Sunset" },
+        { emoji: "🍷", label: "Bar & Cocktails" },
+        { emoji: "🐟", label: "Fresh Grouper" },
+        { emoji: "🎸", label: "Live Music" },
+        { emoji: "🦀", label: "Crab Dip" },
+        { emoji: "⚓", label: "Boat Slip View" },
+        { emoji: "🥂", label: "Outdoor Dining" },
+      ],
+
+      hours: [
+        { day: "Sunday",            time: "11:00 AM – 9:30 PM", brunch: "Brunch 11 AM – 2 PM", today: false },
+        { day: "Monday",            time: "11:00 AM – 9:30 PM", today: false },
+        { day: "Tuesday",           time: "11:00 AM – 9:30 PM", today: false },
+        { day: "Wednesday",         time: "11:00 AM – 9:30 PM", today: false },
+        { day: "Thursday",          time: "11:00 AM – 9:30 PM", today: false },
+        { day: "Friday",            time: "11:00 AM – 10:00 PM", today: false },
+        { day: "Saturday",          time: "11:00 AM – 10:00 PM", today: true },
+      ],
+
+      menu: {
+        Starters: [
+          { name: "Crab & Shrimp Dip",       desc: "Warm, creamy blend of Gulf crab and shrimp served with toasted crostini", price: "Mkt", tags: ["popular"] },
+          { name: "BBQ Gulf Shrimp",          desc: "Gulf shrimp in Creole butter sauce with house BBQ glaze", price: "Mkt", tags: ["popular", "spicy"] },
+          { name: "Firecracker Shrimp",       desc: "Crispy Gulf shrimp with spicy remoulade", price: "Mkt", tags: ["spicy"] },
+          { name: "Cobalt Caviar",            desc: "Black beans, edamame, corn, red onion, Roma tomatoes & cilantro with vinaigrette and tortilla chips", price: "Mkt", tags: [] },
+          { name: "Tuna & Avocado Stack",     desc: "Fresh tuna and avocado served in sweet Asian sauce", price: "Mkt", tags: ["popular"] },
+          { name: "Fried Crab Claws",         desc: "Gulf crab claws lightly fried, served with dipping sauce", price: "Mkt", tags: ["popular"] },
+        ],
+        Mains: [
+          { name: "Gulf Shrimp & Grits",      desc: "Stone-ground grits, tasso gravy, roasted peppers, green onions", price: "Mkt", tags: ["popular", "gf"] },
+          { name: "Bronze Gulf Grouper",      desc: "Pan-bronzed Gulf grouper with lemon butter, seasonal vegetables", price: "Mkt", tags: ["popular"] },
+          { name: "Shrimp Fra Diavolo",       desc: "Sautéed with roasted mushrooms, chargrilled lemon, fresh spinach and arugula", price: "Mkt", tags: ["spicy"] },
+          { name: "Blackened Redfish",        desc: "Cajun-spiced Gulf redfish over seasoned rice", price: "Mkt", tags: [] },
+          { name: "Blackened Chicken",        desc: "With tasso ham over pappardelle pasta", price: "Mkt", tags: [] },
+          { name: "Pecan Catfish",            desc: "Pecan-crusted Gulf catfish with remoulade and sweet potato mash", price: "Mkt", tags: [] },
+          { name: "Catch of the Day",         desc: "Ask your server for today's fresh Gulf catch, chef's preparation", price: "Mkt", tags: ["new"] },
+        ],
+        Sandwiches: [
+          { name: "Shrimp Po\'boy",          desc: "Gulf shrimp po\'boy with fries", price: "Mkt", tags: ["popular"] },
+          { name: "Fried Shrimp Platter",     desc: "Fried Gulf shrimp platter with fries and house slaw", price: "Mkt", tags: [] },
+          { name: "Margherita Pizza",         desc: "Fresh mozzarella, basil, and San Marzano tomatoes on house-made crust", price: "Mkt", tags: [] },
+        ],
+        Brunch: [
+          { name: "Shrimp & Egg Benedict",    desc: "Gulf shrimp, poached eggs, house hollandaise on toasted brioche", price: "Mkt", tags: [] },
+          { name: "Coastal French Toast",     desc: "Thick-cut brioche, fresh berries, whipped cream, cane syrup", price: "Mkt", tags: [] },
+          { name: "Gulf Crab Omelette",       desc: "Three-egg omelette, Gulf crab, Gruyère, herbs, roasted potatoes", price: "Mkt", tags: ["gf"] },
+        ],
+        Desserts: [
+          { name: "Creole Cheesecake",        desc: "House Creole-spiced cheesecake with seasonal berry compote", price: "Mkt", tags: ["popular"] },
+          { name: "Chocolate Cake",           desc: "Decadent layered chocolate cake with ganache", price: "Mkt", tags: [] },
+        ],
+        Drinks: [
+          { name: "Perdido Punch",            desc: "House rum blend, passion fruit, pineapple, fresh lime", price: "Mkt", tags: ["popular"] },
+          { name: "Cobalt Margarita",         desc: "Blanco tequila, Cointreau, fresh citrus, salted rim", price: "Mkt", tags: [] },
+          { name: "Draft Beer",               desc: "Rotating selection of local and craft beers", price: "$6–$9", tags: [] },
+          { name: "House Wine",               desc: "Red, white, or rosé — ask your server", price: "$9/glass", tags: [] },
+        ],
+      },
+
+      happyHour: {
+        schedule: "Daily · 3:00 PM – 5:00 PM",
+        description: "Join us every day for happy hour specials on drinks and apps right on the water.",
+        items: [
+          { name: "Draft Beer Specials",    desc: "Select drafts at happy hour pricing",      price: "$4" },
+          { name: "House Wine",             desc: "Red, white, or rosé by the glass",          price: "$6" },
+          { name: "Cobalt Caviar",          desc: "Happy hour pricing on our signature dip",   price: "$8" },
+          { name: "Firecracker Shrimp",     desc: "Half price during happy hour",              price: "$7" },
+        ],
+      },
+
+      specials: [
+        { day: "Sunday",    name: "Sunday Brunch",        desc: "Full brunch menu 11 AM – 2 PM. Bottomless mimosas available." },
+        { day: "Tuesday",   name: "Taco Tuesday",         desc: "Gulf shrimp and fish tacos at special pricing all day." },
+        { day: "Wednesday", name: "Wine Down Wednesday",  desc: "Half-price bottles of select wines with dinner." },
+        { day: "Friday",    name: "Fresh Friday Catch",   desc: "Chef's featured fresh Gulf catch with market pricing." },
+      ],
+
+      events: [
+        { month: "APR", day: "19", name: "Live Music — Gulf Coast Blues",  detail: "Local blues band on the waterfront patio",    time: "7:00 PM – 10:00 PM" },
+        { month: "APR", day: "25", name: "Seafood Boil Night",              detail: "All-you-can-eat Gulf seafood boil event",      time: "6:00 PM – 9:00 PM" },
+        { month: "MAY", day: "3",  name: "Cinco de Mayo Fiesta",            detail: "Special menu, margarita bar, and live music",  time: "5:00 PM – Close" },
+      ],
+
+      allergens: {
+        notice: "Please inform your server of any food allergies or dietary restrictions before ordering. Items are prepared in a shared kitchen that handles shellfish, nuts, dairy, gluten, and eggs.",
+        labels: [
+          { tag: "GF",  full: "Gluten Free" },
+          { tag: "V",   full: "Vegetarian" },
+          { tag: "VG",  full: "Vegan" },
+          { tag: "NF",  full: "Nut Free" },
+          { tag: "DF",  full: "Dairy Free" },
+          { tag: "SF",  full: "Shellfish Free" },
+        ],
+        common: ["Shellfish", "Tree Nuts", "Dairy", "Gluten", "Eggs", "Fish", "Soy"],
+      },
+      reviews: [
+        { initials: "AL", name: "Amanda L.", date: "April 2026",    rating: 5, text: "Best restaurant in Orange Beach by far. The Gulf Shrimp & Grits were incredible and the view of the bay at sunset is unmatched. We'll be back every trip." },
+        { initials: "JT", name: "James T.",  date: "March 2026",    rating: 5, text: "Brought the family for Sunday Brunch and everyone loved it. Fresh seafood, amazing cocktails, great service. The Crab Dip is a must-order." },
+        { initials: "MK", name: "Maria K.",  date: "February 2026", rating: 4, text: "Fantastic waterfront dining. The grouper was cooked perfectly and the happy hour prices are great. Slightly long wait on weekends but worth it." },
+      ],
+
+      social: [
+        { icon: "📘", name: "Facebook",  url: "https://www.facebook.com/cobalttherestaurant" },
+        { icon: "📸", name: "Instagram", url: "https://www.instagram.com/cobalttherestaurant" },
+        { icon: "🐦", name: "Twitter",   url: "https://twitter.com/Cobaltoba" },
+      ],
+
+      info: [
+        { icon: "📍", label: "28099 Perdido Beach Blvd, Orange Beach, AL" },
+        { icon: "📞", label: "251-923-5300" },
+        { icon: "🌐", label: "cobaltrestaurant.net" },
+        { icon: "⚓", label: "Boat slips available for small boats & yachts" },
+        { icon: "🎉", label: "Catering & private events available" },
+      ],
+    };
+
+    // ── RENDER ─────────────────────────────────────────────────────
+    function render(R) {
+      document.title = R.name + ' – Gulf Coast Radar';
+      document.getElementById('heroBadge').textContent = R.badge;
+      document.getElementById('heroName').textContent  = R.name;
+      document.getElementById('heroAddr').textContent  = R.address;
+      document.getElementById('heroRating').innerHTML  = `<span style="color:#f59e0b;">★</span> ${R.rating} <span style="color:rgba(255,255,255,.6);font-weight:500;">(${R.reviewCount})</span>`;
+
+      // Auto-compute isOpen from hours + current time
+      (function() {
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const today = days[new Date().getDay()];
+        const now   = new Date().getHours() * 60 + new Date().getMinutes();
+        const todayHours = R.hours.find(h => h.day === today);
+        let open = false;
+        if (todayHours) {
+          const parseTime = s => {
+            const m = s.match(/(\d+):(\d+)\s*(AM|PM)/i);
+            if (!m) return null;
+            let h = parseInt(m[1]), min = parseInt(m[2]);
+            if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12;
+            if (m[3].toUpperCase() === 'AM' && h === 12) h = 0;
+            return h * 60 + min;
+          };
+          const parts = todayHours.time.split('–').map(s => s.trim());
+          const start = parseTime(parts[0]), end = parseTime(parts[1]);
+          if (start !== null && end !== null) open = now >= start && now < end;
+        }
+        const openEl = document.getElementById('heroOpen');
+        openEl.textContent = open ? 'Open Now' : 'Closed';
+        if (!open) openEl.classList.add('closed');
+      })();
+
+      document.getElementById('revScore').textContent = R.rating.toFixed(1);
+      document.getElementById('revStars').textContent = '★'.repeat(Math.round(R.rating)) + '☆'.repeat(5 - Math.round(R.rating));
+      document.getElementById('revCount').textContent = R.reviewCount + ' reviews';
+
+      // Carousel
+      const slidesEl = document.getElementById('carSlides');
+      const dotsEl   = document.getElementById('carDots');
+      R.photos.forEach((ph, i) => {
+        const s = document.createElement('div');
+        s.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+        s.style.background = `linear-gradient(135deg,#0c2d48,#${['1a5276','0b4f78','0a3d62','154360','1a2f45'][i % 5]})`;
+        s.innerHTML = ph.url ? `<img src="${ph.url}" alt="${ph.label}">` : `<div class="ph">${ph.emoji}</div>`;
+        slidesEl.appendChild(s);
+        const d = document.createElement('button');
+        d.className = 'car-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dotsEl.appendChild(d);
+      });
+      updateCount();
+
+      // About
+      document.getElementById('aboutText').textContent = R.description;
+      R.chips.forEach(c => { document.getElementById('aboutChips').innerHTML += `<span class="about-chip">${c}</span>`; });
+
+      // Menu tabs
+      const sections = Object.keys(R.menu);
+      let activeMenu = sections[0];
+      sections.forEach(sec => {
+        const btn = document.createElement('button');
+        btn.className = 'menu-tab' + (sec === activeMenu ? ' active' : '');
+        btn.textContent = sec;
+        btn.onclick = () => {
+          activeMenu = sec;
+          document.querySelectorAll('.menu-tab').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderMenuItems(R.menu[sec]);
+        };
+        document.getElementById('menuTabs').appendChild(btn);
+      });
+      renderMenuItems(R.menu[activeMenu]);
+
+      // Happy Hour
+      const hh = R.happyHour;
+      document.getElementById('hhBanner').innerHTML =
+        `<div class="hh-icon">🍺</div><div><div class="hh-title">Happy Hour</div><div class="hh-time">${hh.schedule}</div><div style="font-size:.8rem;margin-top:4px;color:rgba(255,255,255,.8);">${hh.description}</div></div>`;
+      hh.items.forEach(i => {
+        document.getElementById('hhItems').innerHTML +=
+          `<div class="hh-item"><div><div class="hh-item-name">${i.name}</div><div class="hh-item-desc">${i.desc}</div></div><div class="hh-item-price">${i.price}</div></div>`;
+      });
+
+      // Specials
+      R.specials.forEach(s => {
+        document.getElementById('specialsList').innerHTML +=
+          `<div class="special-card"><span class="special-day">${s.day}</span><div><div class="special-name">${s.name}</div><div class="special-desc">${s.desc}</div></div></div>`;
+      });
+
+      // Events
+      R.events.forEach(e => {
+        document.getElementById('eventsList').innerHTML +=
+          `<div class="event-card"><div class="event-date-box"><div class="event-date-month">${e.month}</div><div class="event-date-day">${e.day}</div></div><div><div class="event-name">${e.name}</div><div class="event-detail">${e.detail}</div><div class="event-time">${e.time}</div></div></div>`;
+      });
+
+      // Photos
+      R.photos.forEach(ph => {
+        document.getElementById('photoGrid').innerHTML +=
+          `<div class="photo-thumb"><div class="ph-sm">${ph.emoji}</div></div>`;
+      });
+
+      // Reviews
+      R.reviews.forEach(r => {
+        document.getElementById('reviewsList').innerHTML +=
+          `<div class="review-item"><div class="rev-top"><div class="rev-avatar">${r.initials}</div><div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date}</div></div></div><div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div><div class="rev-text">${r.text}</div></div>`;
+      });
+
+      // Hours
+      R.hours.forEach(h => {
+        document.getElementById('hoursRows').innerHTML +=
+          `<div class="hours-row${h.today ? ' today' : ''}"><span class="hours-day">${h.day}</span><span class="hours-time">${h.time}</span></div>`;
+      });
+
+      // Info
+      R.info.forEach(i => {
+        document.getElementById('infoRows').innerHTML +=
+          `<div class="info-row"><span class="info-icon">${i.icon}</span><span>${i.label}</span></div>`;
+      });
+
+      // Social
+      R.social.forEach(s => {
+        document.getElementById('socialRow').innerHTML +=
+          `<div class="social-btn" onclick="window.open('${s.url}')">${s.icon} ${s.name}</div>`;
+      });
+
+
+      // Allergens
+      if (R.allergens) {
+        document.getElementById('allergyNotice').textContent = R.allergens.notice;
+        document.getElementById('allergyLabels').innerHTML = R.allergens.labels.map(l =>
+          `<div class="allergy-label"><span class="allergy-label-tag">${l.tag}</span>${l.full}</div>`).join('');
+        document.getElementById('allergyCommon').innerHTML = R.allergens.common.map(c =>
+          `<span class="allergy-common-chip">${c}</span>`).join('');
+      }
+      // Location
+      document.getElementById('locDetails').innerHTML =
+        R.info.slice(0, 3).map(i => `<div class="info-row"><span class="info-icon">${i.icon}</span><span>${i.label}</span></div>`).join('');
+    }
+
+    function renderMenuItems(items) {
+      document.getElementById('menuItems').innerHTML = items.map(item => {
+        const tags = (item.tags || []).map(t => `<span class="menu-tag">${t}</span>`).join('');
+        const imgHtml = item.image
+          ? `<div class="menu-item-img">${item.image.startsWith('http') ? `<img src="${item.image}" alt="${item.name}">` : item.image}</div>`
+          : '';
+        return `<div class="menu-item" style="${item.image ? 'align-items:center;' : ''}">
+          ${imgHtml}
+          <div class="menu-item-left">
+            <div class="menu-item-name">${item.name}</div>
+            <div class="menu-item-desc">${item.desc}</div>
+            ${tags ? `<div class="menu-item-tags">${tags}</div>` : ''}
+          </div>
+          <div class="menu-item-price">${item.price}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── CAROUSEL ───────────────────────────────────────────────────
+    let cur = 0;
+    function goTo(n) {
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dots   = document.querySelectorAll('.car-dot');
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
+      updateCount();
+    }
+    function slideCarousel(dir) { goTo(cur + dir); }
+    function updateCount() {
+      const t = document.querySelectorAll('.carousel-slide').length;
+      document.getElementById('carCount').textContent = (cur + 1) + ' / ' + t;
+    }
+    setInterval(() => slideCarousel(1), 5000);
+
+    // ── SCROLL TABS ────────────────────────────────────────────────
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const offset = 120; // sticky nav + action bar height
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top, behavior: 'smooth' });
+      // update active tab + scroll tab into view on mobile
+      const tabs = ['about','menu','happyHour','specials','events','photos','reviews','allergens','location'];
+      const idx = tabs.indexOf(id);
+      document.querySelectorAll('.action-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+        if (i === idx) t.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      });
+    }
+
+    // ── ACTIONS ────────────────────────────────────────────────────
+    function handleReserve() { if (RESTAURANT.bookingUrl) window.open(RESTAURANT.bookingUrl, '_blank'); }
+    function handleOrder()   { if (RESTAURANT.orderUrl)   window.open(RESTAURANT.orderUrl,   '_blank'); }
+    function handleCall()    { window.location.href = 'tel:' + RESTAURANT.phone; }
+
+    render(RESTAURANT);
+    if (!RESTAURANT.bookingUrl) { const b = document.getElementById('reserveBtn'); if(b) b.style.display='none'; }
+    if (!RESTAURANT.orderUrl)   { const b = document.getElementById('orderBtn');   if(b) b.style.display='none'; }
+  </script>
+</body>
+</html>

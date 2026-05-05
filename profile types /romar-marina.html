@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Romar Marina – Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #f0f4f8; color: #0e1726; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    .top-nav { background: #0d2137; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 1.1rem; letter-spacing: .5px; }
+    .nav-logo span { color: #38bdf8; }
+    .nav-back { color: #94a3b8; font-size: .85rem; font-weight: 600; cursor: pointer; }
+    .nav-back:hover { color: #fff; }
+
+    /* ── CAROUSEL ── */
+    .carousel { position: relative; width: 100%; height: 500px; background: #0c2d48; overflow: hidden; }
+    .carousel-slides { width: 100%; height: 100%; position: relative; }
+    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .5s ease; }
+    .carousel-slide.active { opacity: 1; }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-slide .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 7rem; background: linear-gradient(135deg, #0d2137 0%, #1a4a6e 50%, #0d2137 100%); }
+    .car-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 55%); pointer-events: none; }
+    .car-hero { position: absolute; bottom: 40px; left: 32px; z-index: 10; color: #fff; }
+    .car-hero-badge { display: inline-block; background: #0b7a75; color: #fff; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 14px; border-radius: 999px; margin-bottom: 10px; }
+    .car-hero-name { font-size: clamp(1.8rem, 4.5vw, 2.8rem); font-weight: 900; line-height: 1.1; text-shadow: 0 2px 14px rgba(0,0,0,.5); margin-bottom: 8px; }
+    .car-hero-tagline { font-size: .92rem; color: rgba(255,255,255,.82); font-style: italic; }
+    .car-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.45); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .2s; }
+    .car-btn:hover { background: rgba(0,0,0,.8); }
+    .car-prev { left: 16px; } .car-next { right: 16px; }
+    .car-dots { position: absolute; bottom: 14px; right: 60px; display: flex; gap: 6px; z-index: 10; }
+    .car-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; padding: 0; transition: background .2s; }
+    .car-dot.active { background: #fff; }
+    .car-count { position: absolute; bottom: 14px; right: 16px; background: rgba(0,0,0,.5); color: #fff; font-size: .7rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; z-index: 10; }
+
+    /* ── LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 20px 80px; }
+    .two-col { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } .carousel { height: 300px; } .car-hero { bottom: 16px; left: 16px; } }
+    @media (max-width: 480px) {
+      .carousel { height: 220px; }
+      .car-hero-name { font-size: 1.4rem; }
+      .section { padding: 14px; border-radius: 12px; }
+      .page-wrap { padding: 12px 10px 80px; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+      .amenities-grid { grid-template-columns: repeat(2, 1fr); }
+      .service-grid { grid-template-columns: 1fr; }
+      .stats-bar .stat-box { min-width: 80px; }
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 22px; }
+    .stat-box { flex: 1; min-width: 90px; padding: 16px 10px; text-align: center; border-right: 1px solid #e2e8f0; }
+    .stat-box:last-child { border-right: none; }
+    .stat-val { font-size: 1.1rem; font-weight: 900; color: #0d2137; margin-top: 4px; }
+    .stat-lbl { font-size: .67rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 600; margin-top: 2px; }
+
+    /* ── SECTIONS ── */
+    .section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #0d2137; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+
+    /* ── ABOUT ── */
+    .about-text { font-size: .92rem; color: #475569; line-height: 1.85; }
+
+    /* ── FUEL PRICING ── */
+    .fuel-board { background: #0d2137; border-radius: 16px; padding: 20px 24px; margin-bottom: 20px; color: #fff; }
+    .fuel-board-title { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .fuel-board-title::before { content: '⛽'; font-size: 1rem; }
+    .fuel-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .fuel-row:last-child { border-bottom: none; }
+    .fuel-type { font-size: 1rem; font-weight: 800; color: #fff; }
+    .fuel-prices { display: flex; gap: 24px; }
+    .fuel-price-item { text-align: right; }
+    .fuel-price-lbl { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; margin-bottom: 2px; }
+    .fuel-price-val { font-size: 1.4rem; font-weight: 900; color: #38bdf8; }
+    .fuel-price-cash { color: #4ade80; }
+    .fuel-cash-note { margin-top: 14px; font-size: .75rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
+
+    /* ── SERVICES GRID ── */
+    .service-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+    .service-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 6px; transition: border-color .2s, box-shadow .2s; }
+    .service-card:hover { border-color: #0b7a75; box-shadow: 0 4px 16px rgba(11,122,117,.1); }
+    .svc-icon { font-size: 1.8rem; }
+    .svc-name { font-size: .9rem; font-weight: 800; color: #0d2137; }
+    .svc-badge { display: inline-block; background: #dcfce7; color: #166534; font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; padding: 2px 8px; border-radius: 999px; align-self: flex-start; }
+    .svc-detail { font-size: .78rem; color: #64748b; line-height: 1.6; margin-top: 2px; }
+
+    /* ── AMENITIES ── */
+    .amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+    .amenity { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; font-size: .82rem; font-weight: 600; color: #334155; }
+    .amenity-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── PHOTO GRID ── */
+    .photo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    @media (max-width: 600px) { .photo-grid { grid-template-columns: repeat(2, 1fr); } }
+    .photo-thumb { aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s; }
+    .photo-thumb:hover img { transform: scale(1.06); }
+    .photo-thumb .ph-sm { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #dbeafe, #e0f2fe); transition: transform .25s; }
+    .photo-thumb:hover .ph-sm { transform: scale(1.05); }
+
+    /* ── REVIEWS ── */
+    .rating-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .rating-num { font-size: 3rem; font-weight: 900; color: #0d2137; line-height: 1; }
+    .rating-stars { color: #f59e0b; font-size: 1.15rem; }
+    .rating-count { font-size: .82rem; color: #94a3b8; margin-top: 2px; }
+    .review-item { padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+    .review-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .rev-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rev-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0d2137, #0b7a75); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .9rem; flex-shrink: 0; }
+    .rev-name { font-weight: 700; font-size: .88rem; color: #0d2137; }
+    .rev-date { font-size: .74rem; color: #94a3b8; }
+    .rev-stars { color: #f59e0b; font-size: .82rem; margin-bottom: 5px; }
+    .rev-text { font-size: .85rem; color: #475569; line-height: 1.65; }
+
+    /* ── LOCATION ── */
+    .map-ph { width: 100%; height: 220px; border-radius: 14px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); display: flex; align-items: center; justify-content: center; font-size: .9rem; color: #3b82f6; font-weight: 700; gap: 8px; margin-bottom: 16px; cursor: pointer; }
+    .map-ph:hover { opacity: .9; }
+    .loc-list { display: flex; flex-direction: column; gap: 9px; }
+    .loc-row { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; color: #475569; }
+    .loc-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── SIDEBAR ── */
+    .sidebar-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; position: sticky; top: 80px; }
+    .sc-marina-badge { display: inline-block; background: #0b7a75; color: #fff; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; padding: 4px 12px; border-radius: 999px; margin-bottom: 12px; }
+    .sc-name { font-size: 1.1rem; font-weight: 900; color: #0d2137; margin-bottom: 4px; }
+    .sc-sub { font-size: .8rem; color: #64748b; margin-bottom: 18px; line-height: 1.5; }
+    .sc-divider { border: none; border-top: 1px solid #f1f5f9; margin: 16px 0; }
+    .sc-contact-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 11px; font-size: .84rem; font-weight: 700; cursor: pointer; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #0d2137; transition: all .15s; margin-bottom: 8px; width: 100%; text-decoration: none; }
+    .sc-contact-btn:hover, .sc-contact-btn:focus { background: #0d2137; color: #fff; border-color: #0d2137; }
+    .sc-contact-btn.primary { background: #0b7a75; color: #fff; border-color: #0b7a75; }
+    .sc-contact-btn.primary:hover { background: #096560; border-color: #096560; }
+    .sc-social { display: flex; gap: 8px; margin-top: 12px; }
+    .sc-social-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border-radius: 9px; font-size: .78rem; font-weight: 700; border: 1.5px solid #e2e8f0; background: #f8fafc; color: #0d2137; cursor: pointer; transition: all .15s; text-decoration: none; }
+    .sc-social-btn:hover { background: #0d2137; color: #fff; border-color: #0d2137; }
+    .sc-hours-row { display: flex; justify-content: space-between; font-size: .83rem; padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+    .sc-hours-row:last-child { border-bottom: none; }
+    .sc-hours-day { font-weight: 600; color: #0d2137; }
+    .sc-hours-time { color: #64748b; }
+    .sc-hours-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; margin-bottom: 10px; }
+    .sc-fuel-mini { background: #f0f9ff; border-radius: 10px; padding: 12px 14px; margin-top: 12px; }
+    .sc-fuel-mini-title { font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #0b7a75; margin-bottom: 8px; }
+    .sc-fuel-row { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; padding: 3px 0; }
+    .sc-fuel-type { font-weight: 700; color: #0d2137; }
+    .sc-fuel-price { font-weight: 900; color: #0b7a75; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">GULF<span>COAST</span>RADAR</div>
+    <span class="nav-back" onclick="history.back()">← Back to listings</span>
+  </nav>
+
+  <!-- CAROUSEL -->
+  <div class="carousel">
+    <div class="carousel-slides" id="carSlides"></div>
+    <div class="car-overlay"></div>
+    <div class="car-hero">
+      <div class="car-hero-badge" id="heroBadge">Marina</div>
+      <div class="car-hero-name" id="heroName">Loading…</div>
+      <div class="car-hero-tagline" id="heroTagline"></div>
+    </div>
+    <button class="car-btn car-prev" onclick="slideCarousel(-1)">&#8592;</button>
+    <button class="car-btn car-next" onclick="slideCarousel(1)">&#8594;</button>
+    <div class="car-dots" id="carDots"></div>
+    <div class="car-count" id="carCount"></div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="two-col">
+
+      <!-- LEFT COLUMN -->
+      <div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" id="statsBar"></div>
+
+        <!-- About -->
+        <div class="section">
+          <div class="section-title">⚓ About Romar Marina</div>
+          <p class="about-text" id="aboutText"></p>
+        </div>
+
+        <!-- Fuel Pricing Board -->
+        <div class="fuel-board" id="fuelBoard">
+          <div class="fuel-board-title">Current Fuel Prices</div>
+          <div id="fuelRows"></div>
+          <div class="fuel-cash-note">💵 Cash discount applied at pump — no card surcharge on cash transactions</div>
+        </div>
+
+        <!-- Services -->
+        <div class="section">
+          <div class="section-title">🔧 Marina Services</div>
+          <div class="service-grid" id="serviceGrid"></div>
+        </div>
+
+        <!-- Amenities -->
+        <div class="section">
+          <div class="section-title">✨ Facility Amenities</div>
+          <div class="amenities-grid" id="amenitiesGrid"></div>
+        </div>
+
+        <!-- Photo Gallery -->
+        <div class="section">
+          <div class="section-title">📸 Photo Gallery</div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="section" id="reviewsSection">
+          <div class="section-title">⭐ Reviews</div>
+          <div class="rating-row">
+            <div class="rating-num" id="ratingNum">–</div>
+            <div>
+              <div class="rating-stars" id="ratingStars"></div>
+              <div class="rating-count" id="ratingCount"></div>
+            </div>
+          </div>
+          <div id="reviewsList"></div>
+        </div>
+
+        <!-- Location -->
+        <div class="section">
+          <div class="section-title">🗺️ Location</div>
+          <div class="map-ph" id="mapLink" onclick="openMap()">🗺️ Open in Google Maps</div>
+          <div class="loc-list" id="locList"></div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <div>
+        <div class="sidebar-card">
+          <div class="sc-marina-badge">⚓ Orange Beach Marina</div>
+          <div class="sc-name" id="scName">Romar Marina</div>
+          <div class="sc-sub">"Biggest Small Marina on the Gulf Coast" — Friendly, personal service on Cotton Bayou.</div>
+
+          <a class="sc-contact-btn primary" id="callBtn" href="#">📞 Call Us</a>
+          <a class="sc-contact-btn" id="emailBtn" href="#">✉️ Email Marina</a>
+          <a class="sc-contact-btn" id="directionsBtn" href="#" target="_blank" rel="noopener">🗺️ Get Directions</a>
+
+          <hr class="sc-divider">
+
+          <div class="sc-fuel-mini">
+            <div class="sc-fuel-mini-title">⛽ Current Fuel Prices</div>
+            <div id="scFuelRows"></div>
+          </div>
+
+          <hr class="sc-divider">
+
+          <div class="sc-social" id="scSocial"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slug = new URLSearchParams(window.location.search).get('slug') || 'romar-marina';
+      const s = document.createElement('script');
+      s.src = 'data/' + slug + '.js';
+      s.onload = function() { render(window.BUSINESS_DATA); };
+      document.head.appendChild(s);
+    })();
+  </script>
+  <script>
+    let M;
+
+    function render(data) {
+      M = data;
+      document.title = M.name + ' – Gulf Coast Radar';
+
+      // Hero
+      document.getElementById('heroBadge').textContent  = M.badge;
+      document.getElementById('heroName').textContent   = M.name;
+      document.getElementById('heroTagline').textContent = M.tagline;
+
+      // Carousel
+      const slidesEl = document.getElementById('carSlides');
+      const dotsEl   = document.getElementById('carDots');
+      M.photos.forEach((ph, i) => {
+        const s = document.createElement('div');
+        s.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+        s.innerHTML = ph.url
+          ? `<img src="${ph.url}" alt="${ph.label}">`
+          : `<div class="ph">${ph.emoji}</div>`;
+        slidesEl.appendChild(s);
+        const d = document.createElement('button');
+        d.className = 'car-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dotsEl.appendChild(d);
+      });
+      updateCount();
+
+      // Stats
+      const statsEl = document.getElementById('statsBar');
+      M.stats.forEach(s => {
+        statsEl.innerHTML += `<div class="stat-box"><div class="stat-val">${s.val}</div><div class="stat-lbl">${s.lbl}</div></div>`;
+      });
+
+      // About
+      document.getElementById('aboutText').textContent = M.description;
+
+      // Fuel board (main)
+      const fuelRowsEl = document.getElementById('fuelRows');
+      M.fuel.forEach(f => {
+        fuelRowsEl.innerHTML +=
+          `<div class="fuel-row">
+            <div class="fuel-type">${f.type}</div>
+            <div class="fuel-prices">
+              <div class="fuel-price-item">
+                <div class="fuel-price-lbl">Regular</div>
+                <div class="fuel-price-val">${f.regular}</div>
+              </div>
+              <div class="fuel-price-item">
+                <div class="fuel-price-lbl">Cash</div>
+                <div class="fuel-price-val fuel-price-cash">${f.cash}</div>
+              </div>
+            </div>
+          </div>`;
+      });
+
+      // Fuel sidebar mini
+      const scFuelEl = document.getElementById('scFuelRows');
+      M.fuel.forEach(f => {
+        scFuelEl.innerHTML +=
+          `<div class="sc-fuel-row"><span class="sc-fuel-type">${f.type}</span><span class="sc-fuel-price">${f.regular} <span style="color:#94a3b8;font-size:.7rem;font-weight:600;">(${f.cash} cash)</span></span></div>`;
+      });
+
+      // Services
+      const svcEl = document.getElementById('serviceGrid');
+      M.services.forEach(s => {
+        svcEl.innerHTML +=
+          `<div class="service-card">
+            <div class="svc-icon">${s.icon}</div>
+            <div class="svc-name">${s.name}</div>
+            ${s.badge ? `<span class="svc-badge">${s.badge}</span>` : ''}
+            <div class="svc-detail">${s.detail}</div>
+          </div>`;
+      });
+
+      // Amenities
+      const amenEl = document.getElementById('amenitiesGrid');
+      M.amenities.forEach(a => {
+        amenEl.innerHTML += `<div class="amenity"><span class="amenity-icon">${a.icon}</span>${a.name}</div>`;
+      });
+
+      // Photos
+      const photoEl = document.getElementById('photoGrid');
+      M.photos.forEach(ph => {
+        photoEl.innerHTML += ph.url
+          ? `<div class="photo-thumb"><img src="${ph.url}" alt="${ph.label}"></div>`
+          : `<div class="photo-thumb"><div class="ph-sm">${ph.emoji}</div></div>`;
+      });
+
+      // Reviews
+      if (M.reviews && M.reviews.length) {
+        document.getElementById('ratingNum').textContent   = M.rating.toFixed(1);
+        document.getElementById('ratingStars').textContent = '★'.repeat(Math.round(M.rating)) + '☆'.repeat(5 - Math.round(M.rating));
+        document.getElementById('ratingCount').textContent = M.reviewCount + ' reviews on Google';
+        M.reviews.forEach(r => {
+          document.getElementById('reviewsList').innerHTML +=
+            `<div class="review-item">
+              <div class="rev-top">
+                <div class="rev-avatar">${r.initials}</div>
+                <div><div class="rev-name">${r.name}</div><div class="rev-date">${r.date}</div></div>
+              </div>
+              <div class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+              <div class="rev-text">${r.text}</div>
+            </div>`;
+        });
+      } else {
+        document.getElementById('reviewsSection').style.display = 'none';
+      }
+
+      // Location
+      M.location.forEach(l => {
+        document.getElementById('locList').innerHTML +=
+          `<div class="loc-row"><span class="loc-icon">${l.icon}</span><span>${l.label}</span></div>`;
+      });
+
+      // Sidebar buttons
+      document.getElementById('callBtn').href      = 'tel:' + M.phone.replace(/\D/g,'');
+      document.getElementById('emailBtn').href     = 'mailto:' + M.email;
+      document.getElementById('directionsBtn').href = `https://maps.google.com/?q=${encodeURIComponent(M.address)}`;
+
+      // Social
+      if (M.social) {
+        const socEl = document.getElementById('scSocial');
+        if (M.social.facebook)  socEl.innerHTML += `<a class="sc-social-btn" href="${M.social.facebook}" target="_blank" rel="noopener">📘 Facebook</a>`;
+        if (M.social.instagram) socEl.innerHTML += `<a class="sc-social-btn" href="${M.social.instagram}" target="_blank" rel="noopener">📷 Instagram</a>`;
+      }
+    }
+
+    // Map link
+    function openMap() {
+      window.open('https://maps.google.com/?q=' + encodeURIComponent(M.address), '_blank');
+    }
+
+    // ── CAROUSEL ──────────────────────────────────────────────────
+    let cur = 0;
+    function goTo(n) {
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dots   = document.querySelectorAll('.car-dot');
+      slides[cur].classList.remove('active'); dots[cur].classList.remove('active');
+      cur = (n + slides.length) % slides.length;
+      slides[cur].classList.add('active'); dots[cur].classList.add('active');
+      updateCount();
+    }
+    function slideCarousel(dir) { goTo(cur + dir); }
+    function updateCount() {
+      const total = document.querySelectorAll('.carousel-slide').length;
+      document.getElementById('carCount').textContent = (cur + 1) + ' / ' + total;
+    }
+    setInterval(() => slideCarousel(1), 5000);
+  </script>
+</body>
+</html>

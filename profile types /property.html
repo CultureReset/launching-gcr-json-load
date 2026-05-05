@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Property – Gulf Coast Radar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { font-family: 'Inter', system-ui, sans-serif; background: #f4f6f9; color: #0e1726; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      background: #0b1f3a;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo { color: #fff; font-weight: 900; font-size: 1.1rem; letter-spacing: .5px; }
+    .nav-logo span { color: #38bdf8; }
+    .nav-back { color: #94a3b8; font-size: .85rem; font-weight: 600; cursor: pointer; }
+    .nav-back:hover { color: #fff; }
+
+    /* ── PHOTO CAROUSEL ── */
+    .carousel { position: relative; width: 100%; height: 480px; background: #0c2d48; overflow: hidden; }
+    .carousel-slides { width: 100%; height: 100%; position: relative; }
+    .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .4s ease; }
+    .carousel-slide.active { opacity: 1; }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-slide .placeholder {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      background: linear-gradient(135deg, #0c2d48, #1a4a6e);
+    }
+    .car-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,.5); border: none; color: #fff;
+      width: 44px; height: 44px; border-radius: 50%; font-size: 20px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s; z-index: 10;
+    }
+    .car-btn:hover { background: rgba(0,0,0,.8); }
+    .car-prev { left: 16px; }
+    .car-next { right: 16px; }
+    .car-dots { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 10; }
+    .car-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.45); border: none; cursor: pointer; padding: 0; transition: background .2s; }
+    .car-dot.active { background: #fff; }
+    .car-count { position: absolute; bottom: 14px; right: 16px; background: rgba(0,0,0,.55); color: #fff; font-size: .75rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 10; }
+
+    /* ── LAYOUT ── */
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+    .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    @media (max-width: 860px) { .two-col { grid-template-columns: 1fr; } .carousel { height: 280px; } }
+    @media (max-width: 480px) {
+      .carousel { height: 220px; }
+      .car-hero { bottom: 16px; left: 16px; right: 16px; }
+      .car-hero-name { font-size: 1.4rem; }
+      .section { padding: 14px; border-radius: 12px; }
+      .page-wrap { padding: 14px 12px 90px; }
+      .action-bar { padding: 0 8px; }
+      .action-tab { padding: 12px 14px; font-size: .78rem; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .hh-banner { padding: 14px; }
+      .hh-icon { font-size: 1.6rem; }
+      .biz-filter { padding: 0 8px; }
+      .biz-filter-btn { padding: 7px 14px; font-size: .78rem; }
+      .stats-bar { flex-wrap: wrap; gap: 8px; padding: 14px; }
+      .stat-item { min-width: 80px; }
+      .fleet-card { padding: 16px; }
+      .price-row { font-size: .78rem; }
+      .book-bar { padding: 12px 16px; }
+      .top-nav { padding: 12px 16px; }
+    }
+
+    /* ── PROPERTY HEADER ── */
+    .prop-header { margin-bottom: 24px; }
+    .prop-badge { display: inline-block; background: #dcfce7; color: #166534; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
+    .prop-badge.deal { background: #fef3c7; color: #92400e; }
+    .prop-name { font-size: clamp(1.5rem, 3.5vw, 2rem); font-weight: 900; color: #0b1f3a; line-height: 1.2; }
+    .prop-sub { font-size: .95rem; color: #5c6b81; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+
+    /* ── QUICK STATS ── */
+    .stats-row { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; background: #fff; margin-bottom: 28px; }
+    .stat-item { flex: 1; min-width: 100px; padding: 16px 12px; text-align: center; border-right: 1px solid #e2e8f0; }
+    .stat-item:last-child { border-right: none; }
+    .stat-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .stat-val { font-size: 1.2rem; font-weight: 900; color: #0b1f3a; }
+    .stat-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 600; margin-top: 2px; }
+
+    /* ── SECTIONS ── */
+    .section { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .section-title { font-size: 1rem; font-weight: 800; color: #0b1f3a; margin-bottom: 16px; }
+
+    /* ── DESCRIPTION ── */
+    .prop-desc { font-size: .92rem; color: #475569; line-height: 1.75; }
+
+    /* ── AMENITIES ── */
+    .amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .amenity-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .amenity-icon { font-size: 1.2rem; flex-shrink: 0; }
+    .amenity-name { font-size: .82rem; font-weight: 600; color: #334155; }
+
+    /* ── POOLS / FEATURES ── */
+    .features-list { display: flex; flex-direction: column; gap: 10px; }
+    .feature-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .feature-left { display: flex; align-items: center; gap: 10px; font-size: .88rem; font-weight: 600; color: #334155; }
+    .feature-count { background: #0b1f3a; color: #fff; font-size: .75rem; font-weight: 800; padding: 3px 10px; border-radius: 999px; }
+
+    /* ── PHOTO GRID ── */
+    .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .photo-thumb { aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; cursor: pointer; background: #e2e8f0; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
+    .photo-thumb:hover img { transform: scale(1.05); }
+    .photo-thumb .ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: linear-gradient(135deg, #dbeafe, #eff6ff); }
+
+    /* ── BOOKING CARD ── */
+    .booking-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; position: sticky; top: 80px; }
+    .price-row { margin-bottom: 20px; }
+    .price-from { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700; }
+    .price-main { font-size: 2rem; font-weight: 900; color: #0b1f3a; }
+    .price-main span { font-size: .9rem; font-weight: 500; color: #94a3b8; }
+    .price-compare { font-size: .8rem; color: #94a3b8; margin-top: 2px; }
+    .price-compare s { color: #ef4444; }
+
+    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .date-field { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; }
+    .date-field label { display: block; font-size: .65rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
+    .date-field input { border: none; outline: none; font-family: inherit; font-size: .88rem; font-weight: 600; color: #0b1f3a; width: 100%; background: transparent; }
+
+    .guests-field { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; }
+    .guests-field label { display: block; font-size: .65rem; text-transform: uppercase; letter-spacing: .8px; color: #94a3b8; font-weight: 700; margin-bottom: 4px; }
+    .guests-field select { border: none; outline: none; font-family: inherit; font-size: .88rem; font-weight: 600; color: #0b1f3a; width: 100%; background: transparent; cursor: pointer; }
+
+    .book-btn { width: 100%; background: #0b7a75; color: #fff; border: none; border-radius: 12px; padding: 15px; font-family: inherit; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background .2s; }
+    .book-btn:hover { background: #096560; }
+    .inquire-btn { width: 100%; background: transparent; color: #0b1f3a; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 13px; font-family: inherit; font-size: .9rem; font-weight: 700; cursor: pointer; margin-top: 10px; transition: border-color .2s; }
+    .inquire-btn:hover { border-color: #94a3b8; }
+
+    .booking-perks { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
+    .perk { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: #475569; font-weight: 500; }
+
+    /* ── REVIEWS ── */
+    .rating-summary { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .rating-big { font-size: 3rem; font-weight: 900; color: #0b1f3a; }
+    .rating-stars { color: #f59e0b; font-size: 1.2rem; }
+    .rating-count { font-size: .82rem; color: #94a3b8; margin-top: 2px; }
+    .review-card { padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+    .review-card:last-child { border-bottom: none; padding-bottom: 0; }
+    .reviewer { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .reviewer-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0b7a75, #38bdf8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: .9rem; flex-shrink: 0; }
+    .reviewer-name { font-weight: 700; font-size: .88rem; color: #0b1f3a; }
+    .reviewer-date { font-size: .75rem; color: #94a3b8; }
+    .review-stars { color: #f59e0b; font-size: .85rem; margin-bottom: 6px; }
+    .review-text { font-size: .85rem; color: #475569; line-height: 1.65; }
+
+    /* ── LOCATION ── */
+    .map-placeholder { width: 100%; height: 220px; border-radius: 12px; background: linear-gradient(135deg, #dbeafe, #bfdbfe); display: flex; align-items: center; justify-content: center; font-size: .9rem; color: #3b82f6; font-weight: 600; gap: 8px; margin-bottom: 16px; }
+    .location-details { display: flex; flex-direction: column; gap: 8px; }
+    .loc-row { display: flex; align-items: center; gap: 10px; font-size: .88rem; color: #475569; }
+    .loc-icon { font-size: 1rem; width: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-logo">GULF<span>COAST</span>RADAR</div>
+    <span class="nav-back" onclick="history.back()">← Back to listings</span>
+  </nav>
+
+  <div class="carousel" id="carousel">
+    <div class="carousel-slides" id="carouselSlides"></div>
+    <button class="car-btn car-prev" onclick="slideCarousel(-1)">&#8592;</button>
+    <button class="car-btn car-next" onclick="slideCarousel(1)">&#8594;</button>
+    <div class="car-dots" id="carDots"></div>
+    <div class="car-count" id="carCount"></div>
+  </div>
+
+  <div class="page-wrap">
+    <div class="two-col">
+
+      <div>
+        <div class="prop-header">
+          <div class="prop-badge deal" id="propBadge">Available</div>
+          <div class="prop-name" id="propName">Loading...</div>
+          <div class="prop-sub">📍 <span id="propAddress">Gulf Shores, AL</span></div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-icon">🛏️</div><div class="stat-val" id="statBeds">–</div><div class="stat-label">Bedrooms</div></div>
+          <div class="stat-item"><div class="stat-icon">🚿</div><div class="stat-val" id="statBaths">–</div><div class="stat-label">Bathrooms</div></div>
+          <div class="stat-item"><div class="stat-icon">👥</div><div class="stat-val" id="statSleeps">–</div><div class="stat-label">Sleeps</div></div>
+          <div class="stat-item"><div class="stat-icon">📐</div><div class="stat-val" id="statSqft">–</div><div class="stat-label">Sq Ft</div></div>
+          <div class="stat-item"><div class="stat-icon">🏢</div><div class="stat-val" id="statFloor">–</div><div class="stat-label">Floor</div></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📝 About This Property</div>
+          <div class="prop-desc" id="propDesc"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">🏊 Pools &amp; Features</div>
+          <div class="features-list" id="featuresList"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">✨ Amenities</div>
+          <div class="amenities-grid" id="amenitiesGrid"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📸 All Photos</div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">⭐ Guest Reviews</div>
+          <div class="rating-summary">
+            <div class="rating-big" id="ratingBig">–</div>
+            <div>
+              <div class="rating-stars" id="ratingStars"></div>
+              <div class="rating-count" id="ratingCount"></div>
+            </div>
+          </div>
+          <div id="reviewsList"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">📍 Location</div>
+          <div class="map-placeholder">🗺️ Map View</div>
+          <div class="location-details" id="locationDetails"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="booking-card">
+          <div class="price-row">
+            <div class="price-from">As low as</div>
+            <div class="price-main"><span id="priceNight">$–</span> <span>/ night</span></div>
+            <div class="price-compare" id="priceCompare"></div>
+          </div>
+          <div class="date-row">
+            <div class="date-field"><label>Check In</label><input type="date" id="checkIn"></div>
+            <div class="date-field"><label>Check Out</label><input type="date" id="checkOut"></div>
+          </div>
+          <div class="guests-field">
+            <label>Guests</label>
+            <select id="guestCount">
+              <option>1 guest</option><option>2 guests</option><option selected>4 guests</option>
+              <option>6 guests</option><option>8 guests</option><option>10 guests</option>
+            </select>
+          </div>
+          <button class="book-btn" id="bookBtn" onclick="handleBook()">Book Now</button>
+          <button class="inquire-btn" onclick="handleInquire()">💬 Send Inquiry</button>
+          <div class="booking-perks">
+            <div class="perk">✅ Free cancellation up to 30 days</div>
+            <div class="perk">🔒 Secure booking</div>
+            <div class="perk">📞 24/7 guest support</div>
+            <div class="perk">🏆 Best rate guarantee</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const slug = new URLSearchParams(window.location.search).get('slug') || 'the-dunes-503';
+      const s = document.createElement('script');
+      s.src = 'data/' + slug + '.js';
+      s.onload = function() {
+        const d = window.BUSINESS_DATA;
+        render(d);
+        if (!d.bookingUrl) { const b = document.getElementById('bookBtn'); if(b) b.style.display='none'; }
+      };
+      document.head.appendChild(s);
+    })();
+  </script>
+  <script>
+    let PROPERTY;
+
+    // ── RENDER ─────────────────────────────────────────────────────
+    function render(data) {
+      PROPERTY = data;
+      const p = data;
+      document.title = p.name + ' – Gulf Coast Radar';
+      document.getElementById('propBadge').textContent   = p.badge || 'Available';
+      document.getElementById('propName').textContent    = p.name;
+      document.getElementById('propAddress').textContent = p.address;
+      document.getElementById('propDesc').textContent    = p.description;
+      document.getElementById('statBeds').textContent    = p.bedrooms;
+      document.getElementById('statBaths').textContent   = p.bathrooms;
+      document.getElementById('statSleeps').textContent  = p.sleeps;
+      document.getElementById('statSqft').textContent    = p.sqft ? p.sqft.toLocaleString() : '–';
+      document.getElementById('statFloor').textContent   = p.floor || '–';
+      document.getElementById('priceNight').textContent  = '$' + p.pricePerNight;
+      if (p.comparePricePerNight)
+        document.getElementById('priceCompare').innerHTML = 'Compare at <s>$' + p.comparePricePerNight + '/night</s>';
+
+      document.getElementById('ratingBig').textContent   = p.rating.toFixed(1);
+      document.getElementById('ratingStars').textContent = '★'.repeat(Math.round(p.rating)) + '☆'.repeat(5 - Math.round(p.rating));
+      document.getElementById('ratingCount').textContent = p.reviewCount + ' reviews';
+
+      // Carousel
+      const slidesEl = document.getElementById('carouselSlides');
+      const dotsEl   = document.getElementById('carDots');
+      p.photos.forEach((ph, i) => {
+        const s = document.createElement('div');
+        s.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+        s.innerHTML = ph.url ? `<img src="${ph.url}" alt="${ph.label}">` : `<div class="placeholder">${ph.emoji}</div>`;
+        slidesEl.appendChild(s);
+        const d = document.createElement('button');
+        d.className = 'car-dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goToSlide(i);
+        dotsEl.appendChild(d);
+      });
+      updateCarCount();
+
+      // Photo grid
+      p.photos.forEach(ph => {
+        const t = document.createElement('div');
+        t.className = 'photo-thumb';
+        t.innerHTML = ph.url ? `<img src="${ph.url}" alt="${ph.label}">` : `<div class="ph">${ph.emoji}</div>`;
+        document.getElementById('photoGrid').appendChild(t);
+      });
+
+      // Features
+      p.features.forEach(f => {
+        document.getElementById('featuresList').innerHTML +=
+          `<div class="feature-row"><div class="feature-left"><span>${f.icon}</span>${f.name}</div><span class="feature-count">${f.count}</span></div>`;
+      });
+
+      // Amenities
+      p.amenities.forEach(a => {
+        document.getElementById('amenitiesGrid').innerHTML +=
+          `<div class="amenity-item"><span class="amenity-icon">${a.icon}</span><span class="amenity-name">${a.name}</span></div>`;
+      });
+
+      // Reviews
+      p.reviews.forEach(r => {
+        document.getElementById('reviewsList').innerHTML +=
+          `<div class="review-card">
+            <div class="reviewer"><div class="reviewer-avatar">${r.initials}</div><div><div class="reviewer-name">${r.name}</div><div class="reviewer-date">${r.date}</div></div></div>
+            <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+            <div class="review-text">${r.text}</div>
+          </div>`;
+      });
+
+      // Location
+      p.location.forEach(l => {
+        document.getElementById('locationDetails').innerHTML +=
+          `<div class="loc-row"><span class="loc-icon">${l.icon}</span>${l.label}</div>`;
+      });
+    }
+
+    // ── CAROUSEL ───────────────────────────────────────────────────
+    let currentSlide = 0;
+    function goToSlide(n) {
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dots   = document.querySelectorAll('.car-dot');
+      slides[currentSlide].classList.remove('active');
+      dots[currentSlide].classList.remove('active');
+      currentSlide = (n + slides.length) % slides.length;
+      slides[currentSlide].classList.add('active');
+      dots[currentSlide].classList.add('active');
+      updateCarCount();
+    }
+    function slideCarousel(dir) { goToSlide(currentSlide + dir); }
+    function updateCarCount() {
+      const total = document.querySelectorAll('.carousel-slide').length;
+      document.getElementById('carCount').textContent = (currentSlide + 1) + ' / ' + total;
+    }
+    setInterval(() => slideCarousel(1), 5000);
+
+    // ── BOOKING ────────────────────────────────────────────────────
+    function handleBook()    { if (PROPERTY.bookingUrl) window.open(PROPERTY.bookingUrl, '_blank'); }
+    function handleInquire() { alert('Inquiry form coming soon!'); }
+
+    const today = new Date();
+    const checkout = new Date(today);
+    checkout.setDate(today.getDate() + 3);
+    document.getElementById('checkIn').value  = today.toISOString().split('T')[0];
+    document.getElementById('checkOut').value = checkout.toISOString().split('T')[0];
+
+  </script>
+</body>
+</html>
