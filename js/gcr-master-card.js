@@ -175,14 +175,38 @@ function rcGetAllIds(record) {
   return ids;
 }
 
-// Check if two records match by ANY ID overlap
+// Normalize address for comparison
+function rcNormAddress(addr) {
+  if (!addr) return '';
+  return addr.toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/\brd\b|\brd\.\b/g, 'road')
+    .replace(/\bst\b|\bst\.\b/g, 'street')
+    .replace(/\bave\b|\bave\.\b/g, 'avenue')
+    .replace(/\bblvd\b|\bblvd\.\b/g, 'boulevard')
+    .trim();
+}
+
+// Check if two records match by ANY ID overlap OR address
 function rcMatchesEntity(source, target) {
   const sourceIds = rcGetAllIds(source);
   const targetIds = rcGetAllIds(target);
 
+  // Try ID matching first
   for (let id of sourceIds) {
     if (id && targetIds.has(id)) return true;
   }
+
+  // Fallback: match by normalized address
+  const sourceAddr = rcNormAddress(source.address_line_1 || source.address || '');
+  const targetAddr = rcNormAddress(target.address_line_1 || target.address || '');
+  if (sourceAddr && targetAddr && sourceAddr === targetAddr) return true;
+
+  // Also try matching by name (as last resort for same business, different branch)
+  const sourceName = (source.name || '').toLowerCase().trim();
+  const targetName = (target.name || '').toLowerCase().trim();
+  if (sourceName && targetName && sourceName === targetName && sourceAddr) return true;
+
   return false;
 }
 

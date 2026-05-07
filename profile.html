@@ -50,6 +50,13 @@
     .cover-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); border:none; cursor:pointer; padding:0; transition:background .2s; }
     .cover-dot.active { background:#fff; }
     .cover-count { position:absolute; bottom:10px; right:14px; background:rgba(0,0,0,.5); color:#fff; font-size:.68rem; font-weight:700; padding:3px 8px; border-radius:999px; z-index:10; }
+    .cover-img-chips { position:absolute; top:12px; left:12px; display:flex; gap:6px; flex-wrap:wrap; z-index:10; }
+    .cover-img-chip { background:rgba(0,0,0,.52); color:#fff; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; backdrop-filter:blur(4px); white-space:nowrap; }
+    .cover-img-chip.music   { background:rgba(109,40,217,.82); }
+    .cover-img-chip.water   { background:rgba(14,165,233,.82); }
+    .cover-img-chip.outdoor { background:rgba(22,163,74,.76); }
+    .cover-img-chip.hh      { background:rgba(217,119,6,.88); }
+    .cover-open-badge { position:absolute; top:12px; right:12px; padding:5px 12px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(22,163,74,.88); color:#fff; z-index:10; }
 
     /* Header */
     .header { padding:16px 20px; background:var(--card); border-bottom:1px solid var(--border); }
@@ -266,6 +273,8 @@
   <div class="cover" id="js-cover">
     <div class="cover-slides" id="js-slides"></div>
     <div class="cover-overlay"></div>
+    <div class="cover-img-chips" id="js-cover-chips"></div>
+    <div class="cover-open-badge" id="js-cover-open" style="display:none"></div>
     <div class="cover-hero">
       <div class="cover-hero-badge" id="js-hero-badge" style="display:none"></div>
       <div class="cover-hero-name" id="js-hero-name"></div>
@@ -333,11 +342,19 @@
     return;
   }
 
-  // ── Fetch from new entity API ──────────────────────────────
+  // ── Fetch from new entity API + community photos in parallel ──
   let entityData = null;
+  let communityPhotos = [];
   try {
-    const res = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`);
-    if (res.ok) entityData = await res.json();
+    const [entRes, commRes] = await Promise.all([
+      fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`).catch(() => null),
+      fetch(`${GCR_API}/community-photos/${encodeURIComponent(slug)}`).catch(() => null),
+    ]);
+    if (entRes && entRes.ok) entityData = await entRes.json();
+    if (commRes && commRes.ok) {
+      const commData = await commRes.json();
+      communityPhotos = Array.isArray(commData) ? commData : (commData.photos || []);
+    }
   } catch(e) {}
 
   if (!entityData || !entityData.entity) {
@@ -584,12 +601,19 @@
         B.sections.unshift({ id: 'highlights', label: 'About', icon: 'ℹ️' });
     }
 
-    // Photos from entity_photos
-    if (!B.gallery.length && (data.photos || []).length) {
-      B.gallery = data.photos.map(p => ({ url: p.image_url, caption: p.caption }));
-      B.coverImages = B.coverImages.concat(B.gallery.slice(0, 3).map(g => g.url));
+    // Photos from entity_photos — is_cover photo goes first in hero slideshow
+    if ((data.photos || []).length || communityPhotos.length) {
+      const sorted = [...(data.photos || [])].sort((a, b) => (b.is_cover ? 1 : 0) - (a.is_cover ? 1 : 0));
+      const officialGallery = sorted.map(p => ({ url: p.image_url, caption: p.caption, isCover: p.is_cover, type: 'official' }));
+      const communityGallery = communityPhotos.map(p => ({ url: p.image_url || p.photo_url || p.url, caption: p.caption || p.note || 'Community photo', type: 'community' })).filter(p => p.url);
+      if (!B.gallery.length) B.gallery = [...officialGallery, ...communityGallery];
+      // Put cover photo first, then up to 2 more for the hero slideshow
+      const coverPhoto = sorted.find(p => p.is_cover);
+      if (coverPhoto && !B.coverImages.includes(coverPhoto.image_url))
+        B.coverImages.unshift(coverPhoto.image_url);
+      B.coverImages = B.coverImages.concat(sorted.filter(p => !p.is_cover).slice(0, 2).map(p => p.image_url)).filter(Boolean);
       if (!B.sections.find(s => s.id === 'gallery'))
-        B.sections.push({ id: 'gallery', label: 'Photos', icon: '📸' });
+        B.sections.push({ id: 'gallery', label: `Photos${communityGallery.length ? ` (${B.gallery.length})` : ''}`, icon: '📸' });
     }
 
     // Hours from entity_hours
@@ -613,7 +637,7 @@
     const menuSections   = (data.menu && data.menu.sections)      || [];
     const menuSubSecs    = (data.menu && data.menu.sub_sections)   || [];
     const menuItems      = (data.menu && data.menu.items)          || [];
-    const mapMenuItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : '') });
+    const mapMenuItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : ''), image: i.image_url || i.photo_url || '', allergens: i.allergens || '', tags: i.tags || [] });
     menuSections.forEach(sec => {
       const mealId = 'newmenu-' + sec.id;
       const secItems = menuItems.filter(i => i.menu_section_id === sec.id && !i.menu_sub_section_id);
@@ -784,6 +808,40 @@
     const loc = [B.address, B.city, B.state].filter(Boolean).join(', ');
     heroMeta.innerHTML += `<span>📍 ${loc}</span>`;
   }
+
+  // ── Cover image chips (vibe badges) ───────────────────────
+  const chipsEl = document.getElementById('js-cover-chips');
+  const tagSet = new Set((B.tags || []).map(t => (t||'').toLowerCase()));
+  const CHIP_MAP = [
+    { tag:'live music',      label:'🎸 Live Music',      cls:'music'   },
+    { tag:'waterfront',      label:'🌊 Waterfront',      cls:'water'   },
+    { tag:'outdoor seating', label:'🌿 Outdoor Seating', cls:'outdoor' },
+  ];
+  CHIP_MAP.forEach(c => {
+    if (tagSet.has(c.tag)) chipsEl.innerHTML += `<span class="cover-img-chip ${c.cls}">${c.label}</span>`;
+  });
+  if (B.happyHour || (B.entity && B.entity.hh_days)) {
+    chipsEl.innerHTML += `<span class="cover-img-chip hh">🍺 Happy Hour</span>`;
+  }
+
+  // ── Open/closed badge ──────────────────────────────────────
+  (function() {
+    const openEl = document.getElementById('js-cover-open');
+    if (!B.hours || !B.hours.length) return;
+    const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    const h = B.hours.find(x => (x.day||'').toLowerCase() === dayName);
+    if (!h || h.closed) { openEl.textContent = '🔴 Closed Today'; openEl.style.display='block'; return; }
+    if (h.open && h.close) {
+      const toMin = s => { const [hh,mm] = s.replace(/[ap]m/,'').split(':').map(Number); return hh*60+(mm||0)+(s.includes('pm')&&hh!==12?720:0)-(s.includes('am')&&hh===12?720:0); };
+      const cur = now.getHours()*60+now.getMinutes();
+      const isOpen = cur >= toMin(h.open) && cur < toMin(h.close);
+      openEl.textContent = isOpen ? `🟢 Open · closes ${h.close}` : `🔴 Closed · opens ${h.open}`;
+      openEl.style.background = isOpen ? 'rgba(22,163,74,.88)' : 'rgba(220,38,38,.82)';
+      openEl.style.display = 'block';
+    }
+  })();
 
   // ── Cover Slideshow ────────────────────────────────────────
   const slides = B.coverImages || [];
