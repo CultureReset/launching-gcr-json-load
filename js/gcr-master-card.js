@@ -215,80 +215,79 @@ function rcMergeGroup(group) {
   const primary = group.find(e => (e.slug||e.subdomain||'').includes('ChIJ')) ||
     group.reduce((b,e) => ((e.rating||0)>(b.rating||0)?e:b), group[0]);
 
-  const seenTag = new Set();
-  const tags = [];
-  group.forEach(e => (e.tags||[]).forEach(t => {
-    const str = typeof t === 'string' ? t : (t.tag||'');
-    if (str && !seenTag.has(str)) { seenTag.add(str); tags.push(t); }
-  }));
+  const merged = { ...primary };
+  const allKeys = new Set();
 
-  const seenPhoto = new Set();
-  const photos = [];
-  group.forEach(e => (e.photos||[]).forEach(p => {
-    const u = p.image_url||p.url||'';
-    if (u && !seenPhoto.has(u)) { seenPhoto.add(u); photos.push(p); }
-  }));
+  // Collect all keys from all records
+  group.forEach(e => Object.keys(e||{}).forEach(k => allKeys.add(k)));
 
-  function mergeSections(field) {
-    const seen = new Set(); const r = [];
-    group.forEach(e => (e[field]||[]).forEach(s => {
-      const k = (s.section_name||s.name||s.type||JSON.stringify(s)).toLowerCase();
-      if (!seen.has(k)) { seen.add(k); r.push(s); }
-    }));
-    return r;
-  }
-
-  function mergeFlat(field) {
-    const seen = new Set(); const r = [];
-    group.forEach(e => (e[field]||[]).forEach(i => {
-      const k = (typeof i==='string' ? i : (i.label||i.name||'')).toLowerCase();
-      if (k && !seen.has(k)) { seen.add(k); r.push(i); }
-    }));
-    return r;
-  }
-
-  function best(field) {
-    return primary[field] || group.reduce((v,e) => v||e[field], '') || '';
-  }
-
-  function mergeText(field) {
+  // Merge every field
+  for (const key of allKeys) {
     const vals = [];
-    const seen = new Set();
+    const seenKey = new Set();
+
     group.forEach(e => {
-      const v = (e[field] || '').trim();
-      if (v && !seen.has(v.toLowerCase())) {
-        seen.add(v.toLowerCase());
-        vals.push(v);
+      const v = e[key];
+      if (v === undefined || v === null || v === '') return;
+
+      if (Array.isArray(v)) {
+        // Array: add all unique items
+        v.forEach(item => {
+          const dedupeKey = typeof item === 'string'
+            ? item.toLowerCase()
+            : (item.id || item.slug || item.name || JSON.stringify(item)).toLowerCase();
+          if (!seenKey.has(dedupeKey)) {
+            seenKey.add(dedupeKey);
+            vals.push(item);
+          }
+        });
+      } else if (typeof v === 'string') {
+        // String: add all unique non-empty values
+        const str = v.trim();
+        if (str && !seenKey.has(str.toLowerCase())) {
+          seenKey.add(str.toLowerCase());
+          vals.push(str);
+        }
+      } else if (typeof v === 'number') {
+        // Number: keep max (rating, count, price, etc)
+        if (!merged[key] || v > merged[key]) {
+          merged[key] = v;
+        }
+      } else if (typeof v === 'boolean') {
+        // Boolean: use true if any is true
+        if (v) merged[key] = true;
+      } else if (typeof v === 'object') {
+        // Object: keep if primary missing it
+        if (!merged[key]) merged[key] = v;
       }
     });
-    return vals.length ? vals.join(' • ') : '';
+
+    // Set merged result for this key
+    if (vals.length > 0) {
+      if (Array.isArray(merged[key])) {
+        // Merge into existing array
+        const existing = new Set(merged[key].map((x, i) => {
+          const k = typeof x === 'string' ? x.toLowerCase() : (x.id||x.slug||x.name||'').toLowerCase();
+          return k || String(i);
+        }));
+        vals.forEach(v => {
+          const k = typeof v === 'string' ? v.toLowerCase() : (v.id||v.slug||v.name||'').toLowerCase();
+          if (!existing.has(k)) {
+            merged[key].push(v);
+            existing.add(k);
+          }
+        });
+      } else if (typeof merged[key] === 'string') {
+        // Join strings with separator
+        merged[key] = [merged[key], ...vals].join(' • ');
+      } else {
+        // Not array/string, set to first value
+        merged[key] = vals[0];
+      }
+    }
   }
 
-  return Object.assign({}, primary, {
-    tags, photos,
-    description:     mergeText('description'),
-    address_line_1:  best('address_line_1') || best('address'),
-    phone:           best('phone'),
-    website:         best('website') || best('website_url'),
-    directions_url:  best('directions_url'),
-    menu_url:        best('menu_url'),
-    booking_url:     best('booking_url'),
-    reservation_url: best('reservation_url'),
-    order_url:       best('order_url'),
-    hh_days:         best('hh_days'),
-    hh_start:        best('hh_start'),
-    hh_end:          best('hh_end'),
-    hh_description:  mergeText('hh_description'),
-    hours: primary.hours?.length ? primary.hours : (group.find(e=>e.hours?.length)||{}).hours||[],
-    hh_sections:         mergeSections('hh_sections'),
-    happy_hour_sections: mergeSections('happy_hour_sections'),
-    menu_sections:       mergeSections('menu_sections'),
-    drink_sections:      mergeSections('drink_sections'),
-    features:            mergeFlat('features'),
-    perfect_for:         mergeFlat('perfect_for'),
-    site_id:   best('site_id'),
-    subdomain: best('subdomain'),
-  });
+  return merged;
 }
 
 // ── Enrich from GCR.happyHours / specials / events ────────────
