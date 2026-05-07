@@ -136,6 +136,42 @@
       .gcr-chips{gap:5px;}
       a.gcr-chip{font-size:11px;padding:5px 9px;}
     }
+    .gcr-master-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px rgba(15,34,51,.08);width:100%;margin-bottom:14px;display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .14s ease,box-shadow .14s ease;}
+    .gcr-master-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
+    .gcr-mc-img{height:220px;background-size:cover;background-position:center;position:relative;}
+    .gcr-mc-badge{position:absolute;top:12px;left:12px;background:rgba(11,122,117,.88);color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+    .gcr-mc-status{position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+    .gcr-mc-status.open{background:rgba(22,163,74,.88);color:#fff;}
+    .gcr-mc-status.closing{background:rgba(234,179,8,.88);color:#fff;}
+    .gcr-mc-status.opening{background:rgba(59,130,246,.88);color:#fff;}
+    .gcr-mc-status.closed{background:rgba(220,38,38,.78);color:#fff;}
+    .gcr-mc-status.music{background:rgba(109,40,217,.78);color:#fff;}
+    .gcr-mc-img-badges{position:absolute;bottom:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;}
+    .gcr-mc-img-badge{background:rgba(0,0,0,.52);color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;backdrop-filter:blur(4px);}
+    .gcr-mc-img-badge.music{background:rgba(109,40,217,.78);}
+    .gcr-mc-img-badge.water{background:rgba(14,165,233,.78);}
+    .gcr-mc-img-badge.outdoor{background:rgba(22,163,74,.72);}
+    .gcr-mc-price{position:absolute;bottom:12px;right:12px;background:rgba(46,155,85,.92);color:#fff;padding:6px 12px;border-radius:999px;font-weight:800;font-size:13px;}
+    .gcr-mc-body{padding:16px 18px 0;}
+    .gcr-mc-name{font-size:17px;font-weight:800;color:#1a2b3c;}
+    .gcr-mc-sub{font-size:13px;color:#5c6b81;margin-top:2px;}
+    .gcr-mc-desc{margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .gcr-mc-rating{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;}
+    .gcr-mc-tag-sections{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .gcr-mc-tag-row{display:flex;flex-direction:column;gap:4px;}
+    .gcr-mc-tag-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#8fa3b1;}
+    .gcr-mc-tag-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+    .gcr-mc-tag-scroll::-webkit-scrollbar{display:none;}
+    .gcr-mc-chip{background:#f0f4f8;color:#42596c;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
+    .gcr-mc-chip.food{background:#fff7ed;color:#c2410c;}
+    .gcr-mc-chip.drink{background:#fdf4ff;color:#7e22ce;}
+    .gcr-mc-chip.vibe{background:#f0fdf4;color:#15803d;}
+    .gcr-mc-chip.service{background:#f0f9ff;color:#0369a1;}
+    .gcr-mc-info-rows{padding:10px 18px 0;display:flex;flex-direction:column;gap:5px;}
+    .gcr-mc-info-row{font-size:13px;font-weight:600;}
+    .gcr-mc-bottom{padding:12px 18px 16px;}
+    .gcr-mc-addr{font-size:12px;color:#8fa3b1;margin-bottom:8px;}
+    .gcr-mc-actions{display:flex;flex-wrap:wrap;gap:6px;}
   `;
   document.head.appendChild(s);
 })();
@@ -426,15 +462,16 @@ function buildCard(entity) {
   const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
 
   // Happy Hour expand button + panel (only if hh_days exists)
-  const hhPanelId = `hh-${slug.replace(/[^a-z0-9]/g,'_')}`;
+  const hhPanelId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
   const hhBtn = hhDays
-    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;" onclick="event.stopPropagation();event.preventDefault();var p=document.getElementById('${hhPanelId}');p.style.display=p.style.display==='none'?'block':'none';">🍺 Happy Hour</button>`
+    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
     : '';
   const hhPanel = hhDays ? `
     <div id="${hhPanelId}" style="display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
       <div style="font-weight:800;font-size:14px;color:#92400e;margin-bottom:6px;">🍺 Happy Hour</div>
-      <div style="font-size:13px;color:#78350f;font-weight:600;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
-      ${entity.hh_description ? `<div style="margin-top:6px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
+      <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:8px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      ${entity.hh_description ? `<div style="margin-bottom:10px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
+      <div id="${hhPanelId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
     </div>` : '';
 
   // About — 3 lines, no fallback
@@ -1035,19 +1072,25 @@ function renderWithFilter(filter) {
   const grid = document.getElementById('listingsGrid');
   if (!grid) return;
   const category = grid.dataset.category || '';
-  const cardFn = category === 'happy-hours' ? buildHHCard
-               : category === 'specials'    ? buildSpecialsCard
-               : category === 'deals'       ? buildHHSpecialsCard
-               : buildCard;
 
   // Get the full entity list for this page
   const base = window._gcrAllEntities || [];
   const filtered = filterEntities(base, filter);
 
+  const cardFn = category === 'happy-hours' ? buildHHCard
+               : category === 'specials'    ? buildSpecialsCard
+               : category === 'deals'       ? buildHHSpecialsCard
+               : buildCard;
+
   grid.innerHTML = filtered.map(cardFn).join('');
 
   const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
   if (meta) meta.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+
+  // Restaurants: dedup + enrich after filtering
+  if (category === 'restaurants' && typeof processMCRestaurants === 'function') {
+    setTimeout(() => processMCRestaurants(filtered), 0);
+  }
 }
 
 /* ── Build dynamic filter chips from actual entity tags ── */
