@@ -160,29 +160,29 @@ function rcHoursLine(hours) {
 }
 
 // ── ID / matching helpers ─────────────────────────────────────
-function rcExtractIds(entity) {
-  const slug = entity.slug || entity.subdomain || '';
-  const gm = slug.match(/ChIJ[a-zA-Z0-9_-]+/);
-  return {
-    uuid: entity.id || entity.site_id || '',
-    googleId: gm ? gm[0] : '',
-    slug,
-    subdomain: entity.subdomain || '',
-  };
+// Collect ALL possible identifiers from a record
+function rcGetAllIds(record) {
+  const ids = new Set();
+  if (record.id) ids.add(record.id);
+  if (record.site_id) ids.add(record.site_id);
+  if (record.slug) ids.add(record.slug);
+  if (record.subdomain) ids.add(record.subdomain);
+  if (record.entity_id) ids.add(record.entity_id);
+  if (record.entity_slug) ids.add(record.entity_slug);
+  // Extract Google Place ID if in slug
+  const slugMatch = (record.slug || record.entity_slug || '').match(/ChIJ[a-zA-Z0-9_-]+/);
+  if (slugMatch) ids.add(slugMatch[0]);
+  return ids;
 }
 
+// Check if two records match by ANY ID overlap
 function rcMatchesEntity(source, target) {
-  const tSlug = target.slug || target.subdomain || '';
-  const tId   = target.id   || target.site_id   || '';
-  const tGoog = tSlug.match(/ChIJ[a-zA-Z0-9_-]+/)?.[0] || '';
-  const sSlug = source.entity_slug || source.slug || source.subdomain || '';
-  const sId   = source.entity_id   || source.id   || source.site_id   || '';
-  const sGoog = sSlug.match(/ChIJ[a-zA-Z0-9_-]+/)?.[0] || '';
-  if (tId   && sId   && tId === sId)     return true;
-  if (tSlug && sSlug && tSlug === sSlug) return true;
-  if (tGoog && sGoog && tGoog === sGoog) return true;
-  if (target.subdomain && target.subdomain === sSlug) return true;
-  if (source.subdomain && source.subdomain === tSlug) return true;
+  const sourceIds = rcGetAllIds(source);
+  const targetIds = rcGetAllIds(target);
+
+  for (let id of sourceIds) {
+    if (id && targetIds.has(id)) return true;
+  }
   return false;
 }
 
@@ -278,27 +278,26 @@ function rcEnrich(entity) {
 // ── Group duplicate records ───────────────────────────────────
 function rcBuildGroups(entities) {
   const groups = [];
-  const seen = new Set();
+  const assignedIds = new Set();
+
   entities.forEach(entity => {
-    const ids = rcExtractIds(entity);
-    const key = ids.uuid || ids.googleId || ids.slug;
-    if (!key || seen.has(key)) return;
+    const entityIds = rcGetAllIds(entity);
+    const firstId = Array.from(entityIds)[0];
+
+    if (!firstId || assignedIds.has(firstId)) return;
 
     const group = entities.filter(o => {
       if (!o) return false;
-      const oids = rcExtractIds(o);
-      return (ids.uuid     && ids.uuid     === oids.uuid)   ||
-             (ids.googleId && ids.googleId === oids.googleId) ||
-             (ids.slug     && (ids.slug === oids.slug || ids.slug === oids.subdomain)) ||
-             (ids.subdomain && ids.subdomain === oids.slug);
+      return rcMatchesEntity(entity, o);
     });
 
     group.forEach(g => {
-      const gids = rcExtractIds(g);
-      [gids.uuid, gids.googleId, gids.slug].filter(Boolean).forEach(k => seen.add(k));
+      rcGetAllIds(g).forEach(id => assignedIds.add(id));
     });
+
     groups.push(group);
   });
+
   return groups;
 }
 
