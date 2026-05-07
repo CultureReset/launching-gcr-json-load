@@ -218,6 +218,13 @@ function rcMergeGroup(group) {
   const primary = group.find(e => (e.slug||e.subdomain||'').includes('ChIJ')) ||
     group.reduce((b,e) => ((e.rating||0)>(b.rating||0)?e:b), group[0]);
 
+  const seenTag = new Set();
+  const tags = [];
+  group.forEach(e => (e.tags||[]).forEach(t => {
+    const str = typeof t === 'string' ? t : String(t.tag||'').trim();
+    if (str && !seenTag.has(str)) { seenTag.add(str); tags.push(t); }
+  }));
+
   const merged = { ...primary };
   const allKeys = new Set();
 
@@ -372,11 +379,11 @@ function buildRcCard(entity) {
   const tagStrs = [];
   const seenTag = new Set();
   (entity.tags||[]).forEach(t => {
-    const str = typeof t === 'string' ? t : (t.tag||'');
+    const str = typeof t === 'string' ? t : String(t.tag||'').trim();
     if (!str || seenTag.has(str)) return;
     seenTag.add(str);
     tagStrs.push(str.toLowerCase().replace(/[\s\-]+/g,'_'));
-    const cat = (typeof t === 'object' ? (t.tag_category||'') : '').toLowerCase();
+    const cat = (typeof t === 'object' ? String(t.tag_category||'').toLowerCase() : '').toLowerCase();
     const label = str.replace(/[_\-]+/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
     const chip = `<span class="gcr-rc-chip ${cat||'other'}">${rcEsc(label)}</span>`;
     if (cat === 'food')         tagBuckets.food.push(chip);
