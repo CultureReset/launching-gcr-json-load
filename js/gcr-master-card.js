@@ -342,20 +342,21 @@ function rcBuildGroups(entities) {
 
 // ── Build one vertical card ───────────────────────────────────
 function buildRcCard(entity) {
-  const slug    = entity.slug || entity.subdomain || entity.id || '';
-  const name    = entity.name || 'Business';
-  const icon    = entity.icon || entity.emoji || '🍽️';
-  const sub     = entity.subtitle || entity.tagline || '';
-  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g,' ');
-  const city    = entity.city || '';
-  const state   = entity.state || '';
-  const desc    = entity.description || '';
-  const rating  = entity.rating || 0;
-  const reviews = entity.review_count || entity.reviewCount || 0;
-  const addr    = entity.address_line_1 || entity.address || '';
+  const toString = v => typeof v === 'string' ? v : (v ? String(v) : '');
+  const slug    = toString(entity.slug || entity.subdomain || entity.id);
+  const name    = toString(entity.name) || 'Business';
+  const icon    = toString(entity.icon || entity.emoji || '🍽️');
+  const sub     = toString(entity.subtitle || entity.tagline);
+  const subtype = toString(entity.entity_subtype || entity.type).replace(/_/g,' ');
+  const city    = toString(entity.city);
+  const state   = toString(entity.state);
+  const desc    = toString(entity.description);
+  const rating  = Number(entity.rating) || 0;
+  const reviews = Number(entity.review_count || entity.reviewCount) || 0;
+  const addr    = toString(entity.address_line_1 || entity.address);
   const fullAddr = [addr, city, state].filter(Boolean).join(', ');
   const location = [city, state].filter(Boolean).join(', ');
-  const price   = entity.priceRange || entity.price_range || '';
+  const price   = toString(entity.priceRange || entity.price_range);
 
   // Hero image
   const coverPhoto = (entity.photos||[]).find(p => p.is_cover) || (entity.photos||[])[0];
