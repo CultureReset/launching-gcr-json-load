@@ -251,9 +251,22 @@ function rcMergeGroup(group) {
     return primary[field] || group.reduce((v,e) => v||e[field], '') || '';
   }
 
+  function mergeText(field) {
+    const vals = [];
+    const seen = new Set();
+    group.forEach(e => {
+      const v = (e[field] || '').trim();
+      if (v && !seen.has(v.toLowerCase())) {
+        seen.add(v.toLowerCase());
+        vals.push(v);
+      }
+    });
+    return vals.length ? vals.join(' • ') : '';
+  }
+
   return Object.assign({}, primary, {
     tags, photos,
-    description:     best('description'),
+    description:     mergeText('description'),
     address_line_1:  best('address_line_1') || best('address'),
     phone:           best('phone'),
     website:         best('website') || best('website_url'),
@@ -265,7 +278,7 @@ function rcMergeGroup(group) {
     hh_days:         best('hh_days'),
     hh_start:        best('hh_start'),
     hh_end:          best('hh_end'),
-    hh_description:  best('hh_description'),
+    hh_description:  mergeText('hh_description'),
     hours: primary.hours?.length ? primary.hours : (group.find(e=>e.hours?.length)||{}).hours||[],
     hh_sections:         mergeSections('hh_sections'),
     happy_hour_sections: mergeSections('happy_hour_sections'),
