@@ -6,7 +6,10 @@
    ============================================================ */
 
 (function injectStyles() {
-  if (document.getElementById('gcr-rc-styles')) return;
+  // Remove old style if exists to force reinject
+  const old = document.getElementById('gcr-rc-styles');
+  if (old) old.remove();
+
   const s = document.createElement('style');
   s.id = 'gcr-rc-styles';
   s.textContent = `
