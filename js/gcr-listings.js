@@ -139,6 +139,52 @@ window._gcrListingsActive = true;
       .gcr-chips{gap:5px;}
       a.gcr-chip{font-size:11px;padding:5px 9px;}
     }
+    /* Restaurant card */
+    .rcrd{
+      display:grid;grid-template-columns:260px minmax(0,1fr);
+      background:#fff;border:1px solid #e2e8f0;border-radius:20px;
+      box-shadow:0 4px 20px rgba(15,34,51,.07);overflow:hidden;
+      transition:transform .14s ease,box-shadow .14s ease;
+      margin-bottom:14px;
+    }
+    .rcrd:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(15,34,51,.13);}
+    .rcrd-img{
+      background-size:cover;background-position:center;background-color:#cfe8f0;
+      min-height:220px;height:100%;position:relative;align-self:stretch;
+    }
+    .rcrd-body{padding:18px 20px;display:flex;flex-direction:column;gap:6px;}
+    .rcrd-name{font-size:22px;font-weight:900;letter-spacing:-.02em;line-height:1.15;color:#12263a;}
+    .rcrd-loc{font-size:13px;color:#66788a;font-weight:600;}
+    .rcrd-rating{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:700;color:#384f61;}
+    .rcrd-stars{color:#f4b400;font-size:14px;letter-spacing:1px;}
+    .rcrd-rating-num{color:#12263a;}
+    .rcrd-reviews{color:#8fa3b1;}
+    .rcrd-chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .rcrd-chip{
+      background:#f0f7fa;border:1px solid #cde6ef;color:#1a6478;
+      font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;
+    }
+    .rcrd-desc{font-size:13px;color:#5a6a7a;line-height:1.6;margin-top:2px;}
+    .rcrd-hours{font-size:13px;color:#2e7d6b;font-weight:600;}
+    .rcrd-hh-badge{font-size:12px;color:#b45309;font-weight:700;background:#fffbeb;padding:4px 10px;border-radius:8px;border:1px solid #fde68a;align-self:flex-start;}
+    .rcrd-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+    .rcrd-btn{
+      padding:8px 14px;border-radius:10px;font-size:13px;font-weight:800;
+      border:1.5px solid #d1e3ec;background:#f5fafc;color:#1a4f63;
+      text-decoration:none;transition:all .15s;white-space:nowrap;
+    }
+    .rcrd-btn:hover{background:#e0f2f8;border-color:#9dd0e4;}
+    .rcrd-btn-primary{background:#0b7a75;color:#fff;border-color:#0b7a75;}
+    .rcrd-btn-primary:hover{background:#065f5b;border-color:#065f5b;}
+    @media(max-width:768px){
+      .rcrd{grid-template-columns:180px minmax(0,1fr);}
+      .rcrd-name{font-size:18px;}
+    }
+    @media(max-width:500px){
+      .rcrd{grid-template-columns:1fr;grid-template-rows:200px auto;}
+      .rcrd-img{min-height:200px;height:200px;}
+      .rcrd-body{padding:14px 16px;}
+    }
     .gcr-master-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px rgba(15,34,51,.08);width:100%;margin-bottom:14px;display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .14s ease,box-shadow .14s ease;}
     .gcr-master-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
     .gcr-mc-img{height:220px;background-size:cover;background-position:center;position:relative;}
@@ -422,6 +468,84 @@ function computeHoursLine(hours) {
     return `Today ${fmtTimeMins(todayRow.open_time)} – ${fmtTimeMins(todayRow.close_time)}`;
   }
   return '';
+}
+
+/* ── Restaurant card — clean horizontal layout for restaurants.html ── */
+function buildRestaurantCard(entity) {
+  const slug   = entity.slug || entity.subdomain || entity.id || '';
+  const name   = entity.name || 'Restaurant';
+  const city   = entity.city || entity.location || 'Gulf Coast';
+  const state  = entity.state || '';
+  const loc    = [city, state].filter(Boolean).join(', ');
+  const desc   = entity.description || entity.tagline || '';
+  const phone  = entity.phone || '';
+  const addr   = entity.address_line_1 || entity.address || '';
+  const dir    = entity.directions_url || '';
+  const menuUrl = entity.links?.menu || entity.menu_url || '';
+  const rating  = entity.rating;
+  const reviews = entity.review_count || entity.reviewCount || 0;
+  const hhDays  = entity.hh_days || '';
+  const hhStart = entity.hh_start || '';
+  const hhEnd   = entity.hh_end || '';
+
+  let img = (entity.photos && entity.photos[0] && entity.photos[0].image_url)
+    || entity.hero_image_url || entity.cover_url || '';
+  if (img && img.startsWith('//')) img = 'https:' + img;
+  if (!img) img = getFallbackImg(entity.entity_subtype || entity.type || 'restaurants');
+
+  const rawTags = (entity.tags || []).map(t =>
+    (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')
+  ).filter(Boolean);
+
+  // Show up to 4 display tags — prefer food/cuisine-style ones
+  const SKIP = new Set(['restaurant','restaurants','food','dining','dine_in','takeout','delivery','point_of_interest','establishment']);
+  const displayTags = rawTags.filter(t => !SKIP.has(t)).slice(0, 4);
+  const tagChips = displayTags.map(t =>
+    `<span class="rcrd-chip">${tagLabel(t)}</span>`
+  ).join('');
+
+  const stars = rating
+    ? `<span class="rcrd-stars">${starsHtml(rating)}</span> <span class="rcrd-rating-num">${Number(rating).toFixed(1)}</span>${reviews ? ` <span class="rcrd-reviews">(${reviews})</span>` : ''}`
+    : '';
+
+  const hhBadge = hhDays
+    ? `<div class="rcrd-hh-badge">🍺 Happy Hour ${hhDays}${hhStart ? ' · ' + hhStart : ''}${hhEnd ? '–' + hhEnd : ''}</div>`
+    : '';
+
+  const hoursLine = computeHoursLine(entity.hours || []);
+  const hoursHtml = hoursLine ? `<div class="rcrd-hours">🕐 ${hoursLine}</div>` : '';
+
+  const statusBadge = computeStatus(entity.hours || [], rawTags);
+
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
+  const saveBtn = window.GCRSaves ? window.GCRSaves.saveBtnHtml(slug) : '';
+  if (window.GCRSaves) window.GCRSaves.cacheEntity(entity);
+
+  return `
+    <a href="${profileUrl}" class="rcrd" data-slug="${slug}"
+       data-tags="${rawTags.join(',')}"
+       data-hh="${hhDays ? '1' : '0'}"
+       style="text-decoration:none;color:inherit;display:block;">
+      <div class="rcrd-img" style="background-image:url('${img}')">
+        ${statusBadge}
+        ${saveBtn}
+      </div>
+      <div class="rcrd-body">
+        <div class="rcrd-name">${esc(name)}</div>
+        <div class="rcrd-loc">📍 ${esc(loc)}</div>
+        ${stars ? `<div class="rcrd-rating">${stars}</div>` : ''}
+        ${tagChips ? `<div class="rcrd-chips">${tagChips}</div>` : ''}
+        ${desc ? `<div class="rcrd-desc">${esc(desc.substring(0, 160))}${desc.length > 160 ? '…' : ''}</div>` : ''}
+        ${hoursHtml}
+        ${hhBadge}
+        <div class="rcrd-actions">
+          <a href="${profileUrl}" class="rcrd-btn rcrd-btn-primary" onclick="event.stopPropagation()">View Profile</a>
+          ${menuUrl ? `<a href="${menuUrl}" target="_blank" rel="noopener" class="rcrd-btn" onclick="event.stopPropagation()">🍽️ Menu</a>` : ''}
+          ${addr ? `<a href="https://maps.google.com?q=${encodeURIComponent(addr)}" target="_blank" rel="noopener" class="rcrd-btn" onclick="event.stopPropagation()">Directions</a>` : dir ? `<a href="${dir}" target="_blank" rel="noopener" class="rcrd-btn" onclick="event.stopPropagation()">Directions</a>` : ''}
+          ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="rcrd-btn" onclick="event.stopPropagation()">Call</a>` : ''}
+        </div>
+      </div>
+    </a>`;
 }
 
 /* ── Build one card ── */
@@ -1129,7 +1253,8 @@ function renderWithFilter(filter) {
   const base = window._gcrAllEntities || [];
   const filtered = filterEntities(base, filter);
 
-  const cardFn = category === 'happy-hours' ? buildHHCard
+  const cardFn = category === 'restaurants' ? buildRestaurantCard
+               : category === 'happy-hours' ? buildHHCard
                : category === 'specials'    ? buildSpecialsCard
                : category === 'deals'       ? buildHHSpecialsCard
                : buildCard;
@@ -1410,7 +1535,8 @@ function initStandardPage() {
     const activeChip = document.querySelector('.tag-btn.active, .filter-chip.active');
     const currentFilter = (activeChip ? activeChip.dataset.filter : null) || urlTag || 'all';
 
-    const cardFn = category === 'happy-hours' ? buildHHCard
+    const cardFn = category === 'restaurants' ? buildRestaurantCard
+                 : category === 'happy-hours' ? buildHHCard
                  : category === 'specials'    ? buildSpecialsCard
                  : category === 'deals'       ? buildHHSpecialsCard
                  : buildCard;
