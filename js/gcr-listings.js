@@ -53,11 +53,11 @@ window._gcrListingsActive = true;
 
     /* ── Image ── */
     .gcr-card-img{
-      height:220px;
+      aspect-ratio:1/1;
+      width:100%;
       background-size:cover;background-position:center;
       background-color:#f0f4f8;position:relative;
     }
-    @media(max-width:480px){ .gcr-card-img{height:180px;} }
     .gcr-card-badge{
       position:absolute;top:12px;left:12px;
       background:rgba(11,122,117,.88);color:#fff;
