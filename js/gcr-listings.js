@@ -1261,24 +1261,24 @@ function wireFilterChips(_grid) {
 }
 
 /* ── Explicit duplicate map from CSV — maps any variant name → canonical key ── */
+// Keys and values are produced by _dupeKey (lowercase, no punctuation, spaces kept, articles stripped)
 const _DUPE_CANONICAL = {
   'avenue pub': 'avenue pub orange beach',
   'avenue pub orange beach': 'avenue pub orange beach',
   'bahama bobs': 'bahama bobs beach side cafe',
   'bahama bobs beach side cafe': 'bahama bobs beach side cafe',
-  'bleus burger': 'bleus burger restaurant and bar',
-  'bleus burger restaurant and bar': 'bleus burger restaurant and bar',
+  'bleus burger': 'bleus burger',
+  'bleus burger restaurant bar': 'bleus burger',
   'brick spoon': 'brick spoon orange beach',
   'brick spoon orange beach': 'brick spoon orange beach',
   'carmelo': 'carmelo italian',
   'carmelo italian': 'carmelo italian',
-  'coast restaurant': 'coast restaurant at the beach club',
-  'coast restaurant at the beach club': 'coast restaurant at the beach club',
-  'docs seafood shack oyster bar': 'docs seafood shack and oyster bar',
-  'docs seafood shack and oyster bar': 'docs seafood shack and oyster bar',
-  'florabama lounge package and oyster bar': 'florabama lounge package and oyster bar',
-  'florabama oyster bar': 'florabama lounge package and oyster bar',
-  'florabama': 'florabama lounge package and oyster bar',
+  'coast restaurant': 'coast restaurant beach club',
+  'coast restaurant beach club': 'coast restaurant beach club',
+  'docs seafood shack oyster bar': 'docs seafood shack oyster bar',
+  'florabama lounge package oyster bar': 'florabama lounge package oyster bar',
+  'florabama oyster bar': 'florabama lounge package oyster bar',
+  'florabama': 'florabama lounge package oyster bar',
   'ice house taproom': 'icehouse tap room gulf shores',
   'icehouse tap room gulf shores': 'icehouse tap room gulf shores',
   'icehouse tap room': 'icehouse tap room gulf shores',
@@ -1293,9 +1293,13 @@ const _DUPE_CANONICAL = {
   'moes original bbq orange beach': 'moes original bbq orange beach',
 };
 
+// Normalize name: lowercase, strip punctuation, strip articles, collapse spaces
 function _dupeKey(name) {
-  return (name || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
-    .replace(/\b(the|a|an|and|at)\b/g, '').replace(/\s+/g, '').trim();
+  return (name || '').toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\b(the|a|an|and|at)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /* ── Merge duplicate entity records (same business, multiple DB rows) into one ── */
