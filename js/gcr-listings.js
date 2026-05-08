@@ -55,24 +55,16 @@ window._gcrListingsActive = true;
     /* ── Image — fixed height, never aspect-ratio (prevents huge squares on mobile) ── */
     .gcr-card-img{
       width:100%;
-      height:200px;
+      height:220px;
       flex-shrink:0;
       background-size:cover;background-position:center;
       background-color:#f0f4f8;position:relative;
       overflow:hidden;
     }
     .gcr-ev-card-img{
-      width:100%;height:180px;flex-shrink:0;
+      width:100%;height:200px;flex-shrink:0;
       background-size:cover;background-position:center;
       background-color:#f0f4f8;position:relative;overflow:hidden;
-    }
-    @media(max-width:479px){
-      .gcr-card-img{height:160px;}
-      .gcr-ev-card-img{height:140px;}
-      .gcr-card-body{padding:10px 12px 0;}
-      .gcr-card-name{font-size:15px;}
-      .gcr-card-bottom{padding:7px 12px 10px;}
-      .gcr-card-desc{-webkit-line-clamp:2;}
     }
     @media(min-width:600px){
       .gcr-card-img{height:260px;}
