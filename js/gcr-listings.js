@@ -42,6 +42,7 @@ window._gcrListingsActive = true;
       transition:transform .14s ease,box-shadow .14s ease;
       cursor:pointer;
       width:100%;
+      margin-bottom:14px;
     }
     @media (max-width:768px) {
       .gcr-card { grid-template-columns:200px minmax(0,1fr); }
