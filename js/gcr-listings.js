@@ -55,6 +55,7 @@ window._gcrListingsActive = true;
     .gcr-card-img{
       aspect-ratio:1/1;
       width:100%;
+      max-height:380px;
       background-size:cover;background-position:center;
       background-color:#f0f4f8;position:relative;
     }
@@ -129,10 +130,17 @@ window._gcrListingsActive = true;
     .gcr-empty-icon{font-size:54px;margin-bottom:12px;}
     .gcr-empty h3{font-size:22px;font-weight:800;margin:0 0 8px;}
     .gcr-empty p{font-size:15px;line-height:1.6;margin:0;}
+    @media(max-width:760px){
+      .gcr-card-img{max-height:260px;}
+      .gcr-ev-card-img{min-height:180px;}
+    }
     @media(max-width:480px){
+      .gcr-card-img{max-height:220px;}
       .gcr-card-body{padding:13px 14px 0;}
       .gcr-card-bottom{padding:10px 14px 14px;}
+      .gcr-card-info-rows{padding:8px 14px 0;}
       .gcr-btn{padding:8px 11px;font-size:12px;}
+      .gcr-ev-card-img{min-height:150px;}
     }
   `;
   document.head.appendChild(s);
@@ -1699,7 +1707,7 @@ const GCREvents = (() => {
       .gcr-ev-btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;border:1px solid #e2e8f0;background:#fff;color:#25465b;text-decoration:none;cursor:pointer;display:inline-block}
       .gcr-ev-btn.primary{background:#0b7a75;border-color:#0b7a75;color:#fff}
       .gcr-ev-card{display:grid;grid-template-columns:220px 1fr;background:#fff;border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;margin-bottom:14px}
-      .gcr-ev-card-img{min-height:200px;background-size:cover;background-position:center;position:relative}
+      .gcr-ev-card-img{aspect-ratio:4/3;min-height:180px;max-height:320px;background-size:cover;background-position:center;position:relative}
       .gcr-ev-card-badge{position:absolute;left:12px;bottom:12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.92);color:#21485d;font-weight:800;font-size:12px}
       .gcr-ev-card-body{padding:16px 18px}
       .gcr-ev-card-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#0f7c90;margin-bottom:4px}
