@@ -619,7 +619,8 @@ function buildHHCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const fallback = getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || fallback;
   if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
@@ -728,6 +729,8 @@ function buildHHCard(entity) {
        data-live="${hasLiveMusicHH ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <img src="${hero}" alt="" loading="lazy" style="display:none;position:absolute;width:0;height:0;"
+               onerror="var p=this.parentElement;p.style.backgroundImage='url(${fallback})';this.remove();">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
           ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
@@ -839,7 +842,8 @@ function buildSpecialsCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const fallback = getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || fallback;
   if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
@@ -902,6 +906,8 @@ function buildSpecialsCard(entity) {
        data-live="0">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <img src="${hero}" alt="" loading="lazy" style="display:none;position:absolute;width:0;height:0;"
+               onerror="var p=this.parentElement;p.style.backgroundImage='url(${fallback})';this.remove();">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
         </div>
@@ -943,7 +949,8 @@ function buildHHSpecialsCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const fallback = getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || fallback;
   if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
@@ -1018,6 +1025,8 @@ function buildHHSpecialsCard(entity) {
        data-live="0">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}')">
+          <img src="${hero}" alt="" loading="lazy" style="display:none;position:absolute;width:0;height:0;"
+               onerror="var p=this.parentElement;p.style.backgroundImage='url(${fallback})';this.remove();">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
         </div>
