@@ -156,15 +156,27 @@
     .cta:hover{opacity:.95}
     @media (max-width:1080px){.layout{grid-template-columns:1fr}.sidebar{order:2}}
     @media (max-width:760px){
-      .hero{margin-left:12px;margin-right:12px;min-height:220px}
-      .hero h1{font-size:38px}
-      .hero p{font-size:16px}
+      .hero{margin-left:10px;margin-right:10px;min-height:180px}
+      .hero h1{font-size:30px}
+      .hero p{font-size:14px}
+      .hero-content{padding:16px 18px}
       .livebox{position:static;min-width:unset;margin-top:12px}
-      .toolbar{margin-left:12px;margin-right:12px}
-      .layout{padding:12px}
+      .toolbar{margin-left:10px;margin-right:10px}
+      .layout{padding:10px}
       .cards{grid-template-columns:1fr}
-      .section-title{font-size:26px}
-      .utility-image{height:170px}
+      .section-title{font-size:24px}
+      .utility-image{height:150px}
+    }
+    @media (max-width:480px){
+      .hero{margin-left:8px;margin-right:8px;min-height:110px;border-radius:16px}
+      .hero h1{font-size:22px}
+      .hero p{display:none}
+      .hero-content{padding:10px 12px}
+      .livebox{display:none}
+      .toolbar{margin-left:6px;margin-right:6px}
+      .layout{padding:6px;gap:10px}
+      .section-title{font-size:18px;margin-bottom:10px}
+      .utility-image{height:130px}
     }
   </style>
 </head>
