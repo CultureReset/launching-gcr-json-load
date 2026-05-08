@@ -78,6 +78,9 @@ p  { color: var(--text-muted); }
   align-items: center;
   justify-content: space-between;
   padding: 0 14px 8px;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .gcr-logo-row {
   display: flex;
@@ -126,6 +129,9 @@ p  { color: var(--text-muted); }
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .gcr-cat-tabs::-webkit-scrollbar { display: none; }
 .gcr-cat-tab {
@@ -157,6 +163,9 @@ p  { color: var(--text-muted); }
   padding: 0 8px 8px;
   justify-content: center;
   flex-wrap: nowrap;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .gcr-strip-btn {
   display: inline-flex;
