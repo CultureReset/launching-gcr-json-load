@@ -1260,6 +1260,44 @@ function wireFilterChips(_grid) {
   });
 }
 
+/* ── Explicit duplicate map from CSV — maps any variant name → canonical key ── */
+const _DUPE_CANONICAL = {
+  'avenue pub': 'avenue pub orange beach',
+  'avenue pub orange beach': 'avenue pub orange beach',
+  'bahama bobs': 'bahama bobs beach side cafe',
+  'bahama bobs beach side cafe': 'bahama bobs beach side cafe',
+  'bleus burger': 'bleus burger restaurant and bar',
+  'bleus burger restaurant and bar': 'bleus burger restaurant and bar',
+  'brick spoon': 'brick spoon orange beach',
+  'brick spoon orange beach': 'brick spoon orange beach',
+  'carmelo': 'carmelo italian',
+  'carmelo italian': 'carmelo italian',
+  'coast restaurant': 'coast restaurant at the beach club',
+  'coast restaurant at the beach club': 'coast restaurant at the beach club',
+  'docs seafood shack oyster bar': 'docs seafood shack and oyster bar',
+  'docs seafood shack and oyster bar': 'docs seafood shack and oyster bar',
+  'florabama lounge package and oyster bar': 'florabama lounge package and oyster bar',
+  'florabama oyster bar': 'florabama lounge package and oyster bar',
+  'florabama': 'florabama lounge package and oyster bar',
+  'ice house taproom': 'icehouse tap room gulf shores',
+  'icehouse tap room gulf shores': 'icehouse tap room gulf shores',
+  'icehouse tap room': 'icehouse tap room gulf shores',
+  'lulus': 'lulus fun food music',
+  'lulus fun food music': 'lulus fun food music',
+  'lulus gulf shores': 'lulus fun food music',
+  'marcos pizza': 'marcos pizza cotton creek drive gulf shores',
+  'marcos pizza cotton creek drive gulf shores': 'marcos pizza cotton creek drive gulf shores',
+  'mikato japanese restaurant': 'mikato japanese restaurant',
+  'mikato japanese steakhouse': 'mikato japanese restaurant',
+  'moes original bbq': 'moes original bbq orange beach',
+  'moes original bbq orange beach': 'moes original bbq orange beach',
+};
+
+function _dupeKey(name) {
+  return (name || '').toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim()
+    .replace(/\b(the|a|an|and|at)\b/g, '').replace(/\s+/g, '').trim();
+}
+
 /* ── Merge duplicate entity records (same business, multiple DB rows) into one ── */
 function mergeEntityDupes(group) {
   // Pick the record with the best slug (no numeric suffix) as base
@@ -1364,11 +1402,18 @@ function getEntitiesForCategory(businesses, category) {
 
   // Step 2: group by normalized name within this category and merge duplicates
   const nameGroups = new Map();
+  const coreKey = name => (name || '').toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\b(the|a|an)\b/g, '')
+    .replace(/\b(restaurant|bar|grill|cafe|shack|kitchen|house|pub|grille|diner|eatery|lounge|bistro|steakhouse|seafood|pizza|brewing|brewery|company|co|inc|llc|gulf shores|orange beach|alabama|al|beach club|at the)\b/g, '')
+    .replace(/\s+/g, '')
+    .trim();
   catEntities.forEach(b => {
-    const normName = (b.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const key = normName.length > 3 ? normName : (b.slug || b.id || normName + Math.random());
-    if (!nameGroups.has(key)) nameGroups.set(key, []);
-    nameGroups.get(key).push(b);
+    const dk = _dupeKey(b.name);
+    const mapped = _DUPE_CANONICAL[dk];
+    const finalKey = mapped || (coreKey(b.name).length > 3 ? coreKey(b.name) : (b.slug || b.id || dk + Math.random()));
+    if (!nameGroups.has(finalKey)) nameGroups.set(finalKey, []);
+    nameGroups.get(finalKey).push(b);
   });
 
   return [...nameGroups.values()].map(group => group.length === 1 ? group[0] : mergeEntityDupes(group));
