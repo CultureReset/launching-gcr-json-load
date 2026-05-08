@@ -77,6 +77,30 @@ const GCR = {
     });
   },
 
+  _dedupeById(arr) {
+    const seen = new Set();
+    return arr.filter(item => {
+      const id = item.id;
+      if (!id || seen.has(id)) return !id; // keep items with no id, skip dupe ids
+      seen.add(id);
+      return true;
+    });
+  },
+
+  _dedupeSpecials(arr) {
+    const seen = new Set();
+    return arr.filter(item => {
+      const id = item.id;
+      if (id && seen.has(id)) return false;
+      if (id) seen.add(id);
+      // Also dedupe by entity+name+time content key
+      const ck = `${item.entity_id||''}|${item.special_name||item.name||''}|${item.start_time||''}`;
+      if (seen.has(ck)) return false;
+      seen.add(ck);
+      return true;
+    });
+  },
+
   async load(forceRefresh) {
     // 1. Hydrate from cache first — instant render
     const cachedBiz = _gcrCacheGet('entities');
@@ -128,11 +152,13 @@ const GCR = {
         _gcrCacheSet('entities', this.businesses);
       }
       if (evRes && evRes.ok) {
-        this.events = await evRes.json();
+        const evRaw = await evRes.json();
+        this.events = this._dedupeById(Array.isArray(evRaw) ? evRaw : []);
         _gcrCacheSet('events', this.events);
       }
       if (spRes && spRes.ok) {
-        this.specials = await spRes.json();
+        const spRaw = await spRes.json();
+        this.specials = this._dedupeSpecials(Array.isArray(spRaw) ? spRaw : []);
         _gcrCacheSet('specials', this.specials);
       }
       if (hhRes && hhRes.ok) {

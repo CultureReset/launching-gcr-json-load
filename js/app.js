@@ -349,9 +349,14 @@ function _gcrCalRenderEvents() {
   const seenIds = new Set();
 
   const _pushItem = (item) => {
-    const key = item.id || item.event_id || item.special_id;
-    if (key && seenIds.has(key)) return;
-    if (key) seenIds.add(key);
+    // Primary dedup: by ID
+    const idKey = item.id || item.event_id || item.special_id;
+    if (idKey && seenIds.has(idKey)) return;
+    if (idKey) seenIds.add(idKey);
+    // Secondary dedup: by entity+name+time (catches DB dupes with different IDs)
+    const contentKey = `${item.entity_slug||item.slug||item.entity_id||''}|${item.special_name||item.event_name||item.name||''}|${item.start_time||item.event_time||item.time||''}`;
+    if (seenIds.has(contentKey)) return;
+    seenIds.add(contentKey);
     items.push(item);
   };
 
