@@ -33,6 +33,53 @@ function gcrCacheClear() {
 }
 window.gcrCacheClear = gcrCacheClear; // expose for debugging
 
+// ── GA4 + Meta Pixel auto-injection ──────────────────────────
+// Fetches IDs from /api/gcr/settings and injects tracking scripts once.
+(function gcrInjectTracking() {
+  const TRACK_CACHE_KEY = 'gcr:tracking:v1';
+  const TRACK_TTL = 60 * 60 * 1000; // 1 hour
+
+  function inject(ga4, meta) {
+    if (ga4 && !document.getElementById('gcr-ga4')) {
+      const s = document.createElement('script');
+      s.id = 'gcr-ga4';
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${ga4}`;
+      document.head.appendChild(s);
+      const cfg = document.createElement('script');
+      cfg.id = 'gcr-ga4-cfg';
+      cfg.textContent = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4}');`;
+      document.head.appendChild(cfg);
+    }
+    if (meta && !document.getElementById('gcr-meta-pixel')) {
+      const s = document.createElement('script');
+      s.id = 'gcr-meta-pixel';
+      s.textContent = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${meta}');fbq('track','PageView');`;
+      document.head.appendChild(s);
+    }
+  }
+
+  try {
+    const cached = JSON.parse(localStorage.getItem(TRACK_CACHE_KEY) || 'null');
+    if (cached && (Date.now() - cached.ts) < TRACK_TTL) {
+      inject(cached.ga4, cached.meta);
+      return;
+    }
+  } catch (_) {}
+
+  Promise.all([
+    fetch(GCR_API + '/settings/ga4_id').then(r => r.json()).catch(() => ({})),
+    fetch(GCR_API + '/settings/meta_pixel_id').then(r => r.json()).catch(() => ({}))
+  ]).then(([ga4Data, metaData]) => {
+    const ga4 = ga4Data.value || '';
+    const meta = metaData.value || '';
+    if (ga4 || meta) {
+      try { localStorage.setItem(TRACK_CACHE_KEY, JSON.stringify({ ts: Date.now(), ga4, meta })); } catch (_) {}
+      inject(ga4, meta);
+    }
+  }).catch(() => {});
+})();
+
 const GCR = {
   businesses: [],
   events: [],
