@@ -207,7 +207,15 @@ section.layout > aside,
   display: none !important;
 }
 .layout {
-  grid-template-columns: 1fr !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+/* Prevent grid/flex items from expanding beyond their track on mobile */
+.layout > *,
+.layout > main,
+.list,
+#listingsGrid {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* ── GCR Header mobile ── */

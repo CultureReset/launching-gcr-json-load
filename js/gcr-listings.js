@@ -50,7 +50,7 @@ window._gcrListingsActive = true;
       transition:transform .14s ease,box-shadow .14s ease;
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.15);}
-    #listingsGrid,#listingsGrid > *,.list,.list > *{max-width:100%;box-sizing:border-box;}
+    #listingsGrid,#listingsGrid > *,.list,.list > *{max-width:100%;min-width:0;box-sizing:border-box;}
 
     /* ── Image — fixed height, never aspect-ratio (prevents huge squares on mobile) ── */
     .gcr-card-img{
