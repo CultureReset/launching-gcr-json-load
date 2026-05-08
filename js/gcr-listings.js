@@ -1318,29 +1318,15 @@ function mergeEntityDupes(group) {
 function getEntitiesForCategory(businesses, category) {
   const seenSlugs = new Set();
 
-  // Group businesses by normalized name to detect duplicates
-  const nameGroups = new Map();
-  businesses.forEach(b => {
+  // Step 1: filter by category first (dedupe slugs, check subtype, completeness)
+  const catEntities = businesses.filter(b => {
     const slug = b.slug || b.id || b.site_id;
-    if (slug && seenSlugs.has(slug)) return;
+    if (slug && seenSlugs.has(slug)) return false;
     if (slug) seenSlugs.add(slug);
-    const normName = (b.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (!normName || normName.length <= 3) return;
-    if (!nameGroups.has(normName)) nameGroups.set(normName, []);
-    nameGroups.get(normName).push(b);
-  });
-
-  // Merge each group into a single entity, then filter by category
-  const merged = [...nameGroups.values()].map(group => group.length === 1 ? group[0] : mergeEntityDupes(group));
-
-  return merged.filter(b => {
-    // Never surface hidden businesses publicly
     if (b.hidden) return false;
 
-    // Happy Hours — source is already GCR.happyHours (pre-filtered by API), pass all through
     if (category === 'happy-hours') return true;
 
-    // Specials — ONLY businesses that have actual active rows in GCR.specials — skip completeness check
     if (category === 'specials') {
       const specials = (window.GCR && GCR.specials || []).filter(s => s.is_active !== false && s.active !== false);
       return specials.some(s =>
@@ -1350,22 +1336,30 @@ function getEntitiesForCategory(businesses, category) {
       );
     }
 
-    // Happy hours completeness check also skipped — already scoped to real HH data above
-
     const raw = (b.entity_subtype || b.type || b.category || '').toLowerCase();
     const norm = raw.replace(/-/g, '_');
     const catMatch = raw === category || SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
-    // Also check secondary_types — comma-separated page slugs (e.g. "restaurants,things-to-do")
     const secTypes = (b.secondary_types || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
     const secMatch = secTypes.some(s => s === category || s.replace(/_/g, '-') === category || s.replace(/-/g, '_') === category.replace(/-/g, '_'));
     if (!catMatch && !secMatch) return false;
-    // Skip incomplete imports — must have at least one of: image, tags, description, phone, or subtitle
+
     const hasTags  = (b.tags || []).length > 0;
     const hasImage = !!(b.hero_image_url || b.cover_url || (b.photos && b.photos.length > 0));
     const hasDesc  = !!(b.description || b.subtitle || b.tagline);
     const hasPhone = !!b.phone;
     return hasTags || hasImage || hasDesc || hasPhone;
   });
+
+  // Step 2: group by normalized name within this category and merge duplicates
+  const nameGroups = new Map();
+  catEntities.forEach(b => {
+    const normName = (b.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const key = normName.length > 3 ? normName : (b.slug || b.id || normName + Math.random());
+    if (!nameGroups.has(key)) nameGroups.set(key, []);
+    nameGroups.get(key).push(b);
+  });
+
+  return [...nameGroups.values()].map(group => group.length === 1 ? group[0] : mergeEntityDupes(group));
 }
 
 /* ── Main init for standard pages ── */
