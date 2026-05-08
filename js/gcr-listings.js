@@ -46,18 +46,33 @@ window._gcrListingsActive = true;
     .gcr-card {
       background:#fff;border-radius:16px;overflow:hidden;
       box-shadow:0 2px 16px rgba(0,0,0,.1);
-      width:100%;cursor:pointer;
+      width:100%;max-width:100%;box-sizing:border-box;cursor:pointer;
       transition:transform .14s ease,box-shadow .14s ease;
     }
     .gcr-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.15);}
+    #listingsGrid,#listingsGrid > *,.list,.list > *{max-width:100%;box-sizing:border-box;}
 
-    /* ── Image ── */
+    /* ── Image — fixed height, never aspect-ratio (prevents huge squares on mobile) ── */
     .gcr-card-img{
-      aspect-ratio:1/1;
       width:100%;
-      max-height:380px;
+      height:220px;
+      flex-shrink:0;
       background-size:cover;background-position:center;
       background-color:#f0f4f8;position:relative;
+      overflow:hidden;
+    }
+    .gcr-ev-card-img{
+      width:100%;height:200px;flex-shrink:0;
+      background-size:cover;background-position:center;
+      background-color:#f0f4f8;position:relative;overflow:hidden;
+    }
+    @media(min-width:600px){
+      .gcr-card-img{height:260px;}
+      .gcr-ev-card-img{height:220px;}
+    }
+    @media(min-width:900px){
+      .gcr-card-img{height:300px;}
+      .gcr-ev-card-img{height:240px;}
     }
     .gcr-card-badge{
       position:absolute;top:12px;left:12px;
@@ -78,15 +93,15 @@ window._gcrListingsActive = true;
     .gcr-price-badge{position:absolute;bottom:12px;right:12px;background:rgba(46,155,85,.92);color:#fff;padding:6px 12px;border-radius:999px;font-weight:800;font-size:13px;}
 
     /* ── Body ── */
-    .gcr-card-body{padding:16px 18px 0;}
-    .gcr-card-name{font-size:17px;font-weight:800;color:#1a2b3c;}
+    .gcr-card-body{padding:14px 16px 0;}
+    .gcr-card-name{font-size:17px;font-weight:800;color:#1a2b3c;word-break:break-word;}
     .gcr-card-sub{font-size:13px;color:#5c6b81;margin-top:2px;}
     .gcr-card-desc{margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
     .gcr-card-rating{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;}
     .gcr-stars{color:#f59e0b;}
 
     /* ── Tag sections ── */
-    .gcr-tag-sections{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .gcr-tag-sections{margin-top:10px;display:flex;flex-direction:column;gap:8px;}
     .gcr-tag-row{display:flex;flex-direction:column;gap:4px;}
     .gcr-tag-row-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#8fa3b1;}
     .gcr-tag-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
@@ -98,29 +113,30 @@ window._gcrListingsActive = true;
     .gcr-chip.service{background:#f0f9ff;color:#0369a1;}
     a.gcr-chip:hover{filter:brightness(.95);}
 
-    /* ── Info rows (hours / HH / music) ── */
-    .gcr-info-rows{padding:10px 18px 0;display:flex;flex-direction:column;gap:5px;}
+    /* ── Info rows ── */
+    .gcr-info-rows{padding:8px 16px 0;display:flex;flex-direction:column;gap:5px;}
     .gcr-info-row{font-size:13px;font-weight:600;}
     .gcr-info-row.gcr-hours{color:#42596c;}
     .gcr-info-row.gcr-hh{color:#d97706;}
     .gcr-info-row.gcr-music{color:#7c3aed;}
 
     /* ── Buttons ── */
-    .gcr-card-bottom{padding:12px 18px 16px;}
-    .gcr-card-addr{font-size:12px;color:#8fa3b1;margin-bottom:8px;}
+    .gcr-card-bottom{padding:10px 16px 14px;}
+    .gcr-card-addr{font-size:12px;color:#8fa3b1;margin-bottom:8px;word-break:break-word;}
     .gcr-card-actions{display:flex;flex-wrap:wrap;gap:6px;}
     .gcr-btn{
-      padding:7px 13px;border-radius:8px;border:1px solid #d1dbe6;
+      padding:8px 13px;border-radius:8px;border:1px solid #d1dbe6;
       background:#fff;color:#1a2b3c;
       font-size:12px;font-weight:700;
-      text-decoration:none;cursor:pointer;white-space:nowrap;display:inline-block;
+      text-decoration:none;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:4px;
+      min-height:36px;box-sizing:border-box;
     }
     .gcr-btn:hover{background:#f0f4f8;}
     .gcr-btn.primary{background:#0b7a75;color:#fff;border-color:#0b7a75;}
     .gcr-btn.hh{background:#d97706;color:#fff;border-color:#d97706;}
 
     /* ── HH panel ── */
-    .gcr-hh-panel{display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;}
+    .gcr-hh-panel{display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 16px;}
     .gcr-hh-header{font-weight:800;font-size:14px;color:#92400e;margin-bottom:4px;}
     .gcr-hh-time{font-size:13px;color:#78350f;font-weight:600;margin-bottom:10px;}
     .gcr-hh-desc{font-size:13px;color:#92400e;margin-bottom:12px;line-height:1.5;}
@@ -130,18 +146,6 @@ window._gcrListingsActive = true;
     .gcr-empty-icon{font-size:54px;margin-bottom:12px;}
     .gcr-empty h3{font-size:22px;font-weight:800;margin:0 0 8px;}
     .gcr-empty p{font-size:15px;line-height:1.6;margin:0;}
-    @media(max-width:760px){
-      .gcr-card-img{max-height:260px;}
-      .gcr-ev-card-img{min-height:180px;}
-    }
-    @media(max-width:480px){
-      .gcr-card-img{max-height:220px;}
-      .gcr-card-body{padding:13px 14px 0;}
-      .gcr-card-bottom{padding:10px 14px 14px;}
-      .gcr-card-info-rows{padding:8px 14px 0;}
-      .gcr-btn{padding:8px 11px;font-size:12px;}
-      .gcr-ev-card-img{min-height:150px;}
-    }
   `;
   document.head.appendChild(s);
 })();
