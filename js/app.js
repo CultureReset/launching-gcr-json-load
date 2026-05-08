@@ -346,6 +346,14 @@ function _gcrCalRenderEvents() {
   (GCR.businesses||[]).forEach(b=>{ bizMap[b.id]=b; bizMap[b.site_id]=b; bizMap[b.slug]=b; });
 
   const items = [];
+  const seenIds = new Set();
+
+  const _pushItem = (item) => {
+    const key = item.id || item.event_id || item.special_id;
+    if (key && seenIds.has(key)) return;
+    if (key) seenIds.add(key);
+    items.push(item);
+  };
 
   // — Dated events —
   (GCR.events||[]).filter(ev=>{
@@ -367,7 +375,7 @@ function _gcrCalRenderEvents() {
     return false;
   }).forEach(ev=>{
     const isLiveMusic = (ev.event_type||'').toLowerCase().includes('live_music') || (ev.event_type||'').toLowerCase().includes('open_mic');
-    items.push({...ev, _src: isLiveMusic ? 'live_music' : 'event'});
+    _pushItem({...ev, _src: isLiveMusic ? 'live_music' : 'event'});
   });
 
   // — Specials + Happy Hours —
@@ -388,7 +396,7 @@ function _gcrCalRenderEvents() {
     return _gcrCalTypes.has('special');
   }).forEach(sp=>{
     const type = (sp.special_type || sp.type || 'special').toLowerCase();
-    items.push({...sp, _src: type==='happy_hour' ? 'happy_hour' : 'special'});
+    _pushItem({...sp, _src: type==='happy_hour' ? 'happy_hour' : 'special'});
   });
 
   // Sort by time
