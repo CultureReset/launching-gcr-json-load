@@ -538,11 +538,10 @@ function buildCard(entity) {
     ? `<button class="gcr-btn hh" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
     : '';
   const hhPanel = hhDays ? `
-    <div id="${hhPanelId}" class="gcr-hh-panel">
+    <div id="${hhPanelId}" class="gcr-hh-panel" style="display:none;">
       <div class="gcr-hh-header">🍺 Happy Hour</div>
       <div class="gcr-hh-time">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
-      ${entity.hh_description ? `<div class="gcr-hh-desc">${esc(entity.hh_description)}</div>` : ''}
-      <div id="${hhPanelId}-items">Loading items...</div>
+      <div id="${hhPanelId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
     </div>` : '';
 
   // Activity info
