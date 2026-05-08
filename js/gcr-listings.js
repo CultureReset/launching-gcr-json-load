@@ -467,6 +467,11 @@ function computeHoursLine(hours) {
   if (todayRow.open_time && todayRow.close_time) {
     return `Today ${fmtTimeMins(todayRow.open_time)} – ${fmtTimeMins(todayRow.close_time)}`;
   }
+  // API sends combined range in open_time e.g. "11:00 AM – 9:00 PM" with close_time null
+  if (todayRow.open_time && !todayRow.close_time) {
+    const clean = todayRow.open_time.replace(/ | /g, ' ').replace(/–/g, '–').trim();
+    return `Today ${clean}`;
+  }
   return '';
 }
 
@@ -1253,8 +1258,7 @@ function renderWithFilter(filter) {
   const base = window._gcrAllEntities || [];
   const filtered = filterEntities(base, filter);
 
-  const cardFn = category === 'restaurants' ? buildRestaurantCard
-               : category === 'happy-hours' ? buildHHCard
+  const cardFn = category === 'happy-hours' ? buildHHCard
                : category === 'specials'    ? buildSpecialsCard
                : category === 'deals'       ? buildHHSpecialsCard
                : buildCard;
@@ -1535,8 +1539,7 @@ function initStandardPage() {
     const activeChip = document.querySelector('.tag-btn.active, .filter-chip.active');
     const currentFilter = (activeChip ? activeChip.dataset.filter : null) || urlTag || 'all';
 
-    const cardFn = category === 'restaurants' ? buildRestaurantCard
-                 : category === 'happy-hours' ? buildHHCard
+    const cardFn = category === 'happy-hours' ? buildHHCard
                  : category === 'specials'    ? buildSpecialsCard
                  : category === 'deals'       ? buildHHSpecialsCard
                  : buildCard;
