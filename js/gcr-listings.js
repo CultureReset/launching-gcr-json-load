@@ -438,7 +438,8 @@ function buildCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  const fallback = getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || fallback;
   if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
@@ -590,6 +591,8 @@ function buildCard(entity) {
        data-live="${hasLiveMusic ? '1' : '0'}">
       <div class="gcr-card">
         <div class="gcr-card-img" style="background-image:url('${hero}');position:relative;">
+          <img src="${hero}" alt="" loading="lazy" style="display:none;position:absolute;width:0;height:0;"
+               onerror="var p=this.parentElement;p.style.backgroundImage='url(${fallback})';this.remove();">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
           ${saveBtn}
@@ -1245,14 +1248,92 @@ function wireFilterChips(_grid) {
   });
 }
 
+/* ── Merge duplicate entity records (same business, multiple DB rows) into one ── */
+function mergeEntityDupes(group) {
+  // Pick the record with the best slug (no numeric suffix) as base
+  const base = group.reduce((best, b) => {
+    const s = b.slug || '';
+    const bs = best.slug || '';
+    // Prefer slugs without trailing -1 -2 etc, and with more data
+    const bScore = (b.hero_image_url ? 4 : 0) + (b.description ? 2 : 0) + (b.phone ? 1 : 0) - (s.match(/-\d+$/) ? 2 : 0);
+    const bestScore = (best.hero_image_url ? 4 : 0) + (best.description ? 2 : 0) + (best.phone ? 1 : 0) - (bs.match(/-\d+$/) ? 2 : 0);
+    return bScore >= bestScore ? b : best;
+  });
+
+  const merged = { ...base };
+
+  // Best image — first non-null photo or hero_image_url across all dupes
+  const allPhotos = group.flatMap(b => b.photos || []).filter(p => p && p.image_url);
+  const seenUrls = new Set();
+  merged.photos = allPhotos.filter(p => { if (seenUrls.has(p.image_url)) return false; seenUrls.add(p.image_url); return true; });
+  if (!merged.hero_image_url) {
+    const src = group.find(b => b.hero_image_url);
+    if (src) merged.hero_image_url = src.hero_image_url;
+  }
+
+  // Longest description
+  const bestDesc = group.reduce((best, b) => (b.description || '').length > (best.description || '').length ? b : best);
+  if (bestDesc.description) merged.description = bestDesc.description;
+
+  // Phone, address, website — first non-null
+  if (!merged.phone) { const s = group.find(b => b.phone); if (s) merged.phone = s.phone; }
+  if (!merged.address_line_1) { const s = group.find(b => b.address_line_1); if (s) { merged.address_line_1 = s.address_line_1; merged.city = s.city || merged.city; merged.state = s.state || merged.state; } }
+  if (!merged.website_url) { const s = group.find(b => b.website_url); if (s) merged.website_url = s.website_url; }
+  if (!merged.directions_url) { const s = group.find(b => b.directions_url); if (s) merged.directions_url = s.directions_url; }
+
+  // Happy hour — first non-null hh_days
+  if (!merged.hh_days) { const s = group.find(b => b.hh_days); if (s) { merged.hh_days = s.hh_days; merged.hh_start = s.hh_start; merged.hh_end = s.hh_end; merged.hh_description = s.hh_description; } }
+
+  // Rating — highest review count wins
+  const bestRating = group.reduce((best, b) => (b.review_count || 0) > (best.review_count || 0) ? b : best);
+  if (bestRating.review_count) { merged.rating = bestRating.rating; merged.review_count = bestRating.review_count; }
+
+  // Tags — union of all unique tags across dupes
+  const tagSet = new Map();
+  group.forEach(b => (b.tags || []).forEach(t => {
+    const key = (typeof t === 'string' ? t : t.tag || '').toLowerCase().trim();
+    if (key && !tagSet.has(key)) tagSet.set(key, t);
+  }));
+  merged.tags = [...tagSet.values()];
+
+  // Hours — first non-empty hours array
+  if (!(merged.hours || []).length) { const s = group.find(b => (b.hours || []).length); if (s) merged.hours = s.hours; }
+
+  // Booking/reservation/order URLs
+  if (!merged.booking_url) { const s = group.find(b => b.booking_url); if (s) merged.booking_url = s.booking_url; }
+  if (!merged.reservation_url) { const s = group.find(b => b.reservation_url); if (s) merged.reservation_url = s.reservation_url; }
+  if (!merged.order_url) { const s = group.find(b => b.order_url); if (s) merged.order_url = s.order_url; }
+
+  // Subtitle/tagline
+  if (!merged.subtitle) { const s = group.find(b => b.subtitle); if (s) merged.subtitle = s.subtitle; }
+
+  // Boolean amenity flags — true wins
+  const bools = ['live_music','outdoor_seating','delivery','dine_in','takeout','waterfront','serves_beer','serves_wine','serves_cocktails','good_for_children','good_for_groups','wheelchair_accessible'];
+  bools.forEach(f => { if (group.some(b => b[f] === true)) merged[f] = true; });
+
+  return merged;
+}
+
 /* ── Get entities for this page's category ── */
 function getEntitiesForCategory(businesses, category) {
   const seenSlugs = new Set();
-  return businesses.filter(b => {
-    const slug = b.slug || b.id || b.site_id;
-    if (slug && seenSlugs.has(slug)) return false;
-    if (slug) seenSlugs.add(slug);
 
+  // Group businesses by normalized name to detect duplicates
+  const nameGroups = new Map();
+  businesses.forEach(b => {
+    const slug = b.slug || b.id || b.site_id;
+    if (slug && seenSlugs.has(slug)) return;
+    if (slug) seenSlugs.add(slug);
+    const normName = (b.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!normName || normName.length <= 3) return;
+    if (!nameGroups.has(normName)) nameGroups.set(normName, []);
+    nameGroups.get(normName).push(b);
+  });
+
+  // Merge each group into a single entity, then filter by category
+  const merged = [...nameGroups.values()].map(group => group.length === 1 ? group[0] : mergeEntityDupes(group));
+
+  return merged.filter(b => {
     // Never surface hidden businesses publicly
     if (b.hidden) return false;
 
@@ -1477,6 +1558,8 @@ function initStandardPage() {
   } else {
     document.addEventListener('gcr:loaded', e => render(getSource(e.detail)));
   }
+  // When fresh data arrives (stale-while-revalidate), silently re-render
+  document.addEventListener('gcr:refreshed', e => render(getSource(e.detail)));
 
   wireFilterChips(grid);
 }
