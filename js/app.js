@@ -668,6 +668,7 @@ function renderBizCard(biz, context) {
 function renderPageListings() {
   const grid = document.getElementById('listingsGrid');
   if (!grid || typeof GCR === 'undefined') return;
+  if (window._gcrListingsActive) return; // gcr-listings.js handles rendering on this page
   const cat    = grid.dataset.category;
   const tag    = grid.dataset.tag;
   const method = grid.dataset.method;

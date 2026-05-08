@@ -7,6 +7,9 @@
    Each page needs: <div id="listingsGrid" data-category="X">
    ============================================================ */
 
+/* Signal to app.js that this module handles grid rendering — prevents double-render flash */
+window._gcrListingsActive = true;
+
 /* ── Inject styles ── */
 (function injectStyles() {
   const s = document.createElement('style');
@@ -39,7 +42,6 @@
       transition:transform .14s ease,box-shadow .14s ease;
       cursor:pointer;
       width:100%;
-      margin-bottom:14px;
     }
     @media (max-width:768px) {
       .gcr-card { grid-template-columns:200px minmax(0,1fr); }
@@ -213,54 +215,91 @@ function getFallbackImg(subtype) {
 /* ── entity_subtype → listing page ── */
 /* Keys use underscores. The lookup normalizes hyphens→underscores automatically. */
 const SUBTYPE_TO_CATEGORY = {
-  // Restaurants
+  // Restaurants — all DB subtypes mapped
   restaurant:'restaurants', restaurants:'restaurants',
-  bar:'restaurants', bar_grill:'restaurants',
-  hybrid_venue:'restaurants', seafood_restaurant:'restaurants', seafood:'restaurants',
-  casual_dining:'restaurants', steakhouse:'restaurants', pizza:'restaurants',
-  mexican:'restaurants', southern:'restaurants', breakfast_spot:'restaurants',
-  beach_bar:'restaurants', food:'restaurants', dining:'restaurants',
+  american_restaurant:'restaurants', seafood_restaurant:'restaurants', seafood:'restaurants',
+  pizza_restaurant:'restaurants', pizza:'restaurants', pizza_delivery:'restaurants',
+  italian_restaurant:'restaurants', mexican_restaurant:'restaurants', mexican:'restaurants',
+  chinese_restaurant:'restaurants', japanese_restaurant:'restaurants', sushi_restaurant:'restaurants',
+  tex_mex_restaurant:'restaurants', taco_restaurant:'restaurants', barbecue_restaurant:'restaurants',
+  hamburger_restaurant:'restaurants', chicken_restaurant:'restaurants', hot_dog_restaurant:'restaurants',
+  sandwich_shop:'restaurants', deli:'restaurants', diner:'restaurants',
+  brunch_restaurant:'restaurants', breakfast_restaurant:'restaurants', breakfast_spot:'restaurants',
+  steak_house:'restaurants', steakhouse:'restaurants',
+  bar:'restaurants', bar_grill:'restaurants', bar_and_grill:'restaurants',
+  beach_bar:'restaurants', irish_pub:'restaurants', pub:'restaurants',
+  hybrid_venue:'restaurants', casual_dining:'restaurants',
+  southern:'restaurants', food:'restaurants', dining:'restaurants',
+  meal_takeaway:'restaurants', catering:'restaurants',
 
-  // Coffee & Sweets
-  coffee_shop:'coffee-sweets', 'coffee_sweets':'coffee-sweets',
+  // Coffee & Sweets — all DB subtypes mapped
+  coffee_shop:'coffee-sweets', coffee_sweets:'coffee-sweets',
   cafe:'coffee-sweets', bakery:'coffee-sweets',
-  ice_cream:'coffee-sweets', dessert_bar:'coffee-sweets', smoothie:'coffee-sweets',
+  ice_cream:'coffee-sweets', ice_cream_shop:'coffee-sweets',
+  donut_shop:'coffee-sweets', dessert_shop:'coffee-sweets',
+  dessert_bar:'coffee-sweets', smoothie:'coffee-sweets',
 
-  // Shopping
+  // Shopping — all DB subtypes mapped
   boutique:'shopping', souvenir:'shopping', retail:'shopping', shopping:'shopping',
-  surf_shop:'shopping', gift_shop:'shopping', clothing:'shopping',
-  art_gallery:'shopping', gallery_shop:'shopping',
+  surf_shop:'shopping', gift_shop:'shopping', clothing:'shopping', clothing_store:'shopping',
+  art_gallery:'shopping', gallery_shop:'shopping', shopping_mall:'shopping',
+  furniture_store:'shopping', convenience_store:'shopping', food_store:'shopping',
+  sporting_goods_store:'shopping', florist:'shopping', grocery_store:'shopping',
+  liquor_store:'shopping', retail_liquor_store:'shopping',
 
-  // Things To Do (water sports, tours, attractions, rentals)
-  parasailing:'things-to-do', dolphin_cruise:'things-to-do',
-  dolphin_cruises_tours:'things-to-do',
+  // Things To Do — all DB subtypes mapped
+  parasailing:'things-to-do', dolphin_cruise:'things-to-do', dolphin_cruises_tours:'things-to-do',
   snorkeling:'things-to-do', kayak_rental:'things-to-do',
-  canoe_kayak_paddleboard:'things-to-do',
-  boat_rental:'things-to-do', boat_rentals:'things-to-do',
-  fishing_charter:'things-to-do',
-  tour:'things-to-do', attraction:'things-to-do',
+  canoe_kayak_paddleboard:'things-to-do', canoe_kayak_paddleboard_rentals:'things-to-do',
+  boat_rental:'things-to-do', boat_rentals:'things-to-do', boat_tours:'things-to-do',
+  fishing_charter:'things-to-do', charter_fishing:'things-to-do',
+  tour:'things-to-do', attraction:'things-to-do', attractions:'things-to-do',
   jet_ski:'things-to-do', jet_ski_rentals_tours:'things-to-do',
-  paddleboard:'things-to-do',
+  paddleboard:'things-to-do', watersports:'things-to-do',
   banana_boat_rides:'things-to-do', banana_boat:'things-to-do',
-  things_to_do:'things-to-do',
+  helicopter_airplane_tours:'things-to-do', sunset_cruises_tours:'things-to-do',
+  things_to_do:'things-to-do', rentals:'things-to-do',
+  entertainment:'things-to-do', marina:'things-to-do',
+  golf_course:'things-to-do', golf_club:'things-to-do',
+  amusement_park:'things-to-do', amusement_center:'things-to-do',
+  tour_agency:'things-to-do', tour_operator:'things-to-do',
+  event_venue:'things-to-do', tourist_attraction:'things-to-do',
+  sports_complex:'things-to-do', pier:'things-to-do',
 
   // Nightlife
   nightlife:'nightlife',
   bar_club:'nightlife', nightclub:'nightlife', sports_bar:'nightlife',
-  rooftop_bar:'nightlife', lounge:'nightlife',
+  rooftop_bar:'nightlife', lounge:'nightlife', cocktail_bar:'nightlife',
 
-  // Services
+  // Services — all DB subtypes mapped
   services:'services', service:'services',
   salon:'services', spa:'services', photographer:'services', photography:'services',
   wellness:'services', transportation:'services',
   concierge:'services', chair_rental:'services', grocery_delivery:'services',
   cleaning:'services', lawn_care:'services', pest_control:'services',
+  massage:'services', salon_spa:'services', beauty_salon:'services',
+  car_wash:'services', laundromat:'services', laundry_service:'services',
+  cleaning_services:'services', restoration_services:'services',
+  travel_agency:'services', agency:'services',
+  real_estate_agency:'services', real_estate:'services', real_estate_agent:'services',
+  medical_practice:'services', medical_spa:'services', healthcare:'services',
+  financial_services:'services', bank:'services',
+  influencer:'services', artist:'services',
+
+  // Hotels / Staying
+  hotel:'staying', hotels:'staying', lodging:'staying',
+  resort:'staying', resort_hotel:'staying',
+  condo:'staying', condominium_complex:'staying', condominium_association:'staying',
+  vacation_rental:'staying', vacation_rentals:'staying', vacation_rental_resort:'staying',
+  bed_and_breakfast:'staying', rv_park:'staying', campground:'staying',
+  apartment_community:'staying',
 
   // Other
   other:'other',
-  boat_launch:'other', parking:'other', vacation_rental:'other',
-  hotel:'other', condo:'other', resort:'other',
+  boat_launch:'other', parking:'other', parking_lot:'other',
   beach_access:'other', park:'other',
+  government:'other', municipal_government:'other', government_services:'other',
+  postal_service:'other',
 };
 
 /* ── tag → destination page for clickable chips ── */
@@ -393,7 +432,8 @@ function buildCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr    = entity.address_line_1 || entity.address || '';
@@ -418,7 +458,11 @@ function buildCard(entity) {
   const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
   const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
 
-  const displayTags = rawTags.length ? rawTags.slice(0, 4) : (subtype ? [subtype.replace(/ /g,'_')] : []);
+  const subtypeKey2 = (entity.entity_subtype || entity.type || '').toLowerCase().replace(/[\s\-]+/g, '_');
+  const tagsWithSubtype = subtypeKey2 && !rawTags.includes(subtypeKey2)
+    ? [subtypeKey2, ...rawTags]
+    : rawTags;
+  const displayTags = tagsWithSubtype.slice(0, 5);
   const chipLinks = displayTags.map(tag => {
     const dest = tagToPage(tag);
     return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip" onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
@@ -467,7 +511,7 @@ function buildCard(entity) {
     ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
     : '';
   const hhPanel = hhDays ? `
-    <div id="${hhPanelId}" style="display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
+    <div id="${hhPanelId}" style="display:none;grid-column:1/-1;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
       <div style="font-weight:800;font-size:14px;color:#92400e;margin-bottom:6px;">🍺 Happy Hour</div>
       <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:8px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
       ${entity.hh_description ? `<div style="margin-bottom:10px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
@@ -557,8 +601,8 @@ function buildCard(entity) {
             <div class="gcr-card-actions">${isActivity ? (bookBtn || viewBtn) + dirBtn + callBtn : viewBtn + menuBtn + hhBtn + bookBtn + reserveBtn + orderBtn + dirBtn + callBtn}</div>
           </div>
         </div>
+        ${hhPanel}
       </div>
-      ${hhPanel}
     </a>`;
 }
 
@@ -571,7 +615,8 @@ function buildHHCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr    = entity.address_line_1 || entity.address || '';
@@ -594,7 +639,11 @@ function buildHHCard(entity) {
   const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
   const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
 
-  const displayTags = rawTags.length ? rawTags.slice(0, 4) : (subtype ? [subtype.replace(/ /g,'_')] : []);
+  const subtypeKey2 = (entity.entity_subtype || entity.type || '').toLowerCase().replace(/[\s\-]+/g, '_');
+  const tagsWithSubtype = subtypeKey2 && !rawTags.includes(subtypeKey2)
+    ? [subtypeKey2, ...rawTags]
+    : rawTags;
+  const displayTags = tagsWithSubtype.slice(0, 5);
   const chipLinks = displayTags.map(tag => {
     const dest = tagToPage(tag);
     return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip" onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
@@ -786,7 +835,8 @@ function buildSpecialsCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr    = entity.address_line_1 || entity.address || '';
@@ -889,7 +939,8 @@ function buildHHSpecialsCard(entity) {
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
-  const hero    = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  let hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || getFallbackImg(entity.entity_subtype || entity.type);
+  if (hero && hero.startsWith('//')) hero = 'https:' + hero;
   const rating  = entity.rating;
   const reviews = entity.review_count || entity.reviewCount || 0;
   const addr    = entity.address_line_1 || entity.address || '';
@@ -1126,6 +1177,11 @@ function buildDynamicFilters(entities) {
     tagNorms.forEach(norm => {
       tagCounts[norm] = (tagCounts[norm] || 0) + 1;
     });
+    // Also count entity_subtype so filter chips reflect actual entity types on page
+    const sk = (e.entity_subtype || e.type || '').toLowerCase().replace(/[\s\-]+/g, '_');
+    if (sk && !tagNorms.includes(sk)) {
+      tagCounts[sk] = (tagCounts[sk] || 0) + 1;
+    }
     // Count hh_days businesses as happy_hour even if they don't have the tag
     if (e.hh_days && !tagNorms.includes('happy_hour')) {
       tagCounts['happy_hour'] = (tagCounts['happy_hour'] || 0) + 1;
@@ -1218,7 +1274,7 @@ function getEntitiesForCategory(businesses, category) {
     if (!catMatch && !secMatch) return false;
     // Skip incomplete imports — must have at least one of: image, tags, description, phone, or subtitle
     const hasTags  = (b.tags || []).length > 0;
-    const hasImage = !!(b.hero_image_url || b.cover_url);
+    const hasImage = !!(b.hero_image_url || b.cover_url || (b.photos && b.photos.length > 0));
     const hasDesc  = !!(b.description || b.subtitle || b.tagline);
     const hasPhone = !!b.phone;
     return hasTags || hasImage || hasDesc || hasPhone;
