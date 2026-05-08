@@ -1267,34 +1267,53 @@ function wireFilterChips(_grid) {
 /* ── Explicit duplicate map from CSV — maps any variant name → canonical key ── */
 // Keys and values are produced by _dupeKey (lowercase, no punctuation, spaces kept, articles stripped)
 const _DUPE_CANONICAL = {
-  'avenue pub': 'avenue pub orange beach',
-  'avenue pub orange beach': 'avenue pub orange beach',
+  // DUP-001 Bahama Bob's
   'bahama bobs': 'bahama bobs beach side cafe',
   'bahama bobs beach side cafe': 'bahama bobs beach side cafe',
+  // DUP-002 Bleus Burger
   'bleus burger': 'bleus burger',
   'bleus burger restaurant bar': 'bleus burger',
-  'brick spoon': 'brick spoon orange beach',
-  'brick spoon orange beach': 'brick spoon orange beach',
+  // DUP-003 Carmelo Italian
   'carmelo': 'carmelo italian',
   'carmelo italian': 'carmelo italian',
+  // DUP-004 Coast Restaurant
   'coast restaurant': 'coast restaurant beach club',
   'coast restaurant beach club': 'coast restaurant beach club',
+  // DUP-005 Doc's Seafood Shack
   'docs seafood shack oyster bar': 'docs seafood shack oyster bar',
-  'florabama lounge package oyster bar': 'florabama lounge package oyster bar',
-  'florabama oyster bar': 'florabama lounge package oyster bar',
-  'florabama': 'florabama lounge package oyster bar',
+  // DUP-006 Doc's Seafood and Steaks (slug-style card has no address)
+  'docs seafood steaks': 'docs seafood steaks',
+  'docs seafood steak': 'docs seafood steaks',
+  // DUP-007 Flora-Bama (note: _dupeKey strips hyphen but keeps space → "flora bama", not "florabama")
+  'flora bama lounge package oyster bar': 'flora bama lounge package oyster bar',
+  'flora bama lounge oyster bar': 'flora bama lounge package oyster bar',
+  'flora bama oyster bar': 'flora bama lounge package oyster bar',
+  'flora bama': 'flora bama lounge package oyster bar',
+  // DUP-009 Icehouse Tap Room
   'ice house taproom': 'icehouse tap room gulf shores',
   'icehouse tap room gulf shores': 'icehouse tap room gulf shores',
   'icehouse tap room': 'icehouse tap room gulf shores',
+  // DUP-010 LuLu's
   'lulus': 'lulus fun food music',
   'lulus fun food music': 'lulus fun food music',
   'lulus gulf shores': 'lulus fun food music',
+  // DUP-011 Marco's Pizza
   'marcos pizza': 'marcos pizza cotton creek drive gulf shores',
   'marcos pizza cotton creek drive gulf shores': 'marcos pizza cotton creek drive gulf shores',
+  // DUP-012 Mile Marker 158 (Dockside variant has no address)
+  'mile marker 158': 'mile marker 158 dockside',
+  'mile marker 158 dockside': 'mile marker 158 dockside',
+  // Mikato Japanese
   'mikato japanese restaurant': 'mikato japanese restaurant',
   'mikato japanese steakhouse': 'mikato japanese restaurant',
+  // Moe's BBQ
   'moes original bbq': 'moes original bbq orange beach',
   'moes original bbq orange beach': 'moes original bbq orange beach',
+  // Avenue Pub / Brick Spoon
+  'avenue pub': 'avenue pub orange beach',
+  'avenue pub orange beach': 'avenue pub orange beach',
+  'brick spoon': 'brick spoon orange beach',
+  'brick spoon orange beach': 'brick spoon orange beach',
 };
 
 // Normalize name: lowercase, strip punctuation, strip articles, collapse spaces
