@@ -1508,7 +1508,7 @@ function initStandardPage() {
 
     // Always re-apply the active filter after rebuilding (preserves filter state across sort)
     if (currentFilter && currentFilter !== 'all') {
-      applyFilter(grid, currentFilter);
+      renderWithFilter(currentFilter);
     }
   }
 
