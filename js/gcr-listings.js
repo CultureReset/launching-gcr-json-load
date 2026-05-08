@@ -1408,7 +1408,7 @@ function getEntitiesForCategory(businesses, category) {
     return hasTags || hasImage || hasDesc || hasPhone;
   });
 
-  // Step 2: group by normalized name within this category and merge duplicates
+  // Step 2: group by normalized name (explicit CSV map first, then core name)
   const nameGroups = new Map();
   const coreKey = name => (name || '').toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
@@ -1424,7 +1424,36 @@ function getEntitiesForCategory(businesses, category) {
     nameGroups.get(finalKey).push(b);
   });
 
-  return [...nameGroups.values()].map(group => group.length === 1 ? group[0] : mergeEntityDupes(group));
+  // Step 3: second-pass address dedup — same street address + overlapping name words = same business
+  const normAddr = addr => (addr || '').toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\b(suite|ste|unit|apt|floor|bldg|building|#)\b/g, '')
+    .replace(/\s+/g, ' ').trim();
+  const shareWords = (a, b) => {
+    const stop = new Set(['the','and','for','with','grill','bar','restaurant','cafe','house','shack','inn','at']);
+    const wa = new Set((a||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>3&&!stop.has(w)));
+    return (b||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).some(w=>w.length>3&&wa.has(w));
+  };
+  const addrIndex = new Map(); // addr → nameGroups key
+  const mergedKeys = new Set();
+  for (const [key, group] of nameGroups) {
+    const addr = normAddr(group[0] && (group[0].address_line_1 || group[0].address || ''));
+    if (!addr || addr.length < 8) continue;
+    if (addrIndex.has(addr)) {
+      const existKey = addrIndex.get(addr);
+      const existGroup = nameGroups.get(existKey);
+      if (existGroup && shareWords(group[0] && group[0].name, existGroup[0] && existGroup[0].name)) {
+        existGroup.push(...group);
+        mergedKeys.add(key);
+      }
+    } else {
+      addrIndex.set(addr, key);
+    }
+  }
+
+  return [...nameGroups.entries()]
+    .filter(([key]) => !mergedKeys.has(key))
+    .map(([, group]) => group.length === 1 ? group[0] : mergeEntityDupes(group));
 }
 
 /* ── Main init for standard pages ── */
