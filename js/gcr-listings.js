@@ -34,146 +34,106 @@ window._gcrListingsActive = true;
     }
     .toolbar-top { display:none !important; }
     .toolbar { padding:6px 12px !important; }
-    .gcr-card {
-      display:grid;grid-template-columns:clamp(240px, 35%, 400px) minmax(0,1fr);
-      background:#fff;border:1px solid #e2e8f0;border-radius:20px;
-      box-shadow:0 10px 28px rgba(15,34,51,.08);overflow:hidden;
-      text-decoration:none;color:inherit;
-      transition:transform .14s ease,box-shadow .14s ease;
-      cursor:pointer;
-      width:100%;
-    }
-    @media (max-width:768px) {
-      .gcr-card { grid-template-columns:200px minmax(0,1fr); }
-    }
-    @media (max-width:480px) {
-      .gcr-card { grid-template-columns:1fr; }
-    }
     .list > a, .cards > a, #listingsGrid > a {
       display:block;
       text-decoration:none;
       color:inherit;
       width:100%;
     }
-    .gcr-card-hidden {
-      display:none !important;
+    .gcr-card-hidden { display:none !important; }
+
+    /* ── Card ── */
+    .gcr-card {
+      background:#fff;border-radius:16px;overflow:hidden;
+      box-shadow:0 2px 16px rgba(0,0,0,.1);
+      width:100%;cursor:pointer;
+      transition:transform .14s ease,box-shadow .14s ease;
     }
-    .gcr-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
+    .gcr-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.15);}
+
+    /* ── Image ── */
     .gcr-card-img{
-      min-height:260px;height:100%;
-      background-size:cover;
-      background-position:center center;
-      background-repeat:no-repeat;
-      background-color:#f0f4f8;
-      position:relative;align-self:stretch;
+      height:220px;
+      background-size:cover;background-position:center;
+      background-color:#f0f4f8;position:relative;
     }
-    @media (max-width:768px) {
-      .gcr-card-img { min-height:260px; }
-    }
-    @media (max-width:480px) {
-      .gcr-card-img { min-height:300px; }
-    }
+    @media(max-width:480px){ .gcr-card-img{height:180px;} }
     .gcr-card-badge{
-      position:absolute;left:14px;bottom:14px;
-      padding:7px 12px;border-radius:999px;
-      background:rgba(255,255,255,.92);color:#21485d;
-      font-weight:800;font-size:13px;
+      position:absolute;top:12px;left:12px;
+      background:rgba(11,122,117,.88);color:#fff;
+      padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;
     }
-    .gcr-status{
-      position:absolute;right:14px;top:14px;
-      padding:6px 11px;border-radius:999px;
-      font-size:12px;font-weight:800;
-    }
-    .gcr-status.open{background:#d4edda;color:#155724;}
-    .gcr-status.closing{background:#fff3cd;color:#856404;}
-    .gcr-status.opening{background:#cce5ff;color:#004085;}
-    .gcr-status.closed{background:#f8d7da;color:#721c24;}
-    .gcr-status.music{background:#e8d5f5;color:#5b21b6;}
-    .gcr-card-body{padding:16px 18px;display:flex;flex-direction:column;}
-    .gcr-card-name{font-size:28px;font-weight:900;letter-spacing:-.03em;line-height:1.1;}
-    .gcr-card-sub{margin-top:4px;color:#66788a;font-size:15px;font-weight:600;}
-    .gcr-card-rating{
-      margin-top:9px;display:flex;align-items:center;gap:8px;
-      font-size:14px;font-weight:700;color:#384f61;
-    }
-    .gcr-stars{color:#f4b400;letter-spacing:1px;font-size:15px;}
-    .gcr-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;}
-    a.gcr-chip{
-      background:#f7fafc;border:1px solid #e7edf3;color:#496376;
-      padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;
-      text-decoration:none;transition:.15s;
-    }
-    a.gcr-chip:hover{background:#e8f7fa;border-color:#b9e7ef;color:#0b6475;}
-    .gcr-card-bottom{
-      margin-top:auto;padding-top:13px;border-top:1px solid #edf2f7;
-      display:flex;align-items:center;justify-content:space-between;
-      flex-wrap:wrap;gap:10px;
-    }
-    .gcr-card-addr{color:#425b70;font-weight:600;font-size:13px;}
-    .gcr-card-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .gcr-status{position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
+    .gcr-status.open{background:rgba(22,163,74,.88);color:#fff;}
+    .gcr-status.closing{background:rgba(234,179,8,.88);color:#fff;}
+    .gcr-status.opening{background:rgba(59,130,246,.88);color:#fff;}
+    .gcr-status.closed{background:rgba(220,38,38,.78);color:#fff;}
+    .gcr-status.music{background:rgba(109,40,217,.78);color:#fff;}
+    .gcr-img-badges{position:absolute;bottom:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;}
+    .gcr-img-badge{background:rgba(0,0,0,.52);color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;backdrop-filter:blur(4px);}
+    .gcr-img-badge.music{background:rgba(109,40,217,.78);}
+    .gcr-img-badge.water{background:rgba(14,165,233,.78);}
+    .gcr-img-badge.outdoor{background:rgba(22,163,74,.72);}
+    .gcr-price-badge{position:absolute;bottom:12px;right:12px;background:rgba(46,155,85,.92);color:#fff;padding:6px 12px;border-radius:999px;font-weight:800;font-size:13px;}
+
+    /* ── Body ── */
+    .gcr-card-body{padding:16px 18px 0;}
+    .gcr-card-name{font-size:17px;font-weight:800;color:#1a2b3c;}
+    .gcr-card-sub{font-size:13px;color:#5c6b81;margin-top:2px;}
+    .gcr-card-desc{margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .gcr-card-rating{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;}
+    .gcr-stars{color:#f59e0b;}
+
+    /* ── Tag sections ── */
+    .gcr-tag-sections{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+    .gcr-tag-row{display:flex;flex-direction:column;gap:4px;}
+    .gcr-tag-row-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#8fa3b1;}
+    .gcr-tag-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+    .gcr-tag-scroll::-webkit-scrollbar{display:none;}
+    .gcr-chip{background:#f0f4f8;color:#42596c;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;text-decoration:none;}
+    .gcr-chip.food{background:#fff7ed;color:#c2410c;}
+    .gcr-chip.drink{background:#fdf4ff;color:#7e22ce;}
+    .gcr-chip.vibe{background:#f0fdf4;color:#15803d;}
+    .gcr-chip.service{background:#f0f9ff;color:#0369a1;}
+    a.gcr-chip:hover{filter:brightness(.95);}
+
+    /* ── Info rows (hours / HH / music) ── */
+    .gcr-info-rows{padding:10px 18px 0;display:flex;flex-direction:column;gap:5px;}
+    .gcr-info-row{font-size:13px;font-weight:600;}
+    .gcr-info-row.gcr-hours{color:#42596c;}
+    .gcr-info-row.gcr-hh{color:#d97706;}
+    .gcr-info-row.gcr-music{color:#7c3aed;}
+
+    /* ── Buttons ── */
+    .gcr-card-bottom{padding:12px 18px 16px;}
+    .gcr-card-addr{font-size:12px;color:#8fa3b1;margin-bottom:8px;}
+    .gcr-card-actions{display:flex;flex-wrap:wrap;gap:6px;}
     .gcr-btn{
-      border:1px solid #e2e8f0;background:#fff;color:#25465b;
-      padding:9px 13px;border-radius:11px;font-size:13px;font-weight:800;
-      text-decoration:none;display:inline-block;
+      padding:7px 13px;border-radius:8px;border:1px solid #d1dbe6;
+      background:#fff;color:#1a2b3c;
+      font-size:12px;font-weight:700;
+      text-decoration:none;cursor:pointer;white-space:nowrap;display:inline-block;
     }
     .gcr-btn:hover{background:#f0f4f8;}
-    .gcr-empty{
-      padding:52px 24px;text-align:center;color:#66788a;
-    }
+    .gcr-btn.primary{background:#0b7a75;color:#fff;border-color:#0b7a75;}
+    .gcr-btn.hh{background:#d97706;color:#fff;border-color:#d97706;}
+
+    /* ── HH panel ── */
+    .gcr-hh-panel{display:none;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;}
+    .gcr-hh-header{font-weight:800;font-size:14px;color:#92400e;margin-bottom:4px;}
+    .gcr-hh-time{font-size:13px;color:#78350f;font-weight:600;margin-bottom:10px;}
+    .gcr-hh-desc{font-size:13px;color:#92400e;margin-bottom:12px;line-height:1.5;}
+
+    /* ── Empty state ── */
+    .gcr-empty{padding:52px 24px;text-align:center;color:#66788a;}
     .gcr-empty-icon{font-size:54px;margin-bottom:12px;}
     .gcr-empty h3{font-size:22px;font-weight:800;margin:0 0 8px;}
     .gcr-empty p{font-size:15px;line-height:1.6;margin:0;}
-    @media(max-width:760px){
-      .gcr-card{grid-template-columns:1fr;}
-      .gcr-card-img{min-height:260px;}
-      .gcr-card-name{font-size:22px;}
-    }
     @media(max-width:480px){
-      .gcr-card-img{min-height:200px;}
-      .gcr-card-name{font-size:20px;}
-      .gcr-card-body{padding:13px 14px;}
-      .gcr-card-bottom{flex-direction:column;align-items:flex-start;gap:8px;}
-      .gcr-card-actions{width:100%;justify-content:flex-start;}
-      .gcr-btn{padding:10px 14px;font-size:13px;min-height:42px;display:inline-flex;align-items:center;}
-      .gcr-chips{gap:5px;}
-      a.gcr-chip{font-size:11px;padding:5px 9px;}
+      .gcr-card-body{padding:13px 14px 0;}
+      .gcr-card-bottom{padding:10px 14px 14px;}
+      .gcr-btn{padding:8px 11px;font-size:12px;}
     }
-    .gcr-master-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 28px rgba(15,34,51,.08);width:100%;margin-bottom:14px;display:block;text-decoration:none;color:inherit;cursor:pointer;transition:transform .14s ease,box-shadow .14s ease;}
-    .gcr-master-card:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(15,34,51,.13);}
-    .gcr-mc-img{height:220px;background-size:cover;background-position:center;position:relative;}
-    .gcr-mc-badge{position:absolute;top:12px;left:12px;background:rgba(11,122,117,.88);color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
-    .gcr-mc-status{position:absolute;top:12px;right:12px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;}
-    .gcr-mc-status.open{background:rgba(22,163,74,.88);color:#fff;}
-    .gcr-mc-status.closing{background:rgba(234,179,8,.88);color:#fff;}
-    .gcr-mc-status.opening{background:rgba(59,130,246,.88);color:#fff;}
-    .gcr-mc-status.closed{background:rgba(220,38,38,.78);color:#fff;}
-    .gcr-mc-status.music{background:rgba(109,40,217,.78);color:#fff;}
-    .gcr-mc-img-badges{position:absolute;bottom:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap;}
-    .gcr-mc-img-badge{background:rgba(0,0,0,.52);color:#fff;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;backdrop-filter:blur(4px);}
-    .gcr-mc-img-badge.music{background:rgba(109,40,217,.78);}
-    .gcr-mc-img-badge.water{background:rgba(14,165,233,.78);}
-    .gcr-mc-img-badge.outdoor{background:rgba(22,163,74,.72);}
-    .gcr-mc-price{position:absolute;bottom:12px;right:12px;background:rgba(46,155,85,.92);color:#fff;padding:6px 12px;border-radius:999px;font-weight:800;font-size:13px;}
-    .gcr-mc-body{padding:16px 18px 0;}
-    .gcr-mc-name{font-size:17px;font-weight:800;color:#1a2b3c;}
-    .gcr-mc-sub{font-size:13px;color:#5c6b81;margin-top:2px;}
-    .gcr-mc-desc{margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
-    .gcr-mc-rating{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;}
-    .gcr-mc-tag-sections{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
-    .gcr-mc-tag-row{display:flex;flex-direction:column;gap:4px;}
-    .gcr-mc-tag-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#8fa3b1;}
-    .gcr-mc-tag-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
-    .gcr-mc-tag-scroll::-webkit-scrollbar{display:none;}
-    .gcr-mc-chip{background:#f0f4f8;color:#42596c;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0;}
-    .gcr-mc-chip.food{background:#fff7ed;color:#c2410c;}
-    .gcr-mc-chip.drink{background:#fdf4ff;color:#7e22ce;}
-    .gcr-mc-chip.vibe{background:#f0fdf4;color:#15803d;}
-    .gcr-mc-chip.service{background:#f0f9ff;color:#0369a1;}
-    .gcr-mc-info-rows{padding:10px 18px 0;display:flex;flex-direction:column;gap:5px;}
-    .gcr-mc-info-row{font-size:13px;font-weight:600;}
-    .gcr-mc-bottom{padding:12px 18px 16px;}
-    .gcr-mc-addr{font-size:12px;color:#8fa3b1;margin-bottom:8px;}
-    .gcr-mc-actions{display:flex;flex-wrap:wrap;gap:6px;}
   `;
   document.head.appendChild(s);
 })();
@@ -428,6 +388,34 @@ function computeHoursLine(hours) {
   return '';
 }
 
+/* ── Tag categorization for card sections ── */
+const TAG_CAT = {
+  seafood:'food',pizza:'food',bbq:'food',barbecue:'food',mexican:'food',breakfast:'food',
+  brunch:'food',burger:'food',burgers:'food',hamburger:'food',steakhouse:'food',southern:'food',
+  sushi:'food',italian:'food',desserts:'food',ice_cream:'food',coffee:'food',bakery:'food',
+  catering:'food',sandwich:'food',deli:'food',wings:'food',tacos:'food',seafood_restaurant:'food',
+  breakfast_spot:'food',bar_grill:'food',bar_and_grill:'food',casual_dining:'food',
+  beer:'drink',wine:'drink',cocktails:'drink',full_bar:'drink',craft_beer:'drink',
+  happy_hour:'drink',serves_beer:'drink',serves_wine:'drink',serves_cocktails:'drink',bar:'drink',
+  waterfront:'vibe',live_music:'vibe',outdoor_seating:'vibe',family_friendly:'vibe',
+  good_for_groups:'vibe',pet_friendly:'vibe',waterfront_dining:'vibe',rooftop:'vibe',
+  karaoke:'vibe',trivia:'vibe',bingo:'vibe',sports:'vibe',live_entertainment:'vibe',
+  dine_in:'service',takeout:'service',delivery:'service',wheelchair_accessible:'service',
+  reservations:'service',good_for_children:'service',drive_through:'service',curbside_pickup:'service',
+};
+const TAG_EMOJI = {
+  seafood:'🦀',pizza:'🍕',bbq:'🔥',barbecue:'🔥',mexican:'🌮',breakfast:'🍳',brunch:'🥂',
+  burger:'🍔',burgers:'🍔',hamburger:'🍔',steakhouse:'🥩',southern:'🍗',sushi:'🍱',
+  italian:'🍝',desserts:'🍰',ice_cream:'🍦',coffee:'☕',bakery:'🥐',wings:'🍗',tacos:'🌮',
+  beer:'🍺',wine:'🍷',cocktails:'🍹',full_bar:'🥃',craft_beer:'🍻',happy_hour:'🍺',
+  serves_beer:'🍺',serves_wine:'🍷',serves_cocktails:'🍹',bar:'🍸',
+  waterfront:'🌊',live_music:'🎸',outdoor_seating:'🌿',family_friendly:'👨‍👩‍👧',
+  good_for_groups:'👥',pet_friendly:'🐾',waterfront_dining:'🌊',rooftop:'🏙️',
+  karaoke:'🎤',trivia:'🎯',bingo:'🎱',
+  dine_in:'🍽️',takeout:'🥡',delivery:'🛵',wheelchair_accessible:'♿',
+  reservations:'📅',good_for_children:'👶',bar_grill:'🍺',bar_and_grill:'🍺',
+};
+
 /* ── Build one card ── */
 function buildCard(entity) {
   const slug    = entity.slug || entity.subdomain || entity.id || '';
@@ -456,23 +444,44 @@ function buildCard(entity) {
   const hhDesc  = entity.hh_description || '';
   const location = [city, state].filter(Boolean).join(', ');
 
-  // Normalize tags — handle both string tags and {tag, tag_category} objects
+  // Normalize tags
   const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
+  const rawSubtype = (entity.entity_subtype || entity.type || '').toLowerCase();
+  const subtypeKey = rawSubtype.replace(/-/g,'_');
+  const allTagKeys = subtypeKey && !rawTags.includes(subtypeKey) ? [subtypeKey, ...rawTags] : rawTags;
 
   const statusBadge = computeStatus(entity.hours || [], rawTags);
-  const priceRange  = entity.priceRange || entity.price_range || '';
-  const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
-  const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
+  const fullAddr    = [addr, city, state].filter(Boolean).join(', ');
 
-  const subtypeKey2 = (entity.entity_subtype || entity.type || '').toLowerCase().replace(/[\s\-]+/g, '_');
-  const tagsWithSubtype = subtypeKey2 && !rawTags.includes(subtypeKey2)
-    ? [subtypeKey2, ...rawTags]
-    : rawTags;
-  const displayTags = tagsWithSubtype.slice(0, 5);
-  const chipLinks = displayTags.map(tag => {
-    const dest = tagToPage(tag);
-    return `<a href="${dest}?tag=${encodeURIComponent(tag)}" class="gcr-chip" onclick="event.stopPropagation()">${tagLabel(tag)}</a>`;
-  }).join('');
+  // Categorize tags into sections
+  const sections = { food:[], drink:[], vibe:[], service:[] };
+  allTagKeys.forEach(tag => {
+    const cat = TAG_CAT[tag];
+    if (cat && sections[cat] && sections[cat].length < 6) {
+      const emoji = TAG_EMOJI[tag] || '';
+      const label = tag.replace(/_/g,' ').replace(/\b\w/g,l=>l.toUpperCase());
+      sections[cat].push(`<span class="gcr-chip ${cat}">${emoji ? emoji+' ':''  }${label}</span>`);
+    }
+  });
+  // Boolean fields → extra chips
+  if (entity.waterfront     && !sections.vibe.some(c=>c.includes('Waterfront')))    sections.vibe.push('<span class="gcr-chip vibe">🌊 Waterfront</span>');
+  if (entity.live_music      && !sections.vibe.some(c=>c.includes('Live Music')))    sections.vibe.push('<span class="gcr-chip vibe">🎸 Live Music</span>');
+  if (entity.outdoor_seating && !sections.vibe.some(c=>c.includes('Outdoor')))      sections.vibe.push('<span class="gcr-chip vibe">🌿 Outdoor Seating</span>');
+  if (entity.delivery        && !sections.service.some(c=>c.includes('Delivery')))  sections.service.push('<span class="gcr-chip service">🛵 Delivery</span>');
+  if (entity.takeout         && !sections.service.some(c=>c.includes('Takeout')))   sections.service.push('<span class="gcr-chip service">🥡 Takeout</span>');
+  if (entity.dine_in         && !sections.service.some(c=>c.includes('Dine')))      sections.service.push('<span class="gcr-chip service">🍽️ Dine-in</span>');
+  if (entity.wheelchair_accessible && !sections.service.some(c=>c.includes('Accessible'))) sections.service.push('<span class="gcr-chip service">♿ Accessible</span>');
+  if (entity.good_for_children && !sections.service.some(c=>c.includes('Children'))) sections.service.push('<span class="gcr-chip service">👶 Kid Friendly</span>');
+
+  const SECTION_LABELS = { food:'Food', drink:'Drinks', vibe:'Vibe & Amenities', service:'Service' };
+  const hasAnySections = Object.values(sections).some(a => a.length > 0);
+  const tagSectionsHtml = hasAnySections
+    ? `<div class="gcr-tag-sections">${Object.entries(sections).filter(([,chips])=>chips.length>0).map(([cat,chips])=>`
+        <div class="gcr-tag-row">
+          <div class="gcr-tag-row-label">${SECTION_LABELS[cat]}</div>
+          <div class="gcr-tag-scroll">${chips.join('')}</div>
+        </div>`).join('')}</div>`
+    : (allTagKeys.length ? `<div class="gcr-tag-sections"><div class="gcr-tag-row"><div class="gcr-tag-scroll">${allTagKeys.slice(0,6).map(t=>`<span class="gcr-chip">${tagLabel(t)}</span>`).join('')}</div></div></div>` : '');
 
   const ratingBlock = rating ? `
     <div class="gcr-card-rating">
@@ -481,7 +490,7 @@ function buildCard(entity) {
       ${reviews ? `<span style="color:#8fa3b1">(${reviews})</span>` : ''}
     </div>` : '';
 
-  // Detect activity type — must match profile.html redirect list exactly
+  // Activity detection
   const ACTIVITY_SUBTYPES = new Set([
     'parasailing','boat-rentals','boat_rental','boat_rentals','charter-fishing','fishing_charter',
     'dolphin-cruises-tours','dolphin_cruise','dolphin_cruises_tours','jet-ski-rentals-tours',
@@ -489,125 +498,112 @@ function buildCard(entity) {
     'banana-boat-rides','banana_boat','helicopter-airplane-tours','sunset-cruises-tours',
     'boat-tours','boat_tours','watersports','snorkeling','paddleboard','kayak_rental','fishing-charters'
   ]);
-  const rawSubtype = (entity.entity_subtype || entity.type || '').toLowerCase();
-  const isActivity = ACTIVITY_SUBTYPES.has(rawSubtype) || ACTIVITY_SUBTYPES.has(rawSubtype.replace(/-/g,'_'));
+  const isActivity = ACTIVITY_SUBTYPES.has(rawSubtype) || ACTIVITY_SUBTYPES.has(subtypeKey);
 
+  // Buttons
+  const profileUrl = isActivity
+    ? `activity-profile.html?id=${encodeURIComponent(slug)}`
+    : `profile.html?id=${encodeURIComponent(slug)}`;
   const usedUrls = new Set();
-  const dedupeBtn = (url, label, style) => {
+  const dedupeBtn = (url, cls, label) => {
     if (!url) return '';
     const key = url.replace(/https?:\/\//,'').replace(/\/$/,'').split('?')[0];
     if (usedUrls.has(key)) return '';
     usedUrls.add(key);
-    return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn" style="${style||''}" onclick="event.stopPropagation()">${label}</a>`;
+    return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn ${cls}" onclick="event.stopPropagation()">${label}</a>`;
   };
-  const profileUrl = isActivity
-    ? `activity-profile.html?id=${encodeURIComponent(slug)}`
-    : `profile.html?id=${encodeURIComponent(slug)}`;
-  const viewBtn    = `<a href="${profileUrl}" class="gcr-btn" style="background:#0b7a75;color:#fff;border-color:#0b7a75;" onclick="event.stopPropagation()">View Profile</a>`;
-  const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ View Menu</a>`;
+  const viewBtn    = `<a href="${profileUrl}" class="gcr-btn primary" onclick="event.stopPropagation()">View Profile</a>`;
+  const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ Menu</a>`;
   const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
-  const dirBtn     = dedupeBtn(dir,         '📍 Directions','');
-  const bookBtn    = dedupeBtn(bookingUrl,  '📅 Book Now',  'background:#0ea5e9;color:#fff;border-color:#0ea5e9;');
-  const reserveBtn = dedupeBtn(reservationUrl, '🍽️ Reserve',   'background:#22c55e;color:#fff;border-color:#22c55e;');
-  const orderBtn   = dedupeBtn(orderUrl,       '🛵 Order',      'background:#f59e0b;color:#fff;border-color:#f59e0b;');
+  const dirBtn     = dedupeBtn(dir, '', '📍 Directions');
+  const bookBtn    = dedupeBtn(bookingUrl, '', '📅 Book Now');
+  const reserveBtn = dedupeBtn(reservationUrl, '', '🍽️ Reserve');
+  const orderBtn   = dedupeBtn(orderUrl, '', '🛵 Order');
 
-  // Happy Hour expand button + panel (only if hh_days exists)
+  // HH panel
   const hhPanelId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
   const hhBtn = hhDays
-    ? `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
+    ? `<button class="gcr-btn hh" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
     : '';
   const hhPanel = hhDays ? `
-    <div id="${hhPanelId}" style="display:none;grid-column:1/-1;border-top:1px solid #fde68a;background:#fffbeb;padding:14px 18px;">
-      <div style="font-weight:800;font-size:14px;color:#92400e;margin-bottom:6px;">🍺 Happy Hour</div>
-      <div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:8px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
-      ${entity.hh_description ? `<div style="margin-bottom:10px;font-size:13px;color:#92400e;line-height:1.5;">${esc(entity.hh_description)}</div>` : ''}
-      <div id="${hhPanelId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
+    <div id="${hhPanelId}" class="gcr-hh-panel">
+      <div class="gcr-hh-header">🍺 Happy Hour</div>
+      <div class="gcr-hh-time">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
+      ${entity.hh_description ? `<div class="gcr-hh-desc">${esc(entity.hh_description)}</div>` : ''}
+      <div id="${hhPanelId}-items">Loading items...</div>
     </div>` : '';
 
-  // About — 3 lines, no fallback
-  const aboutBlock = desc
-    ? `<div style="margin-top:8px;font-size:13px;color:#5c6b81;line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">${esc(desc)}</div>`
-    : '';
-
-  // Hours — only if data exists
-  const fullAddr  = [addr, city, state].filter(Boolean).join(', ');
-  const hoursInfo = computeHoursLine(entity.hours || []);
-  const hoursBlock = hoursInfo
-    ? `<div style="margin-top:6px;font-size:13px;color:#42596c;font-weight:600;">🕐 ${hoursInfo}</div>`
-    : '';
-
-  // Happy hour — only if data exists
-  const hhBlock = hhDays
-    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
-    : '';
-
-  // Activity info block — replaces hours/hh for activity types
+  // Activity info
   const pFrom = entity.price_from;
   const pUnit = entity.price_unit || '';
-  const priceLabel = pFrom === 0 || pFrom === '0'
-    ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">✓ Free</div>`
-    : pFrom != null
-      ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">From $${pFrom}${pUnit ? '/'+pUnit : ''}</div>`
-      : '';
-  const activityBlock = isActivity ? [
-    entity.duration_text   ? `<div style="margin-top:6px;font-size:13px;color:#0b6475;font-weight:700;">⏱ ${esc(entity.duration_text)}</div>` : '',
-    entity.capacity_max    ? `<div style="margin-top:4px;font-size:13px;color:#42596c;font-weight:600;">👥 Up to ${entity.capacity_max} people</div>` : '',
-    entity.min_age         ? `<div style="margin-top:4px;font-size:13px;color:#42596c;">Ages ${entity.min_age}+</div>` : '',
-    priceLabel,
+  const activityInfo = isActivity ? [
+    entity.duration_text ? `<div style="margin-top:6px;font-size:13px;color:#0b6475;font-weight:700;">⏱ ${esc(entity.duration_text)}</div>` : '',
+    entity.capacity_max  ? `<div style="margin-top:4px;font-size:13px;color:#42596c;font-weight:600;">👥 Up to ${entity.capacity_max} people</div>` : '',
+    pFrom != null        ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">${pFrom===0||pFrom==='0'?'✓ Free':'From $'+pFrom+(pUnit?'/'+pUnit:'')}</div>` : '',
   ].join('') : '';
-  // For non-activity types with a price (public spots, services, etc.)
-  const priceFromBlock = !isActivity && priceLabel ? priceLabel : '';
 
-  // Live music today — check actual events
+  // Live music
   const todayStr2  = new Date().toISOString().split('T')[0];
   const todayName2 = new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
   const todayMusic = (window.GCR && GCR.events || []).filter(e => {
-    const matchEntity = (e.entity_slug||e.slug||e.entity_id) === (slug||entity.id);
-    if (!matchEntity) return false;
-    const isToday = e.event_date === todayStr2;
-    const isRecurringToday = e.recurring && (e.day_of_week||'').toLowerCase() === todayName2;
-    if (!isToday && !isRecurringToday) return false;
-    const t = (e.event_type||'').toLowerCase();
-    const n = (e.event_name||'').toLowerCase();
+    if ((e.entity_slug||e.slug||e.entity_id) !== (slug||entity.id)) return false;
+    if (e.event_date !== todayStr2 && !(e.recurring && (e.day_of_week||'').toLowerCase()===todayName2)) return false;
+    const t=(e.event_type||'').toLowerCase(), n=(e.event_name||'').toLowerCase();
     return t.includes('live')||t.includes('music')||t.includes('dj')||n.includes('live')||n.includes('dj');
   });
-  const hasLiveMusic = rawTags.some(t => t.includes('live_music') || t.includes('live music')) || todayMusic.length > 0;
-  const musicBlock = todayMusic.length
-    ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:700;">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
-    : (hasLiveMusic ? `<div style="margin-top:6px;font-size:13px;color:#7c3aed;font-weight:600;">🎸 Live Music</div>` : '');
+  const hasLiveMusic = rawTags.some(t=>t.includes('live_music')||t.includes('live music')) || entity.live_music || todayMusic.length>0;
 
-  // Cache entity for save button
+  // Info rows
+  const hoursInfo = computeHoursLine(entity.hours || []);
+  const infoRows = [
+    hoursInfo ? `<div class="gcr-info-row gcr-hours">🕐 ${hoursInfo}</div>` : '',
+    hhDays    ? `<div class="gcr-info-row gcr-hh">🍺 Happy Hour ${esc(hhDays)}${hhStart?' · '+esc(hhStart):''}${hhEnd?'–'+esc(hhEnd):''}</div>` : '',
+    todayMusic.length ? `<div class="gcr-info-row gcr-music">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
+      : hasLiveMusic ? `<div class="gcr-info-row gcr-music">🎸 Live Music</div>` : '',
+  ].filter(Boolean).join('');
+
+  // Image badges
+  const imgBadges = [
+    hasLiveMusic ? '<span class="gcr-img-badge music">🎸 Live Music</span>' : '',
+    (entity.waterfront||rawTags.includes('waterfront')) ? '<span class="gcr-img-badge water">🌊 Waterfront</span>' : '',
+    (entity.outdoor_seating||rawTags.includes('outdoor_seating')) ? '<span class="gcr-img-badge outdoor">🌿 Outdoor</span>' : '',
+  ].filter(Boolean).join('');
+
+  const priceRange = entity.priceRange || entity.price_range || '';
+
   if (window.GCRSaves) window.GCRSaves.cacheEntity(entity);
   const saveBtn = window.GCRSaves ? window.GCRSaves.saveBtnHtml(slug) : '';
 
   return `
-    <a href="profile.html?id=${encodeURIComponent(slug)}"
+    <a href="${profileUrl}"
        style="text-decoration:none;color:inherit;"
        data-slug="${slug}"
        data-tags="${rawTags.join(',').toLowerCase()}"
-       data-subtype="${(entity.entity_subtype || entity.type || '').toLowerCase()}"
-       data-hh="${entity.hh_days ? '1' : '0'}"
+       data-subtype="${rawSubtype}"
+       data-hh="${hhDays ? '1' : '0'}"
        data-live="${hasLiveMusic ? '1' : '0'}">
       <div class="gcr-card">
-        <div class="gcr-card-img" style="background-image:url('${hero}');position:relative;">
+        <div class="gcr-card-img" style="background-image:url('${hero}')">
           <img src="${hero}" alt="" loading="lazy" style="display:none;position:absolute;width:0;height:0;"
                onerror="var p=this.parentElement;p.style.backgroundImage='url(${fallback})';this.remove();">
           <div class="gcr-card-badge">${icon} ${subtype}</div>
           ${statusBadge}
           ${saveBtn}
-          ${priceDisplay ? `<div style="position:absolute;right:14px;bottom:14px;padding:6px 12px;border-radius:999px;background:rgba(46,155,85,.92);color:#fff;font-weight:800;font-size:13px;">${priceDisplay}</div>` : ''}
+          ${imgBadges ? `<div class="gcr-img-badges">${imgBadges}</div>` : ''}
+          ${priceRange ? `<div class="gcr-price-badge">${priceRange}</div>` : ''}
         </div>
         <div class="gcr-card-body">
           <div class="gcr-card-name">${esc(name)}</div>
           <div class="gcr-card-sub">${esc([sub, location].filter(Boolean).join(' · '))}</div>
-          ${aboutBlock}
+          ${desc ? `<div class="gcr-card-desc">${esc(desc)}</div>` : ''}
           ${ratingBlock}
-          ${chipLinks ? `<div class="gcr-chips">${chipLinks}</div>` : ''}
-          ${isActivity ? activityBlock : hoursBlock + hhBlock + musicBlock + priceFromBlock}
-          <div class="gcr-card-bottom">
-            <div class="gcr-card-addr">${esc(fullAddr || location)}</div>
-            <div class="gcr-card-actions">${isActivity ? (bookBtn || viewBtn) + dirBtn + callBtn : viewBtn + menuBtn + hhBtn + bookBtn + reserveBtn + orderBtn + dirBtn + callBtn}</div>
-          </div>
+          ${tagSectionsHtml}
+          ${isActivity ? activityInfo : ''}
+        </div>
+        ${!isActivity && infoRows ? `<div class="gcr-info-rows">${infoRows}</div>` : ''}
+        <div class="gcr-card-bottom">
+          <div class="gcr-card-addr">${fullAddr||location ? '📍 '+esc(fullAddr||location) : ''}</div>
+          <div class="gcr-card-actions">${isActivity ? (bookBtn||viewBtn)+dirBtn+callBtn : viewBtn+menuBtn+hhBtn+bookBtn+reserveBtn+orderBtn+dirBtn+callBtn}</div>
         </div>
         ${hhPanel}
       </div>
