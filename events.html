@@ -209,6 +209,7 @@
         <div class="panel">
           <h3>Submit an Event</h3>
           <p class="mini-meta" style="font-size:14px;line-height:1.6;margin:0 0 12px">Promote concerts, family nights, bar events, pop-ups, and recurring activities so locals and tourists can find them fast.</p>
+          <button onclick="createNewEvent()" class="cta" style="display:block;width:100%;border:none;cursor:pointer;margin-top:8px;">+ Create New Event</button>
           <a href="#" class="cta">Submit Your Event</a>
         </div>
       </aside>
@@ -275,6 +276,7 @@
         </div>
         <div style="display:flex;gap:10px;">
           <button onclick="saveEventChanges()" style="flex:1;background:#0b7a75;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">💾 Save Changes</button>
+          <button id="deleteEventBtn" onclick="deleteEventConfirm()" style="flex:1;background:#dc2626;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">🗑️ Delete</button>
           <button onclick="closeEventEditor()" style="flex:1;background:#f0f4f8;color:#666;border:1px solid #e2e8f0;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">Cancel</button>
         </div>
       </div>
@@ -363,6 +365,29 @@
     _editingEventIdx = null;
   }
 
+  function createNewEvent() {
+    const newEvent = {
+      id: 'new-' + Date.now(),
+      event_name: '',
+      artist_name: '',
+      event_date: '',
+      start_time: '',
+      description: '',
+      event_type: 'live_music_or_event',
+      day_of_week: ''
+    };
+    allEvents.push(newEvent);
+    _editingEventIdx = allEvents.length - 1;
+    document.getElementById('editEventName').value = '';
+    document.getElementById('editArtistName').value = '';
+    document.getElementById('editEventDate').value = '';
+    document.getElementById('editEventTime').value = '';
+    document.getElementById('editEventDesc').value = '';
+    document.getElementById('editEventType').value = 'live_music_or_event';
+    document.getElementById('editEventDay').value = '';
+    document.getElementById('eventEditorModal').style.display = 'block';
+  }
+
   async function saveEventChanges() {
     if (_editingEventIdx === null) return;
     const ev = allEvents[_editingEventIdx];
@@ -378,26 +403,76 @@
       day_of_week: document.getElementById('editEventDay').value,
     };
 
+    if (!updates.event_name && !updates.artist_name) {
+      alert('Please enter an event name or artist name');
+      return;
+    }
+
     try {
-      const res = await fetch('https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id, {
-        method: 'PUT',
+      const isNew = ev.id.toString().startsWith('new-');
+      const method = isNew ? 'POST' : 'PUT';
+      const url = isNew
+        ? 'https://cybercheck-api-database.vercel.app/api/dashboard/events'
+        : 'https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id;
+
+      const res = await fetch(url, {
+        method: method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(updates)
       });
+
       if (res.ok) {
-        Object.assign(ev, updates);
+        const saved = await res.json();
+        if (isNew && saved.id) {
+          ev.id = saved.id;
+        }
+        Object.assign(ev, updates, saved);
         // Also update GCR.events for calendar sync
         if (window.GCR && window.GCR.events) {
           const gcrEvent = GCR.events.find(e => e.id === ev.id);
-          if (gcrEvent) Object.assign(gcrEvent, updates);
+          if (gcrEvent) Object.assign(gcrEvent, ev);
+          else if (isNew) GCR.events.push(ev);
         }
         closeEventEditor();
         if (currentTab === 'today') renderToday(); else if (currentTab === 'weekly') renderWeekly(); else if (currentTab === 'date') renderDateRange();
-        alert('Event saved!');
+        alert(isNew ? 'Event created!' : 'Event saved!');
       } else {
         const err = await res.json().catch(() => ({}));
         alert('Save failed: ' + (err.error || res.statusText));
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  async function deleteEventConfirm() {
+    if (_editingEventIdx === null) return;
+    const ev = allEvents[_editingEventIdx];
+    if (!ev) return;
+
+    if (!confirm('Delete this event? This cannot be undone.')) return;
+
+    try {
+      const res = await fetch('https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        // Remove from allEvents
+        allEvents.splice(_editingEventIdx, 1);
+        // Remove from GCR.events
+        if (window.GCR && window.GCR.events) {
+          const idx = GCR.events.findIndex(e => e.id === ev.id);
+          if (idx !== -1) GCR.events.splice(idx, 1);
+        }
+        closeEventEditor();
+        if (currentTab === 'today') renderToday(); else if (currentTab === 'weekly') renderWeekly(); else if (currentTab === 'date') renderDateRange();
+        alert('Event deleted!');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert('Delete failed: ' + (err.error || res.statusText));
       }
     } catch (e) {
       alert('Error: ' + e.message);
