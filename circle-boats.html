@@ -676,8 +676,8 @@
         B.sections.push({ id: 'specials', label: 'Specials', icon: '⭐' });
     }
 
-    // Things To Do — pricing
-    if (!B.packages.length && (data.pricing || []).length) {
+    // Pricing — only add as standalone section if no fleet (fleet shows pricing inline)
+    if (!B.packages.length && (data.pricing || []).length && !(data.fleet || []).length) {
       B.packages = data.pricing.map(p => ({
         name: p.package_name, desc: p.description,
         price: p.price_text || (p.price ? '$' + p.price : ''),
@@ -692,10 +692,11 @@
       B._activities = data.activities;
       B.sections.push({ id: 'activities', label: 'Activities', icon: '🎯' });
     }
-    // Fleet
+    // Fleet — store pricing alongside for inline display
     if ((data.fleet || []).length) {
       B._fleet = data.fleet;
-      B.sections.push({ id: 'fleet', label: 'Fleet & Equipment', icon: '⛵' });
+      B._pricing = data.pricing || [];
+      B.sections.push({ id: 'fleet', label: 'Our Boats & Pricing', icon: '⛵' });
     }
     // Add-ons
     if ((data.addons || []).length) {
@@ -1081,19 +1082,47 @@
         break;
 
       case 'fleet':
-        html += `<div class="menu-grid">`;
+        html += `<div style="display:grid;gap:16px;">`;
         (B._fleet || []).forEach(f => {
+          // Match pricing rows to this boat by item_name in package_name, or use sort_order split if all rows are generic
+          const allPricing = B._pricing || [];
+          const nameKey = (f.item_name || '').toLowerCase();
+          let boatPricing = allPricing.filter(p => (p.package_name || '').toLowerCase().includes(nameKey));
+          // Fallback: split pricing evenly across fleet items by sort_order
+          if (!boatPricing.length && allPricing.length) {
+            const idx = (B._fleet || []).indexOf(f);
+            const chunkSize = Math.ceil(allPricing.length / (B._fleet || []).length);
+            boatPricing = allPricing.slice(idx * chunkSize, idx * chunkSize + chunkSize);
+          }
+          const pricingHtml = boatPricing.length ? `
+            <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;">Pricing</div>
+              <div style="display:grid;gap:6px;">
+                ${boatPricing.map(p => `
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:6px 8px;background:#f8fafc;border-radius:6px;">
+                    <div>
+                      <span style="font-weight:600;">${p.package_name || ''}</span>
+                      ${p.time_slot_start && p.time_slot_end ? `<span style="color:var(--muted);margin-left:6px;">${p.time_slot_start}–${p.time_slot_end}</span>` : ''}
+                      ${p.description ? `<div style="color:var(--muted);font-size:12px;margin-top:2px;">${p.description}</div>` : ''}
+                    </div>
+                    <span style="font-weight:800;color:var(--accent);white-space:nowrap;margin-left:12px;">${p.price_text || (p.price ? '$'+p.price : '')}</span>
+                  </div>`).join('')}
+              </div>
+            </div>` : '';
           html += `<div class="item" style="padding:0;overflow:hidden;">
-            ${f.image_url ? `<img src="${f.image_url}" alt="${f.item_name}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display='none'">` : ''}
-            <div style="padding:12px;">
-              <div class="name">${f.item_name}</div>
-              ${f.description ? `<div class="desc">${f.description}</div>` : ''}
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)">
-                ${f.max_capacity_text ? `<span>👥 ${f.max_capacity_text}</span>` : ''}
+            ${f.image_url ? `<img src="${f.image_url}" alt="${f.item_name}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <div style="padding:14px;">
+              <div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">
+                <div class="name" style="font-size:16px;">${f.item_name}</div>
+                ${f.max_capacity_text ? `<span style="font-size:12px;background:var(--chip);border:1px solid var(--border);border-radius:999px;padding:3px 10px;white-space:nowrap;">👥 ${f.max_capacity_text}</span>` : ''}
+              </div>
+              ${f.description ? `<div class="desc" style="margin-top:6px;">${f.description}</div>` : ''}
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;font-size:12px;color:var(--muted)">
                 ${f.weight ? `<span>⚖️ ${f.weight}</span>` : ''}
                 ${f.dimensions ? `<span>📐 ${f.dimensions}</span>` : ''}
                 ${f.condition && f.condition !== 'available' ? `<span>🔧 ${f.condition}</span>` : ''}
               </div>
+              ${pricingHtml}
             </div>
           </div>`;
         });
