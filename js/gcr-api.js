@@ -10,7 +10,7 @@ const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
    Stale-while-revalidate: pages render from cache instantly,
    fresh data fetched in background to update cache for next visit.
    Bump GCR_CACHE_VERSION to force-invalidate everyone's cache. */
-const GCR_CACHE_VERSION = 'v6';
+const GCR_CACHE_VERSION = 'v5';
 const GCR_CACHE_TTL_MS  = 10 * 60 * 1000; // 10 minutes — data considered fresh
 
 function _gcrCacheGet(key) {
@@ -127,18 +127,9 @@ const GCR = {
   _dedupeById(arr) {
     const seen = new Set();
     return arr.filter(item => {
-      // Primary: DB id
-      if (item.id && seen.has(item.id)) return false;
-      if (item.id) seen.add(item.id);
-      // Secondary: content key — same artist at same venue on same date+time
-      const ck = [
-        (item.artist_name || item.event_name || '').toLowerCase().trim(),
-        (item.entity_name || item.businessName || item.venue_location || item.entity_id || '').toLowerCase().trim(),
-        item.event_date || item.date || '',
-        item.start_time || '',
-      ].join('|');
-      if (seen.has(ck)) return false;
-      seen.add(ck);
+      const id = item.id;
+      if (!id || seen.has(id)) return !id; // keep items with no id, skip dupe ids
+      seen.add(id);
       return true;
     });
   },

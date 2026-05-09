@@ -605,15 +605,14 @@
 
   function init() {
     const rawEvents = GCR.events || [];
-    // Dedup on exactly what gets displayed: time + name + venue + city
     const seen = new Set();
     allEvents = rawEvents.filter(e => {
-      const vp = (e.venue_location || '').split(',');
       const key = [
-        (e.start_time || '').trim(),
-        (e.event_name || e.artist_name || '').toLowerCase().trim(),
-        (e.entity_name || e.businessName || vp[0] || '').toLowerCase().trim(),
-        (e.entity_city || e.city || vp.slice(1).join(',') || '').toLowerCase().trim(),
+        (e.artist_name || e.event_name || '').toLowerCase().trim(),
+        (e.entity_name || e.businessName || e.venue_location || e.entity_id || '').toLowerCase().trim(),
+        e.event_date || e.date || '',
+        e.start_time || '',
+        (e.day_of_week||'').toLowerCase()
       ].join('|');
       if (seen.has(key)) return false;
       seen.add(key);
@@ -622,7 +621,7 @@
     const now = new Date();
     const todayStr  = now.toISOString().split('T')[0];
     const todayName = DAYS[now.getDay()];
-    const todayCount = allEvents.filter(e => e.event_date===todayStr || (e.recurring&&(e.day_of_week||'').toLowerCase()===todayName)).length;
+    const todayCount = allEvents.filter(e => e.event_date===todayStr || ((e.recurring||(e.day_of_week||'').trim())&&(e.day_of_week||'').toLowerCase()===todayName)).length;
     const musicCount = allEvents.filter(e => (e.event_type||'').includes('live')||(e.event_type||'').includes('music')).length;
     const livebox = document.querySelector('.livebox');
     if (livebox) {
@@ -648,7 +647,7 @@
 
     // Featured Tonight: events happening today, sorted soonest first
     const featured = allEvents.filter(e =>
-      e.event_date === today || (e.recurring && (e.day_of_week||'').toLowerCase() === todayName)
+      e.event_date === today || ((e.recurring||(e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName)
     ).slice(0, 3);
 
     const featuredPanel = document.getElementById('featuredTonightPanel');
