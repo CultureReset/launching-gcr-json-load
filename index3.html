@@ -902,7 +902,7 @@
       <div style="font-size:clamp(1.5rem,5vw,2.6rem);font-weight:900;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 12px rgba(0,0,0,.35);line-height:1.1;">
         Search It &nbsp;·&nbsp; Swipe It &nbsp;·&nbsp; Plan It
       </div>
-      <button onclick="openTripSwipe()"
+      <button id="trip-swipe-btn" onclick="openTripSwipe()"
          style="display:inline-flex;align-items:center;gap:10px;margin-top:18px;
                 background:linear-gradient(135deg,#7c3aed,#a855f7);
                 color:#fff;font-size:clamp(1rem,3vw,1.25rem);font-weight:900;
@@ -1947,15 +1947,24 @@ document.addEventListener('gcr:loaded', function() {
   var _btnCfg = null;
   var GCR_API = 'https://cybercheck-api-database.vercel.app';
 
-  async function openTripSwipe() {
-    if (!_btnCfg) {
-      try {
-        var r = await fetch(GCR_API + '/api/admin/trip-swipe-button');
-        _btnCfg = await r.json();
-      } catch(e) {
-        _btnCfg = { type: 'iframe', url: 'https://gcr-trip-swipe.vercel.app/swipe/all' };
-      }
+  async function _loadBtnCfg() {
+    if (_btnCfg) return _btnCfg;
+    try {
+      var r = await fetch(GCR_API + '/api/admin/trip-swipe-button');
+      _btnCfg = await r.json();
+    } catch(e) {
+      _btnCfg = { type: 'iframe', url: 'https://gcr-trip-swipe.vercel.app/swipe/all' };
     }
+    var btn = document.getElementById('trip-swipe-btn');
+    if (btn && _btnCfg.label) btn.textContent = _btnCfg.label;
+    return _btnCfg;
+  }
+
+  // Load button label on page load (non-blocking)
+  _loadBtnCfg();
+
+  async function openTripSwipe() {
+    if (!_btnCfg) await _loadBtnCfg();
     var modal = document.getElementById('tripswipe-modal');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
