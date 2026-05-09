@@ -387,6 +387,11 @@
       });
       if (res.ok) {
         Object.assign(ev, updates);
+        // Also update GCR.events for calendar sync
+        if (window.GCR && window.GCR.events) {
+          const gcrEvent = GCR.events.find(e => e.id === ev.id);
+          if (gcrEvent) Object.assign(gcrEvent, updates);
+        }
         closeEventEditor();
         if (currentTab === 'today') renderToday(); else if (currentTab === 'weekly') renderWeekly(); else if (currentTab === 'date') renderDateRange();
         alert('Event saved!');
