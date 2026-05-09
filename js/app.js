@@ -165,9 +165,13 @@ function _gcrInjectCal() {
     #gcrCalModal .cal-filters{padding:10px 20px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
     #gcrCalModal .cal-toggle{background:#f3f4f6;color:#374151;border:1.5px solid #d1d5db;cursor:pointer;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:700;transition:.15s;}
     #gcrCalModal .cal-toggle.on{background:#0b7a75;color:#fff;border-color:#0b7a75;}
-    #gcrCalModal .cal-body{display:flex;flex-wrap:wrap;min-height:360px;}
-    #gcrCalModal .cal-mini{width:268px;min-width:268px;padding:16px;border-right:1px solid #f0f0f0;background:#fafafa;flex-shrink:0;}
-    #gcrCalModal .cal-events{flex:1;min-width:260px;padding:16px;overflow-y:auto;max-height:500px;}
+    #gcrCalModal .cal-body{display:flex;flex-direction:column;min-height:360px;}
+    #gcrCalModal .cal-mini{display:none;position:absolute;z-index:10;background:#fff;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:14px;width:280px;top:100%;left:0;margin-top:6px;}
+    #gcrCalModal .cal-mini.open{display:block;}
+    #gcrCalModal .cal-datepicker-wrap{position:relative;display:inline-block;}
+    #gcrCalModal .cal-datepicker-btn{background:#fff;border:1.5px solid #d1d5db;cursor:pointer;border-radius:10px;padding:7px 16px;font-weight:800;font-size:.95rem;color:#0d2137;display:flex;align-items:center;gap:7px;}
+    #gcrCalModal .cal-datepicker-btn:hover{border-color:#0b7a75;color:#0b7a75;}
+    #gcrCalModal .cal-events{flex:1;padding:16px;overflow-y:auto;max-height:calc(100vh - 280px);}
     #gcrCalModal .cal-day-cell{text-align:center;padding:5px 3px;cursor:pointer;border-radius:7px;font-size:.82rem;transition:.12s;}
     #gcrCalModal .cal-day-cell:hover{background:#e0f2fe;}
     #gcrCalModal .cal-day-sel{background:#0b7a75!important;color:#fff;font-weight:700;}
@@ -175,7 +179,7 @@ function _gcrInjectCal() {
     #gcrCalModal .cal-day-hasdot::after{content:'';display:block;width:5px;height:5px;background:#0b7a75;border-radius:50%;margin:1px auto 0;}
     #gcrCalModal .cal-ev-card{display:flex;gap:12px;padding:12px;border-radius:10px;margin-bottom:9px;}
     #gcrCalModal .cal-closebtn{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;cursor:pointer;border-radius:8px;padding:7px 11px;}
-    @media(max-width:600px){#gcrCalModal .cal-mini{width:100%;min-width:0;border-right:none;border-bottom:1px solid #f0f0f0;} #gcrCalModal .cal-events{max-height:360px;}}
+    @media(max-width:600px){#gcrCalModal .cal-events{max-height:calc(100vh - 260px);}}
     </style>`;
 
   const html = `${style}
@@ -191,17 +195,21 @@ function _gcrInjectCal() {
       </div>
       <div class="cal-daterow">
         <button class="cal-navbtn" onclick="gcrCalNav(-1)">◀ Prev</button>
-        <div id="gcrCalLabel" class="cal-datelabel"></div>
+        <div class="cal-datepicker-wrap">
+          <button class="cal-datepicker-btn" onclick="gcrCalTogglePicker()" id="gcrCalPickerBtn">
+            📅 <span id="gcrCalLabel"></span> ▾
+          </button>
+          <div class="cal-mini" id="gcrMiniCal"></div>
+        </div>
         <button class="cal-navbtn" onclick="gcrCalNav(1)">Next ▶</button>
-      </div>
-      <div class="cal-filters">
-        <span style="font-size:.7rem;font-weight:700;color:#888;">Show:</span>
-        <button class="cal-toggle on" data-t="events"     onclick="gcrCalToggle(this)">🎉 Events</button>
-        <button class="cal-toggle on" data-t="happy_hour" onclick="gcrCalToggle(this)">🍻 Happy Hours</button>
-        <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎸 Live Music</button>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span style="font-size:.7rem;font-weight:700;color:#888;">Show:</span>
+          <button class="cal-toggle on" data-t="events"     onclick="gcrCalToggle(this)">🎉 Events</button>
+          <button class="cal-toggle on" data-t="happy_hour" onclick="gcrCalToggle(this)">🍻 Happy Hours</button>
+          <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎸 Live Music</button>
+        </div>
       </div>
       <div class="cal-body">
-        <div class="cal-mini" id="gcrMiniCal"></div>
         <div class="cal-events" id="gcrCalEvents"></div>
       </div>
     </div>
@@ -230,6 +238,20 @@ window.closeCalendarModal = function() {
   document.body.style.overflow = '';
 };
 
+window.gcrCalTogglePicker = function() {
+  const mini = document.getElementById('gcrMiniCal');
+  if (mini) mini.classList.toggle('open');
+};
+
+// Close date picker when clicking outside
+document.addEventListener('click', function(e) {
+  const mini = document.getElementById('gcrMiniCal');
+  const btn = document.getElementById('gcrCalPickerBtn');
+  if (mini && mini.classList.contains('open') && !mini.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+    mini.classList.remove('open');
+  }
+});
+
 window.gcrCalNav = function(dir) {
   _gcrCalDate = new Date(_gcrCalDate);
   _gcrCalDate.setDate(_gcrCalDate.getDate() + dir);
@@ -246,6 +268,9 @@ window.gcrCalToggle = function(btn) {
 window.gcrCalSelectDay = function(ds) {
   _gcrCalDate = new Date(ds + 'T12:00:00');
   _gcrCalRender();
+  // Close the date picker after selecting
+  const mini = document.getElementById('gcrMiniCal');
+  if (mini) mini.classList.remove('open');
 };
 
 window.gcrCalMiniNav = function(dir) {
