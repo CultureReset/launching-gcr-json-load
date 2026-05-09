@@ -516,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span style="font-size:1.4rem">${b.emoji || '🏖️'}</span>
           <div>
             <div style="font-weight:600;font-size:.88rem">${b.name}</div>
-            <div style="font-size:.75rem;color:#888">${b.tagline || b.type || ''}</div>
+            <div style="font-size:.75rem;color:#888">${b.subtitle || b.tagline || b.type || ''}</div>
           </div>
         </a>`).join('');
       heroDropdown.classList.add('open');
@@ -602,11 +602,11 @@ function renderBizCard(biz, context) {
 
   const showBookBtn  = biz.booking_required && (isBookingCtx || isMixed);
   const showMenuBtn  = biz.links?.menu && (isRestaurantCtx || isMixed) && !biz.booking_required;
-  const showHHTag    = (biz.happy_hour || biz.happyHour) && (isHappyHourCtx || isMixed);
+  const showHHTag    = (biz.hh_days || biz.happyHour) && (isHappyHourCtx || isMixed);
   const showCatTag   = isMixed;
-  const hhText       = biz.happy_hour || biz.happyHour || '';
+  const hhText       = biz.hh_days || biz.happyHour || '';
   const slug         = biz.slug || biz.site_id || biz.id;
-  const priceRange   = biz.price_range || biz.priceRange || '';
+  const priceRange   = biz.price_from || biz.price_range || biz.priceRange || '';
   const category     = biz.type || biz.category || '';
 
   // Use specific card classes for different contexts
@@ -746,10 +746,10 @@ function renderHappyHourPage() {
     grid.innerHTML = businesses.map(biz => {
       const slug    = biz.slug || biz.site_id || biz.id;
       const cardId  = 'hh-' + slug;
-      const hhText  = biz.happy_hour || biz.happyHour || '';
+      const hhText  = biz.hh_days || biz.happyHour || '';
       const tags    = (biz.tags || []).join(' ');
       const hhSpecials = GCR.specials.filter(s =>
-        (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
+        (s.site_id === biz.site_id || s.site_id === biz.id) && s.is_active !== false
       );
       const detailsHtml = hhSpecials.length
         ? hhSpecials.map(s => `
@@ -795,7 +795,7 @@ function renderHappyHourPage() {
   }
 
   function hhStatus(biz) {
-    const parsed = parseHHTime(biz.happy_hour || biz.happyHour || '');
+    const parsed = parseHHTime(biz.hh_days || biz.happyHour || '');
     const now = new Date();
     const cur = now.getHours() * 60 + now.getMinutes();
     if (!parsed) return 'later';
@@ -806,10 +806,10 @@ function renderHappyHourPage() {
 
   function hhFullCard(biz) {
     const slug = biz.slug || biz.site_id || biz.id;
-    const hhText = biz.happy_hour || biz.happyHour || '';
+    const hhText = biz.hh_days || biz.happyHour || '';
     const photo = biz.photo || biz.cover_photo || '';
     const hhSpecials = GCR.specials.filter(s =>
-      (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
+      (s.site_id === biz.site_id || s.site_id === biz.id) && s.is_active !== false
     );
     const dealsHtml = hhSpecials.length
       ? hhSpecials.slice(0,3).map(s => `<div class="deal">${escGcr(s.name||'Special')}${s.discount ? ' — '+escGcr(s.discount) : ''}</div>`).join('')
@@ -844,14 +844,14 @@ function renderHappyHourPage() {
 
   function hhCompactCard(biz) {
     const slug = biz.slug || biz.site_id || biz.id;
-    const hhText = biz.happy_hour || biz.happyHour || '';
+    const hhText = biz.hh_days || biz.happyHour || '';
     const parsed = parseHHTime(hhText);
     const cur = new Date().getHours()*60 + new Date().getMinutes();
     const minsUntil = parsed && parsed.startMin > cur ? parsed.startMin - cur : null;
     const countdown = minsUntil
       ? `<span class="countdown">In ${minsUntil>=60?Math.floor(minsUntil/60)+'h ':''}${minsUntil%60}m</span>` : '';
     const hhSpecials = GCR.specials.filter(s =>
-      (s.site_id === biz.site_id || s.site_id === biz.id) && s.active !== false
+      (s.site_id === biz.site_id || s.site_id === biz.id) && s.is_active !== false
     );
     const deal = hhSpecials[0]
       ? escGcr(hhSpecials[0].name+(hhSpecials[0].discount?' — '+hhSpecials[0].discount:''))
@@ -1068,8 +1068,8 @@ function renderDealsPage() {
   if (!grid || typeof GCR === 'undefined' || grid.dataset.category !== 'deals') return;
 
   // Get both happy hour and regular specials
-  const happyHours = (GCR.specials || []).filter(s => s.active !== false && (s.type === 'happy_hour' || (s.name || '').toLowerCase().includes('happy hour')));
-  const specials = (GCR.specials || []).filter(s => s.active !== false && (!s.type || s.type !== 'happy_hour'));
+  const happyHours = (GCR.specials || []).filter(s => s.is_active !== false && (s.type === 'happy_hour' || (s.name || '').toLowerCase().includes('happy hour')));
+  const specials = (GCR.specials || []).filter(s => s.is_active !== false && (!s.type || s.type !== 'happy_hour'));
   const allDeals = [...happyHours, ...specials];
 
   if (!allDeals.length) {
@@ -1595,7 +1595,7 @@ function _renderBusinessProfile(biz) {
       quickGrid.style.display = 'none'; /* hide for rentals/tours/activities */
     } else {
       const hh = document.getElementById('profileHHour');
-      if (hh) hh.textContent = biz.happy_hour || biz.happyHour || '—';
+      if (hh) hh.textContent = biz.hh_days || biz.happyHour || '—';
       const kf = document.getElementById('profileKids');
       if (kf) kf.textContent = (biz.kids_friendly || biz.kidsFriendly) ? '✅ Yes' : '✗ No';
       const od = document.getElementById('profileOutdoor');

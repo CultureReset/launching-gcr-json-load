@@ -433,7 +433,7 @@ function buildCard(entity) {
   const slug    = entity.slug || entity.subdomain || entity.id || '';
   const name    = entity.name || 'Business';
   const icon    = entity.icon || entity.emoji || '📍';
-  const sub     = entity.subtitle || entity.tagline || '';
+  const sub     = entity.subtitle || '';
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
@@ -580,7 +580,7 @@ function buildCard(entity) {
     (entity.outdoor_seating||rawTags.includes('outdoor_seating')) ? '<span class="gcr-img-badge outdoor">🌿 Outdoor</span>' : '',
   ].filter(Boolean).join('');
 
-  const priceRange = entity.priceRange || entity.price_range || '';
+  const priceRange = entity.price_from || entity.price_range || '';
 
   if (window.GCRSaves) window.GCRSaves.cacheEntity(entity);
   const saveBtn = window.GCRSaves ? window.GCRSaves.saveBtnHtml(slug) : '';
@@ -626,7 +626,7 @@ function buildHHCard(entity) {
   const slug    = entity.slug || entity.subdomain || entity.id || '';
   const name    = entity.name || 'Business';
   const icon    = entity.icon || entity.emoji || '📍';
-  const sub     = entity.subtitle || entity.tagline || '';
+  const sub     = entity.subtitle || '';
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
@@ -651,7 +651,7 @@ function buildHHCard(entity) {
 
   const rawTags = (entity.tags || []).map(t => (typeof t === 'string' ? t : (t.tag || '')).toLowerCase().replace(/[\s\-]+/g, '_')).filter(Boolean);
   const statusBadge = computeStatus(entity.hours || [], rawTags);
-  const priceRange  = entity.priceRange || entity.price_range || '';
+  const priceRange  = entity.price_from || entity.price_range || '';
   const priceTag    = rawTags.find(t => t.startsWith('$') || t.includes('from_'));
   const priceDisplay = priceRange || (priceTag ? priceTag.replace(/_/g,' ') : '');
 
@@ -849,7 +849,7 @@ function buildSpecialsCard(entity) {
   const slug    = entity.slug || entity.subdomain || entity.id || '';
   const name    = entity.name || 'Business';
   const icon    = entity.icon || entity.emoji || '📍';
-  const sub     = entity.subtitle || entity.tagline || '';
+  const sub     = entity.subtitle || '';
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
@@ -956,7 +956,7 @@ function buildHHSpecialsCard(entity) {
   const slug    = entity.slug || entity.subdomain || entity.id || '';
   const name    = entity.name || 'Business';
   const icon    = entity.icon || entity.emoji || '📍';
-  const sub     = entity.subtitle || entity.tagline || '';
+  const sub     = entity.subtitle || '';
   const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
   const city    = entity.city || '';
   const state   = entity.state || '';
@@ -1404,7 +1404,7 @@ function getEntitiesForCategory(businesses, category) {
     if (category === 'happy-hours') return true;
 
     if (category === 'specials') {
-      const specials = (window.GCR && GCR.specials || []).filter(s => s.is_active !== false && s.active !== false);
+      const specials = (window.GCR && GCR.specials || []).filter(s => s.is_active !== false);
       return specials.some(s =>
         (s.entity_slug && s.entity_slug === b.slug) ||
         (s.entity_id && s.entity_id === b.id) ||
@@ -1421,7 +1421,7 @@ function getEntitiesForCategory(businesses, category) {
 
     const hasTags  = (b.tags || []).length > 0;
     const hasImage = !!(b.hero_image_url || b.cover_url || (b.photos && b.photos.length > 0));
-    const hasDesc  = !!(b.description || b.subtitle || b.tagline);
+    const hasDesc  = !!(b.description || b.subtitle);
     const hasPhone = !!b.phone;
     return hasTags || hasImage || hasDesc || hasPhone;
   });
