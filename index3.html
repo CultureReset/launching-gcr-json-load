@@ -1920,25 +1920,72 @@ document.addEventListener('gcr:loaded', function() {
 })();
 </script>
 
-<!-- ── Trip Swipe Modal ── -->
+<!-- ── Trip Swipe Modal (dynamic — config from admin dashboard) ── -->
 <div id="tripswipe-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a1628;">
-  <iframe id="tripswipe-frame"
-    src="about:blank"
-    style="width:100%;height:100%;border:none;"
-    allow="geolocation"></iframe>
+
+  <!-- iframe view -->
+  <iframe id="tripswipe-frame" src="about:blank"
+    style="display:none;width:100%;height:100%;border:none;" allow="geolocation"></iframe>
+
+  <!-- app download view -->
+  <div id="tripswipe-appbox" style="display:none;position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;padding:32px;text-align:center;">
+    <button onclick="closeTripModal()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:22px;width:40px;height:40px;border-radius:50%;cursor:pointer;">✕</button>
+    <div style="font-size:40px;margin-bottom:16px;">💜</div>
+    <div id="ts-app-title" style="font-size:clamp(1.4rem,5vw,2rem);font-weight:900;color:#fff;margin-bottom:10px;">Get Trip Swipe</div>
+    <div id="ts-app-desc" style="font-size:15px;color:rgba(255,255,255,.7);max-width:320px;margin-bottom:32px;line-height:1.5;"></div>
+    <a id="ts-ios-btn" href="#" target="_blank" style="display:none;background:#fff;color:#000;font-weight:700;font-size:15px;padding:14px 28px;border-radius:999px;text-decoration:none;margin-bottom:12px;width:100%;max-width:260px;box-sizing:border-box;">
+      🍎 Download on App Store
+    </a>
+    <a id="ts-android-btn" href="#" target="_blank" style="display:none;background:#4ade80;color:#000;font-weight:700;font-size:15px;padding:14px 28px;border-radius:999px;text-decoration:none;width:100%;max-width:260px;box-sizing:border-box;">
+      ▶ Get it on Google Play
+    </a>
+  </div>
+
 </div>
 
 <script>
-  // !! Replace with your deployed Trip Swipe URL !!
-  var TRIP_SWIPE_URL = 'https://gcr-trip-swipe.vercel.app/swipe/all';
+  var _btnCfg = null;
+  var GCR_API = 'https://cybercheck-api-database.vercel.app';
 
-  function openTripSwipe() {
+  async function openTripSwipe() {
+    if (!_btnCfg) {
+      try {
+        var r = await fetch(GCR_API + '/api/admin/trip-swipe-button');
+        _btnCfg = await r.json();
+      } catch(e) {
+        _btnCfg = { type: 'iframe', url: 'https://gcr-trip-swipe.vercel.app/swipe/all' };
+      }
+    }
     var modal = document.getElementById('tripswipe-modal');
-    var frame = document.getElementById('tripswipe-frame');
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    if (frame.src === 'about:blank') frame.src = TRIP_SWIPE_URL;
-    // Pass auth token if user is already signed in on GCR
+
+    var type = _btnCfg.type || 'iframe';
+
+    if (type === 'link') {
+      closeTripModal();
+      window.open(_btnCfg.url, '_blank');
+      return;
+    }
+
+    if (type === 'app_download') {
+      document.getElementById('tripswipe-frame').style.display = 'none';
+      var box = document.getElementById('tripswipe-appbox');
+      box.style.display = 'flex';
+      document.getElementById('ts-app-title').textContent = _btnCfg.title || 'Get Trip Swipe';
+      document.getElementById('ts-app-desc').textContent = _btnCfg.description || '';
+      var iosBtn = document.getElementById('ts-ios-btn');
+      var andBtn = document.getElementById('ts-android-btn');
+      if (_btnCfg.app_store_url) { iosBtn.href = _btnCfg.app_store_url; iosBtn.style.display = 'block'; }
+      if (_btnCfg.play_store_url) { andBtn.href = _btnCfg.play_store_url; andBtn.style.display = 'block'; }
+      return;
+    }
+
+    // default: iframe
+    document.getElementById('tripswipe-appbox').style.display = 'none';
+    var frame = document.getElementById('tripswipe-frame');
+    frame.style.display = 'block';
+    if (frame.src === 'about:blank') frame.src = _btnCfg.url || 'https://gcr-trip-swipe.vercel.app/swipe/all';
     frame.onload = function() {
       var token = localStorage.getItem('gcr_access_token');
       if (token) {
@@ -1947,11 +1994,13 @@ document.addEventListener('gcr:loaded', function() {
     };
   }
 
+  function closeTripModal() {
+    document.getElementById('tripswipe-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
   window.addEventListener('message', function(e) {
-    if (e.data && e.data.type === 'tripswipe-close') {
-      document.getElementById('tripswipe-modal').style.display = 'none';
-      document.body.style.overflow = '';
-    }
+    if (e.data && e.data.type === 'tripswipe-close') closeTripModal();
   });
 </script>
 </body>
