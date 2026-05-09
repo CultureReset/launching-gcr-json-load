@@ -193,6 +193,55 @@
     .section-btn-arrow { font-size:18px; }
 
     @media (max-width:480px) { .bay { flex-direction:column; gap:10px; } }
+
+    /* ── GCR Plus Premium Styles ─────────────────────────── */
+    :root {
+      --ocean: #0077b6;
+      --ocean-dark: #023e8a;
+      --ocean-light: #90e0ef;
+      --teal: #00b4d8;
+    }
+
+    /* Cover overlay */
+    .cover-overlay { position:absolute; bottom:0; left:0; right:0; padding:60px 22px 18px; background:linear-gradient(transparent, rgba(0,10,25,.82)); color:#fff; z-index:5; pointer-events:none; }
+    .cover-overlay .co-name { font-size:clamp(18px,4.5vw,30px); font-weight:900; letter-spacing:-.02em; margin:0 0 4px; text-shadow:0 2px 8px rgba(0,0,0,.4); }
+    .cover-overlay .co-tag  { font-size:14px; opacity:.88; margin:0; }
+
+    /* GCR Plus badge */
+    .gcr-plus-badge { display:inline-flex; align-items:center; gap:5px; background:linear-gradient(135deg,#7c3aed,#4338ca); color:#fff; padding:4px 12px; border-radius:999px; font-size:11px; font-weight:900; letter-spacing:.6px; text-transform:uppercase; box-shadow:0 2px 8px rgba(124,58,237,.35); }
+
+    /* Premium header highlight */
+    .header { border-top:4px solid #0077b6; }
+
+    /* Feature pills (replace flat badges) */
+    .feature-pill { background:linear-gradient(135deg,#e0f2fe,#bae6fd); color:#0369a1; border:1px solid #7dd3fc; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:5px; }
+
+    /* FAQ Accordion */
+    .faq-item { border:1px solid var(--border); border-radius:12px; margin-bottom:8px; overflow:hidden; background:#fff; }
+    .faq-q { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; font-weight:700; font-size:14px; cursor:pointer; gap:12px; user-select:none; }
+    .faq-q:hover { background:var(--chip); }
+    .faq-arrow { font-size:18px; color:var(--ocean); transition:transform .22s; flex-shrink:0; }
+    .faq-item.open .faq-arrow { transform:rotate(180deg); }
+    .faq-a { display:none; padding:12px 16px 14px; font-size:13px; color:var(--muted); line-height:1.75; white-space:pre-line; border-top:1px solid var(--border); }
+    .faq-item.open .faq-a { display:block; }
+
+    /* Inline Photo Strip */
+    .photo-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; border-radius:10px; overflow:hidden; }
+    .photo-strip img { width:100%; aspect-ratio:4/3; object-fit:cover; cursor:pointer; transition:opacity .18s; }
+    .photo-strip img:hover { opacity:.85; }
+    @media(max-width:500px) { .photo-strip { grid-template-columns:repeat(2,1fr); } }
+
+    /* Booking CTA card */
+    .book-cta-card { background:linear-gradient(135deg,var(--ocean),var(--ocean-dark)); color:#fff; border-radius:16px; padding:20px; text-align:center; margin:16px 0; }
+    .book-cta-card h3 { margin:0 0 6px; font-size:20px; font-weight:900; }
+    .book-cta-card p { margin:0 0 14px; font-size:13px; opacity:.9; line-height:1.5; }
+    .book-btn-white { display:inline-block; background:#fff; color:var(--ocean-dark); padding:12px 28px; border-radius:999px; font-weight:900; font-size:15px; text-decoration:none; box-shadow:0 4px 14px rgba(0,0,0,.2); transition:transform .15s; }
+    .book-btn-white:hover { transform:translateY(-1px); }
+
+    /* Launch locations */
+    .launch-loc { background:var(--chip); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:8px; }
+    .launch-loc .loc-name { font-weight:800; font-size:15px; color:var(--ocean); margin-bottom:4px; }
+    .launch-loc .loc-addr { font-size:13px; color:var(--muted); line-height:1.5; }
   </style>
 </head>
 <body>
@@ -236,6 +285,7 @@
     <button class="cover-arrow cover-prev" id="js-prev">&#8249;</button>
     <button class="cover-arrow cover-next" id="js-next">&#8250;</button>
     <div class="cover-dots" id="js-dots"></div>
+    <div class="cover-overlay" id="js-cover-overlay"></div>
   </div>
 
   <div class="popup-overlay" id="gallery-popup">
@@ -306,6 +356,7 @@
   // ── Map entity API → BUSINESS_DATA ────────────────────────
   const B = mapEntityToBusinessData(entityData);
   window.BUSINESS_DATA = B;
+
 
   function mapEntityToBusinessData(data) {
     const e = data.entity;
@@ -424,15 +475,21 @@
           if (groups.length <= 1) {
             // Single group — one tab, label from section_label
             const g = groups[0];
-            const mealId = key;
-            B.foodMenu.push({ category: g?.title || label, meal: mealId, note: g?.note_text, isDrink, items: (g?.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text })) });
-            B.sections.push({ id: 'meal-' + mealId, mealId, label, icon: renderIcon });
+            const items = (g?.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text }));
+            if (items.length) {  // skip if section has no items (dedicated tables handle it)
+              const mealId = key;
+              B.foodMenu.push({ category: g?.title || label, meal: mealId, note: g?.note_text, isDrink, items });
+              B.sections.push({ id: 'meal-' + mealId, mealId, label, icon: renderIcon });
+            }
           } else {
             // Multiple groups — each group gets its own nav tab
             groups.forEach(g => {
-              const groupId = key + '-' + (g.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              B.foodMenu.push({ category: g.title || label, meal: groupId, note: g.note_text, isDrink, items: (g.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text })) });
-              B.sections.push({ id: 'meal-' + groupId, mealId: groupId, label: g.title || label, icon: renderIcon });
+              const items = (g.items || []).map(i => ({ name: i.item_name, desc: i.item_description, price: i.price_text }));
+              if (items.length) {
+                const groupId = key + '-' + (g.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                B.foodMenu.push({ category: g.title || label, meal: groupId, note: g.note_text, isDrink, items });
+                B.sections.push({ id: 'meal-' + groupId, mealId: groupId, label: g.title || label, icon: renderIcon });
+              }
             });
           }
         }
@@ -516,10 +573,15 @@
         B.sections.unshift({ id: 'highlights', label: 'About', icon: 'ℹ️' });
     }
 
-    // Photos from entity_photos
-    if (!B.gallery.length && (data.photos || []).length) {
-      B.gallery = data.photos.map(p => ({ url: p.image_url, caption: p.caption }));
-      B.coverImages = B.coverImages.concat(B.gallery.slice(0, 3).map(g => g.url));
+    // Photos — merge gallery section photos with full entity_photos table (deduplicated)
+    if ((data.photos || []).length) {
+      const existingUrls = new Set(B.gallery.map(g => g.url));
+      const extra = data.photos
+        .filter(p => p.image_url && !existingUrls.has(p.image_url))
+        .map(p => ({ url: p.image_url, caption: p.caption }));
+      B.gallery = B.gallery.concat(extra);
+      if (!B.coverImages.length || B.coverImages.length < 4)
+        B.coverImages = B.coverImages.concat(extra.slice(0, 3).map(g => g.url));
       if (!B.sections.find(s => s.id === 'gallery'))
         B.sections.push({ id: 'gallery', label: 'Photos', icon: '📸' });
     }
@@ -718,6 +780,15 @@
   document.getElementById('js-emoji').textContent = B.emoji;
   document.getElementById('js-name').textContent  = B.name;
 
+  // GCR Plus badge next to name
+  document.getElementById('js-name').insertAdjacentHTML('afterend', `<span class="gcr-plus-badge" style="margin-left:10px;vertical-align:middle;">⭐ GCR PLUS</span>`);
+
+  // Cover overlay
+  const coverOverlay = document.getElementById('js-cover-overlay');
+  if (coverOverlay && (slides.length > 0)) {
+    coverOverlay.innerHTML = `<div class="co-name">${B.emoji} ${B.name}</div>${B.tagline ? `<div class="co-tag">${B.tagline}</div>` : ''}`;
+  }
+
   const meta = document.getElementById('js-meta');
   if (B.tagline)      meta.innerHTML += `<span class="meta-item"><em>${B.tagline}</em></span>`;
   if (B.city)         meta.innerHTML += `<span class="meta-item">📍 ${B.city}, ${B.state}</span>`;
@@ -725,7 +796,7 @@
   if (B.rating)       meta.innerHTML += `<span class="meta-item">⭐ ${B.rating}${B.reviewCount ? ' (' + B.reviewCount.toLocaleString() + ' reviews)' : ''}</span>`;
 
   const badges = document.getElementById('js-badges');
-  (B.about.features || []).forEach(f => { badges.innerHTML += `<span class="badge">${f}</span>`; });
+  (B.about.features || []).forEach(f => { badges.innerHTML += `<span class="feature-pill">✓ ${f}</span>`; });
 
   const cta = document.getElementById('js-cta');
   // Circle Boats: Book Now opens modular booking modal
@@ -806,14 +877,20 @@
         if (B.about) {
           if (B.about.description) html += `<p class="about-p">${B.about.description}</p>`;
           if (B.about.features?.length) {
-            html += `<div class="sub-label">Features</div><div class="tag-row">${B.about.features.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
+            html += `<div class="sub-label">What's Included</div><div class="tag-row">${B.about.features.map(f=>`<span class="feature-pill">✓ ${f}</span>`).join('')}</div>`;
           }
           if (B.about.perfectFor?.length) {
             html += `<div class="sub-label">Perfect For</div><div class="tag-row">${B.about.perfectFor.map(f=>`<span class="tag">${f}</span>`).join('')}</div>`;
           }
           if (B.tags?.length) {
-            html += `<div class="sub-label">Categories</div><div class="tag-row">${B.tags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t}</span>`).join('')}</div>`;
+            const showTags = B.tags.filter(t => !['establishment','service','point of interest'].includes(t));
+            if (showTags.length) html += `<div class="sub-label">Tags</div><div class="tag-row">${showTags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t.replace(/_/g,' ')}</span>`).join('')}</div>`;
           }
+          html += `<div class="book-cta-card">
+            <h3>🚤 Ready to Hit the Water?</h3>
+            <p>No license required. Easy &amp; fun for everyone. Just show up and enjoy the ride!</p>
+            <a href="${B.bookingUrl || B.website || '#'}" target="_blank" class="book-btn-white">📅 Book Your Boat Now</a>
+          </div>`;
         }
         break;
 
@@ -875,10 +952,10 @@
       case 'packages':
         html += `</div><div class="pkg-grid">`;
         (B.packages || []).forEach(p => {
-          html += `<div class="pkg">
-            ${p.badge?`<div class="pkg-tag">${p.badge}</div>`:''}
+          html += `<div class="pkg" style="${p.badge==='Most Popular'?'border-color:#0077b6;':''}">
+            ${p.badge?`<div class="pkg-tag" style="${p.badge==='Best Value'?'background:#059669;':p.badge==='Most Popular'?'background:#0077b6;':''}">${p.badge}</div>`:''}
             <div class="pkg-name">${p.name}</div>
-            ${p.price?`<div class="pkg-price">${p.price}</div>`:''}
+            ${p.price?`<div class="pkg-price" style="font-size:18px;color:${p.price==='Book Online'?'#0077b6':'var(--accent)'}">${p.price==='Book Online'?'<a href="https://beachsidecircleboats.com" target="_blank" style="color:#0077b6;font-size:14px;font-weight:800;text-decoration:none;">📅 Book Online →</a>':p.price}</div>`:''}
             ${p.duration?`<div class="pkg-dur">⏱ ${p.duration}</div>`:''}
             ${p.desc?`<div class="pkg-desc">${p.desc}</div>`:''}
           </div>`;
@@ -945,12 +1022,21 @@
         container.appendChild(el); return;
       }
 
-      case 'gallery':
+      case 'gallery': {
+        const gPhotos = (B.gallery || []).slice(0, 8);
+        if (gPhotos.length) {
+          html += `<div class="photo-strip">`;
+          gPhotos.forEach((p, i) => {
+            html += `<img src="${p.url}" alt="${p.caption || 'Circle Boats photo ' + (i+1)}" loading="lazy" onclick="openGallery()" onerror="this.style.display='none'">`;
+          });
+          html += `</div>`;
+        }
         html += `<button class="section-btn" onclick="openGallery()">
-          <span>📸 View Photos (${(B.gallery||[]).length} photos)</span>
+          <span>📸 View All Photos (${(B.gallery||[]).length} photos)</span>
           <span class="section-btn-arrow">›</span>
         </button>`;
         break;
+      }
 
       case 'reviews':
         html += `<button class="section-btn" onclick="openReviews()">
@@ -997,13 +1083,17 @@
       case 'fleet':
         html += `<div class="menu-grid">`;
         (B._fleet || []).forEach(f => {
-          html += `<div class="item">
-            <div class="name">${f.item_name}</div>
-            ${f.description ? `<div class="desc">${f.description}</div>` : ''}
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)">
-              ${f.capacity ? `<span>👥 Capacity: ${f.capacity}</span>` : ''}
-              ${f.weight ? `<span>⚖️ ${f.weight}</span>` : ''}
-              ${f.dimensions ? `<span>📐 ${f.dimensions}</span>` : ''}
+          html += `<div class="item" style="padding:0;overflow:hidden;">
+            ${f.image_url ? `<img src="${f.image_url}" alt="${f.item_name}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <div style="padding:12px;">
+              <div class="name">${f.item_name}</div>
+              ${f.description ? `<div class="desc">${f.description}</div>` : ''}
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)">
+                ${f.max_capacity_text ? `<span>👥 ${f.max_capacity_text}</span>` : ''}
+                ${f.weight ? `<span>⚖️ ${f.weight}</span>` : ''}
+                ${f.dimensions ? `<span>📐 ${f.dimensions}</span>` : ''}
+                ${f.condition && f.condition !== 'available' ? `<span>🔧 ${f.condition}</span>` : ''}
+              </div>
             </div>
           </div>`;
         });
@@ -1013,13 +1103,16 @@
       case 'addons':
         html += `<div class="menu-grid">`;
         (B._addons || []).forEach(a => {
-          const price = a.price_min != null && a.price_max != null ? `$${a.price_min}–$${a.price_max}` : a.price != null ? `$${a.price}` : '';
-          html += `<div class="item">
-            <div class="name">${a.addon_name}</div>
-            ${a.description ? `<div class="desc">${a.description}</div>` : ''}
-            <div style="display:flex;justify-content:space-between;margin-top:6px">
-              ${price ? `<span class="price">${price}</span>` : ''}
-              ${a.price_type === 'included' ? `<span style="font-size:12px;background:#f0fdf4;color:#166534;border-radius:999px;padding:2px 8px;font-weight:700">Included</span>` : ''}
+          const price = a.price_min != null && a.price_max != null ? `$${a.price_min}–$${a.price_max}` : a.price != null ? `+$${a.price}` : '';
+          html += `<div class="item" style="padding:0;overflow:hidden;">
+            ${a.image_url ? `<img src="${a.image_url}" alt="${a.addon_name}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" onerror="this.style.display='none'">` : ''}
+            <div style="padding:12px;">
+              <div class="name">${a.addon_name}</div>
+              ${a.description ? `<div class="desc">${a.description}</div>` : ''}
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+                ${price ? `<span class="price">${price}</span>` : ''}
+                ${a.price_type === 'included' ? `<span style="font-size:12px;background:#f0fdf4;color:#166534;border-radius:999px;padding:2px 8px;font-weight:700">Included</span>` : ''}
+              </div>
             </div>
           </div>`;
         });
@@ -1051,6 +1144,27 @@
         });
         break;
 
+      case 'launch-locations':
+        (B._launchLocations || []).forEach(loc => {
+          html += `<div class="launch-loc">
+            <div class="loc-name">📍 ${loc.name}</div>
+            <div class="loc-addr" style="white-space:pre-line">${loc.address}</div>
+            ${loc.slots ? `<div style="margin-top:6px;font-size:12px;font-weight:700;color:var(--accent)">🕐 ${loc.slots}</div>` : ''}
+            ${loc.maps ? `<a href="${loc.maps}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--accent);">Open in Google Maps →</a>` : ''}
+          </div>`;
+        });
+        html += `<p style="font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5">Staying at a waterfront vacation rental? We may be able to deliver directly to your dock — contact us to check availability.</p>`;
+        break;
+
+      case 'what-to-bring':
+        if (B._whatToBring) {
+          html += `<ul style="margin:0;padding-left:0;list-style:none;display:grid;gap:8px">`;
+          B._whatToBring.forEach(item => { html += `<li style="display:flex;gap:10px;font-size:14px;line-height:1.5"><span style="color:#22c55e;font-weight:800;font-size:16px">✓</span><span>${item}</span></li>`; });
+          html += `</ul>`;
+          if (B._whatToBringNote) html += `<p style="font-size:13px;color:var(--accent);font-weight:600;margin:12px 0 0;line-height:1.5">💡 ${B._whatToBringNote}</p>`;
+        }
+        break;
+
       case 'meetingpoint': {
         const mp = B._meetingPoint || {};
         html += `${mp.location_name ? `<div style="font-weight:700;font-size:16px;margin-bottom:8px">${mp.location_name}</div>` : ''}
@@ -1062,18 +1176,30 @@
       }
 
       case 'qna': {
+        // Deduplicate by question text (DB has 4x duplicates)
+        const seen = new Set();
+        const unique = (B._qna || []).filter(q => {
+          const key = (q.question || '').trim().toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
         const grouped = {};
-        (B._qna || []).forEach(q => {
+        unique.forEach(q => {
           const label = q.section_label || 'FAQ';
           if (!grouped[label]) grouped[label] = [];
           grouped[label].push(q);
         });
-        Object.entries(grouped).forEach(([label, items]) => {
-          html += `<h3>${label}</h3>`;
-          items.forEach(q => {
-            html += `<div style="margin-bottom:14px">
-              <div style="font-weight:700;font-size:14px;margin-bottom:4px">${q.question}</div>
-              ${q.answer ? `<div style="font-size:13px;color:var(--muted);line-height:1.6">${q.answer}</div>` : ''}
+        Object.entries(grouped).forEach(([label, items], gi) => {
+          if (Object.keys(grouped).length > 1) html += `<h3>${label}</h3>`;
+          items.forEach((q, qi) => {
+            const fid = `faq-${gi}-${qi}`;
+            html += `<div class="faq-item" id="${fid}">
+              <div class="faq-q" onclick="(function(el){el.classList.toggle('open');})(document.getElementById('${fid}'))">
+                <span>${q.question}</span>
+                <span class="faq-arrow">⌄</span>
+              </div>
+              ${q.answer ? `<div class="faq-a">${q.answer.replace(/\n/g,'<br>')}</div>` : ''}
             </div>`;
           });
         });
