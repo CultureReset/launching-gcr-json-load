@@ -11,7 +11,7 @@ const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
    fresh data fetched in background to update cache for next visit.
    Bump GCR_CACHE_VERSION to force-invalidate everyone's cache. */
 const GCR_CACHE_VERSION = 'v6';
-const GCR_CACHE_TTL_MS  = 60 * 60 * 1000; // 1 hour — data considered fresh
+const GCR_CACHE_TTL_MS  = 5 * 60 * 1000; // 5 minutes — keep events fresh
 
 function _gcrCacheGet(key) {
   try {
@@ -199,22 +199,45 @@ const GCR = {
 
   async _fetchAndPopulate(dispatchLoaded) {
     try {
-      const [bizRes, evRes, spRes, hhRes] = await Promise.all([
-        fetch(GCR_API + '/entities?limit=500').catch(() => null),
-        fetch(GCR_API + '/events').catch(() => null),
+      const [bizRes, spRes, hhRes] = await Promise.all([
+        fetch(GCR_API.replace('/gcr', '') + '/admin/businesses').catch(() =>
+          fetch(GCR_API + '/entities?limit=500').catch(() => null)
+        ),
         fetch(GCR_API + '/specials').catch(() => null),
         fetch(GCR_API + '/happy-hours').catch(() => null),
       ]);
 
       if (bizRes && bizRes.ok) {
         const data = await bizRes.json();
-        const raw = (data.entities || data.businesses || []).filter(b => !this._isTestEntity(b));
+        const raw = (data.businesses || data.entities || []).filter(b => !this._isTestEntity(b));
         this.businesses = this._dedupeBusinesses(raw);
         _gcrCacheSet('entities', this.businesses);
-      }
-      if (evRes && evRes.ok) {
-        const evRaw = await evRes.json();
-        this.events = this._dedupeById(Array.isArray(evRaw) ? evRaw : []);
+
+        // Extract events from businesses — same data the dashboard displays
+        const extracted = [];
+        this.businesses.forEach(biz => {
+          const evts = biz.events || biz.event_list || [];
+          evts.forEach(ev => {
+            extracted.push({
+              id: ev.id || (biz.id + '-' + (ev.name || ev.event_name || '')),
+              event_name:   ev.name       || ev.event_name   || '',
+              artist_name:  ev.artist     || ev.artist_name  || '',
+              description:  ev.description || '',
+              event_date:   ev.date       || ev.event_date   || '',
+              start_time:   ev.time       || ev.start_time   || '',
+              end_time:     ev.end_time   || '',
+              cover_charge: ev.price      || ev.cover_charge || '',
+              event_type:   ev.event_type || '',
+              day_of_week:  ev.day_of_week || '',
+              entity_id:    biz.id,
+              entity_name:  biz.name,
+              entity_slug:  biz.slug || biz.subdomain || '',
+              entity_hero_image_url: biz.hero_image_url || biz.image || '',
+              venue_location: biz.address || biz.vicinity || '',
+            });
+          });
+        });
+        this.events = this._dedupeById(extracted);
         _gcrCacheSet('events', this.events);
       }
       if (spRes && spRes.ok) {
