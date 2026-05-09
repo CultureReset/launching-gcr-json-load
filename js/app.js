@@ -1269,11 +1269,11 @@ function renderEventsPage() {
       <article class="event-card" data-tags="${ev.category || ''}">
         <div class="event-image" style="background-image:url('${escGcr(photo)}');background-color:#e0f2fe"><div class="image-badge">${escGcr(category)}</div></div>
         <div class="event-body">
-          <div class="title-row"><div><div class="name">${escGcr(ev.title || ev.name || 'Event')}</div><div class="subline"><span>${escGcr(ev.venue || (biz && biz.name) || 'Orange Beach')}</span></div></div><div class="status">● Coming</div></div>
-          <div class="timepill">🕐 ${escGcr(dateStr)}${ev.time ? ' • ' + escGcr(ev.time) : ''}</div>
-          <div class="event-copy">${escGcr((ev.description || ev.descr || 'Event details — check details for more info.').substring(0, 180))}</div>
+          <div class="title-row"><div><div class="name">${escGcr(ev.artist_name || ev.title || ev.name || 'Event')}</div><div class="subline"><span>${escGcr(ev.entity_name || (biz && biz.name) || 'Orange Beach')}</span></div></div><div class="status">● Coming</div></div>
+          <div class="timepill">🕐 ${escGcr(dateStr)}${ev.start_time ? ' • ' + escGcr(ev.start_time) : ''}</div>
+          <div class="event-copy">${escGcr((ev.description || ev.descr || 'Live music event — check details for more info.').substring(0, 180))}</div>
           ${chips ? `<div class="chips">${chips}</div>` : ''}
-          <div class="bottom-row"><div class="venue">📍 ${escGcr(ev.venue || (biz && biz.address) || '')}</div><div class="actions"><a href="profile.html?id=${bizSlug}" class="action">Details</a><a href="profile.html?id=${bizSlug}" class="action primary">Save</a></div></div>
+          <div class="bottom-row"><div class="venue">📍 ${escGcr(ev.entity_name || (biz && biz.name) || ev.entity_city || '')}</div><div class="actions"><a href="profile.html?id=${bizSlug}" class="action">Details</a><a href="profile.html?id=${bizSlug}" class="action primary">Save</a></div></div>
         </div>
       </article>`;
     }).join('');
@@ -1310,7 +1310,7 @@ function renderEventsPage() {
         </div>
         <div class="event-info">
           <h4>${escGcr(ev.title || ev.name || 'Event')}</h4>
-          <p>${escGcr(ev.venue || (biz && biz.name) || '')}${ev.time ? ` · ${escGcr(ev.time)}` : ''}</p>
+          <p>${escGcr(ev.entity_name || (biz && biz.name) || '')}${ev.start_time ? ` · ${escGcr(ev.start_time)}` : ''}</p>
           <div class="event-meta">
             ${ev.category ? `<span class="event-cat-badge ${cls}">${ev.category.replace(/-/g,' ')}</span>` : ''}
             ${ev.cover !== undefined ? `<span class="event-cat-badge" style="background:${ev.cover==='Free'?'#dcfce7':'#fef3c7'};color:${ev.cover==='Free'?'#16a34a':'#d97706'}">${escGcr(ev.cover)}</span>` : ''}
@@ -1360,8 +1360,8 @@ function renderEventsPage() {
             <div>
               <div class="event-list-title">${escGcr(ev.title || ev.name || 'Event')}</div>
               <div class="event-list-meta">
-                ${ev.time ? `⏰ ${escGcr(ev.time)}` : ''}
-                ${ev.venue || (biz && biz.name) ? ` · 📍 ${escGcr(ev.venue || biz.name)}` : ''}
+                ${ev.start_time ? `⏰ ${escGcr(ev.start_time)}` : ''}
+                ${ev.entity_name || (biz && biz.name) ? ` · 📍 ${escGcr(ev.entity_name || biz.name)}` : ''}
                 ${ev.cover ? ` · ${escGcr(ev.cover)}` : ''}
               </div>
             </div>
