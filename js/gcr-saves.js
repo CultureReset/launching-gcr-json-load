@@ -5,14 +5,11 @@
    ============================================================ */
 
 const GCR_API = 'https://cybercheck-api-database.vercel.app';
-const SUPA_URL = 'https://mhafixflyffflwjhcgfn.supabase.co';
-const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oYWZpeGZseWZmZmx3amhjZ2ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MTA4MzUsImV4cCI6MjA4NzM4NjgzNX0.3KW-rGnLhJQ1u3IsSeoGFfgQpcoJNdBGFOGnhc88tHw';
 
 window.GCRSaves = (function() {
-  let _supabase = null;
   let _user = null;
   let _token = null;
-  let _saves = new Set(); // slugs the user has saved
+  let _saves = new Set();
   let _ready = false;
   const _listeners = [];
 
@@ -80,6 +77,23 @@ window.GCRSaves = (function() {
       background:none;border:none;text-decoration:underline;
     }
     .gcr-auth-error { color:#e53e3e;font-size:13px;margin-bottom:8px; }
+    .gcr-auth-tabs { display:flex;gap:6px;margin-bottom:18px; }
+    .gcr-auth-tab {
+      flex:1;padding:8px 4px;border:1px solid #d1dce5;border-radius:8px;
+      background:#f8fafc;font-size:13px;font-weight:600;cursor:pointer;color:#66788a;
+    }
+    .gcr-auth-tab.active { background:#0b7a75;color:#fff;border-color:#0b7a75; }
+    .gcr-google-btn {
+      width:100%;padding:12px;background:#fff;color:#3c4043;
+      border:1px solid #d1dce5;border-radius:10px;font-size:15px;
+      font-weight:600;cursor:pointer;margin-bottom:10px;
+      display:flex;align-items:center;justify-content:center;gap:10px;
+    }
+    .gcr-google-btn:hover { background:#f8fafc; }
+    .gcr-auth-panel { display:none; }
+    .gcr-auth-panel.active { display:block; }
+    .gcr-phone-row { display:flex;gap:6px;margin-bottom:10px; }
+    .gcr-phone-row input:first-child { width:70px;flex-shrink:0; }
     .gcr-personalized-banner {
       background:linear-gradient(135deg,#0b7a75,#0ea5e9);
       color:#fff;padding:10px 18px;border-radius:12px;
@@ -103,89 +117,165 @@ window.GCRSaves = (function() {
   modal.className = 'gcr-auth-modal';
   modal.innerHTML = `
     <div class="gcr-auth-box">
-      <div style="font-size:36px;margin-bottom:8px;">❤️</div>
-      <h2 id="gcr-auth-title">Save your favourites</h2>
-      <p id="gcr-auth-sub">Sign in to save places and get personalized recommendations across GCR and Trip Swipe.</p>
+      <div style="font-size:32px;margin-bottom:6px;">❤️</div>
+      <h2 style="margin:0 0 4px;font-size:20px;color:#0f2233;">Save your favourites</h2>
+      <p style="font-size:13px;color:#66788a;margin:0 0 16px;">One account works on GCR &amp; Trip Swipe</p>
+
+      <div class="gcr-auth-tabs">
+        <button class="gcr-auth-tab active" data-tab="phone">📱 Phone</button>
+        <button class="gcr-auth-tab" data-tab="google">G Google</button>
+        <button class="gcr-auth-tab" data-tab="email" id="gcr-tab-email">✉️ Email</button>
+      </div>
+
       <div id="gcr-auth-err" class="gcr-auth-error" style="display:none;"></div>
-      <input class="gcr-auth-input" type="email" id="gcr-auth-email" placeholder="Email address">
-      <input class="gcr-auth-input" type="password" id="gcr-auth-pw" placeholder="Password">
-      <button class="gcr-auth-submit" id="gcr-auth-go">Sign In</button>
-      <button class="gcr-auth-switch" id="gcr-auth-switch">Don't have an account? Sign up</button>
-      <br><br>
+
+      <!-- Phone / SMS OTP -->
+      <div class="gcr-auth-panel active" id="gcr-panel-phone">
+        <div id="gcr-phone-step1">
+          <div class="gcr-phone-row">
+            <input class="gcr-auth-input" id="gcr-phone-cc" value="+1" style="margin-bottom:0;">
+            <input class="gcr-auth-input" id="gcr-phone-num" type="tel" placeholder="(555) 555-5555" style="margin-bottom:0;flex:1;">
+          </div>
+          <p style="font-size:11px;color:#aaa;margin:4px 0 10px;">We'll text you a 6-digit code. No spam, ever.</p>
+          <button class="gcr-auth-submit" id="gcr-phone-send">Send Code</button>
+        </div>
+        <div id="gcr-phone-step2" style="display:none;">
+          <p style="font-size:13px;color:#0b7a75;margin:0 0 10px;font-weight:600;">Code sent! Enter it below:</p>
+          <input class="gcr-auth-input" id="gcr-otp-code" type="number" placeholder="6-digit code" maxlength="6" style="letter-spacing:8px;font-size:22px;text-align:center;">
+          <button class="gcr-auth-submit" id="gcr-otp-verify">Verify Code</button>
+          <button class="gcr-auth-switch" id="gcr-phone-back">← Change number</button>
+        </div>
+      </div>
+
+      <!-- Google -->
+      <div class="gcr-auth-panel" id="gcr-panel-google">
+        <button class="gcr-google-btn" id="gcr-google-btn">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/></svg>
+          Continue with Google
+        </button>
+        <p style="font-size:12px;color:#aaa;text-align:center;">You'll be redirected to Google, then back here.</p>
+      </div>
+
+      <!-- Email / Password -->
+      <div class="gcr-auth-panel" id="gcr-panel-email">
+        <input class="gcr-auth-input" type="email" id="gcr-auth-email" placeholder="Email address">
+        <input class="gcr-auth-input" type="password" id="gcr-auth-pw" placeholder="Password">
+        <button class="gcr-auth-submit" id="gcr-auth-go">Sign In</button>
+        <button class="gcr-auth-switch" id="gcr-auth-switch">Don't have an account? Sign up</button>
+      </div>
+
+      <br>
       <button onclick="GCRSaves.closeModal()" style="font-size:12px;color:#aaa;background:none;border:none;cursor:pointer;">Cancel</button>
     </div>`;
   document.body.appendChild(modal);
 
-  let _authMode = 'signin';
-  function setAuthMode(mode) {
-    _authMode = mode;
-    const isSignup = mode === 'signup';
-    document.getElementById('gcr-auth-title').textContent = isSignup ? 'Create account' : 'Sign in to save';
-    document.getElementById('gcr-auth-go').textContent = isSignup ? 'Create Account' : 'Sign In';
-    document.getElementById('gcr-auth-switch').textContent = isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up";
+  // ── Tab switching ─────────────────────────────────────────────
+  modal.querySelectorAll('.gcr-auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      modal.querySelectorAll('.gcr-auth-tab').forEach(t => t.classList.remove('active'));
+      modal.querySelectorAll('.gcr-auth-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('gcr-panel-' + tab.dataset.tab).classList.add('active');
+      document.getElementById('gcr-auth-err').style.display = 'none';
+    });
+  });
+
+  // ── SMS OTP ───────────────────────────────────────────────────
+  let _pendingPhone = '';
+  document.getElementById('gcr-phone-send').addEventListener('click', async () => {
+    const cc  = document.getElementById('gcr-phone-cc').value.trim();
+    const num = document.getElementById('gcr-phone-num').value.replace(/\D/g,'');
+    const phone = cc + num;
+    const errEl = document.getElementById('gcr-auth-err');
+    errEl.style.display = 'none';
+    if (num.length < 10) { errEl.textContent = 'Enter a valid phone number'; errEl.style.display = ''; return; }
+    const btn = document.getElementById('gcr-phone-send');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      await GCRAuth.sendOtp(phone);
+      _pendingPhone = phone;
+      document.getElementById('gcr-phone-step1').style.display = 'none';
+      document.getElementById('gcr-phone-step2').style.display = '';
+    } catch(e) { errEl.textContent = e.message || 'Could not send code'; errEl.style.display = ''; }
+    btn.textContent = 'Send Code'; btn.disabled = false;
+  });
+
+  document.getElementById('gcr-otp-verify').addEventListener('click', async () => {
+    const code = document.getElementById('gcr-otp-code').value.trim();
+    const errEl = document.getElementById('gcr-auth-err');
+    errEl.style.display = 'none';
+    if (code.length !== 6) { errEl.textContent = 'Enter the 6-digit code'; errEl.style.display = ''; return; }
+    const btn = document.getElementById('gcr-otp-verify');
+    btn.textContent = 'Verifying…'; btn.disabled = true;
+    try {
+      await GCRAuth.verifyOtp(_pendingPhone, code);
+      closeModal(); showToast('Welcome! ✨');
+    } catch(e) { errEl.textContent = e.message || 'Invalid code'; errEl.style.display = ''; }
+    btn.textContent = 'Verify Code'; btn.disabled = false;
+  });
+
+  document.getElementById('gcr-phone-back').addEventListener('click', () => {
+    document.getElementById('gcr-phone-step1').style.display = '';
+    document.getElementById('gcr-phone-step2').style.display = 'none';
+  });
+
+  document.getElementById('gcr-google-btn').addEventListener('click', () => GCRAuth.signInGoogle());
+
+  let _emailMode = 'signin';
+  function setEmailMode(mode) {
+    _emailMode = mode;
+    const s = mode === 'signup';
+    document.getElementById('gcr-auth-go').textContent = s ? 'Create Account' : 'Sign In';
+    document.getElementById('gcr-auth-switch').textContent = s ? 'Already have an account? Sign in' : "Don't have an account? Sign up";
   }
-  document.getElementById('gcr-auth-switch').addEventListener('click', () => setAuthMode(_authMode === 'signin' ? 'signup' : 'signin'));
+  document.getElementById('gcr-auth-switch').addEventListener('click', () => setEmailMode(_emailMode === 'signin' ? 'signup' : 'signin'));
   document.getElementById('gcr-auth-go').addEventListener('click', async () => {
     const email = document.getElementById('gcr-auth-email').value.trim();
-    const pw = document.getElementById('gcr-auth-pw').value;
+    const pw    = document.getElementById('gcr-auth-pw').value;
     const errEl = document.getElementById('gcr-auth-err');
     errEl.style.display = 'none';
     if (!email || !pw) { errEl.textContent = 'Please enter email and password'; errEl.style.display = ''; return; }
     try {
-      const fn = _authMode === 'signup'
-        ? () => _supabase.auth.signUp({ email, password: pw })
-        : () => _supabase.auth.signInWithPassword({ email, password: pw });
-      const { data, error } = await fn();
-      if (error) throw error;
-      if (_authMode === 'signup' && !data.session) {
-        errEl.style.display = '';
-        errEl.style.color = '#0b7a75';
-        errEl.textContent = 'Check your email to confirm your account.';
-        return;
-      }
-      closeModal();
-      showToast('Welcome! Loading your personalized GCR ✨');
-    } catch(e) { errEl.textContent = e.message || 'Sign in failed'; errEl.style.display = ''; }
+      await GCRAuth.signInEmail(email, pw, _emailMode === 'signup');
+      closeModal(); showToast('Welcome! ✨');
+    } catch(e) {
+      if (e.confirmEmail) { errEl.style.color='#0b7a75'; errEl.textContent='Check your email to confirm.'; errEl.style.display=''; return; }
+      errEl.textContent = e.message || 'Sign in failed'; errEl.style.display = '';
+    }
   });
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  function openModal() { modal.classList.add('open'); }
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+  function openModal()  { modal.classList.add('open'); }
   function closeModal() { modal.classList.remove('open'); }
 
-  // ── Init Supabase ─────────────────────────────────────────────
+  // ── Init via GCRAuth ──────────────────────────────────────────
   async function init() {
-    // Load Supabase JS if not already loaded
-    if (!window.supabase || !window.supabase.createClient) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-    _supabase = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+    await GCRAuth.init();
+    _user  = GCRAuth.getUser();
+    _token = GCRAuth.getToken();
+    if (_user) { await loadSaves(); }
 
-    // Check session
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (session) {
-      _user = session.user;
-      _token = session.access_token;
-      await loadSaves();
-    }
+    // Show/hide tabs based on admin config
+    const mode = GCRAuth.getAuthMode();
+    const phoneTab  = modal.querySelector('[data-tab="phone"]');
+    const googleTab = modal.querySelector('[data-tab="google"]');
+    const phonePanel  = document.getElementById('gcr-panel-phone');
+    const googlePanel = document.getElementById('gcr-panel-google');
 
-    // Listen for auth changes
-    _supabase.auth.onAuthStateChange(async (event, session) => {
-      _user = session?.user || null;
-      _token = session?.access_token || null;
-      if (_user) {
-        await loadSaves();
-        renderUserBar();
-        personalizeListings();
-      } else {
-        _saves.clear();
-        renderUserBar();
-        updateAllSaveBtns();
-      }
+    if (mode === 'email') {
+      // Hide phone + google, show email tab if it exists
+      if (phoneTab)  { phoneTab.style.display  = 'none'; phonePanel.classList.remove('active'); }
+      if (googleTab) { googleTab.style.display = 'none'; googlePanel.classList.remove('active'); }
+    } else if (mode === 'phone_google') {
+      // Hide email, show phone + google (already default)
+      phoneTab.classList.add('active'); phonePanel.classList.add('active');
+    }
+    // mode === 'all' → show everything (tabs already rendered)
+
+    GCRAuth.onChange(async (user, token) => {
+      _user = user; _token = token;
+      if (_user) { await loadSaves(); renderUserBar(); personalizeListings(); }
+      else { _saves.clear(); renderUserBar(); updateAllSaveBtns(); }
     });
 
     renderUserBar();
@@ -201,7 +291,7 @@ window.GCRSaves = (function() {
         headers: { 'Authorization': 'Bearer ' + _token }
       });
       const d = await r.json();
-      _saves = new Set((d || []).map(s => s.entity_slug));
+      _saves = new Set((d.saves || d || []).map(s => s.entity_slug));
       updateAllSaveBtns();
     } catch(e) {}
   }
@@ -299,8 +389,9 @@ window.GCRSaves = (function() {
     }).catch(() => null);
     if (!r?.ok) return;
     const savedItems = await r.json();
-    const preferredCategories = new Set(savedItems.map(s => (s.category||'').toLowerCase()));
-    const savedSlugs = new Set(savedItems.map(s => s.entity_slug));
+    const saves = savedItems.saves || savedItems || [];
+    const preferredCategories = new Set(saves.map(s => (s.category||'').toLowerCase()));
+    const savedSlugs = new Set(saves.map(s => s.entity_slug));
 
     cards.sort((a, b) => {
       const aSlug = a.dataset.slug || '';
@@ -323,7 +414,7 @@ window.GCRSaves = (function() {
 
   // ── Sign out ──────────────────────────────────────────────────
   async function signOut() {
-    await _supabase.auth.signOut();
+    await GCRAuth.signOut();
     showToast('Signed out');
   }
 

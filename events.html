@@ -254,9 +254,9 @@
     </div>
   </footer>
 
-  <script src="js/gcr-api.js?v=5"></script>
+  <script src="js/gcr-api.js?v=6"></script>
   <script src="js/app.js"></script>
-  <script src="js/gcr-listings.js?v=5"></script>
+  <script src="js/gcr-auth.js"></script><script src="js/gcr-saves.js"></script><script src="js/gcr-listings.js?v=5"></script>
   <script>
   function _setHdrH(){const h=document.querySelector('.gcr-header');if(h)document.documentElement.style.setProperty('--gcr-header-h',Math.ceil(h.getBoundingClientRect().height)+'px');}
   document.addEventListener('DOMContentLoaded',_setHdrH);
@@ -391,7 +391,7 @@
     const todayName = DAYS[now.getDay()];
     let events = allEvents.filter(e => {
       const isToday     = e.event_date === todayStr;
-      const isRecurring = (e.recurring || (e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName;
+      const isRecurring = e.recurring && (e.day_of_week||'').toLowerCase() === todayName;
       return isToday || isRecurring;
     }).filter(matchesFilter);
     events.sort((a,b) => (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
@@ -608,10 +608,10 @@
     const seen = new Set();
     allEvents = rawEvents.filter(e => {
       const key = [
-        (e.event_name||'').toLowerCase().trim(),
-        e.entity_id || e.entity_slug || e.venue_location || '',
-        e.start_time || '',
+        (e.artist_name || e.event_name || '').toLowerCase().trim(),
+        (e.entity_name || e.businessName || e.venue_location || e.entity_id || '').toLowerCase().trim(),
         e.event_date || e.date || '',
+        e.start_time || '',
         (e.day_of_week||'').toLowerCase()
       ].join('|');
       if (seen.has(key)) return false;
