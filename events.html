@@ -215,6 +215,72 @@
     </section>
   </div>
 
+  <!-- Event Editor Modal -->
+  <div id="eventEditorModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;padding:20px;box-sizing:border-box;overflow-y:auto;">
+    <div style="background:#fff;border-radius:20px;max-width:600px;margin:40px auto;padding:30px;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h2 style="margin:0;font-size:24px;font-weight:900;">Edit Event</h2>
+        <button onclick="closeEventEditor()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888;">×</button>
+      </div>
+      <div style="display:grid;gap:14px;">
+        <div>
+          <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Event Name</label>
+          <input type="text" id="editEventName" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Artist Name</label>
+          <input type="text" id="editArtistName" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Date</label>
+            <input type="date" id="editEventDate" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Time</label>
+            <input type="time" id="editEventTime" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+          </div>
+        </div>
+        <div>
+          <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Description</label>
+          <textarea id="editEventDesc" rows="3" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Event Type</label>
+            <select id="editEventType" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+              <option value="">General Event</option>
+              <option value="live_music">Live Music</option>
+              <option value="open_mic">Open Mic</option>
+              <option value="karaoke">Karaoke</option>
+              <option value="trivia">Trivia</option>
+              <option value="bingo">Bingo</option>
+              <option value="show_performance">Show/Performance</option>
+              <option value="market">Market</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:13px;font-weight:700;color:#666;margin-bottom:4px;">Recurring Day</label>
+            <select id="editEventDay" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:inherit;">
+              <option value="">One-time</option>
+              <option value="monday">Monday</option>
+              <option value="tuesday">Tuesday</option>
+              <option value="wednesday">Wednesday</option>
+              <option value="thursday">Thursday</option>
+              <option value="friday">Friday</option>
+              <option value="saturday">Saturday</option>
+              <option value="sunday">Sunday</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="saveEventChanges()" style="flex:1;background:#0b7a75;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">💾 Save Changes</button>
+          <button onclick="closeEventEditor()" style="flex:1;background:#f0f4f8;color:#666;border:1px solid #e2e8f0;padding:12px;border-radius:10px;font-weight:800;cursor:pointer;font-size:14px;">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
@@ -276,6 +342,63 @@
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function fmt12(t) { if (!t) return ''; const [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; const h12=h%12||12; return m?`${h12}:${String(m).padStart(2,'0')}${ap}`:`${h12}${ap}`; }
 
+  let _editingEventIdx = null;
+
+  function openEventEditor(idx) {
+    const ev = allEvents[idx];
+    if (!ev) return;
+    _editingEventIdx = idx;
+    document.getElementById('editEventName').value = ev.event_name || '';
+    document.getElementById('editArtistName').value = ev.artist_name || '';
+    document.getElementById('editEventDate').value = ev.event_date || '';
+    document.getElementById('editEventTime').value = ev.start_time || '';
+    document.getElementById('editEventDesc').value = ev.description || '';
+    document.getElementById('editEventType').value = ev.event_type || '';
+    document.getElementById('editEventDay').value = ev.day_of_week || '';
+    document.getElementById('eventEditorModal').style.display = 'flex';
+  }
+
+  function closeEventEditor() {
+    document.getElementById('eventEditorModal').style.display = 'none';
+    _editingEventIdx = null;
+  }
+
+  async function saveEventChanges() {
+    if (_editingEventIdx === null) return;
+    const ev = allEvents[_editingEventIdx];
+    if (!ev || !ev.id) { alert('Cannot save: event ID missing'); return; }
+
+    const updates = {
+      event_name: document.getElementById('editEventName').value,
+      artist_name: document.getElementById('editArtistName').value,
+      event_date: document.getElementById('editEventDate').value,
+      start_time: document.getElementById('editEventTime').value,
+      description: document.getElementById('editEventDesc').value,
+      event_type: document.getElementById('editEventType').value,
+      day_of_week: document.getElementById('editEventDay').value,
+    };
+
+    try {
+      const res = await fetch('https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) {
+        Object.assign(ev, updates);
+        closeEventEditor();
+        if (currentTab === 'today') renderToday(); else if (currentTab === 'weekly') renderWeekly(); else if (currentTab === 'date') renderDateRange();
+        alert('Event saved!');
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert('Save failed: ' + (err.error || res.statusText));
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
   function getVenueParts(ev) {
     const vp = (ev.venue_location || '').split(',');
     const biz  = ev.entity_name || ev.businessName || vp[0]?.trim() || '';
@@ -321,6 +444,7 @@
             ${(ev.recurring||(ev.day_of_week||'').trim())?'<span style="background:#eef2ff;color:var(--purple);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>':''}
             ${ev.cover_charge?'<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>':''}
             <div style="margin-left:auto;display:flex;gap:6px;">
+              <button onclick="openEventEditor(${idx})" style="background:#f59e0b;color:#fff;padding:8px 14px;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">✏️ Edit</button>
               ${profileUrl?`<a href="${profileUrl}" style="background:var(--brand);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;text-decoration:none;">View Venue →</a>`:''}
             </div>
           </div>
@@ -353,6 +477,7 @@
           <div class="expand-meta">📍 ${esc(biz)}${city?' · '+esc(city):''}${time !== '—' ? ' &nbsp;·&nbsp; 🕐 ' + esc(time) : ''}</div>
           ${desc?`<div class="expand-desc">${esc(desc)}</div>`:''}
           <div class="expand-btns">
+            <button onclick="openEventEditor(${idx})" class="expand-btn" style="background:#f59e0b;color:#fff;border:none;cursor:pointer;">✏️ Edit Event</button>
             ${profileUrl?`<a href="${profileUrl}" class="expand-btn primary">View Venue →</a>`:''}
             ${profileUrl?`<a href="${profileUrl}#events" class="expand-btn">All Events at ${esc(biz)}</a>`:''}
           </div>
