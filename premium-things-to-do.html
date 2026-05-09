@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title id="page-title">Premium Experience – Gulf Coast Radar</title>
+  <meta id="page-desc" name="description" content="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    :root {
+      --accent: #0ea5e9;
+      --ink:    #0e1726;
+      --muted:  #5c6b81;
+      --border: #e6ecf3;
+      --chip:   #eef6ff;
+      --card:   #ffffff;
+      --shadow: 0 2px 16px rgba(0,0,0,.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; background:#f4f6f9; color:var(--ink); font-family:'Inter',system-ui,-apple-system,sans-serif; }
+    a { color:var(--accent); text-decoration:none; }
+
+    /* ── Hero ── */
+    .hero { position:relative; width:100%; aspect-ratio:16/7; background:#0c2d48; overflow:hidden; }
+    @media(max-width:640px){ .hero { aspect-ratio:4/3; } }
+    .hero-slides { position:relative; width:100%; height:100%; }
+    .hero-slide { position:absolute; inset:0; opacity:0; transition:opacity .6s ease; pointer-events:none; }
+    .hero-slide.active { opacity:1; pointer-events:auto; }
+    .hero-slide img { width:100%; height:100%; object-fit:cover; display:block; }
+    .hero-overlay { position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,.15) 0%, rgba(0,0,0,.55) 100%); z-index:2; }
+    .hero-content { position:absolute; bottom:0; left:0; right:0; z-index:3; padding:24px 20px 20px; }
+    .hero-premium { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:4px 12px; font-size:11px; font-weight:700; letter-spacing:1.5px; color:#fff; text-transform:uppercase; margin-bottom:10px; }
+    .hero-name { font-size:clamp(22px,5vw,40px); font-weight:900; color:#fff; line-height:1.15; margin:0 0 6px; }
+    .hero-tag  { font-size:14px; color:rgba(255,255,255,.85); margin:0 0 14px; }
+    .hero-meta { display:flex; flex-wrap:wrap; gap:12px; }
+    .hero-pill { display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,.18); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:5px 12px; font-size:13px; font-weight:600; color:#fff; }
+    .hero-arrows { position:absolute; bottom:50%; transform:translateY(50%); width:100%; z-index:4; display:flex; justify-content:space-between; padding:0 12px; pointer-events:none; }
+    .hero-arr { pointer-events:auto; background:rgba(0,0,0,.4); border:none; color:#fff; font-size:20px; width:38px; height:38px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+    .hero-arr:hover { background:rgba(0,0,0,.65); }
+    .hero-dots { position:absolute; bottom:10px; right:14px; z-index:4; display:flex; gap:5px; }
+    .hero-dot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.45); border:none; cursor:pointer; padding:0; transition:background .2s; }
+    .hero-dot.active { background:#fff; }
+
+    /* ── Sticky CTA bar ── */
+    .cta-bar { background:#fff; border-bottom:1px solid var(--border); padding:12px 16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .btn { display:inline-flex; align-items:center; gap:6px; padding:10px 18px; border-radius:999px; font-size:13px; font-weight:700; cursor:pointer; border:none; white-space:nowrap; text-decoration:none; transition:all .18s; }
+    .btn-book  { background:var(--accent); color:#fff; }
+    .btn-book:hover  { filter:brightness(1.1); transform:translateY(-1px); }
+    .btn-call  { background:#22c55e; color:#fff; }
+    .btn-call:hover  { background:#16a34a; transform:translateY(-1px); }
+    .btn-dir   { background:var(--chip); color:var(--ink); border:1px solid var(--border); }
+    .btn-dir:hover   { background:var(--border); }
+    .btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); }
+    .social-btn { width:34px; height:34px; border-radius:50%; background:var(--chip); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
+    .social-btn:hover { background:var(--accent); border-color:var(--accent); }
+    .social-btn:hover svg { fill:#fff; }
+    .social-btn svg { width:16px; height:16px; fill:var(--muted); }
+
+    /* ── Quick stats strip ── */
+    .stats-strip { background:#fff; border-bottom:1px solid var(--border); display:flex; overflow-x:auto; scrollbar-width:none; gap:0; }
+    .stats-strip::-webkit-scrollbar { display:none; }
+    .stat-item { flex-shrink:0; padding:14px 20px; text-align:center; border-right:1px solid var(--border); }
+    .stat-val { font-size:18px; font-weight:800; color:var(--accent); }
+    .stat-lbl { font-size:11px; color:var(--muted); font-weight:600; margin-top:2px; text-transform:uppercase; letter-spacing:.5px; }
+
+    /* ── Sticky tab nav ── */
+    .sticky-nav { position:sticky; top:64px; z-index:998; background:rgba(255,255,255,.97); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); box-shadow:0 2px 12px rgba(0,0,0,.07); }
+    .tabs { display:flex; overflow-x:auto; gap:4px; padding:10px 12px; scrollbar-width:none; scroll-snap-type:x mandatory; }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { white-space:nowrap; flex-shrink:0; padding:7px 14px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; scroll-snap-align:start; transition:all .15s; color:var(--ink); }
+    .tab:hover { border-color:var(--accent); color:var(--accent); }
+    .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+    /* ── Sections ── */
+    .wrap { max-width:960px; margin:0 auto; padding:0 0 80px; }
+    section { padding:20px 16px; scroll-margin-top:130px; }
+
+    /* ── Section cards ── */
+    .sec-card { background:#fff; border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:0; box-shadow:var(--shadow); }
+    .sec-header { display:flex; align-items:center; gap:10px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+    .sec-icon { font-size:22px; }
+    .sec-title { font-size:18px; font-weight:800; margin:0; }
+
+    /* ── Fleet cards ── */
+    .fleet-grid { display:grid; gap:20px; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+    .fleet-card { background:#fff; border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:var(--shadow); }
+    .fleet-img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
+    .fleet-body { padding:18px; }
+    .fleet-head { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
+    .fleet-name { font-size:17px; font-weight:800; }
+    .fleet-cap  { font-size:12px; font-weight:600; background:var(--chip); color:#0b6aa3; border:1px solid #cfe6ff; border-radius:999px; padding:4px 10px; white-space:nowrap; flex-shrink:0; }
+    .fleet-desc { font-size:13px; color:var(--muted); line-height:1.55; }
+    .fleet-specs { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .fleet-spec  { font-size:12px; color:var(--muted); }
+    .pricing-table { margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+    .pricing-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:8px; }
+    .pricing-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; }
+    .pricing-row + .pricing-row { border-top:1px solid var(--border); }
+    .pricing-slot { font-size:14px; font-weight:600; }
+    .pricing-time { font-size:12px; color:var(--muted); margin-top:2px; }
+    .pricing-price { font-size:21px; font-weight:900; color:var(--accent); white-space:nowrap; margin-left:12px; }
+    .btn-book-boat { margin-top:14px; width:100%; padding:12px; background:var(--accent); color:#fff; border:none; border-radius:999px; font-size:14px; font-weight:700; cursor:pointer; transition:all .18s; }
+    .btn-book-boat:hover { filter:brightness(1.1); transform:translateY(-1px); }
+
+    /* ── Package cards ── */
+    .pkg-grid { display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+    .pkg-card { border:1px solid var(--border); border-radius:12px; padding:16px; background:#fff; position:relative; }
+    .pkg-badge { position:absolute; top:-10px; left:16px; background:var(--accent); color:#fff; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; }
+    .pkg-name  { font-size:15px; font-weight:700; margin-bottom:4px; }
+    .pkg-dur   { font-size:12px; color:var(--muted); margin-bottom:10px; }
+    .pkg-price { font-size:28px; font-weight:900; color:var(--accent); }
+    .pkg-desc  { font-size:13px; color:var(--muted); margin-top:8px; line-height:1.5; }
+
+    /* ── Menu items ── */
+    .menu-grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+    .menu-item { border:1px solid var(--border); border-radius:10px; padding:12px; background:#fff; }
+    .menu-name  { font-size:13px; font-weight:700; }
+    .menu-desc  { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.4; }
+    .menu-price { font-size:14px; font-weight:800; color:var(--accent); margin-top:6px; }
+    .menu-sec-title { font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:.5px; margin:14px 0 8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
+    /* ── Included checklist ── */
+    .included-grid { display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+    .included-item { display:flex; align-items:center; gap:10px; font-size:14px; }
+    .included-check { width:24px; height:24px; border-radius:50%; background:#dcfce7; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+
+    /* ── Add-ons ── */
+    .addon-grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
+    .addon-card { border:1px solid var(--border); border-radius:12px; padding:14px; background:#fff; display:flex; flex-direction:column; }
+    .addon-name  { font-size:14px; font-weight:700; }
+    .addon-desc  { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.45; flex:1; }
+    .addon-price { font-size:15px; font-weight:800; color:var(--accent); margin-top:10px; }
+
+    /* ── Specials/Deals ── */
+    .deal-card { border-left:3px solid var(--accent); padding:12px 14px; background:#f8fbff; border-radius:0 10px 10px 0; margin-bottom:10px; }
+    .deal-badge { display:inline-block; background:var(--accent); color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 10px; margin-bottom:6px; }
+    .deal-name  { font-size:14px; font-weight:700; }
+    .deal-desc  { font-size:13px; color:var(--muted); margin-top:3px; }
+
+    /* ── Events ── */
+    .event-card { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border); }
+    .event-card:last-child { border-bottom:none; }
+    .event-badge { background:var(--chip); color:#0b6aa3; border:1px solid #cfe6ff; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; text-align:center; min-width:56px; flex-shrink:0; }
+    .event-name { font-size:14px; font-weight:700; }
+    .event-note { font-size:12px; color:var(--muted); margin-top:3px; }
+
+    /* ── Hours ── */
+    .hours-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+    .hours-row:last-child { border-bottom:none; }
+    .hours-day { font-weight:600; }
+    .hours-time { color:var(--muted); }
+    .hours-closed { color:#ef4444; }
+
+    /* ── Location ── */
+    .location-grid { display:grid; gap:14px; }
+    .location-row { display:flex; gap:12px; align-items:flex-start; font-size:14px; }
+    .location-icon { font-size:20px; flex-shrink:0; }
+    .location-label { font-weight:700; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+
+    /* ── FAQ ── */
+    .faq-item { border-bottom:1px solid var(--border); padding:14px 0; }
+    .faq-item:last-child { border-bottom:none; }
+    .faq-q { font-size:14px; font-weight:700; cursor:pointer; display:flex; justify-content:space-between; gap:10px; }
+    .faq-a { font-size:13px; color:var(--muted); margin-top:8px; line-height:1.6; display:none; }
+    .faq-item.open .faq-a { display:block; }
+    .faq-item.open .faq-arrow { transform:rotate(90deg); }
+    .faq-arrow { transition:transform .2s; flex-shrink:0; }
+
+    /* ── Policies ── */
+    .policy-item { margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+    .policy-item:last-child { border-bottom:none; }
+    .policy-type { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:4px; }
+    .policy-text { font-size:14px; color:var(--muted); line-height:1.6; }
+
+    /* ── Requirements/Bullets ── */
+    .bullet-list { display:grid; gap:8px; }
+    .bullet-item { display:flex; gap:10px; font-size:14px; line-height:1.5; }
+    .bullet-dot  { width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; margin-top:6px; }
+
+    /* ── Gallery ── */
+    .photo-grid { display:grid; gap:8px; grid-template-columns:repeat(3,1fr); }
+    @media(min-width:640px){ .photo-grid { grid-template-columns:repeat(4,1fr); } }
+    .photo-thumb { aspect-ratio:1; border-radius:8px; overflow:hidden; cursor:pointer; }
+    .photo-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .2s; }
+    .photo-thumb:hover img { transform:scale(1.05); }
+
+    /* ── Reviews ── */
+    .review-card { padding:14px 0; border-bottom:1px solid var(--border); }
+    .review-card:last-child { border-bottom:none; }
+    .review-stars { color:#f59e0b; font-size:14px; margin-bottom:6px; }
+    .review-text { font-size:14px; color:var(--ink); line-height:1.6; }
+    .review-author { font-size:12px; color:var(--muted); margin-top:6px; }
+
+    /* ── About ── */
+    .about-p { font-size:15px; color:var(--muted); line-height:1.7; margin:0 0 14px; }
+    .feat-pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+    .feat-pill { background:var(--chip); color:#0b6aa3; border:1px solid #cfe6ff; border-radius:999px; padding:5px 12px; font-size:13px; font-weight:600; }
+    .sub-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:14px 0 8px; }
+
+    /* ── Schedules / Tickets ── */
+    .schedule-slot { background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:10px; }
+    .schedule-time { font-size:16px; font-weight:800; color:var(--accent); margin-bottom:4px; }
+    .schedule-name { font-size:13px; color:var(--muted); margin-bottom:10px; }
+    .ticket-row { display:flex; justify-content:space-between; font-size:14px; padding:6px 0; border-top:1px solid var(--border); }
+
+    /* ── Happy hour ── */
+    .hh-time { font-size:15px; font-weight:700; color:var(--accent); margin-bottom:12px; }
+    .hh-deal { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+    .hh-deal:last-child { border-bottom:none; }
+    .hh-price { font-size:15px; font-weight:800; color:#22c55e; }
+
+    /* ── Activities ── */
+    .activity-card { border:1px solid var(--border); border-radius:12px; padding:14px; background:#fff; margin-bottom:10px; }
+    .activity-name { font-size:15px; font-weight:700; }
+    .activity-desc { font-size:13px; color:var(--muted); margin-top:4px; }
+    .activity-meta { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:12px; color:var(--muted); }
+
+    /* ── Mobile sticky book btn ── */
+    .mobile-book { display:none; position:fixed; bottom:0; left:0; right:0; z-index:999; padding:12px 16px; background:#fff; border-top:1px solid var(--border); box-shadow:0 -4px 20px rgba(0,0,0,.1); }
+    .mobile-book .btn { width:100%; justify-content:center; font-size:15px; padding:14px; }
+    @media(max-width:640px){ .mobile-book { display:block; } }
+
+    /* ── Loading / error ── */
+    .loading { padding:60px 20px; text-align:center; color:var(--muted); font-size:15px; }
+
+    /* ── GCR Plus badge ── */
+    .gcr-plus { display:inline-flex; align-items:center; gap:4px; background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:999px; vertical-align:middle; margin-left:8px; }
+  </style>
+</head>
+<body>
+
+<!-- GCR global header injected by gcr-listings.js if present -->
+
+<div class="wrap">
+  <!-- Hero -->
+  <div class="hero" id="js-hero">
+    <div class="hero-slides" id="js-slides"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content" id="js-hero-content">
+      <div class="hero-premium">⭐ GCR Premium</div>
+      <h1 class="hero-name" id="js-name">Loading…</h1>
+      <p class="hero-tag"  id="js-tag"></p>
+      <div class="hero-meta" id="js-hero-meta"></div>
+    </div>
+    <div class="hero-arrows">
+      <button class="hero-arr" id="js-prev">‹</button>
+      <button class="hero-arr" id="js-next">›</button>
+    </div>
+    <div class="hero-dots" id="js-dots"></div>
+  </div>
+
+  <!-- CTA action bar -->
+  <div class="cta-bar" id="js-cta"></div>
+
+  <!-- Quick stats strip -->
+  <div class="stats-strip" id="js-stats" style="display:none;"></div>
+
+  <!-- Sticky tab nav -->
+  <div class="sticky-nav">
+    <div class="tabs" id="js-tabs"></div>
+  </div>
+
+  <!-- Section content -->
+  <div id="js-sections"><div class="loading">Loading…</div></div>
+</div>
+
+<!-- Mobile sticky book button -->
+<div class="mobile-book" id="js-mobile-book" style="display:none;">
+  <button class="btn btn-book" id="js-mobile-book-btn">📅 Book Now</button>
+</div>
+
+<script>
+(async function () {
+  const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+  const params  = new URLSearchParams(location.search);
+  const slug    = params.get('slug') || '';
+
+  if (!slug) {
+    document.getElementById('js-sections').innerHTML = '<div class="loading" style="color:#ef4444;">No slug provided. Use ?slug=your-business-slug</div>';
+    return;
+  }
+
+  let entityData = null;
+  try {
+    const res = await fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`);
+    if (res.ok) entityData = await res.json();
+  } catch(e) {}
+
+  if (!entityData || !entityData.entity) {
+    document.getElementById('js-sections').innerHTML = `<div class="loading" style="color:#ef4444;">Could not load: ${slug}</div>`;
+    return;
+  }
+
+  const B = mapEntity(entityData);
+  window.BUSINESS_DATA = B;
+  buildPage(B);
+
+  // ── DATA MAPPER ───────────────────────────────────────────────
+  function mapEntity(data) {
+    const e = data.entity;
+    const DRINK_TYPES = new Set(['drink_item','beer_item','wine_item','spirit_item']);
+    const ICONS = {
+      about:'ℹ️', highlights:'✦', schedules:'🎟️', cruise_times:'🎟️',
+      guest_info:'📋', restrictions:'📋', gallery:'📸', reviews:'⭐',
+      hours:'🕐', location:'📍', happy_hour:'🍺', food:'🍽️',
+      lunch:'🍽️', dinner:'🌙', brunch:'🥂', kids:'👶', gluten_free:'🌿',
+      games:'🎮', packages:'🎟️', specials:'⭐', events:'📅',
+      cocktails:'🍹', beer:'🍺', wine:'🍷', draft_beer:'🍺',
+    };
+
+    const B = {
+      name: e.name, slug: e.slug,
+      tagline: e.subtitle,
+      emoji: e.icon || '🏢',
+      phone: (e.phone || '').replace(/\D/g, ''),
+      phoneDisplay: e.phone,
+      address: e.address_line_1, city: e.city, state: e.state, zip: e.zip,
+      website: e.website_url, googleMaps: e.directions_url,
+      rating: e.rating, reviewCount: e.review_count,
+      bookingUrl: e.booking_url || null,
+      reservationUrl: e.reservation_url || null,
+      orderUrl: e.order_url || null,
+      priceFrom: e.price_from || null,
+      socialInstagram: e.social_instagram || null,
+      socialFacebook: e.social_facebook || null,
+      socialTiktok: e.social_tiktok || null,
+      coverImages: e.hero_image_url ? [e.hero_image_url] : [],
+      about: { description: e.description || '', features: (data.features||[]).map(f=>f.label), perfectFor: (data.perfect_for||[]).map(p=>p.label) },
+      tags: (data.tags||[]).map(t=>t.tag),
+      highlights: [], restrictions: [], schedules: [],
+      gallery: [], reviews: [], hours: null,
+      sections: [],
+      foodMenu: [], happyHour: null,
+      packages: [], specials: [], events: [],
+    };
+
+    // Section-based data
+    (data.sections || []).forEach(sec => {
+      const key = sec.section_key, type = sec.section_type;
+      const icon = ICONS[key] || '', label = sec.section_label;
+
+      if (type === 'rich_text') {
+        if (!B.about.description) B.about.description = sec.content?.body_text || '';
+        B.sections.push({ id:'about', label, icon });
+
+      } else if (type === 'bullets') {
+        const bullets = (sec.bullets||[]).map(b=>b.bullet_text);
+        if (key === 'highlights') { B.highlights = bullets; if (bullets.length) B.sections.push({ id:'highlights', label, icon }); }
+        else if (key === 'guest_info' || key === 'restrictions') { B.restrictions = bullets; if (bullets.length) B.sections.push({ id:'restrictions', label, icon }); }
+        else if (key === 'specials') { B.specials = bullets.map(b=>({ name:b, desc:'', badge:'★' })); if (bullets.length) B.sections.push({ id:'specials', label, icon }); }
+        else if (bullets.length) B.sections.push({ id:key, label, icon });
+
+      } else if (type === 'grouped_items') {
+        const groups = sec.groups || [], allItems = groups.flatMap(g=>g.items||[]);
+        const isTicket = allItems.some(i=>i.item_type==='ticket');
+        const isDrink  = allItems.some(i=>DRINK_TYPES.has(i.item_type));
+
+        if (key === 'schedules' || key === 'cruise_times' || isTicket) {
+          B.schedules = groups.map(g=>({ time:g.title, name:g.subtitle, tickets:(g.items||[]).map(i=>({ name:i.item_name, price:i.price_numeric||parseFloat((i.price_text||'').replace(/[^0-9.]/g,''))||0 })) }));
+          if (B.schedules.length) B.sections.push({ id:'schedules', label, icon:'🎟️' });
+
+        } else if (key === 'happy_hour') {
+          const schedText = groups.length ? (groups[0].title||'')+(groups[0].subtitle?' · '+groups[0].subtitle:'') : '';
+          B.happyHour = { schedule:schedText, deals:allItems.map(i=>({ name:i.item_name, desc:i.item_description, price:i.price_text })) };
+          B.sections.push({ id:'happy-hour', label, icon:'🍺' });
+
+        } else {
+          const renderIcon = isDrink ? (icon||'🍹') : (icon||'🍽️');
+          if (groups.length <= 1) {
+            const g = groups[0], items = (g?.items||[]).map(i=>({ name:i.item_name, desc:i.item_description, price:i.price_text }));
+            if (items.length) { B.foodMenu.push({ category:g?.title||label, meal:key, note:g?.note_text, isDrink, items }); B.sections.push({ id:'meal-'+key, mealId:key, label, icon:renderIcon }); }
+          } else {
+            groups.forEach(g => {
+              const items = (g.items||[]).map(i=>({ name:i.item_name, desc:i.item_description, price:i.price_text }));
+              if (items.length) { const gid = key+'-'+(g.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'); B.foodMenu.push({ category:g.title||label, meal:gid, note:g.note_text, isDrink, items }); B.sections.push({ id:'meal-'+gid, mealId:gid, label:g.title||label, icon:renderIcon }); }
+            });
+          }
+        }
+
+      } else if (type === 'cards') {
+        const cards = sec.cards || [];
+        if (key === 'packages' || key === 'events') {
+          if (key === 'events') { B.events = cards.map(c=>({ name:c.title, desc:c.description, badge:c.badge_text, note:c.subtitle })); if (B.events.length) B.sections.push({ id:'events', label, icon:'📅' }); }
+          else { B.packages = cards.map(c=>({ name:c.title, price:c.price_text, duration:c.subtitle, desc:c.description, badge:c.badge_text })); if (B.packages.length) B.sections.push({ id:'packages', label, icon:'🎟️' }); }
+        } else {
+          B.packages = cards.map(c=>({ name:c.title, price:c.price_text, duration:c.subtitle, desc:c.description, badge:c.badge_text }));
+          if (B.packages.length) B.sections.push({ id:key, label, icon });
+        }
+
+      } else if (type === 'gallery') {
+        B.gallery = (sec.photos||[]).map(p=>({ url:p.image_url, caption:p.caption }));
+        B.sections.push({ id:'gallery', label, icon:'📸' });
+
+      } else if (type === 'reviews') {
+        B.reviews = (sec.reviews||[]).map(r=>({ author:r.author_name, rating:r.rating, text:r.review_text, date:r.review_date }));
+        B.sections.push({ id:'reviews', label, icon:'⭐' });
+
+      } else if (type === 'hours') {
+        B.hours = (sec.hours||[]).map(h=>({ day:h.day_of_week, open:h.open_time?.slice(0,5)||null, close:h.close_time?.slice(0,5)||null, closed:h.is_closed }));
+        if (B.hours.length) B.sections.push({ id:'hours', label, icon:'🕐' });
+
+      } else if (type === 'location') {
+        const loc = sec.location||{};
+        if (loc.address_line_1) B.address = loc.address_line_1;
+        if (loc.city) B.city = loc.city; if (loc.state) B.state = loc.state;
+        if (loc.directions_url) B.googleMaps = loc.directions_url;
+        if (loc.phone) { B.phoneDisplay = loc.phone; B.phone = loc.phone.replace(/\D/g,''); }
+        if (loc.website_url) B.website = loc.website_url;
+        B.sections.push({ id:'location', label, icon:'📍' });
+      }
+    });
+
+    // Gallery from entity_photos table
+    if ((data.photos||[]).length) {
+      const existing = new Set(B.gallery.map(g=>g.url));
+      const extra = data.photos.filter(p=>p.image_url&&!existing.has(p.image_url)).map(p=>({ url:p.image_url, caption:p.caption }));
+      B.gallery = B.gallery.concat(extra);
+      if (!B.sections.find(s=>s.id==='gallery')) B.sections.push({ id:'gallery', label:'Photos', icon:'📸' });
+    }
+    if (B.gallery.length) B.coverImages = B.coverImages.concat(B.gallery.slice(0,4).map(g=>g.url));
+
+    // Hours from entity_hours
+    const fmtT = t => { if(!t) return null; if(t.includes('am')||t.includes('pm')) return t; const [h,m]=t.split(':').map(Number); const ap=h>=12?'pm':'am'; return (m?`${h%12||12}:${String(m).padStart(2,'0')}`:h%12||12)+ap; };
+    if (!B.hours && (data.hours||[]).length) {
+      B.hours = data.hours.map(h=>({ day:h.day_of_week?h.day_of_week[0].toUpperCase()+h.day_of_week.slice(1):'', open:fmtT(h.open_time), close:fmtT(h.close_time), closed:h.is_closed }));
+      if (B.hours.length && !B.sections.find(s=>s.id==='hours')) B.sections.push({ id:'hours', label:'Hours', icon:'🕐' });
+    }
+
+    // About bullets → highlights
+    if (!B.highlights.length && (data.about_bullets||[]).length) {
+      B.highlights = data.about_bullets.map(b=>(b.icon?b.icon+' ':'')+b.text);
+      if (B.highlights.length && !B.sections.find(s=>s.id==='highlights')) B.sections.unshift({ id:'highlights', label:'About', icon:'ℹ️' });
+    }
+
+    // Menu from new tables
+    const menuSecs = (data.menu&&data.menu.sections)||[], menuSubSecs = (data.menu&&data.menu.sub_sections)||[], menuItems = (data.menu&&data.menu.items)||[];
+    const mapMI = i => ({ name:i.item_name, desc:i.description, price:i.price_text||(i.price?'$'+i.price:'') });
+    menuSecs.forEach(sec => {
+      const mid='newmenu-'+sec.id, secItems=menuItems.filter(i=>i.menu_section_id===sec.id&&!i.menu_sub_section_id);
+      if (secItems.length) B.foodMenu.push({ category:sec.section_name, meal:mid, note:sec.section_note, isDrink:false, items:secItems.map(mapMI) });
+      menuSubSecs.filter(sub=>sub.menu_section_id===sec.id).forEach(sub => { const subItems=menuItems.filter(i=>i.menu_sub_section_id===sub.id); if(subItems.length) B.foodMenu.push({ category:sub.sub_section_name, meal:mid, note:sub.section_note, isDrink:false, items:subItems.map(mapMI) }); });
+      if (B.foodMenu.some(c=>c.meal===mid)) B.sections.push({ id:'meal-'+mid, mealId:mid, label:sec.section_name, icon:sec.icon||'🍽️' });
+    });
+
+    // Drinks
+    const drinkSecs=(data.drinks&&data.drinks.sections)||[], drinkItems=(data.drinks&&data.drinks.items)||[];
+    drinkSecs.forEach(sec => {
+      const did='newdrink-'+sec.id, secItems=drinkItems.filter(i=>i.drink_section_id===sec.id);
+      if (secItems.length) { B.foodMenu.push({ category:sec.section_name, meal:did, note:sec.section_note, isDrink:true, items:secItems.map(i=>{ const bp=[i.item_style,i.abv,i.ibu,i.brewery].filter(Boolean).join(' · '); return { name:i.item_name, desc:bp?(i.description?i.description+' · '+bp:bp):i.description, price:i.price_text||(i.price?'$'+i.price:'') }; }) }); B.sections.push({ id:'meal-'+did, mealId:did, label:sec.section_name, icon:'🍹' }); }
+    });
+
+    // Happy hour from new tables
+    const hhSecs=(data.happy_hour&&data.happy_hour.sections)||[], hhItems=(data.happy_hour&&data.happy_hour.items)||[];
+    if (!B.happyHour && hhSecs.length) {
+      const sched=[e.hh_days,(e.hh_start&&e.hh_end)?`${e.hh_start}–${e.hh_end}`:'',e.hh_description].filter(Boolean).join(' · ');
+      const deals=hhItems.map(i=>({ name:i.item_name, desc:i.description, price:i.price_text||(i.hh_price!=null?`$${i.hh_price}`:'') }));
+      if (deals.length||sched) { B.happyHour={schedule:sched,deals}; if(!B.sections.find(s=>s.id==='happy-hour')) B.sections.push({ id:'happy-hour', label:'Happy Hour', icon:'🍺' }); }
+    }
+
+    // Events
+    if (!B.events.length && (data.events||[]).length) {
+      B.events = data.events.map(ev=>({ name:ev.event_name, desc:ev.description||(ev.artist_name?'Featuring '+ev.artist_name:''), badge:ev.event_type||(ev.recurring?'Every '+ev.day_of_week:ev.event_date||''), note:[ev.start_time,ev.end_time].filter(Boolean).join('–')+(ev.venue_location?' · '+ev.venue_location:'') }));
+      if (B.events.length && !B.sections.find(s=>s.id==='events')) B.sections.push({ id:'events', label:'Events', icon:'📅' });
+    }
+
+    // Specials
+    if (!B.specials.length && (data.specials||[]).length) {
+      B.specials = data.specials.map(s=>({ name:s.special_name, desc:[s.description,s.days,s.start_time&&s.end_time?s.start_time+'–'+s.end_time:''].filter(Boolean).join(' · '), badge:s.discount_text||'★' }));
+      if (B.specials.length && !B.sections.find(s=>s.id==='specials')) B.sections.push({ id:'specials', label:'Deals & Specials', icon:'⭐' });
+    }
+
+    // Pricing (standalone only if no fleet)
+    if (!B.packages.length && (data.pricing||[]).length && !(data.fleet||[]).length) {
+      B.packages = data.pricing.map(p=>({ name:p.package_name, desc:p.description, price:p.price_text||(p.price?'$'+p.price:''), duration:[p.time_slot_start&&p.time_slot_end?p.time_slot_start+'–'+p.time_slot_end:'',p.price_unit].filter(Boolean).join(' · ') }));
+      if (B.packages.length && !B.sections.find(s=>s.id==='packages')) B.sections.push({ id:'packages', label:'Packages & Pricing', icon:'🎟️' });
+    }
+
+    // Dedicated tables
+    if ((data.activities||[]).length) { B._activities=data.activities; B.sections.push({ id:'activities', label:'Activities', icon:'🎯' }); }
+
+    if ((data.fleet||[]).length) {
+      B._fleet=data.fleet; B._pricing=data.pricing||[];
+      // Use DB section_label if available (e.g. "Our Boats", "Our Fleet", "Our Charter Trips")
+      const fleetSec = (data.sections||[]).find(s=>s.section_key==='fleet');
+      const fleetLabel = fleetSec?.section_label || 'Our Fleet';
+      B.sections.push({ id:'fleet', label:fleetLabel, icon:'⛵' });
+    }
+
+    if ((data.addons||[]).length) { B._addons=data.addons; B.sections.push({ id:'addons', label:'Extras & Add-Ons', icon:'➕' }); }
+    if ((data.whats_included||[]).length) { B._included=data.whats_included; B.sections.push({ id:'included', label:"What's Included", icon:'✅' }); }
+    if ((data.requirements||[]).length) { B._requirements=data.requirements; B.sections.push({ id:'requirements', label:'Requirements', icon:'📋' }); }
+    if ((data.policies||[]).length) { B._policies=data.policies; B.sections.push({ id:'policies', label:'Good to Know', icon:'📄' }); }
+    if ((data.meeting_points||[]).length) { B._meetingPoint=data.meeting_points[0]; B.sections.push({ id:'meetingpoint', label:'Meeting Point', icon:'🗺️' }); }
+    if ((data.qna||[]).length) { B._qna=data.qna; B.sections.push({ id:'qna', label:'FAQs', icon:'❓' }); }
+
+    // Ensure location + move gallery/hours to end
+    if (!B.sections.find(s=>s.id==='location') && (B.address||B.city)) B.sections.push({ id:'location', label:'Find Us', icon:'📍' });
+    ['gallery','hours','location'].forEach(id => { const i=B.sections.findIndex(s=>s.id===id); if(i>-1) B.sections.push(B.sections.splice(i,1)[0]); });
+
+    return B;
+  }
+
+  // ── PAGE BUILDER ──────────────────────────────────────────────
+  function buildPage(B) {
+    document.getElementById('page-title').textContent = B.name + ' – Gulf Coast Radar';
+    if (B.tagline) document.getElementById('page-desc').setAttribute('content', B.tagline);
+
+    // Hero
+    document.getElementById('js-name').textContent = B.name;
+    if (B.tagline) document.getElementById('js-tag').textContent = B.tagline;
+    const heroMeta = document.getElementById('js-hero-meta');
+    if (B.rating) heroMeta.innerHTML += `<span class="hero-pill">⭐ ${B.rating}${B.reviewCount?' ('+B.reviewCount.toLocaleString()+')'  :''}</span>`;
+    if (B.city)   heroMeta.innerHTML += `<span class="hero-pill">📍 ${B.city}, ${B.state||''}</span>`;
+    if (B.priceFrom) heroMeta.innerHTML += `<span class="hero-pill">From $${B.priceFrom}</span>`;
+
+    // Slides
+    const slides = B.coverImages.filter(Boolean);
+    const slidesEl = document.getElementById('js-slides'), dotsEl = document.getElementById('js-dots');
+    let cur = 0;
+    if (slides.length) {
+      slides.forEach((src,i) => {
+        slidesEl.innerHTML += `<div class="hero-slide${i===0?' active':''}"><img src="${esc(src)}" alt="${esc(B.name)}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#0c2d48,#1e40af)'"></div>`;
+        if (slides.length > 1) dotsEl.innerHTML += `<button class="hero-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
+      });
+      if (slides.length === 1) { document.getElementById('js-prev').style.display='none'; document.getElementById('js-next').style.display='none'; }
+    } else {
+      document.getElementById('js-prev').style.display='none'; document.getElementById('js-next').style.display='none';
+    }
+    window.goSlide = n => { cur=(n+slides.length)%slides.length; document.querySelectorAll('.hero-slide').forEach((s,i)=>s.classList.toggle('active',i===cur)); document.querySelectorAll('.hero-dot').forEach((d,i)=>d.classList.toggle('active',i===cur)); };
+    document.getElementById('js-prev').onclick = () => goSlide(cur-1);
+    document.getElementById('js-next').onclick = () => goSlide(cur+1);
+    if (slides.length > 1) setInterval(() => goSlide(cur+1), 5000);
+
+    // CTA bar
+    const cta = document.getElementById('js-cta');
+    const bookUrl = B.bookingUrl;
+    if (bookUrl) cta.innerHTML += `<a href="${esc(bookUrl)}" target="_blank" class="btn btn-book">📅 Book Now</a>`;
+    if (B.phone) cta.innerHTML += `<a href="tel:${esc(B.phone)}" class="btn btn-call">📞 Call</a>`;
+    if (B.googleMaps) cta.innerHTML += `<a href="${esc(B.googleMaps)}" target="_blank" class="btn btn-dir">📍 Directions</a>`;
+    if (B.reservationUrl) cta.innerHTML += `<a href="${esc(B.reservationUrl)}" target="_blank" class="btn btn-book" style="background:#059669;">🍽️ Reserve</a>`;
+    if (B.orderUrl) cta.innerHTML += `<a href="${esc(B.orderUrl)}" target="_blank" class="btn btn-book" style="background:#d97706;">🛵 Order</a>`;
+    if (B.website) cta.innerHTML += `<a href="${esc(B.website)}" target="_blank" class="btn btn-ghost">🌐 Website</a>`;
+    if (B.socialInstagram) cta.innerHTML += socialBtn(B.socialInstagram, 'instagram');
+    if (B.socialFacebook)  cta.innerHTML += socialBtn(B.socialFacebook,  'facebook');
+    if (B.socialTiktok)    cta.innerHTML += socialBtn(B.socialTiktok,    'tiktok');
+
+    // Mobile book button
+    if (bookUrl || B.phone) {
+      const mb = document.getElementById('js-mobile-book');
+      mb.style.display = 'block';
+      const mbBtn = document.getElementById('js-mobile-book-btn');
+      if (bookUrl) { mbBtn.textContent = '📅 Book Now'; mbBtn.onclick = () => window.open(bookUrl,'_blank'); }
+      else { mbBtn.textContent = '📞 Call to Book'; mbBtn.onclick = () => location.href = 'tel:'+B.phone; }
+    }
+
+    // Tabs
+    const tabsEl = document.getElementById('js-tabs');
+    B.sections.forEach(sec => {
+      if (sec.scrollTo) return;
+      const btn = document.createElement('button');
+      btn.className = 'tab'; btn.dataset.id = sec.id;
+      btn.textContent = (sec.icon ? sec.icon+' ' : '') + sec.label;
+      btn.onclick = () => {
+        const el = document.getElementById('sec-'+sec.id);
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 64 - 52 - 8;
+        window.scrollTo({ top: Math.max(0,top), behavior:'smooth' });
+      };
+      tabsEl.appendChild(btn);
+    });
+
+    // Active tab on scroll
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id.replace('sec-','');
+          document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.id === id));
+        }
+      });
+    }, { rootMargin:'-30% 0px -60% 0px' });
+
+    // Sections
+    const container = document.getElementById('js-sections');
+    container.innerHTML = '';
+
+    B.sections.forEach(sec => {
+      if (sec.scrollTo) return;
+      const el = document.createElement('section');
+      el.id = 'sec-' + sec.id;
+      let html = '';
+
+      switch (sec.id) {
+
+        case 'about':
+        case 'highlights':
+          html = secCard(sec, `
+            ${B.about.description ? `<p class="about-p">${esc(B.about.description)}</p>` : ''}
+            ${B.highlights.length ? `<div class="bullet-list">${B.highlights.map(h=>`<div class="bullet-item"><div class="bullet-dot"></div><div>${esc(h)}</div></div>`).join('')}</div>` : ''}
+            ${B.about.features?.length ? `<div class="sub-label">Highlights</div><div class="feat-pills">${B.about.features.map(f=>`<span class="feat-pill">✓ ${esc(f)}</span>`).join('')}</div>` : ''}
+            ${B.about.perfectFor?.length ? `<div class="sub-label">Perfect For</div><div class="feat-pills">${B.about.perfectFor.map(f=>`<span class="feat-pill">${esc(f)}</span>`).join('')}</div>` : ''}
+          `); break;
+
+        case 'fleet':
+          html = secCard(sec, `<div class="fleet-grid">${(B._fleet||[]).map(f => {
+            const allP = B._pricing||[], nameKey = (f.item_name||'').toLowerCase();
+            let bp = allP.filter(p=>(p.package_name||'').toLowerCase().includes(nameKey));
+            if (!bp.length && allP.length) { const idx=(B._fleet||[]).indexOf(f), sz=Math.ceil(allP.length/(B._fleet||[]).length); bp=allP.slice(idx*sz,idx*sz+sz); }
+            return `<div class="fleet-card">
+              ${f.image_url ? `<img class="fleet-img" src="${esc(f.image_url)}" alt="${esc(f.item_name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+              <div class="fleet-body">
+                <div class="fleet-head">
+                  <div class="fleet-name">${esc(f.item_name)}</div>
+                  ${f.max_capacity_text ? `<span class="fleet-cap">👥 ${esc(f.max_capacity_text)}</span>` : ''}
+                </div>
+                ${f.description ? `<div class="fleet-desc">${esc(f.description)}</div>` : ''}
+                ${(f.weight||f.dimensions) ? `<div class="fleet-specs">${f.weight?`<span class="fleet-spec">⚖️ ${esc(f.weight)}</span>`:''} ${f.dimensions?`<span class="fleet-spec">📐 ${esc(f.dimensions)}</span>`:''}</div>` : ''}
+                ${bp.length ? `<div class="pricing-table"><div class="pricing-label">Rental Rates</div>${bp.map(p=>`
+                  <div class="pricing-row">
+                    <div><div class="pricing-slot">${esc(p.package_name||'')}</div>${p.time_slot_start&&p.time_slot_end?`<div class="pricing-time">${esc(p.time_slot_start)} – ${esc(p.time_slot_end)}</div>`:''}</div>
+                    <div class="pricing-price">${esc(p.price_text||(p.price?'$'+p.price:''))}</div>
+                  </div>`).join('')}</div>` : ''}
+                ${B.bookingUrl ? `<button class="btn-book-boat" onclick="window.open('${esc(B.bookingUrl)}','_blank')">📅 Book Now</button>` : ''}
+              </div>
+            </div>`;
+          }).join('')}</div>`); break;
+
+        case 'packages':
+          html = secCard(sec, `<div class="pkg-grid">${B.packages.map(p=>`
+            <div class="pkg-card">
+              ${p.badge ? `<div class="pkg-badge">${esc(p.badge)}</div>` : ''}
+              <div class="pkg-name">${esc(p.name)}</div>
+              ${p.duration ? `<div class="pkg-dur">${esc(p.duration)}</div>` : ''}
+              ${p.price ? `<div class="pkg-price">${esc(p.price)}</div>` : ''}
+              ${p.desc ? `<div class="pkg-desc">${esc(p.desc)}</div>` : ''}
+            </div>`).join('')}</div>`); break;
+
+        case 'specials':
+          html = secCard(sec, B.specials.map(s=>`
+            <div class="deal-card">
+              ${s.badge ? `<div class="deal-badge">${esc(s.badge)}</div>` : ''}
+              <div class="deal-name">${esc(s.name)}</div>
+              ${s.desc ? `<div class="deal-desc">${esc(s.desc)}</div>` : ''}
+            </div>`).join('')); break;
+
+        case 'events':
+          html = secCard(sec, B.events.map(ev=>`
+            <div class="event-card">
+              <div class="event-badge">${esc(ev.badge||'📅')}</div>
+              <div><div class="event-name">${esc(ev.name)}</div>${ev.note?`<div class="event-note">${esc(ev.note)}</div>`:''} ${ev.desc?`<div class="event-note" style="margin-top:4px;">${esc(ev.desc)}</div>`:''}</div>
+            </div>`).join('')); break;
+
+        case 'schedules':
+          html = secCard(sec, B.schedules.map(s=>`
+            <div class="schedule-slot">
+              <div class="schedule-time">${esc(s.time||'')}</div>
+              ${s.name?`<div class="schedule-name">${esc(s.name)}</div>`:''}
+              ${(s.tickets||[]).map(t=>`<div class="ticket-row"><span>${esc(t.name)}</span><span style="font-weight:700;color:var(--accent)">$${t.price}</span></div>`).join('')}
+            </div>`).join('')); break;
+
+        case 'happy-hour':
+          html = secCard(sec, `
+            ${B.happyHour?.schedule ? `<div class="hh-time">${esc(B.happyHour.schedule)}</div>` : ''}
+            ${(B.happyHour?.deals||[]).map(d=>`<div class="hh-deal"><span>${esc(d.name)}${d.desc?`<span style="color:var(--muted);font-size:12px;"> · ${esc(d.desc)}</span>`:''}</span>${d.price?`<span class="hh-price">${esc(d.price)}</span>`:''}</div>`).join('')}
+          `); break;
+
+        case 'included':
+          html = secCard(sec, `<div class="included-grid">${(B._included||[]).map(i=>`
+            <div class="included-item"><div class="included-check">✓</div><div><strong>${esc(i.item_name)}</strong>${i.description?`<div style="font-size:12px;color:var(--muted);">${esc(i.description)}</div>`:''}</div></div>`).join('')}</div>`); break;
+
+        case 'addons':
+          html = secCard(sec, `<div class="addon-grid">${(B._addons||[]).map(a=>{
+            const price = a.price_min!=null&&a.price_max!=null?`$${a.price_min}–$${a.price_max}`:a.price!=null?`+$${a.price}`:a.price_text||'';
+            return `<div class="addon-card">${a.image_url?`<img src="${esc(a.image_url)}" alt="${esc(a.addon_name)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;display:block;margin-bottom:10px;" loading="lazy" onerror="this.style.display='none'">`:''}<div class="addon-name">${esc(a.addon_name)}</div>${a.description?`<div class="addon-desc">${esc(a.description)}</div>`:''}<div class="addon-price">${esc(price)}</div></div>`;
+          }).join('')}</div>`); break;
+
+        case 'activities':
+          html = secCard(sec, (B._activities||[]).map(a=>`
+            <div class="activity-card">
+              <div class="activity-name">${esc(a.activity_name||a.name||'')}</div>
+              ${a.description?`<div class="activity-desc">${esc(a.description)}</div>`:''}
+              <div class="activity-meta">${[a.duration?`⏱ ${a.duration}`:'', a.max_participants?`👥 Up to ${a.max_participants}`:'', a.difficulty_level?`🎯 ${a.difficulty_level}`:''].filter(Boolean).map(s=>`<span>${esc(s)}</span>`).join('')}</div>
+            </div>`).join('')); break;
+
+        case 'restrictions':
+          html = secCard(sec, `<div class="bullet-list">${B.restrictions.map(r=>`<div class="bullet-item"><div class="bullet-dot"></div><div>${esc(r)}</div></div>`).join('')}</div>`); break;
+
+        case 'requirements':
+          html = secCard(sec, `<div class="bullet-list">${(B._requirements||[]).map(r=>`<div class="bullet-item"><div class="bullet-dot"></div><div>${esc(r.requirement_text||r)}</div></div>`).join('')}</div>`); break;
+
+        case 'policies':
+          html = secCard(sec, (B._policies||[]).map(p=>`
+            <div class="policy-item">
+              ${p.policy_type?`<div class="policy-type">${esc(p.policy_type.replace(/_/g,' '))}</div>`:''}
+              <div class="policy-text">${esc(p.policy_text)}</div>
+            </div>`).join('')); break;
+
+        case 'qna':
+          html = secCard(sec, (B._qna||[]).map((q,i)=>`
+            <div class="faq-item" id="faq-${i}">
+              <div class="faq-q" onclick="toggleFaq(${i})"><span>${esc(q.question)}</span><span class="faq-arrow">›</span></div>
+              <div class="faq-a">${esc(q.answer)}</div>
+            </div>`).join('')); break;
+
+        case 'meetingpoint':
+          html = secCard(sec, (() => {
+            const mp = B._meetingPoint||{};
+            return `<div class="location-grid">
+              ${mp.location_name?`<div class="location-row"><div class="location-icon">📍</div><div><div class="location-label">Meeting Point</div>${esc(mp.location_name)}</div></div>`:''}
+              ${mp.address?`<div class="location-row"><div class="location-icon">🏠</div><div><div class="location-label">Address</div>${esc(mp.address)}</div></div>`:''}
+              ${mp.instructions?`<div class="location-row"><div class="location-icon">ℹ️</div><div><div class="location-label">Instructions</div>${esc(mp.instructions)}</div></div>`:''}
+              ${mp.map_url?`<a href="${esc(mp.map_url)}" target="_blank" class="btn btn-dir" style="margin-top:10px;">🗺️ View on Map</a>`:''}
+            </div>`;
+          })()); break;
+
+        case 'gallery':
+          html = secCard(sec, B.gallery.length ? `<div class="photo-grid">${B.gallery.map((p,i)=>`<div class="photo-thumb" onclick="openPhoto(${i})"><img src="${esc(p.url)}" alt="${esc(p.caption||B.name)}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`).join('')}</div>` : ''); break;
+
+        case 'reviews':
+          html = secCard(sec, B.reviews.map(r=>`
+            <div class="review-card">
+              <div class="review-stars">${'★'.repeat(Math.round(r.rating||5))}${'☆'.repeat(5-Math.round(r.rating||5))}</div>
+              <div class="review-text">${esc(r.text)}</div>
+              <div class="review-author">— ${esc(r.author)}${r.date?' · '+r.date.slice(0,10):''}</div>
+            </div>`).join('')); break;
+
+        case 'hours':
+          html = secCard(sec, (B.hours||[]).map(h=>`
+            <div class="hours-row">
+              <span class="hours-day">${esc(h.day)}</span>
+              ${h.closed ? `<span class="hours-closed">Closed</span>` : `<span class="hours-time">${esc(h.open||'')} – ${esc(h.close||'')}</span>`}
+            </div>`).join('')); break;
+
+        case 'location':
+          html = secCard(sec, `<div class="location-grid">
+            ${B.address||B.city ? `<div class="location-row"><div class="location-icon">📍</div><div><div class="location-label">Address</div>${esc([B.address,B.city,B.state,B.zip].filter(Boolean).join(', '))}</div></div>` : ''}
+            ${B.phoneDisplay ? `<div class="location-row"><div class="location-icon">📞</div><div><div class="location-label">Phone</div><a href="tel:${esc(B.phone)}">${esc(B.phoneDisplay)}</a></div></div>` : ''}
+            ${B.website ? `<div class="location-row"><div class="location-icon">🌐</div><div><div class="location-label">Website</div><a href="${esc(B.website)}" target="_blank">${esc(B.website)}</a></div></div>` : ''}
+            ${B.googleMaps ? `<a href="${esc(B.googleMaps)}" target="_blank" class="btn btn-dir" style="margin-top:10px;">📍 Get Directions</a>` : ''}
+          </div>`); break;
+
+        default:
+          // Meal sections
+          if (sec.id.startsWith('meal-')) {
+            const cat = B.foodMenu.find(c => c.meal === sec.mealId);
+            if (cat) html = secCard(sec, `
+              ${cat.note ? `<p style="font-size:13px;color:var(--muted);margin:0 0 12px;">${esc(cat.note)}</p>` : ''}
+              <div class="menu-grid">${cat.items.map(i=>`
+                <div class="menu-item">
+                  <div class="menu-name">${esc(i.name)}</div>
+                  ${i.desc ? `<div class="menu-desc">${esc(i.desc)}</div>` : ''}
+                  ${i.price ? `<div class="menu-price">${esc(i.price)}</div>` : ''}
+                </div>`).join('')}</div>`);
+          }
+      }
+
+      if (html) { el.innerHTML = html; container.appendChild(el); observer.observe(el); }
+    });
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────
+  function secCard(sec, inner) {
+    return `<div class="sec-card">
+      <div class="sec-header">
+        ${sec.icon ? `<span class="sec-icon">${sec.icon}</span>` : ''}
+        <h2 class="sec-title">${esc(sec.label)}</h2>
+      </div>
+      ${inner}
+    </div>`;
+  }
+
+  function esc(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function socialBtn(url, type) {
+    const icons = {
+      instagram: '<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>',
+      facebook:  '<svg viewBox="0 0 24 24"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.235 2.686.235v2.97h-1.514c-1.491 0-1.956.93-1.956 1.886v2.269h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>',
+      tiktok:    '<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.75a4.85 4.85 0 01-1.01-.06z"/></svg>',
+    };
+    const href = url.startsWith('http') ? url : (type==='instagram'?'https://instagram.com/':type==='tiktok'?'https://tiktok.com/@':'https://facebook.com/') + url.replace('@','');
+    return `<a href="${esc(href)}" target="_blank" class="social-btn" title="${type}">${icons[type]||''}</a>`;
+  }
+
+  window.toggleFaq = i => { document.getElementById('faq-'+i)?.classList.toggle('open'); };
+
+  window.openPhoto = i => {
+    const p = BUSINESS_DATA.gallery[i]; if (!p) return;
+    const o = document.createElement('div');
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+    o.innerHTML = `<img src="${esc(p.url)}" style="max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain;">`;
+    o.onclick = () => o.remove();
+    document.body.appendChild(o);
+  };
+
+})();
+</script>
+</body>
+</html>
