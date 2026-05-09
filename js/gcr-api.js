@@ -125,11 +125,25 @@ const GCR = {
   },
 
   _dedupeById(arr) {
-    const seen = new Set();
+    const seenIds = new Set();
+    const seenKeys = new Set();
     return arr.filter(item => {
-      const id = item.id;
-      if (!id || seen.has(id)) return !id; // keep items with no id, skip dupe ids
-      seen.add(id);
+      // Dedup by id
+      if (item.id) {
+        if (seenIds.has(item.id)) return false;
+        seenIds.add(item.id);
+      }
+      // Dedup by content key (name + entity + date + time + day)
+      const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').trim();
+      const key = [
+        norm(item.artist_name || item.event_name || ''),
+        norm(item.entity_name || item.entity_id || ''),
+        (item.event_date || item.date || '').trim(),
+        (item.start_time || '').trim(),
+        (item.day_of_week || '').toLowerCase().trim()
+      ].join('|');
+      if (seenKeys.has(key)) return false;
+      seenKeys.add(key);
       return true;
     });
   },

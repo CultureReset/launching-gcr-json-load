@@ -808,17 +808,23 @@
     else if (tab==='date') renderDateRange();
   }
 
+  function _norm(s) { return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'').trim(); }
+
   function init() {
     const rawEvents = GCR.events || [];
     const seen = new Set();
     allEvents = rawEvents.filter(e => {
-      const key = [
-        (e.artist_name || e.event_name || '').toLowerCase().trim(),
-        (e.entity_name || e.businessName || e.venue_location || e.entity_id || '').toLowerCase().trim(),
-        e.event_date || e.date || '',
-        e.start_time || '',
-        (e.day_of_week||'').toLowerCase()
-      ].join('|');
+      // Primary key: id-based dedup
+      if (e.id && seen.has('id:' + e.id)) return false;
+      if (e.id) seen.add('id:' + e.id);
+
+      // Content key: name + entity + date + time + day
+      const name   = _norm(e.artist_name || e.event_name || '');
+      const entity = _norm(e.entity_name || e.entity_id || e.businessName || e.venue_location || '');
+      const date   = (e.event_date || e.date || '').trim();
+      const time   = (e.start_time || '').trim();
+      const day    = (e.day_of_week || '').toLowerCase().trim();
+      const key    = `${name}|${entity}|${date}|${time}|${day}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
