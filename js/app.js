@@ -428,6 +428,30 @@ function _gcrCalRenderEvents() {
     _pushItem({...sp, _src: type==='happy_hour' ? 'happy_hour' : 'special'});
   });
 
+  // — Happy Hour businesses (recurring schedules) —
+  if (_gcrCalTypes.has('happy_hour')) {
+    (GCR.happyHours||[]).forEach(hh=>{
+      if (!hh.hh_days) return;
+      let hhDaysRaw = hh.hh_days;
+      if (typeof hhDaysRaw === 'string') {
+        try { hhDaysRaw = JSON.parse(hhDaysRaw); } catch(e) { hhDaysRaw = hhDaysRaw.split(/[,;]+/).map(s=>s.trim()); }
+      }
+      const hhDays = (Array.isArray(hhDaysRaw) ? hhDaysRaw : []).map(d=>d.toLowerCase());
+      const dayMatch = !hhDays.length || ['daily','everyday','all'].some(k=>hhDays.includes(k)) ||
+        hhDays.includes(dayName) || (isWeekend&&(hhDays.includes('weekend')||hhDays.includes('weekends')));
+      if (!dayMatch) return;
+      _pushItem({
+        entity_id: hh.id,
+        entity_name: hh.name,
+        entity_slug: hh.slug,
+        special_name: (hh.hh_description || 'Happy Hour'),
+        start_time: hh.hh_start,
+        time: hh.hh_start,
+        _src: 'happy_hour'
+      });
+    });
+  }
+
   // Sort by time
   items.sort((a,b)=>{
     const at = _gcrCalToMin(a.start_time||a.time||a.event_time||'') ?? 9999;
