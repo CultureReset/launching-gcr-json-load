@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
    MASTER CALENDAR MODAL  (works on every page)
 ══════════════════════════════════════════ */
 let _gcrCalDate   = new Date();
-let _gcrCalTypes  = new Set(['events','happy_hour','special','live-music']);
+let _gcrCalTypes  = new Set(['events','happy_hour','live-music']);
 
 /* Inject modal HTML once into page body */
 function _gcrInjectCal() {
@@ -198,7 +198,6 @@ function _gcrInjectCal() {
         <span style="font-size:.7rem;font-weight:700;color:#888;">Show:</span>
         <button class="cal-toggle on" data-t="events"     onclick="gcrCalToggle(this)">🎉 Events</button>
         <button class="cal-toggle on" data-t="happy_hour" onclick="gcrCalToggle(this)">🍻 Happy Hours</button>
-        <button class="cal-toggle on" data-t="special"    onclick="gcrCalToggle(this)">🏷️ Specials</button>
         <button class="cal-toggle on" data-t="live-music" onclick="gcrCalToggle(this)">🎸 Live Music</button>
       </div>
       <div class="cal-body">
