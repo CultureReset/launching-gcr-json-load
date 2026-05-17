@@ -218,6 +218,8 @@ const SUBTYPE_TO_CATEGORY = {
   furniture_store:'shopping', convenience_store:'shopping', food_store:'shopping',
   sporting_goods_store:'shopping', florist:'shopping', grocery_store:'shopping',
   liquor_store:'shopping', retail_liquor_store:'shopping',
+  store:'shopping', market:'shopping', thrift_store:'shopping',
+  book_store:'shopping', home_goods_store:'shopping', shoe_store:'shopping',
 
   // Things To Do — all DB subtypes mapped
   parasailing:'things-to-do', dolphin_cruise:'things-to-do', dolphin_cruises_tours:'things-to-do',
@@ -237,9 +239,13 @@ const SUBTYPE_TO_CATEGORY = {
   tour_agency:'things-to-do', tour_operator:'things-to-do',
   event_venue:'things-to-do', tourist_attraction:'things-to-do',
   sports_complex:'things-to-do', pier:'things-to-do',
+  activity:'things-to-do', venue:'things-to-do',
+  marina_and_rentals:'things-to-do', performing_arts:'things-to-do',
+  miniature_golf:'things-to-do', state_park:'things-to-do',
+  museum:'things-to-do', nature_preserve:'things-to-do',
 
   // Nightlife
-  nightlife:'nightlife',
+  nightlife:'nightlife', night_club:'nightlife',
   bar_club:'nightlife', nightclub:'nightlife', sports_bar:'nightlife',
   rooftop_bar:'nightlife', lounge:'nightlife', cocktail_bar:'nightlife',
 
@@ -263,6 +269,7 @@ const SUBTYPE_TO_CATEGORY = {
   resort:'staying', resort_hotel:'staying',
   condo:'staying', condominium_complex:'staying', condominium_association:'staying',
   vacation_rental:'staying', vacation_rentals:'staying', vacation_rental_resort:'staying',
+  vacation_home:'staying', motel:'staying',
   bed_and_breakfast:'staying', rv_park:'staying', campground:'staying',
   apartment_community:'staying',
 
