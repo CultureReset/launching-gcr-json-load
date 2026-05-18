@@ -610,11 +610,11 @@
       const officialGallery = sorted.map(p => ({ url: p.image_url, caption: p.caption, isCover: p.is_cover, type: 'official' }));
       const communityGallery = communityPhotos.map(p => ({ url: p.image_url || p.photo_url || p.url, caption: p.caption || p.note || 'Community photo', type: 'community' })).filter(p => p.url);
       if (!B.gallery.length) B.gallery = [...officialGallery, ...communityGallery];
-      // Put cover photo first, then up to 2 more for the hero slideshow
+      // Put cover photo first, then all other photos for the hero slideshow
       const coverPhoto = sorted.find(p => p.is_cover);
       if (coverPhoto && !B.coverImages.includes(coverPhoto.image_url))
         B.coverImages.unshift(coverPhoto.image_url);
-      B.coverImages = B.coverImages.concat(sorted.filter(p => !p.is_cover).slice(0, 2).map(p => p.image_url)).filter(Boolean);
+      B.coverImages = B.coverImages.concat(sorted.filter(p => !p.is_cover).map(p => p.image_url)).filter(Boolean);
       if (!B.sections.find(s => s.id === 'gallery'))
         B.sections.push({ id: 'gallery', label: `Photos${communityGallery.length ? ` (${B.gallery.length})` : ''}`, icon: '📸' });
     }
