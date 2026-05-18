@@ -495,16 +495,16 @@
   }
 
   // ── CARD VIEW ───────────────────────────────────────────────────────────────
-  function buildEventCard(ev) {
+  function buildEventCard(ev, idx) {
     const slug = ev.entity_slug || ev.slug || '';
-    const name = ev.event_name || ev.name || '';
+    const name = ev.artist_name || ev.event_name || ev.name || 'Event';
     const { biz, city } = getVenueParts(ev);
     const hero  = fallbackImg(ev);
-    const etype = (ev.event_type || '').replace(/_/g,' ');
+    const etype = (ev.event_type || '').replace(/_/g,' ') || 'Event';
     const time  = ev.start_time ? fmt12(ev.start_time) : '';
     const desc  = (ev.description || '').slice(0, 120);
     const profileUrl = slug ? `profile.html?id=${encodeURIComponent(slug)}` : '';
-    const isMusic = (ev.event_type||'').includes('music') || (ev.event_type||'').includes('live') || (ev.event_type||'').includes('mic');
+    const isMusic = (ev.event_type||'').includes('music') || (ev.event_type||'').includes('live') || (ev.event_type||'').includes('mic') || (ev.artist_name||'').length > 0;
     return `
       <div class="event-card" style="margin-bottom:12px;">
         <div class="event-image" style="background-image:url('${hero}')">
@@ -535,7 +535,7 @@
   // ── LIST VIEW ───────────────────────────────────────────────────────────────
   function buildEventRow(ev, idx) {
     const slug = ev.entity_slug || ev.slug || '';
-    const name = ev.event_name || ev.name || '';
+    const name = ev.artist_name || ev.event_name || ev.name || '';
     const { biz, city } = getVenueParts(ev);
     const hero = fallbackImg(ev);
     const time = ev.start_time ? fmt12(ev.start_time) : '—';
@@ -597,7 +597,8 @@
     let events = allEvents.filter(e => {
       const isToday     = e.event_date === todayStr;
       const isRecurring = (e.recurring || (e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName;
-      return isToday || isRecurring;
+      const hasNoDate   = !e.event_date || e.event_date.trim() === '';
+      return isToday || isRecurring || hasNoDate;
     }).filter(matchesFilter);
     events.sort((a,b) => (a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
     document.getElementById('todayHeading').textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
@@ -608,7 +609,7 @@
       return;
     }
     if (currentView === 'cards') {
-      grid.innerHTML = events.map(buildEventCard).join('');
+      grid.innerHTML = events.map((e, i) => buildEventCard(e, i)).join('');
     } else {
       grid.innerHTML = events.map((e, i) => buildEventRow(e, i)).join('');
     }
@@ -616,7 +617,7 @@
 
   function renderWeekly() {
     const grid = document.getElementById('weeklyGrid');
-    let events = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim()).filter(matchesFilter);
+    let events = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim() || !e.event_date || e.event_date.trim() === '').filter(matchesFilter);
     document.getElementById('resultCount').textContent = `${events.length} recurring events`;
     if (!events.length) { grid.innerHTML = `<div style="padding:52px 24px;text-align:center;color:#66788a;"><div style="font-size:3rem;margin-bottom:12px;">🗓️</div><h3 style="font-weight:800;margin:0 0 8px;">No weekly schedules yet</h3></div>`; return; }
     const dayOrder = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};
@@ -856,10 +857,16 @@
     const today = new Date().toISOString().split('T')[0];
     const todayName = DAYS[new Date().getDay()];
 
-    // Featured Tonight: events happening today, sorted soonest first
-    const featured = allEvents.filter(e =>
-      e.event_date === today || ((e.recurring||(e.day_of_week||'').trim()) && (e.day_of_week||'').toLowerCase() === todayName)
-    ).slice(0, 3);
+    // Featured Tonight: any events, prioritizing today/recurring
+    const featured = allEvents
+      .sort((a,b) => {
+        const aIsToday = a.event_date === today;
+        const bIsToday = b.event_date === today;
+        if (aIsToday && !bIsToday) return -1;
+        if (!aIsToday && bIsToday) return 1;
+        return 0;
+      })
+      .slice(0, 3);
 
     const featuredPanel = document.getElementById('featuredTonightPanel');
     const featuredList  = document.getElementById('featuredTonightList');
@@ -867,10 +874,11 @@
       featuredList.innerHTML = featured.map(e => {
         const slug = e.entity_slug || e.slug || '';
         const time = e.start_time ? ` · ${fmt12(e.start_time)}` : '';
+        const name = e.event_name || e.name || e.artist_name || 'Event';
         return `<div class="mini-card">
           <div>
-            <div class="mini-name">${e.title || e.name || 'Event'}</div>
-            <div class="mini-meta">Tonight${time}${e.venue_name ? ' · ' + e.venue_name : ''}</div>
+            <div class="mini-name">${esc(name)}</div>
+            <div class="mini-meta">Tonight${time}${e.entity_name ? ' · ' + esc(e.entity_name) : ''}</div>
             <div class="mini-links">${slug ? `<a href="profile.html?id=${encodeURIComponent(slug)}">Details</a>` : ''}</div>
           </div>
         </div>`;
@@ -878,18 +886,22 @@
       featuredPanel.style.display = '';
     }
 
-    // Recurring: events with recurring flag OR day_of_week set
-    const recurring = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim()).slice(0, 5);
+    // Recurring: events with recurring flag OR day_of_week set, or just any events if none marked recurring
+    let recurring = allEvents.filter(e => e.recurring || (e.day_of_week||'').trim());
+    if (!recurring.length) recurring = allEvents.slice(0, 5);
+    else recurring = recurring.slice(0, 5);
+
     const recurringPanel = document.getElementById('recurringPanel');
     const recurringList  = document.getElementById('recurringList');
     if (recurring.length && recurringPanel && recurringList) {
       recurringList.innerHTML = recurring.map(e => {
         const slug = e.entity_slug || e.slug || '';
-        const day  = e.day_of_week ? `Every ${e.day_of_week}` : 'Recurring';
+        const day  = e.day_of_week ? `Every ${e.day_of_week}` : (e.recurring ? 'Recurring' : 'Upcoming');
+        const name = e.event_name || e.name || e.artist_name || 'Event';
         return `<div class="mini-card">
           <div>
-            <div class="mini-name">${e.title || e.name || 'Event'}</div>
-            <div class="mini-meta">${day}${e.venue_name ? ' · ' + e.venue_name : ''}</div>
+            <div class="mini-name">${esc(name)}</div>
+            <div class="mini-meta">${day}${e.entity_name ? ' · ' + esc(e.entity_name) : ''}</div>
             <div class="mini-links">${slug ? `<a href="profile.html?id=${encodeURIComponent(slug)}">Details</a>` : ''}</div>
           </div>
         </div>`;
