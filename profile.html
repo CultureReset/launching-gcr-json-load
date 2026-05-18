@@ -411,7 +411,10 @@
       googleMaps: e.directions_url,
       rating: e.rating,
       reviewCount: e.review_count,
-      coverImages: e.hero_image_url ? [e.hero_image_url] : [],
+      coverImages: [
+        ...(e.hero_image_url ? [e.hero_image_url] : []),
+        ...(Array.isArray(e._extra_photos) ? e._extra_photos : [])
+      ],
       about: {
         description: '',
         features: [...new Set((data.features || []).map(f => f.label).filter(Boolean))],
@@ -856,9 +859,13 @@
     document.getElementById('js-next').style.display = 'none';
   } else {
     slides.forEach((src, i) => {
-      slidesEl.innerHTML += `<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" onerror="this.parentElement.style.background='linear-gradient(135deg,#0c2d48,#1a4a6e)'"></div>`;
+      slidesEl.innerHTML += `<div class="cover-slide${i===0?' active':''}"><img src="${src}" alt="${B.name} photo ${i+1}" loading="lazy" style="cursor:pointer" onclick="openPopup('gallery-popup')" onerror="this.parentElement.style.background='linear-gradient(135deg,#0c2d48,#1a4a6e)'"></div>`;
       if (slides.length > 1) dotsEl.innerHTML += `<button class="cover-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`;
     });
+    // Populate gallery with all cover images
+    const galleryImages = slides.map((src, i) => ({ url: src, caption: `Photo ${i+1}` }));
+    window.galleryImages = galleryImages;
+    window.galleryCurrentPage = 0;
     if (slides.length === 1) {
       document.getElementById('js-prev').style.display = 'none';
       document.getElementById('js-next').style.display = 'none';
