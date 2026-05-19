@@ -585,7 +585,7 @@ function buildCard(entity) {
   const hoursInfo = computeHoursLine(entity.hours || []);
   const infoRows = [
     hoursInfo ? `<div class="gcr-info-row gcr-hours">🕐 ${hoursInfo}</div>` : '',
-    hhDays    ? `<div class="gcr-info-row gcr-hh">🍺 Happy Hour ${esc(hhDays)}${hhStart?' · '+esc(hhStart):''}${hhEnd?'–'+esc(hhEnd):''}</div>` : '',
+    hhDays    ? `<div class="gcr-info-row gcr-hh">🍺 Happy Hour ${esc(hhDays)}${hhStart?' · '+fmt12(hhStart):''}${hhEnd?'–'+fmt12(hhEnd):''}</div>` : '',
     todayMusic.length ? `<div class="gcr-info-row gcr-music">🎸 Live Music Tonight: ${todayMusic.map(e=>e.event_name||'Live Music').join(', ')}</div>`
       : hasLiveMusic ? `<div class="gcr-info-row gcr-music">🎸 Live Music</div>` : '',
   ].filter(Boolean).join('');
@@ -716,7 +716,7 @@ function buildHHCard(entity) {
     : '';
 
   const hhBlock = hhDays
-    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+fmt12(hhStart) : ''}${hhEnd ? '–'+fmt12(hhEnd) : ''}</div>`
     : '';
 
   const todayStr2  = new Date().toISOString().split('T')[0];
@@ -742,7 +742,7 @@ function buildHHCard(entity) {
   const hhItemsPopup = `
     <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:500px;overflow-y:auto;" data-slug="${esc(slug)}">
       <div style="font-weight:900;font-size:16px;color:#92400e;margin-bottom:12px;">🍺 Happy Hour</div>
-      ${hhDays ? `<div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>` : ''}
+      ${hhDays ? `<div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+fmt12(hhStart) : ''}${hhEnd ? '–'+fmt12(hhEnd) : ''}</div>` : ''}
       ${hhDesc ? `<div style="margin-bottom:14px;font-size:13px;color:#92400e;line-height:1.5;">${esc(hhDesc)}</div>` : ''}
       <div id="${hhItemsPopupId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
     </div>`;
@@ -1003,7 +1003,7 @@ function buildHHSpecialsCard(entity) {
 
   // HH block
   const hhBlock = hhDays
-    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>`
+    ? `<div style="margin-top:6px;font-size:13px;color:#d97706;font-weight:700;">🍺 Happy Hour ${esc(hhDays)}${hhStart ? ' · '+fmt12(hhStart) : ''}${hhEnd ? '–'+fmt12(hhEnd) : ''}</div>`
     : '';
 
   // Specials preview
