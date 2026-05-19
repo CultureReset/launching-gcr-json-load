@@ -532,7 +532,14 @@ function buildCard(entity) {
     return `<a href="${url}" target="_blank" rel="noopener" class="gcr-btn ${cls}" onclick="event.stopPropagation()">${label}</a>`;
   };
   const viewBtn    = `<a href="${profileUrl}" class="gcr-btn primary" onclick="event.stopPropagation()">View Profile</a>`;
-  const menuBtn    = `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ Menu</a>`;
+  const menuUrl    = entity.menu_url || '';
+  const pageCategory = document.querySelector('#listingsGrid')?.dataset?.category || '';
+  const FOOD_PAGES = new Set(['restaurants','coffee-sweets','nightlife','happy-hours']);
+  const menuBtn    = FOOD_PAGES.has(pageCategory)
+    ? (menuUrl
+        ? `<a href="${menuUrl}" target="_blank" rel="noopener" class="gcr-btn" onclick="event.stopPropagation()">🍽️ Menu</a>`
+        : `<a href="${profileUrl}" class="gcr-btn" onclick="event.stopPropagation()">🍽️ Menu</a>`)
+    : '';
   const callBtn    = phone ? `<a href="tel:${phone.replace(/\D/g,'')}" class="gcr-btn" onclick="event.stopPropagation()">📞 Call</a>` : '';
   const dirBtn     = dedupeBtn(dir, '', '📍 Directions');
   const bookBtn    = dedupeBtn(bookingUrl, '', '📅 Book Now');
@@ -545,13 +552,13 @@ function buildCard(entity) {
     ? `<button class="gcr-btn hh" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhPanelId}')">🍺 Happy Hour</button>`
     : '';
   const hhPanel = hhDays ? `
-    <div id="${hhPanelId}" class="gcr-hh-panel" style="display:none;">
+    <div id="${hhPanelId}" class="gcr-hh-panel" style="display:none;" data-slug="${esc(slug)}">
       <div class="gcr-hh-header">🍺 Happy Hour</div>
       <div class="gcr-hh-time">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>
       <div id="${hhPanelId}-items" style="font-size:13px;color:#78350f;">Loading items...</div>
     </div>` : '';
 
-  // Activity info
+  // Activity info & Price display
   const pFrom = entity.price_from;
   const pUnit = entity.price_unit || '';
   const activityInfo = isActivity ? [
@@ -559,6 +566,9 @@ function buildCard(entity) {
     entity.capacity_max  ? `<div style="margin-top:4px;font-size:13px;color:#42596c;font-weight:600;">👥 Up to ${entity.capacity_max} people</div>` : '',
     pFrom != null        ? `<div style="margin-top:4px;font-size:13px;color:#2e9b55;font-weight:800;">${pFrom===0||pFrom==='0'?'✓ Free':'From $'+pFrom+(pUnit?'/'+pUnit:'')}</div>` : '',
   ].join('') : '';
+
+  // Price info for restaurants/coffee/shopping (show in card body)
+  const priceInfo = !isActivity && pFrom != null ? `<div style="margin-top:6px;font-size:13px;color:#0b7a75;font-weight:700;">💵 ${pFrom===0||pFrom==='0'?'Free':'From $'+pFrom+(pUnit?'/'+pUnit:'')}</div>` : '';
 
   // Live music
   const todayStr2  = new Date().toISOString().split('T')[0];
@@ -616,7 +626,7 @@ function buildCard(entity) {
           ${desc ? `<div class="gcr-card-desc">${esc(desc)}</div>` : ''}
           ${ratingBlock}
           ${tagSectionsHtml}
-          ${isActivity ? activityInfo : ''}
+          ${isActivity ? activityInfo : priceInfo}
         </div>
         ${!isActivity && infoRows ? `<div class="gcr-info-rows">${infoRows}</div>` : ''}
         <div class="gcr-card-bottom">
@@ -730,7 +740,7 @@ function buildHHCard(entity) {
   const hhItemsPopupId = `hh-items-${slug.replace(/[^a-z0-9]/g,'_')}`;
   const hhItemsBtn = `<button class="gcr-btn" style="background:#d97706;color:#fff;border-color:#d97706;flex:1;font-size:14px;font-weight:900;padding:12px 16px;" onclick="event.stopPropagation();event.preventDefault();toggleHHItems('${hhItemsPopupId}')">🍺 View Happy Hour Items</button>`;
   const hhItemsPopup = `
-    <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:500px;overflow-y:auto;">
+    <div id="${hhItemsPopupId}" style="display:none;margin-top:14px;border:1px solid #fde68a;border-radius:14px;background:#fffbeb;padding:18px;max-height:500px;overflow-y:auto;" data-slug="${esc(slug)}">
       <div style="font-weight:900;font-size:16px;color:#92400e;margin-bottom:12px;">🍺 Happy Hour</div>
       ${hhDays ? `<div style="font-size:13px;color:#78350f;font-weight:600;margin-bottom:14px;">${esc(hhDays)}${hhStart ? ' · '+esc(hhStart) : ''}${hhEnd ? '–'+esc(hhEnd) : ''}</div>` : ''}
       ${hhDesc ? `<div style="margin-bottom:14px;font-size:13px;color:#92400e;line-height:1.5;">${esc(hhDesc)}</div>` : ''}
@@ -792,9 +802,8 @@ function toggleHHItems(popupId) {
 
 function loadHHItems(popupId) {
   const itemsContainer = document.getElementById(popupId + '-items');
-  // Reverse the slug: non-alphanumeric chars were replaced with _ when building the ID
-  // Since slugs use hyphens, underscores map back to hyphens
-  const slug = popupId.replace('hh-items-', '').replace(/_/g, '-');
+  const popup = document.getElementById(popupId);
+  const slug = popup?.dataset?.slug || popupId.replace('hh-items-', '').replace(/_/g, '-');
 
   // Fetch happy hour items for this entity
   fetch(`https://cybercheck-api-database.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
@@ -1154,6 +1163,7 @@ function renderWithFilter(filter) {
   const grid = document.getElementById('listingsGrid');
   if (!grid) return;
   const category = grid.dataset.category || '';
+  const PAGE_SIZE = 10;
 
   // Get the full entity list for this page
   const base = window._gcrAllEntities || [];
@@ -1164,10 +1174,41 @@ function renderWithFilter(filter) {
                : category === 'deals'       ? buildHHSpecialsCard
                : buildCard;
 
-  grid.innerHTML = filtered.map(cardFn).join('');
+  function attachLoadMoreListenerFilter(entities, cardFn) {
+    const btn = document.getElementById('gcrLoadMoreBtn');
+    if (!btn) return;
+    let currentVisible = PAGE_SIZE;
+    btn.addEventListener('click', () => {
+      currentVisible += PAGE_SIZE;
+      const slice = entities.slice(0, currentVisible);
+      const newHtml = slice.map(cardFn).join('');
+      const remaining = entities.length - currentVisible;
+      const loadMore = remaining > 0 ? `
+        <div style="text-align:center;margin-top:28px;">
+          <button id="gcrLoadMoreBtn" style="padding:12px 32px;background:#0b7a75;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s;">
+            Load More (${remaining} remaining)
+          </button>
+        </div>` : '';
+      grid.innerHTML = newHtml + loadMore;
+      attachLoadMoreListenerFilter(entities, cardFn);
+    });
+  }
+
+  const visible = filtered.slice(0, PAGE_SIZE);
+  const html = visible.map(cardFn).join('');
+  const loadMoreBtn = filtered.length > PAGE_SIZE ? `
+    <div style="text-align:center;margin-top:28px;">
+      <button id="gcrLoadMoreBtn" style="padding:12px 32px;background:#0b7a75;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s;">
+        Load More (${filtered.length - PAGE_SIZE} remaining)
+      </button>
+    </div>` : '';
+
+  grid.innerHTML = html + loadMoreBtn;
 
   const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
   if (meta) meta.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+
+  attachLoadMoreListenerFilter(filtered, cardFn);
 
   // Restaurants: dedup + enrich after filtering
   if (category === 'restaurants' && typeof processMCRestaurants === 'function') {
@@ -1487,6 +1528,8 @@ function initStandardPage() {
   if (!grid) return;
 
   const category = grid.dataset.category || '';
+  const PAGE_SIZE = 10;
+  let visibleCount = PAGE_SIZE;
 
   // Show loading state immediately
   if (!grid.children.length) {
@@ -1514,6 +1557,7 @@ function initStandardPage() {
   }
 
   let _allEntities = [];
+  let _filteredEntities = [];
 
   function updateStatRow(entities) {
     const now      = new Date();
@@ -1592,6 +1636,26 @@ function initStandardPage() {
     return copy;
   }
 
+  function attachLoadMoreListener(entities, cardFn) {
+    const btn = document.getElementById('gcrLoadMoreBtn');
+    if (!btn) return;
+    let currentVisible = visibleCount;
+    btn.addEventListener('click', () => {
+      currentVisible += PAGE_SIZE;
+      const slice = entities.slice(0, currentVisible);
+      const newHtml = slice.map(cardFn).join('');
+      const remaining = entities.length - currentVisible;
+      const loadMore = remaining > 0 ? `
+        <div style="text-align:center;margin-top:28px;">
+          <button id="gcrLoadMoreBtn" style="padding:12px 32px;background:#0b7a75;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s;">
+            Load More (${remaining} remaining)
+          </button>
+        </div>` : '';
+      grid.innerHTML = newHtml + loadMore;
+      attachLoadMoreListener(entities, cardFn);
+    });
+  }
+
   function renderEntities(entities) {
     if (!entities.length) {
       grid.innerHTML = `
@@ -1605,18 +1669,29 @@ function initStandardPage() {
       return;
     }
 
-    // Capture which filter is currently active BEFORE rebuilding the grid
-    const activeChip = document.querySelector('.tag-btn.active, .filter-chip.active');
-    const currentFilter = (activeChip ? activeChip.dataset.filter : null) || urlTag || 'all';
+    _filteredEntities = entities;
+    visibleCount = PAGE_SIZE;
 
     const cardFn = category === 'happy-hours' ? buildHHCard
                  : category === 'specials'    ? buildSpecialsCard
                  : category === 'deals'       ? buildHHSpecialsCard
                  : buildCard;
-    grid.innerHTML = entities.map(cardFn).join('');
+
+    const visible = entities.slice(0, visibleCount);
+    const html = visible.map(cardFn).join('');
+    const loadMoreBtn = entities.length > PAGE_SIZE ? `
+      <div style="text-align:center;margin-top:28px;">
+        <button id="gcrLoadMoreBtn" style="padding:12px 32px;background:#0b7a75;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s;">
+          Load More (${entities.length - PAGE_SIZE} remaining)
+        </button>
+      </div>` : '';
+
+    grid.innerHTML = html + loadMoreBtn;
+
     const meta = document.getElementById('resultCount') || document.querySelector('.toolbar-meta');
     if (meta) meta.textContent = `${entities.length} listed`;
     wireFilterChips(grid);
+    attachLoadMoreListener(entities, cardFn);
 
     // Activate chip from URL on initial page load
     if (urlTag) {
@@ -1624,11 +1699,6 @@ function initStandardPage() {
         const f = (btn.dataset.filter || '').replace(/-/g, '_');
         btn.classList.toggle('active', f === urlTag.replace(/-/g, '_'));
       });
-    }
-
-    // Always re-apply the active filter after rebuilding (preserves filter state across sort)
-    if (currentFilter && currentFilter !== 'all') {
-      renderWithFilter(currentFilter);
     }
   }
 
