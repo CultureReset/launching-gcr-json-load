@@ -603,10 +603,10 @@
         B.sections.push({ id: 'hours', label: 'Hours', icon: '🕐' });
     }
 
-    // Menu sections from new tables — API returns { sections:[], sub_sections:[], items:[] }
-    const menuSections   = (data.menu && data.menu.sections)      || [];
-    const menuSubSecs    = (data.menu && data.menu.sub_sections)   || [];
-    const menuItems      = (data.menu && data.menu.items)          || [];
+    // Menu sections from new tables
+    const menuSections   = data.menuSections || [];
+    const menuSubSecs    = data.menuSubSections || [];
+    const menuItems      = data.menuItems || [];
     const mapMenuItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : '') });
     menuSections.forEach(sec => {
       const mealId = 'newmenu-' + sec.id;
@@ -622,9 +622,9 @@
         B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
     });
 
-    // Drink sections from new tables — API returns { sections:[], items:[] }
-    const drinkSections = (data.drinks && data.drinks.sections) || [];
-    const drinkItems    = (data.drinks && data.drinks.items)    || [];
+    // Drink sections from new tables
+    const drinkSections = data.drinkSections || [];
+    const drinkItems    = data.drinkItems || [];
     drinkSections.forEach(sec => {
       const drinkId = 'newdrink-' + sec.id;
       const secItems = drinkItems.filter(i => i.drink_section_id === sec.id);
@@ -637,9 +637,9 @@
       }
     });
 
-    // Happy hour from new tables — API returns { sections:[], items:[] }
-    const hhSections = (data.happy_hour && data.happy_hour.sections) || [];
-    const hhItems    = (data.happy_hour && data.happy_hour.items)    || [];
+    // Happy hour from new tables
+    const hhSections = data.hhSections || [];
+    const hhItems    = data.hhItems || [];
     if (!B.happyHour && hhSections.length) {
       const schedule = [e.hh_days, (e.hh_start && e.hh_end) ? `${e.hh_start}–${e.hh_end}` : '', e.hh_description].filter(Boolean).join(' · ');
       const deals = hhItems.map(i => ({

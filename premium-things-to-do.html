@@ -439,7 +439,7 @@
     }
 
     // Menu from new tables
-    const menuSecs = (data.menu&&data.menu.sections)||[], menuSubSecs = (data.menu&&data.menu.sub_sections)||[], menuItems = (data.menu&&data.menu.items)||[];
+    const menuSecs = data.menuSections||[], menuSubSecs = data.menuSubSections||[], menuItems = data.menuItems||[];
     const mapMI = i => ({ name:i.item_name, desc:i.description, price:i.price_text||(i.price?'$'+i.price:'') });
     menuSecs.forEach(sec => {
       const mid='newmenu-'+sec.id, secItems=menuItems.filter(i=>i.menu_section_id===sec.id&&!i.menu_sub_section_id);
@@ -449,14 +449,14 @@
     });
 
     // Drinks
-    const drinkSecs=(data.drinks&&data.drinks.sections)||[], drinkItems=(data.drinks&&data.drinks.items)||[];
+    const drinkSecs=data.drinkSections||[], drinkItems=data.drinkItems||[];
     drinkSecs.forEach(sec => {
       const did='newdrink-'+sec.id, secItems=drinkItems.filter(i=>i.drink_section_id===sec.id);
       if (secItems.length) { B.foodMenu.push({ category:sec.section_name, meal:did, note:sec.section_note, isDrink:true, items:secItems.map(i=>{ const bp=[i.item_style,i.abv,i.ibu,i.brewery].filter(Boolean).join(' · '); return { name:i.item_name, desc:bp?(i.description?i.description+' · '+bp:bp):i.description, price:i.price_text||(i.price?'$'+i.price:'') }; }) }); B.sections.push({ id:'meal-'+did, mealId:did, label:sec.section_name, icon:'🍹' }); }
     });
 
     // Happy hour from new tables
-    const hhSecs=(data.happy_hour&&data.happy_hour.sections)||[], hhItems=(data.happy_hour&&data.happy_hour.items)||[];
+    const hhSecs=data.hhSections||[], hhItems=data.hhItems||[];
     if (!B.happyHour && hhSecs.length) {
       const sched=[e.hh_days,(e.hh_start&&e.hh_end)?`${e.hh_start}–${e.hh_end}`:'',e.hh_description].filter(Boolean).join(' · ');
       const deals=hhItems.map(i=>({ name:i.item_name, desc:i.description, price:i.price_text||(i.hh_price!=null?`$${i.hh_price}`:'') }));
