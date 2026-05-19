@@ -696,25 +696,6 @@
       }
     }
 
-    // Events from entity_events — skip policy/info entries (no type, date, or day)
-    if (!B.events.length && (data.events || []).length) {
-      const seenEvNames = new Set();
-      B.events = data.events.filter(ev => {
-        const hasSchedule = ev.event_type || ev.event_date || ev.day_of_week || ev.recurring;
-        if (!hasSchedule) return false;
-        const key = (ev.event_name || '').toLowerCase().trim();
-        if (seenEvNames.has(key)) return false;
-        seenEvNames.add(key);
-        return true;
-      }).map(ev => ({
-        name: ev.event_name,
-        desc: ev.description || (ev.artist_name ? 'Featuring ' + ev.artist_name : ''),
-        badge: ev.event_type || (ev.recurring ? 'Every ' + ev.day_of_week : ev.event_date || ''),
-        note: [ev.start_time, ev.end_time].filter(Boolean).join('–') + (ev.venue_location ? ' · ' + ev.venue_location : ''),
-      }));
-      if (B.events.length && !B.sections.find(s => s.id === 'events'))
-        B.sections.push({ id: 'events', label: 'Events', icon: '📅' });
-    }
 
     // Specials from entity_specials
     if (!B.specials.length && (data.specials || []).length) {
@@ -743,8 +724,8 @@
         B.sections.push({ id: 'packages', label: 'Pricing', icon: '🎟️' });
     }
 
-    // Section items — grouped by section
-    if ((data.sectionItems || []).length && (data.sections || []).length) {
+    // Section items — grouped by section (skip if we already loaded from menuSections)
+    if ((data.sectionItems || []).length && (data.sections || []).length && !menuSections.length) {
       const itemsBySection = {};
       (data.sectionItems || []).forEach(item => {
         if (!itemsBySection[item.section_id]) itemsBySection[item.section_id] = [];
