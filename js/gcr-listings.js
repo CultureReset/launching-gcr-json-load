@@ -805,13 +805,13 @@ function loadHHItems(popupId) {
   const popup = document.getElementById(popupId);
   const slug = popup?.dataset?.slug || popupId.replace('hh-items-', '').replace(/_/g, '-');
 
-  // Fetch happy hour items for this entity
   fetch(`https://cybercheck-api-database.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
     .then(res => res.json())
     .then(data => {
-      const hhItems = (data.happy_hour && data.happy_hour.items) || [];
-      const entity  = data.entity || {};
-      const hhDesc  = entity.hh_description || '';
+      const hhItems = data.hhItems || [];
+      const hhSections = data.hhSections || [];
+      const entity = data.entity || {};
+      const hhDesc = entity.hh_description || '';
 
       if (hhItems.length === 0) {
         itemsContainer.innerHTML = hhDesc
@@ -820,18 +820,15 @@ function loadHHItems(popupId) {
         return;
       }
 
-      // Group by section if sections exist
-      const sections = (data.happy_hour && data.happy_hour.sections) || [];
       let html = '';
-      if (sections.length) {
-        sections.forEach(sec => {
-          const secItems = hhItems.filter(i => i.hh_section_id === sec.id);
+      if (hhSections.length) {
+        hhSections.forEach(sec => {
+          const secItems = hhItems.filter(i => i.happy_hour_section_id === sec.id);
           if (!secItems.length) return;
           html += `<div style="font-weight:800;color:#92400e;font-size:14px;margin:14px 0 6px;">${esc(sec.section_name)}</div>`;
           html += secItems.map(item => hhItemRow(item)).join('');
         });
-        // Items without a section
-        const unsectioned = hhItems.filter(i => !i.hh_section_id);
+        const unsectioned = hhItems.filter(i => !i.happy_hour_section_id);
         html += unsectioned.map(item => hhItemRow(item)).join('');
       } else {
         html = hhItems.map(item => hhItemRow(item)).join('');
@@ -839,7 +836,8 @@ function loadHHItems(popupId) {
 
       itemsContainer.innerHTML = html || '<div style="color:#92400e;">No items listed yet</div>';
     })
-    .catch(() => {
+    .catch(err => {
+      console.error('HH items load error:', err);
       itemsContainer.innerHTML = '<div style="color:#92400e;">Error loading items</div>';
     });
 }
