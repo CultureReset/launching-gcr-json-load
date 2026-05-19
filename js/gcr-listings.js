@@ -1182,13 +1182,19 @@ function renderWithFilter(filter) {
       const newHtml = slice.map(cardFn).join('');
       const remaining = entities.length - currentVisible;
       const loadMore = remaining > 0 ? `
-        <div style="text-align:center;margin-top:28px;">
+        <div style="text-align:center;margin-top:28px;" id="loadMoreContainer">
           <button id="gcrLoadMoreBtn" style="padding:12px 32px;background:#0b7a75;color:#fff;border:none;border-radius:999px;font-weight:700;font-size:14px;cursor:pointer;transition:background .15s;">
             Load More (${remaining} remaining)
           </button>
         </div>` : '';
       grid.innerHTML = newHtml + loadMore;
-      attachLoadMoreListenerFilter(entities, cardFn);
+      if (remaining > 0) {
+        const container = document.getElementById('loadMoreContainer');
+        if (container) {
+          container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => attachLoadMoreListenerFilter(entities, cardFn), 100);
+        }
+      }
     });
   }
 
