@@ -646,7 +646,7 @@
       const secItems = menuItems.filter(i => (i.menu_section_id === sec.id || i.section_id === sec.id) && !i.menu_sub_section_id);
       if (secItems.length) {
         B.foodMenu.push({ category: sec.section_name, meal: mealId, note: sec.section_note, isDrink: false, items: secItems.map(mapMenuItem) });
-        B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
+        B.sections.push({ id: 'meal-' + mealId, type: 'food', mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
       }
       menuSubSecs.filter(sub => sub.menu_section_id === sec.id).forEach(sub => {
         const subItems = menuItems.filter(i => i.menu_sub_section_id === sub.id);
@@ -676,7 +676,7 @@
             };
           })
         });
-        B.sections.push({ id: 'meal-' + drinkId, mealId: drinkId, label: sec.section_name, icon: '🍹' });
+        B.sections.push({ id: 'meal-' + drinkId, type: 'food', mealId: drinkId, label: sec.section_name, icon: '🍹' });
       }
     });
 
