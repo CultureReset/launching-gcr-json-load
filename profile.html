@@ -733,6 +733,28 @@
         B.sections.push({ id: 'packages', label: 'Pricing', icon: '🎟️' });
     }
 
+    // Section items — grouped by section
+    if ((data.sectionItems || []).length && (data.sections || []).length) {
+      const itemsBySection = {};
+      (data.sectionItems || []).forEach(item => {
+        if (!itemsBySection[item.section_id]) itemsBySection[item.section_id] = [];
+        itemsBySection[item.section_id].push(item);
+      });
+
+      (data.sections || []).forEach(sec => {
+        const items = itemsBySection[sec.id] || [];
+        if (items.length) {
+          // Add items to foodMenu based on section type
+          if (sec.section_type === 'menu' || sec.section_label?.toLowerCase().includes('menu')) {
+            const mapItem = i => ({ name: i.item_name, desc: i.item_description, price: i.price_text || '' });
+            B.foodMenu.push({ category: sec.section_label, meal: 'sec-' + sec.id, isDrink: false, items: items.map(mapItem) });
+            if (!B.sections.find(s => s.id === 'meal-sec-' + sec.id))
+              B.sections.push({ id: 'meal-sec-' + sec.id, mealId: 'sec-' + sec.id, label: sec.section_label, icon: '🍽️' });
+          }
+        }
+      });
+    }
+
     // Activities
     if ((data.activities || []).length) {
       B._activities = data.activities;
