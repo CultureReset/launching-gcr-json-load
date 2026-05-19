@@ -643,16 +643,16 @@
     const mapMenuItem = i => ({ name: i.item_name, desc: i.description, price: i.price_text || (i.price ? '$' + i.price : ''), image: i.image_url || i.photo_url || '', allergens: i.allergens || '', tags: i.tags || [] });
     menuSections.forEach(sec => {
       const mealId = 'newmenu-' + sec.id;
-      const secItems = menuItems.filter(i => i.menu_section_id === sec.id && !i.menu_sub_section_id);
-      if (secItems.length)
+      const secItems = menuItems.filter(i => (i.menu_section_id === sec.id || i.section_id === sec.id) && !i.menu_sub_section_id);
+      if (secItems.length) {
         B.foodMenu.push({ category: sec.section_name, meal: mealId, note: sec.section_note, isDrink: false, items: secItems.map(mapMenuItem) });
+        B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
+      }
       menuSubSecs.filter(sub => sub.menu_section_id === sec.id).forEach(sub => {
         const subItems = menuItems.filter(i => i.menu_sub_section_id === sub.id);
         if (subItems.length)
           B.foodMenu.push({ category: sub.sub_section_name, meal: mealId, note: sub.section_note, isDrink: false, items: subItems.map(mapMenuItem) });
       });
-      if (B.foodMenu.some(c => c.meal === mealId))
-        B.sections.push({ id: 'meal-' + mealId, mealId, label: sec.section_name, icon: sec.icon || '🍽️' });
     });
 
     // Drink sections from new tables
@@ -660,12 +660,22 @@
     const drinkItems    = data.drinkItems || [];
     drinkSections.forEach(sec => {
       const drinkId = 'newdrink-' + sec.id;
-      const secItems = drinkItems.filter(i => i.drink_section_id === sec.id);
+      const secItems = drinkItems.filter(i => i.drink_section_id === sec.id || i.section_id === sec.id);
       if (secItems.length) {
-        B.foodMenu.push({ category: sec.section_name, meal: drinkId, note: sec.section_note, isDrink: true, items: secItems.map(i => {
-          const beerParts = [i.item_style, i.abv, i.ibu, i.brewery].filter(Boolean).join(' · ');
-          return { name: i.item_name, desc: beerParts ? (i.description ? i.description + ' · ' + beerParts : beerParts) : i.description, price: i.price_text || (i.price ? '$' + i.price : '') };
-        })});
+        B.foodMenu.push({
+          category: sec.section_name,
+          meal: drinkId,
+          note: sec.section_note,
+          isDrink: true,
+          items: secItems.map(i => {
+            const beerParts = [i.item_style, i.abv, i.ibu, i.brewery].filter(Boolean).join(' · ');
+            return {
+              name: i.item_name,
+              desc: beerParts ? (i.description ? i.description + ' · ' + beerParts : beerParts) : i.description,
+              price: i.price_text || (i.price ? '$' + i.price : '')
+            };
+          })
+        });
         B.sections.push({ id: 'meal-' + drinkId, mealId: drinkId, label: sec.section_name, icon: '🍹' });
       }
     });
