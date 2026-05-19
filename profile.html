@@ -999,6 +999,24 @@
       }
     }
 
+    // Handle food sections with type='food' and optional mealId
+    if (sec.type === 'food' || sec.id.startsWith('meal-')) {
+      html += '</div>';
+      el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
+
+      // If this section has a specific mealId, show just that meal category
+      if (sec.mealId && B.foodMenu) {
+        const cat = B.foodMenu.find(c => c.meal === sec.mealId);
+        if (cat) {
+          el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`;
+        }
+      } else if (B.foodMenu) {
+        // Otherwise show all food menu items
+        B.foodMenu.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
+      }
+      container.appendChild(el); return;
+    }
+
     switch (sec.id) {
 
       case 'about':
@@ -1016,12 +1034,6 @@
           html += `<div class="sub-label">Categories</div><div class="tag-row">${B.tags.map(t=>`<span class="tag" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534;">${t}</span>`).join('')}</div>`;
         }
         break;
-
-      case 'food':
-        html += '</div>';
-        el.innerHTML = `<h2 style="padding:0 4px 8px;font-size:22px">${sec.icon||''} ${sec.label}</h2>`;
-        if (B.foodMenu) B.foodMenu.forEach(cat => { el.innerHTML += `<div class="card">${menuCatHTML(cat)}</div>`; });
-        container.appendChild(el); return;
 
       case 'happy-hour':
         if (B.happyHour) {
