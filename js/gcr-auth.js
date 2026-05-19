@@ -13,8 +13,8 @@
 // ── CONFIG — change this one line to swap providers ──────────
 const GCR_AUTH_PROVIDER = 'supabase'; // 'supabase' | 'firebase'
 
-const SUPABASE_URL  = 'https://mhafixflyffflwjhcgfn.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oYWZpeGZseWZmZmx3amhjZ2ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4MTA4MzUsImV4cCI6MjA4NzM4NjgzNX0.3KW-rGnLhJQ1u3IsSeoGFfgQpcoJNdBGFOGnhc88tHw';
+const SUPABASE_URL  = 'https://xbptmkpbiqzvxptjkfoi.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhicHRta3BiaXF6dnhwdGprZm9pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU5NTYsImV4cCI6MjA5Mzc1MTk1Nn0.VPbIAGRiH2b2v1KOLuaCxBOvEHw-hINHfy5_Rppd-N8';
 
 const FIREBASE_CONFIG = {
   // Fill these in from Firebase Console → Project Settings → Your Apps
