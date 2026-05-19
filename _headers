@@ -1,0 +1,25 @@
+/*
+  Cache-Control: public, max-age=3600
+
+/*.html
+  Cache-Control: public, max-age=3600
+
+/*.js
+/*.css
+  Cache-Control: public, max-age=86400, immutable
+
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.svg
+/*.webp
+  Cache-Control: public, max-age=86400, immutable
+
+/images/*
+/logo/*
+/assets/*
+  Cache-Control: public, max-age=86400, immutable
+
+/api/*
+  Cache-Control: public, max-age=3600
