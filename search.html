@@ -531,18 +531,23 @@ function buildItemCard(entity, items, q) {
 
 
 /* ── Render one result as business card ── */
-function renderResult(entity, q, tab) {
-  const hasMenu = entity.menu && entity.menu.sections && entity.menu.sections.length > 0;
-  const hasDrinks = entity.drinks && entity.drinks.sections && entity.drinks.sections.length > 0;
-  const hasHH = entity.happy_hour && entity.happy_hour.sections && entity.happy_hour.sections.length > 0;
-  const hasSpecials = entity.specials && entity.specials.length > 0;
+function renderResult(result, q, tab) {
+  if (!result || !result.entity) return '';
+  const entity = result.entity;
 
-  if (tab === 'businesses') return buildBusinessCard(entity);
-  if (tab === 'menu' && !hasMenu) return '';
-  if (tab === 'drinks' && !hasDrinks) return '';
-  if (tab === 'specials' && !hasSpecials) return '';
+  // Filter matches based on tab
+  let items = [];
+  if (tab === 'all' || tab === 'menu') {
+    items = result.menuMatches || [];
+  } else if (tab === 'drinks') {
+    items = result.drinksMatches || [];
+  } else if (tab === 'specials') {
+    items = result.specialsMatches || [];
+  } else if (tab === 'businesses') {
+    items = [];
+  }
 
-  return buildBusinessCard(entity);
+  return buildItemCard(entity, items, q);
 }
 
 /* ── Build business card (same as listing page) ── */
@@ -586,29 +591,22 @@ function buildBusinessCard(entity) {
     </a>`;
 }
 
-/* ── Render visible slice ── */
-function renderResults() {
-  const container  = document.getElementById('resultsContainer');
-  const loadWrap   = document.getElementById('loadMoreWrap');
-  const slice      = filteredResults.slice(0, visibleCount);
-  container.innerHTML = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
-  loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
-}
 
 /* ── Apply tab filter ── */
 function applyTab(tab) {
   currentTab = tab;
-  if (tab === 'all' || tab === 'businesses') {
+  if (tab === 'all') {
     filteredResults = allResults;
+  } else if (tab === 'businesses') {
+    filteredResults = allResults.filter(r => r.nameMatch);
   } else if (tab === 'menu') {
-    filteredResults = allResults.filter(e => (e.menu && e.menu.sections && e.menu.sections.length > 0));
+    filteredResults = allResults.filter(r => r.menuMatches && r.menuMatches.length > 0);
   } else if (tab === 'drinks') {
-    filteredResults = allResults.filter(e => (e.drinks && e.drinks.sections && e.drinks.sections.length > 0));
+    filteredResults = allResults.filter(r => r.drinksMatches && r.drinksMatches.length > 0);
   } else if (tab === 'specials') {
-    filteredResults = allResults.filter(e => (e.specials && e.specials.length > 0));
+    filteredResults = allResults.filter(r => r.specialsMatches && r.specialsMatches.length > 0);
   }
   visibleCount = PAGE_SIZE;
-  // Sync both tab bars
   document.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   renderResults();
 }
@@ -618,11 +616,12 @@ function applyTab(tab) {
 /* ── Update count badges on toggle pills ── */
 function updateCounts(results) {
   const all      = results.length;
-  const menu     = results.filter(e => (e.menu && e.menu.sections && e.menu.sections.length > 0)).length;
-  const drinks   = results.filter(e => (e.drinks && e.drinks.sections && e.drinks.sections.length > 0)).length;
-  const specials = results.filter(e => (e.specials && e.specials.length > 0)).length;
+  const business = results.filter(r => r.nameMatch).length;
+  const menu     = results.filter(r => r.menuMatches && r.menuMatches.length > 0).length;
+  const drinks   = results.filter(r => r.drinksMatches && r.drinksMatches.length > 0).length;
+  const specials = results.filter(r => r.specialsMatches && r.specialsMatches.length > 0).length;
   document.querySelector('.search-mode-toggle[data-tab="all"]').textContent        = `🔍 All (${all})`;
-  document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${all})`;
+  document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${business})`;
   document.querySelector('.search-mode-toggle[data-tab="menu"]').textContent       = `🍽️ Food (${menu})`;
   document.querySelector('.search-mode-toggle[data-tab="drinks"]').textContent     = `🍺 Drinks (${drinks})`;
   document.querySelector('.search-mode-toggle[data-tab="specials"]').textContent   = `🏷️ Specials (${specials})`;
@@ -748,30 +747,43 @@ async function doSearch(q) {
   document.getElementById('gcrLoadingOverlay').style.display = '';
 
   try {
-    // 1. Get all cached businesses from GCR
-    const businesses = (window.GCR && GCR.businesses) || [];
+    // 1. Get all entities
+    const entRes = await fetch(`${API}/api/gcr/entities?limit=500`);
+    if (!entRes.ok) throw new Error(`Entities failed: ${entRes.status}`);
+    const entData = await entRes.json();
+    const entities = entData.entities || entData.businesses || [];
 
-    // 2. Filter for matches locally (fuzzy match on name, description, tags)
-    const ql = lastQuery.toLowerCase();
-    const matches = businesses.filter(b => {
-      const name = (b.name || '').toLowerCase();
-      const desc = (b.description || '').toLowerCase();
-      const tags = (b.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).join(' ').toLowerCase();
-      return name.includes(ql) || desc.includes(ql) || tags.includes(ql);
-    });
+    // 2. Fetch full entity data for each + search locally
+    allResults = [];
+    for (const baseEnt of entities) {
+      const slug = baseEnt.slug || baseEnt.subdomain || '';
+      if (!slug || !baseEnt.name) continue;
 
-    // 3. Fetch full entity data for each match
-    allResults = await Promise.all(matches.map(async (match) => {
       try {
-        const slug = match.slug || match.subdomain || '';
         const fullRes = await fetch(`${API}/api/gcr/entity/${encodeURIComponent(slug)}`);
-        if (fullRes.ok) {
-          const fullData = await fullRes.json();
-          return fullData.entity ? { ...fullData.entity, ...fullData } : match;
+        if (!fullRes.ok) continue;
+        const fullData = await fullRes.json();
+        const entity = fullData.entity || fullData;
+
+        // Search for matches in this entity
+        const menuMatches = searchInItems((entity.menu?.items || []), q, 'menu');
+        const drinksMatches = searchInItems((entity.drinks?.items || []), q, 'drink');
+        const specialsMatches = searchInItems((entity.specials || []), q, 'special');
+        const nameMatch = fuzzyScore(entity.name, q) >= 50 || fuzzyScore(entity.slug, q) >= 50;
+
+        // Only add if at least one match found
+        if (menuMatches.length || drinksMatches.length || specialsMatches.length || nameMatch) {
+          allResults.push({
+            entity,
+            menuMatches,
+            drinksMatches,
+            specialsMatches,
+            nameMatch,
+            matchType: nameMatch ? 'business' : (menuMatches.length ? 'menu' : (drinksMatches.length ? 'drinks' : 'specials'))
+          });
         }
-      } catch(e) {}
-      return match;
-    }));
+      } catch(e) { /* skip */ }
+    }
   } catch(err) {
     console.error('Search error:', err);
     allResults = [];
@@ -794,12 +806,25 @@ async function doSearch(q) {
   applyTab('all');
 }
 
+function searchInItems(items, q, itemType = 'menu') {
+  if (!items || !Array.isArray(items)) return [];
+  return items.filter(item => {
+    const name = item.item_name || item.special_name || '';
+    const desc = item.description || '';
+    if (fuzzyScore(name, q) >= 50 || fuzzyScore(desc, q) >= 40) {
+      item._type = itemType;
+      return true;
+    }
+    return false;
+  });
+}
+
 /* ── Render visible slice ── */
 function renderResults() {
   const container = document.getElementById('resultsContainer');
   const loadWrap  = document.getElementById('loadMoreWrap');
   const slice     = filteredResults.slice(0, visibleCount);
-  container.innerHTML = slice.map(e => renderResult(e, lastQuery, currentTab)).filter(Boolean).join('');
+  container.innerHTML = slice.map(r => renderResult(r, lastQuery, currentTab)).filter(Boolean).join('');
   loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
 }
 
