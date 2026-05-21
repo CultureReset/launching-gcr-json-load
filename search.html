@@ -779,12 +779,40 @@ async function doSearch(q) {
   document.getElementById('gcrLoadingOverlay').style.display = '';
 
   try {
-    const res  = await fetch(`${API}/api/gcr/search`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ query: lastQuery }),
-    });
-    const data = await res.json();
-    allResults = data.results || [];
+    // Step 1: Wait for GCR to load (should already be loaded)
+    if (!GCR.loaded) {
+      await new Promise(resolve => {
+        document.addEventListener('gcr:loaded', resolve, { once: true });
+      });
+    }
+
+    // Step 2: Search for matching businesses (uses both API and local cache)
+    const basicResults = await GCR.search(lastQuery);
+
+    // Step 3: Fetch full profiles for each result (same as cosmos pattern)
+    allResults = await Promise.all(
+      basicResults.map(async (biz) => {
+        const profile = await GCR.loadProfile(biz.slug);
+
+        // Step 4: Extract matching items client-side
+        const qLower = lastQuery.toLowerCase();
+        return {
+          ...profile,
+          slug: profile.slug || biz.slug,
+          name: profile.name || biz.name,
+          // Add matched items for tab filtering
+          matched_menu_items: (profile.menu_items || []).filter(item =>
+            (item.item_name || item.name || '').toLowerCase().includes(qLower)
+          ),
+          matched_drink_items: (profile.drink_items || []).filter(item =>
+            (item.item_name || item.name || '').toLowerCase().includes(qLower)
+          ),
+          matched_specials: (profile.specials || []).filter(item =>
+            (item.special_name || item.name || '').toLowerCase().includes(qLower)
+          )
+        };
+      })
+    );
   } catch(err) {
     console.error('Search error:', err);
     allResults = [];
