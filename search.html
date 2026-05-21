@@ -380,15 +380,6 @@ function levenshtein(a, b) {
   return d[m][n];
 }
 
-function entityScore(entity, q) {
-  return Math.max(
-    fuzzyScore(entity.name, q),
-    fuzzyScore(entity.entity_subtype, q),
-    fuzzyScore(entity.description, q),
-    fuzzyScore(entity.city, q),
-    ...(entity.tags||[]).map(t => fuzzyScore(typeof t==='string'?t:t.tag||'', q))
-  );
-}
 
 /* ── Helpers ── */
 function esc(s) {
@@ -431,6 +422,16 @@ function openStatusHtml(entity) {
 /* ── Score an item match for display emphasis ── */
 function isExactMatch(itemName, q) {
   return (itemName || '').toLowerCase().trim() === q.toLowerCase().trim();
+}
+
+function entityScore(entity, q) {
+  return Math.max(
+    fuzzyScore(entity.name, q),
+    fuzzyScore(entity.entity_subtype, q),
+    fuzzyScore(entity.description, q),
+    fuzzyScore(entity.city, q),
+    ...(entity.tags||[]).map(t => fuzzyScore(typeof t==='string'?t:t.tag||'', q))
+  );
 }
 
 /* ── Build unified result card (shrimp-style layout for everything) ── */
@@ -780,11 +781,15 @@ async function doSearch(q) {
             drinksMatches,
             specialsMatches,
             nameMatch,
-            matchType: nameMatch ? 'business' : (menuMatches.length ? 'menu' : (drinksMatches.length ? 'drinks' : 'specials'))
+            matchType: nameMatch ? 'business' : (menuMatches.length ? 'menu' : (drinksMatches.length ? 'drinks' : 'specials')),
+            score: entityScore(entity, q)
           });
         }
       } catch(e) { /* skip */ }
     }
+
+    // Sort by relevance score
+    allResults.sort((a, b) => b.score - a.score);
   } catch(err) {
     console.error('Search error:', err);
     allResults = [];
