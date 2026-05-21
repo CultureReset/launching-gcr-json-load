@@ -783,11 +783,8 @@ async function doSearch(q) {
         searched++;
 
         // Search for matches in this entity
-        // Flatten items from nested sections structure
-        const menuItems = entity.menu?.items ? entity.menu.items :
-          (entity.menu?.sections || []).flatMap(s => s.items || []);
-        const drinksItems = entity.drinks?.items ? entity.drinks.items :
-          (entity.drinks?.sections || []).flatMap(s => s.items || []);
+        const menuItems = entity.menu?.items || [];
+        const drinksItems = entity.drinks?.items || [];
         const specialsItems = entity.specials || [];
 
         if (searched < 3) {
