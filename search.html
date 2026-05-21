@@ -783,9 +783,17 @@ async function doSearch(q) {
         searched++;
 
         // Search for matches in this entity
-        const menuMatches = searchInItems((entity.menu?.items || []), q, 'menu');
-        const drinksMatches = searchInItems((entity.drinks?.items || []), q, 'drink');
-        const specialsMatches = searchInItems((entity.specials || []), q, 'special');
+        const menuItems = entity.menu?.items || [];
+        const drinksItems = entity.drinks?.items || [];
+        const specialsItems = entity.specials || [];
+
+        if (searched < 5) {
+          console.log(`Entity: ${entity.name}, menu items: ${menuItems.length}, drinks: ${drinksItems.length}, specials: ${specialsItems.length}`);
+        }
+
+        const menuMatches = searchInItems(menuItems, q, 'menu');
+        const drinksMatches = searchInItems(drinksItems, q, 'drink');
+        const specialsMatches = searchInItems(specialsItems, q, 'special');
         const nameMatch = fuzzyScore(entity.name, q) >= 50 || fuzzyScore(entity.slug, q) >= 50;
 
         // Only add if at least one match found
