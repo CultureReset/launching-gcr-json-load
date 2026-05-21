@@ -496,21 +496,33 @@ function buildItemCard(entity, items, q) {
     }).join('');
     moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
   } else {
-    // No matched items — only show if business has a description
+    // No matched items — show description if available
     const desc = entity.description || '';
-    if (!desc) return '';
-
-    listLabel = '📝 About';
-    viewBtnLabel = 'View Profile';
-    listInner = `
-      <div class="gcr-item-row">
-        <div class="gcr-item-content">
-          <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
-        </div>
-      </div>`;
+    if (desc) {
+      listLabel = '📝 About';
+      viewBtnLabel = 'View Profile';
+      listInner = `
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
+          </div>
+        </div>`;
+    } else {
+      // No items, no description — still show business card with "View Profile" button
+      listLabel = '';
+      viewBtnLabel = 'View Profile';
+      listInner = '';
+    }
   }
 
   const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">${viewBtnLabel}</a>`;
+
+  const listSection = listLabel || listInner ? `
+    <div class="gcr-item-list" onclick="event.stopPropagation()">
+      ${listLabel ? `<div class="gcr-item-label">${listLabel}</div>` : ''}
+      ${listInner}
+      ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
+    </div>` : '';
 
   return `
     <div class="gcr-item-card" style="cursor:pointer;" onclick="window.location='${profileUrl}'">
@@ -521,11 +533,7 @@ function buildItemCard(entity, items, q) {
         ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
         ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
       </div>
-      <div class="gcr-item-list" onclick="event.stopPropagation()">
-        <div class="gcr-item-label">${listLabel}</div>
-        ${listInner}
-        ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
-      </div>
+      ${listSection}
       <div class="gcr-item-card-footer" onclick="event.stopPropagation()">${viewBtn}${dirBtn}${callBtn}</div>
     </div>`;
 }
@@ -536,17 +544,19 @@ function renderResult(result, q, tab) {
   if (!result || !result.entity) return '';
   const entity = result.entity;
 
-  // Filter matches based on tab
+  // Get matched items based on tab
   let items = [];
-  if (tab === 'all' || tab === 'menu') {
+  if (tab === 'menu') {
     items = result.menuMatches || [];
   } else if (tab === 'drinks') {
     items = result.drinksMatches || [];
   } else if (tab === 'specials') {
     items = result.specialsMatches || [];
-  } else if (tab === 'businesses') {
-    items = [];
+  } else if (tab === 'all') {
+    // Show all matched items regardless of type
+    items = [...(result.menuMatches || []), ...(result.drinksMatches || []), ...(result.specialsMatches || [])];
   }
+  // For 'businesses' tab, items stay empty
 
   return buildItemCard(entity, items, q);
 }
