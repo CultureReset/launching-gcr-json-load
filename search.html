@@ -804,7 +804,7 @@ function renderResults() {
 }
 
 /* ── Boot ── */
-document.addEventListener('DOMContentLoaded', () => {
+function initSearch() {
   const searchInput = document.getElementById('searchInput');
   const searchBtn   = document.getElementById('searchBtn');
 
@@ -843,6 +843,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const q = params.get('q');
   if (q) { searchInput.value = q; doSearch(q); }
+}
+
+/* Wait for GCR data to load, then initialize search */
+document.addEventListener('gcr:loaded', initSearch);
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.GCR && window.GCR.loaded) {
+    initSearch();
+  }
 });
 </script>
 <script src="js/claim-modal.js"></script>
