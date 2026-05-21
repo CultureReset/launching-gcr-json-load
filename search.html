@@ -463,7 +463,7 @@ function buildItemCard(entity, items, q) {
   // Deduplicate matched items by name
   const seenNames = new Set();
   const cleanItems = (items || []).filter(item => {
-    const n = (item.item_name || item.special_name || '').trim();
+    const n = (item.name || item.item_name || item.special_name || '').trim();
     if (!n || seenNames.has(n.toLowerCase())) return false;
     seenNames.add(n.toLowerCase());
     return true;
@@ -477,7 +477,7 @@ function buildItemCard(entity, items, q) {
     listLabel = '🍴 Matching Items';
     viewBtnLabel = 'View Menu';
     listInner = cleanItems.slice(0, 8).map(item => {
-      const iname    = item.item_name || item.special_name || '';
+      const iname    = item.name || item.item_name || item.special_name || '';
       const idesc    = item.description || '';
       const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
       const itype    = item._type || 'menu';
@@ -841,7 +841,7 @@ async function doSearch(q) {
 function searchInItems(items, q, itemType = 'menu') {
   if (!items || !Array.isArray(items)) return [];
   return items.filter(item => {
-    const name = item.item_name || item.special_name || '';
+    const name = item.name || item.item_name || item.special_name || '';
     const desc = item.description || '';
     if (fuzzyScore(name, q) >= 50 || fuzzyScore(desc, q) >= 40) {
       item._type = itemType;
