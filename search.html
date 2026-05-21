@@ -783,12 +783,16 @@ async function doSearch(q) {
         searched++;
 
         // Search for matches in this entity
-        const menuItems = entity.menu?.items || [];
-        const drinksItems = entity.drinks?.items || [];
+        // Flatten items from nested sections structure
+        const menuItems = entity.menu?.items ? entity.menu.items :
+          (entity.menu?.sections || []).flatMap(s => s.items || []);
+        const drinksItems = entity.drinks?.items ? entity.drinks.items :
+          (entity.drinks?.sections || []).flatMap(s => s.items || []);
         const specialsItems = entity.specials || [];
 
-        if (searched < 5) {
+        if (searched < 3) {
           console.log(`Entity: ${entity.name}, menu items: ${menuItems.length}, drinks: ${drinksItems.length}, specials: ${specialsItems.length}`);
+          if (menuItems.length > 0) console.log('  Sample menu item:', menuItems[0]);
         }
 
         const menuMatches = searchInItems(menuItems, q, 'menu');
