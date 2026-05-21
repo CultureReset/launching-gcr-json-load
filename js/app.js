@@ -22,7 +22,7 @@
     fetch(API + '/api/gcr/track', {
       method: 'POST', keepalive: true,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({ page_path: location.pathname, page_title: document.title, referrer: document.referrer || null, session_id: sess, device_type: device, source: 'gcr' }, utm, extra || {}))
+      body: JSON.stringify(Object.assign({ page_path: location.pathname, page_title: document.title, referrer: document.referrer || null, session_id: sess, device_type: device, source: 'gcr', visitor_id: window.GCRIdentity.visitorId }, utm, extra || {}))
     }).catch(function(){});
   }
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', send); } else { send(); }

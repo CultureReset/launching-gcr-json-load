@@ -158,10 +158,17 @@ window.GCRSaves = (function() {
 
       <!-- Email / Password -->
       <div class="gcr-auth-panel" id="gcr-panel-email">
-        <input class="gcr-auth-input" type="email" id="gcr-auth-email" placeholder="Email address">
-        <input class="gcr-auth-input" type="password" id="gcr-auth-pw" placeholder="Password">
-        <button class="gcr-auth-submit" id="gcr-auth-go">Sign In</button>
-        <button class="gcr-auth-switch" id="gcr-auth-switch">Don't have an account? Sign up</button>
+        <div id="gcr-email-step1">
+          <input class="gcr-auth-input" type="email" id="gcr-auth-email" placeholder="Email address">
+          <p style="font-size:11px;color:#aaa;margin:4px 0 10px;">We'll send you a code. No password needed.</p>
+          <button class="gcr-auth-submit" id="gcr-email-send">Send Code</button>
+        </div>
+        <div id="gcr-email-step2" style="display:none;">
+          <p style="font-size:13px;color:#0b7a75;margin:0 0 10px;font-weight:600;">Code sent! Enter it below:</p>
+          <input class="gcr-auth-input" id="gcr-email-code" type="text" placeholder="Enter code">
+          <button class="gcr-auth-submit" id="gcr-email-verify">Create Account</button>
+          <button class="gcr-auth-switch" id="gcr-email-back">← Change email</button>
+        </div>
       </div>
 
       <br>
@@ -221,27 +228,66 @@ window.GCRSaves = (function() {
 
   document.getElementById('gcr-google-btn').addEventListener('click', () => GCRAuth.signInGoogle());
 
-  let _emailMode = 'signin';
-  function setEmailMode(mode) {
-    _emailMode = mode;
-    const s = mode === 'signup';
-    document.getElementById('gcr-auth-go').textContent = s ? 'Create Account' : 'Sign In';
-    document.getElementById('gcr-auth-switch').textContent = s ? 'Already have an account? Sign in' : "Don't have an account? Sign up";
-  }
-  document.getElementById('gcr-auth-switch').addEventListener('click', () => setEmailMode(_emailMode === 'signin' ? 'signup' : 'signin'));
-  document.getElementById('gcr-auth-go').addEventListener('click', async () => {
+  // ── Email verification code ──────────────────────────────────────
+  let _pendingEmail = '';
+  document.getElementById('gcr-email-send').addEventListener('click', async () => {
     const email = document.getElementById('gcr-auth-email').value.trim();
-    const pw    = document.getElementById('gcr-auth-pw').value;
     const errEl = document.getElementById('gcr-auth-err');
     errEl.style.display = 'none';
-    if (!email || !pw) { errEl.textContent = 'Please enter email and password'; errEl.style.display = ''; return; }
+    if (!email) { errEl.textContent = 'Please enter email'; errEl.style.display = ''; return; }
     try {
-      await GCRAuth.signInEmail(email, pw, _emailMode === 'signup');
-      closeModal(); showToast('Welcome! ✨');
+      const res = await fetch(GCR_API + '/api/admin/tourist/send-verification-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      if (!res.ok) throw new Error('Failed to send code');
+      _pendingEmail = email;
+      document.getElementById('gcr-email-step1').style.display = 'none';
+      document.getElementById('gcr-email-step2').style.display = 'block';
     } catch(e) {
-      if (e.confirmEmail) { errEl.style.color='#0b7a75'; errEl.textContent='Check your email to confirm.'; errEl.style.display=''; return; }
-      errEl.textContent = e.message || 'Sign in failed'; errEl.style.display = '';
+      errEl.textContent = e.message || 'Failed to send code'; errEl.style.display = '';
     }
+  });
+
+  document.getElementById('gcr-email-verify').addEventListener('click', async () => {
+    const code = document.getElementById('gcr-email-code').value.trim();
+    const errEl = document.getElementById('gcr-auth-err');
+    errEl.style.display = 'none';
+    if (!code) { errEl.textContent = 'Please enter code'; errEl.style.display = ''; return; }
+    try {
+      const res = await fetch(GCR_API + '/api/tourist/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: _pendingEmail,
+          verification_code: code,
+          first_app: 'gcr',
+          anonymous_visitor_id: window.GCRIdentity.visitorId
+        })
+      });
+      if (!res.ok) throw new Error('Invalid code');
+      const { token } = await res.json();
+      localStorage.setItem('cc_admin_token', token);
+
+      // Trigger backfill
+      await fetch(GCR_API + '/api/tourist/backfill-anonymous', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+
+      closeModal(); showToast('Welcome! ✨');
+      window.location.reload();
+    } catch(e) {
+      errEl.textContent = e.message || 'Verification failed'; errEl.style.display = '';
+    }
+  });
+
+  document.getElementById('gcr-email-back').addEventListener('click', () => {
+    document.getElementById('gcr-email-step1').style.display = 'block';
+    document.getElementById('gcr-email-step2').style.display = 'none';
+    document.getElementById('gcr-auth-email').value = '';
+    document.getElementById('gcr-email-code').value = '';
   });
 
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });

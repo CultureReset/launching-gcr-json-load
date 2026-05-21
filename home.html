@@ -36,6 +36,28 @@
     padding: 0 14px 8px;
   }
 
+  .app-switcher {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #fff;
+  }
+  .app-switcher .app-label {
+    font-weight: 700;
+    opacity: 0.9;
+  }
+  .app-switcher a {
+    color: #fff;
+    text-decoration: none;
+    border-bottom: 2px solid rgba(255,255,255,0.5);
+    padding-bottom: 2px;
+    transition: border-color 0.15s;
+  }
+  .app-switcher a:hover {
+    border-bottom-color: #fff;
+  }
+
   .gcr-logo-row {
     display: flex;
     align-items: center;
@@ -851,6 +873,10 @@
     <button class="gcr-install-btn" id="installBtn" style="display:none;" onclick="installApp()">
       📲 Install App
     </button>
+    <div class="app-switcher">
+      <span class="app-label">GCR</span>
+      <a href="/trip-swipe/" class="app-link">Trip Swipe →</a>
+    </div>
   </div>
 
   <!-- Category tabs -->
@@ -1074,6 +1100,19 @@
   </div>
 </section>
 
+<!-- ══════════ PERSONALIZED RECOMMENDATIONS ══════════ -->
+<section class="home-section bg-white" id="recommendationsSection" style="display:none;padding:32px 0;">
+  <div class="hcont">
+    <div class="section-head">
+      <div class="section-label">Just For You</div>
+      <h2 class="section-title">Recommended For You</h2>
+      <p class="section-sub">Based on your activity across Gulf Coast Radar</p>
+    </div>
+    <div class="featured-scroller-wrap">
+      <div class="featured-scroller" id="recommendationsRow"></div>
+    </div>
+  </div>
+</section>
 
 <!-- ══════════ LOCATION DISTRICTS ══════════ -->
 <section class="home-section bg-white">
@@ -1358,8 +1397,10 @@
 
 <!-- Calendar modal injected by app.js -->
 
+<script src="js/shared-identity.js"></script>
 <script src="js/gcr-api.js?v=6"></script>
 <script src="js/app.js"></script>
+<script src="js/gcr-saves.js"></script>
 <script>
 /* ══ HOME PAGE — live data rendering ══
    Waits for gcr:loaded event from gcr-api.js (async fetch).
@@ -1431,6 +1472,48 @@
             '</div>' +
           '</a>';
         }).join('');
+      }
+    }
+
+    // ── Load recommendations if logged in ──
+    var token = localStorage.getItem('cc_admin_token');
+    if (token) {
+      var recRow = document.getElementById('recommendationsRow');
+      if (recRow) {
+        fetch('https://cybercheck-api-database.vercel.app/api/tourist/recommendations?limit=6', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(r => r.json())
+        .then(recs => {
+          if (recs && recs.length) {
+            var colors = { restaurants:'#0b7a75','things-to-do':'#1a6496',events:'#6c3483',shopping:'#1e8449',other:'#2e4057','coffee-sweets':'#7c4f2a',nightlife:'#4a235a',hotels:'#1a5276' };
+            recRow.innerHTML = recs.map(function(biz) {
+              var bg  = colors[biz.entity_subtype || ''] || '#0b7a75';
+              var cat = (biz.entity_subtype || '').replace(/[_-]/g,' ');
+              var heroImg = biz.photo_url || '';
+              var topStyle = heroImg
+                ? 'background:url(\'' + heroImg + '\') center/cover no-repeat;'
+                : 'background:linear-gradient(135deg,' + bg + ',' + bg + 'cc);';
+              return '<a href="profile.html?id=' + encodeURIComponent(biz.entity_slug) + '" class="feat-card">' +
+                '<div class="feat-card-top" style="' + topStyle + '">' +
+                  '<span style="font-size:2rem;background:rgba(255,255,255,.85);border-radius:50%;padding:6px;position:absolute;bottom:8px;left:8px;">✨</span>' +
+                  '<span class="feat-badge" style="position:absolute;top:8px;right:8px;">★ ' + (biz.rating ? Number(biz.rating).toFixed(1) : 'Trending') + '</span>' +
+                '</div>' +
+                '<div class="feat-card-body">' +
+                  '<div class="feat-card-name">' + (biz.entity_name||'') + '</div>' +
+                  '<div class="feat-card-cat">' + cat + '</div>' +
+                  '<div class="feat-card-desc">' + (biz.tagline||'Recommended for you') + '</div>' +
+                  '<div class="feat-card-meta">' +
+                    '<span>' + (biz.city||'Gulf Coast') + '</span>' +
+                    (biz.rating ? '<span class="feat-card-rating">★ ' + Number(biz.rating).toFixed(1) + '</span>' : '') +
+                  '</div>' +
+                '</div>' +
+              '</a>';
+            }).join('');
+            document.getElementById('recommendationsSection').style.display = 'block';
+          }
+        })
+        .catch(() => {});
       }
     }
 
@@ -1994,12 +2077,6 @@ document.addEventListener('gcr:loaded', function() {
     var frame = document.getElementById('tripswipe-frame');
     frame.style.display = 'block';
     if (frame.src === 'about:blank') frame.src = _btnCfg.url || 'https://gcr-trip-swipe.vercel.app/swipe/all';
-    frame.onload = function() {
-      var token = localStorage.getItem('gcr_access_token');
-      if (token) {
-        try { frame.contentWindow.postMessage({ type: 'gcr-auth', token: token }, '*'); } catch(e) {}
-      }
-    };
   }
 
   function closeTripModal() {
