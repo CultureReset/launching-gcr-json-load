@@ -741,6 +741,7 @@ async function doSearch(q) {
   lastQuery = q.trim();
   hideAutocomplete();
 
+  // Hide all sections
   document.getElementById('defaultState').style.display      = 'none';
   document.getElementById('resultsSection').style.display    = 'none';
   document.getElementById('noResults').style.display         = 'none';
@@ -867,7 +868,11 @@ function initSearch() {
 
   const params = new URLSearchParams(window.location.search);
   const q = params.get('q');
-  if (q) { searchInput.value = q; doSearch(q); }
+  if (q) {
+    searchInput.value = q;
+    document.getElementById('defaultState').style.display = 'none';
+    doSearch(q);
+  }
 }
 
 /* Wait for GCR data to load, then initialize search */
