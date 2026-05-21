@@ -1859,6 +1859,15 @@ document.addEventListener('gcr:loaded', function() {
     }
   }
 
+  function doHeroSearch() {
+    var q = document.getElementById('heroSearch').value.trim();
+    if (q) window.location.href = 'search.html?q=' + encodeURIComponent(q);
+  }
+
+  function doTagSearch(label) {
+    if (label) window.location.href = 'search.html?q=' + encodeURIComponent(label);
+  }
+
   function applyCards(cards) {
     if (!cards || !cards.length) return;
     var catMap = {};
