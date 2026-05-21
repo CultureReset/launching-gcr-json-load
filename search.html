@@ -345,7 +345,6 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8
 const PAGE_SIZE = 10;
 
 let allResults = [];
-let similarResults = [];
 let filteredResults = [];
 let currentTab = 'all';
 let visibleCount = 0;
@@ -530,47 +529,61 @@ function buildItemCard(entity, items, q) {
     </div>`;
 }
 
-/* ── Categorize results ── */
-function categorizeResult(entity, q) {
-  const nameLower = (entity.name || '').toLowerCase();
-  const cityLower = (entity.city || '').toLowerCase();
-  const descLower = (entity.description || entity.subtitle || '').toLowerCase();
-  const ql = (q || '').toLowerCase();
-  const isBusinessMatch = nameLower.includes(ql) || cityLower.includes(ql) || descLower.includes(ql);
-  const hasMenuItems = (entity.matched_menu_items || []).length > 0;
-  const hasSpecials  = (entity.matched_specials || []).length > 0;
-  return { isBusinessMatch, hasMenuItems, hasSpecials };
+
+/* ── Render one result as business card ── */
+function renderResult(entity, q, tab) {
+  const hasMenu = entity.menu && entity.menu.sections && entity.menu.sections.length > 0;
+  const hasDrinks = entity.drinks && entity.drinks.sections && entity.drinks.sections.length > 0;
+  const hasHH = entity.happy_hour && entity.happy_hour.sections && entity.happy_hour.sections.length > 0;
+  const hasSpecials = entity.specials && entity.specials.length > 0;
+
+  if (tab === 'businesses') return buildBusinessCard(entity);
+  if (tab === 'menu' && !hasMenu) return '';
+  if (tab === 'drinks' && !hasDrinks) return '';
+  if (tab === 'specials' && !hasSpecials) return '';
+
+  return buildBusinessCard(entity);
 }
 
-/* ── Render one result ── */
-function renderResult(entity, q, tab) {
-  const { hasMenuItems, hasSpecials } = categorizeResult(entity, q);
-  const allItems = entity.matched_menu_items || [];
-  const menuItems  = allItems.filter(i => i._type === 'menu');
-  const drinkItems = allItems.filter(i => i._type === 'drink');
-  const hhItems    = allItems.filter(i => i._type === 'happy_hour');
+/* ── Build business card (same as listing page) ── */
+function buildBusinessCard(entity) {
+  const slug = entity.slug || entity.subdomain || '';
+  const name = entity.name || 'Business';
+  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
+  const city = entity.city || '';
+  const state = entity.state || '';
+  const hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || FALLBACK_IMG;
+  const rating = entity.rating;
+  const reviews = entity.review_count || 0;
+  const addr = entity.address_line_1 || '';
+  const phone = entity.phone || '';
+  const location = [city, state].filter(Boolean).join(', ');
+  const desc = entity.description || '';
+  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
 
-  if (tab === 'businesses') return buildItemCard(entity, [], q);
+  const ratingStr = rating ? `⭐ ${Number(rating).toFixed(1)}${reviews ? ` (${reviews})` : ''}` : '';
+  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
 
-  if (tab === 'drinks') {
-    if (!drinkItems.length) return '';
-    return buildItemCard(entity, drinkItems, q);
-  }
-
-  if (tab === 'menu') {
-    if (!menuItems.length && !hhItems.length) return '';
-    return buildItemCard(entity, [...menuItems, ...hhItems], q);
-  }
-
-  if (tab === 'specials') {
-    if (!hasSpecials) return '';
-    return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
-  }
-
-  // "all" tab: prefer items if matched, otherwise show business-detail rows
-  if (allItems.length) return buildItemCard(entity, allItems, q);
-  if (hasSpecials) return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
-  return buildItemCard(entity, [], q);
+  return `
+    <a href="${profileUrl}" style="text-decoration:none;color:inherit;">
+      <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.1);margin-bottom:16px;transition:transform .14s,box-shadow .14s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 16px rgba(0,0,0,.1)'">
+        <div style="width:100%;aspect-ratio:1/1;background-image:url('${hero}');background-size:cover;background-position:center;position:relative;background-color:#f0f4f8;">
+          <div style="position:absolute;top:12px;left:12px;background:rgba(11,122,117,.88);color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;">${subtype}</div>
+        </div>
+        <div style="padding:14px 16px;">
+          <div style="font-size:17px;font-weight:800;color:#1a2b3c;">${esc(name)}</div>
+          <div style="font-size:13px;color:#5c6b81;margin-top:2px;">${esc([desc.substring(0, 60), location].filter(Boolean).join(' · '))}</div>
+          ${ratingStr ? `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;">${ratingStr}</div>` : ''}
+        </div>
+        <div style="padding:10px 16px 14px;border-top:1px solid #f0f4f8;">
+          <div style="font-size:12px;color:#8fa3b1;margin-bottom:8px;">📍 ${esc(fullAddr)}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <a href="${profileUrl}" style="padding:8px 13px;border-radius:8px;background:#0b7a75;color:#fff;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;box-sizing:border-box;">View Profile</a>
+            ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" style="padding:8px 13px;border-radius:8px;border:1px solid #d1dbe6;background:#fff;color:#1a2b3c;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;box-sizing:border-box;">📞 Call</a>` : ''}
+          </div>
+        </div>
+      </div>
+    </a>`;
 }
 
 /* ── Render visible slice ── */
@@ -588,11 +601,11 @@ function applyTab(tab) {
   if (tab === 'all' || tab === 'businesses') {
     filteredResults = allResults;
   } else if (tab === 'menu') {
-    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu'));
+    filteredResults = allResults.filter(e => (e.menu && e.menu.sections && e.menu.sections.length > 0));
   } else if (tab === 'drinks') {
-    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink'));
+    filteredResults = allResults.filter(e => (e.drinks && e.drinks.sections && e.drinks.sections.length > 0));
   } else if (tab === 'specials') {
-    filteredResults = allResults.filter(e => (e.matched_specials||[]).length > 0);
+    filteredResults = allResults.filter(e => (e.specials && e.specials.length > 0));
   }
   visibleCount = PAGE_SIZE;
   // Sync both tab bars
@@ -605,9 +618,9 @@ function applyTab(tab) {
 /* ── Update count badges on toggle pills ── */
 function updateCounts(results) {
   const all      = results.length;
-  const menu     = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu')).length;
-  const drinks   = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink')).length;
-  const specials = results.filter(e => (e.matched_specials||[]).length > 0).length;
+  const menu     = results.filter(e => (e.menu && e.menu.sections && e.menu.sections.length > 0)).length;
+  const drinks   = results.filter(e => (e.drinks && e.drinks.sections && e.drinks.sections.length > 0)).length;
+  const specials = results.filter(e => (e.specials && e.specials.length > 0)).length;
   document.querySelector('.search-mode-toggle[data-tab="all"]').textContent        = `🔍 All (${all})`;
   document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${all})`;
   document.querySelector('.search-mode-toggle[data-tab="menu"]').textContent       = `🍽️ Food (${menu})`;
@@ -735,23 +748,38 @@ async function doSearch(q) {
   document.getElementById('gcrLoadingOverlay').style.display = '';
 
   try {
-    const res  = await fetch(`${API}/api/gcr/search`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ query: lastQuery }),
+    // 1. Get all cached businesses from GCR
+    const businesses = (window.GCR && GCR.businesses) || [];
+
+    // 2. Filter for matches locally (fuzzy match on name, description, tags)
+    const ql = lastQuery.toLowerCase();
+    const matches = businesses.filter(b => {
+      const name = (b.name || '').toLowerCase();
+      const desc = (b.description || '').toLowerCase();
+      const tags = (b.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).join(' ').toLowerCase();
+      return name.includes(ql) || desc.includes(ql) || tags.includes(ql);
     });
-    const data = await res.json();
-    allResults = data.results || [];
+
+    // 3. Fetch full entity data for each match
+    allResults = await Promise.all(matches.map(async (match) => {
+      try {
+        const slug = match.slug || match.subdomain || '';
+        const fullRes = await fetch(`${API}/api/gcr/entity/${encodeURIComponent(slug)}`);
+        if (fullRes.ok) {
+          const fullData = await fullRes.json();
+          return fullData.entity ? { ...fullData.entity, ...fullData } : match;
+        }
+      } catch(e) {}
+      return match;
+    }));
   } catch(err) {
     console.error('Search error:', err);
     allResults = [];
   }
 
-  // Find similar using local fuzzy match
-  similarResults = findSimilar(lastQuery, allResults);
-
   document.getElementById('gcrLoadingOverlay').style.display = 'none';
 
-  if (!allResults.length && !similarResults.length) {
+  if (!allResults.length) {
     document.getElementById('noResults').style.display = '';
     return;
   }
@@ -760,28 +788,18 @@ async function doSearch(q) {
   updateCounts(allResults);
 
   const total = allResults.length;
-  document.getElementById('searchHeading').textContent    = total ? `${total} result${total!==1?'s':''} for "${lastQuery}"` : `No exact results for "${lastQuery}"`;
-  document.getElementById('searchSubheading').textContent = total ? 'Orange Beach & Gulf Shores · Best matches first' : 'Showing similar businesses below';
+  document.getElementById('searchHeading').textContent    = `${total} result${total!==1?'s':''} for "${lastQuery}"`;
+  document.getElementById('searchSubheading').textContent = 'Orange Beach & Gulf Shores · Best matches first';
 
   applyTab('all');
 }
 
-/* ── Render visible slice + similar ── */
+/* ── Render visible slice ── */
 function renderResults() {
   const container = document.getElementById('resultsContainer');
   const loadWrap  = document.getElementById('loadMoreWrap');
   const slice     = filteredResults.slice(0, visibleCount);
-  let html = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
-
-  // Similar results section
-  if (similarResults.length && currentTab === 'all') {
-    html += `<div class="similar-section">
-      <div class="similar-label">📍 Similar — you might also like</div>
-      ${similarResults.map(e => buildItemCard(e, [], lastQuery)).join('')}
-    </div>`;
-  }
-
-  container.innerHTML = html;
+  container.innerHTML = slice.map(e => renderResult(e, lastQuery, currentTab)).filter(Boolean).join('');
   loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
 }
 
