@@ -844,7 +844,7 @@
 ══════════════════════════════════════════ -->
 <div class="gcr-header">
   <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row">
+    <a href="home.html" class="gcr-logo-row">
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
@@ -2001,6 +2001,50 @@ document.addEventListener('gcr:loaded', function() {
   window.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'tripswipe-close') closeTripModal();
   });
+
+  // QR Code Tracking
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const qrId = params.get('id');
+
+    if (qrId) {
+      console.log('[QR] Scanned ID:', qrId);
+
+      // Fetch location name from API
+      fetch('https://cybercheck-api-database.vercel.app/api/qr/locations')
+        .then(res => res.json())
+        .then(qrLocations => {
+          const locationName = (qrLocations[qrId] && qrLocations[qrId].name) || `Location ${qrId}`;
+
+          // Send to Google Analytics
+          if (window.gtag) {
+            window.gtag('event', 'qr_scan', {
+              qr_id: qrId,
+              location_name: locationName
+            });
+          }
+
+          // Log to API
+          try {
+            fetch('https://cybercheck-api-database.vercel.app/api/qr/scans', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                qr_id: qrId,
+                location_name: locationName,
+                timestamp: new Date().toISOString(),
+                referrer: document.referrer
+              })
+            }).catch(() => {});
+          } catch(e) {}
+        })
+        .catch(() => {
+          if (window.gtag) {
+            window.gtag('event', 'qr_scan', { qr_id: qrId, location_name: `Location ${qrId}` });
+          }
+        });
+    }
+  })();
 </script>
 </body>
 </html>

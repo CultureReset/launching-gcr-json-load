@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabs = document.getElementById('gcrCatTabs') || document.querySelector('.gcr-cat-tabs');
   if (tabs) {
     // Mark active tab based on current page
-    const page = window.location.pathname.split('/').pop() || 'index3.html';
+    const page = window.location.pathname.split('/').pop() || 'home.html';
     tabs.querySelectorAll('.gcr-cat-tab').forEach(a => {
       a.classList.remove('active');
       if (a.getAttribute('href') === page) a.classList.add('active');
@@ -545,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
   }
 
-  /* ── Hero search (index3.html — #heroSearch + dropdown) ── */
+  /* ── Hero search (home.html — #heroSearch + dropdown) ── */
   const heroInput    = document.getElementById('heroSearch');
   const heroDropdown = document.getElementById('heroDropdown');
   if (heroInput) {

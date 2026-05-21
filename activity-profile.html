@@ -112,7 +112,7 @@
 <body>
 <div class="gcr-header">
   <div class="gcr-header-top">
-    <a href="index3.html" class="gcr-logo-row"><img src="gcr-logo.png" alt="Gulf Coast Radar"><div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div></a>
+    <a href="home.html" class="gcr-logo-row"><img src="gcr-logo.png" alt="Gulf Coast Radar"><div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div></a>
     <button onclick="history.back()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:1rem;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;">← Back</button>
   </div>
   <div class="gcr-cat-tabs">
@@ -171,7 +171,7 @@
   if(!slug){document.body.innerHTML='<p style="padding:40px;color:red">No ?id= in URL</p>';return;}
   let d=null;try{const r=await fetch(`${API}/entity/${encodeURIComponent(slug)}`);if(r.ok)d=await r.json();}catch(e){}
   if(!d?.entity){document.body.innerHTML=`<p style="padding:40px;color:red">Could not load: ${slug}</p>`;return;}
-  if(d.entity.is_active===false){window.location.replace('index3.html');return;}
+  if(d.entity.is_active===false){window.location.replace('home.html');return;}
   const B=map(d);window.BUSINESS_DATA=B;
 
   function map(d){

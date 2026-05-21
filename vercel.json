@@ -3,6 +3,6 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "redirects": [
-    { "source": "/", "destination": "/index3", "permanent": false }
+    { "source": "/", "destination": "/home", "permanent": false }
   ]
 }

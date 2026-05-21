@@ -196,7 +196,7 @@
   let data=null;
   try{const r=await fetch(`${API}/entity/${encodeURIComponent(slug)}`);if(r.ok)data=await r.json();}catch(e){}
   if(!data?.entity){document.body.innerHTML=`<p style="padding:40px;color:red">Could not load: ${slug}</p>`;return;}
-  if(data.entity.is_active===false){window.location.replace('index3.html');return;}
+  if(data.entity.is_active===false){window.location.replace('home.html');return;}
   const B=map(data);window.BUSINESS_DATA=B;
 
   function map(d){
