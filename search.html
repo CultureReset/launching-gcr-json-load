@@ -750,13 +750,17 @@ async function doSearch(q) {
 
   try {
     // 1. Get all entities
+    console.log('Fetching entities from:', `${API}/api/gcr/entities?limit=500`);
     const entRes = await fetch(`${API}/api/gcr/entities?limit=500`);
+    console.log('Entities response:', entRes.status, entRes.ok);
     if (!entRes.ok) throw new Error(`Entities failed: ${entRes.status}`);
     const entData = await entRes.json();
     const entities = entData.entities || entData.businesses || [];
+    console.log('Found', entities.length, 'entities');
 
     // 2. Fetch full entity data for each + search locally
     allResults = [];
+    let searched = 0;
     for (const baseEnt of entities) {
       const slug = baseEnt.slug || baseEnt.subdomain || '';
       if (!slug || !baseEnt.name) continue;
@@ -766,6 +770,7 @@ async function doSearch(q) {
         if (!fullRes.ok) continue;
         const fullData = await fullRes.json();
         const entity = fullData.entity || fullData;
+        searched++;
 
         // Search for matches in this entity
         const menuMatches = searchInItems((entity.menu?.items || []), q, 'menu');
@@ -784,11 +789,13 @@ async function doSearch(q) {
             matchType: nameMatch ? 'business' : (menuMatches.length ? 'menu' : (drinksMatches.length ? 'drinks' : 'specials')),
             score: entityScore(entity, q)
           });
+          console.log('Match found:', entity.name, 'menu:', menuMatches.length, 'drinks:', drinksMatches.length, 'specials:', specialsMatches.length, 'name:', nameMatch);
         }
-      } catch(e) { /* skip */ }
+      } catch(e) { console.warn('Error fetching', slug, ':', e.message); }
     }
 
     // Sort by relevance score
+    console.log('Searched', searched, 'entities, found', allResults.length, 'matches');
     allResults.sort((a, b) => b.score - a.score);
   } catch(err) {
     console.error('Search error:', err);
