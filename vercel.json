@@ -4,5 +4,8 @@
   "cleanUrls": true,
   "redirects": [
     { "source": "/", "destination": "/home", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/trip-swipe/:path*", "destination": "https://trip-swipe-live-lgsh.vercel.app/:path*" }
   ]
 }
