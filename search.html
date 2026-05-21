@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search — Gulf Coast Radar</title>
   <link rel="icon" type="image/png" href="logo/gcr-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -226,7 +226,7 @@
 
 <div class="gcr-header">
   <div class="gcr-header-top">
-    <a href="home.html" class="gcr-logo-row">
+    <a href="index3.html" class="gcr-logo-row">
       <img src="gcr-logo.png" alt="Gulf Coast Radar">
       <div class="gcr-logo-text">GULF<span>COAST</span>RADAR</div>
     </a>
@@ -245,7 +245,7 @@
     
     
     <a href="public-spots.html"        class="gcr-cat-tab">✨ Public Spots</a>
-    <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a><a href="shopping.html" class="gcr-cat-tab">🛍️ Shopping</a><a href="staying.html" class="gcr-cat-tab">🏨 Staying</a>
+    <a href="feed.html"         class="gcr-cat-tab">📡 Live Feed</a>
   </div>
   <div class="gcr-action-strip">
     <button class="gcr-strip-btn gcr-strip-gold" onclick="openSignupModal()">⭐ Join Our Loyalty Program 🎁</button>
@@ -332,19 +332,20 @@
 
 <footer class="site-footer"><div class="container">
   <div class="footer-bottom" style="border-top:none;padding-top:0">
-    <p>© 2026 Gulf Coast Radar · <a href="home.html" style="color:var(--teal-light)">Home</a></p>
+    <p>© 2026 Gulf Coast Radar · <a href="index3.html" style="color:var(--teal-light)">Home</a></p>
     <p>Powered by <span class="powered">CyberCheck</span></p>
   </div>
 </div></footer>
 
-<script src="js/gcr-api.js?v=5"></script>
+<script src="js/gcr-api.js"></script>
 <script src="js/app.js"></script>
 <script>
 const API = 'https://cybercheck-api-database.vercel.app';
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 let allResults = [];
+let similarResults = [];
 let filteredResults = [];
 let currentTab = 'all';
 let visibleCount = 0;
@@ -380,6 +381,15 @@ function levenshtein(a, b) {
   return d[m][n];
 }
 
+function entityScore(entity, q) {
+  return Math.max(
+    fuzzyScore(entity.name, q),
+    fuzzyScore(entity.entity_subtype, q),
+    fuzzyScore(entity.description, q),
+    fuzzyScore(entity.city, q),
+    ...(entity.tags||[]).map(t => fuzzyScore(typeof t==='string'?t:t.tag||'', q))
+  );
+}
 
 /* ── Helpers ── */
 function esc(s) {
@@ -424,16 +434,6 @@ function isExactMatch(itemName, q) {
   return (itemName || '').toLowerCase().trim() === q.toLowerCase().trim();
 }
 
-function entityScore(entity, q) {
-  return Math.max(
-    fuzzyScore(entity.name, q),
-    fuzzyScore(entity.entity_subtype, q),
-    fuzzyScore(entity.description, q),
-    fuzzyScore(entity.city, q),
-    ...(entity.tags||[]).map(t => fuzzyScore(typeof t==='string'?t:t.tag||'', q))
-  );
-}
-
 /* ── Build unified result card (shrimp-style layout for everything) ── */
 function buildItemCard(entity, items, q) {
   const slug    = entity.slug || entity.subdomain || '';
@@ -463,7 +463,7 @@ function buildItemCard(entity, items, q) {
   // Deduplicate matched items by name
   const seenNames = new Set();
   const cleanItems = (items || []).filter(item => {
-    const n = (item.name || item.item_name || item.special_name || '').trim();
+    const n = (item.item_name || item.special_name || '').trim();
     if (!n || seenNames.has(n.toLowerCase())) return false;
     seenNames.add(n.toLowerCase());
     return true;
@@ -477,7 +477,7 @@ function buildItemCard(entity, items, q) {
     listLabel = '🍴 Matching Items';
     viewBtnLabel = 'View Menu';
     listInner = cleanItems.slice(0, 8).map(item => {
-      const iname    = item.name || item.item_name || item.special_name || '';
+      const iname    = item.item_name || item.special_name || '';
       const idesc    = item.description || '';
       const iprice   = item.price_text || (item.price ? `$${Number(item.price).toFixed(2)}` : '') || (item.hh_price ? `$${Number(item.hh_price).toFixed(2)}` : '');
       const itype    = item._type || 'menu';
@@ -496,33 +496,65 @@ function buildItemCard(entity, items, q) {
     }).join('');
     moreCount = cleanItems.length > 8 ? cleanItems.length - 8 : 0;
   } else {
-    // No matched items — show description if available
-    const desc = entity.description || '';
-    if (desc) {
-      listLabel = '📝 About';
-      viewBtnLabel = 'View Profile';
-      listInner = `
+    // No matched items — build rows from whatever business data matched
+    listLabel = '🔍 Matched By';
+    viewBtnLabel = 'View Profile';
+    const rows = [];
+    const ql = (q || '').toLowerCase();
+    const qWords = ql.split(/\s+/).filter(w => w.length > 2);
+
+    // Matching tags
+    const tags = (entity.tags || []).map(t => typeof t === 'string' ? t : (t.tag || '')).filter(Boolean);
+    const matchingTags = tags.filter(t => {
+      const tl = t.toLowerCase().replace(/_/g, ' ');
+      return tl.includes(ql) || qWords.some(w => tl.includes(w));
+    });
+    if (matchingTags.length) {
+      rows.push(`
         <div class="gcr-item-row">
           <div class="gcr-item-content">
+            <div class="gcr-item-name">🏷️ Tags</div>
+            <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">${matchingTags.slice(0, 8).map(t => `<span class="gcr-search-chip feature">${esc(t.replace(/_/g,' '))}</span>`).join('')}</div>
+          </div>
+        </div>`);
+    }
+
+    // Description (if query appears in it or nothing else matched)
+    const desc = entity.description || '';
+    if (desc && (desc.toLowerCase().includes(ql) || qWords.some(w => desc.toLowerCase().includes(w)) || !matchingTags.length)) {
+      rows.push(`
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-name">📝 About</div>
             <div class="gcr-item-desc" style="-webkit-line-clamp:3;">${esc(desc)}</div>
           </div>
-        </div>`;
-    } else {
-      // No items, no description — still show business card with "View Profile" button
-      listLabel = '';
-      viewBtnLabel = 'View Profile';
-      listInner = '';
+        </div>`);
     }
+
+    // Happy Hour
+    if (entity.hh_days) {
+      const hh = `${esc(entity.hh_days)}${entity.hh_start ? ' · '+esc(entity.hh_start) : ''}${entity.hh_end ? '–'+esc(entity.hh_end) : ''}`;
+      rows.push(`
+        <div class="gcr-item-row">
+          <div class="gcr-item-content">
+            <div class="gcr-item-name" style="color:#d97706;">🍺 Happy Hour</div>
+            <div class="gcr-item-desc">${hh}</div>
+          </div>
+        </div>`);
+    }
+
+    if (!rows.length) {
+      rows.push(`
+        <div class="gcr-item-row" style="justify-content:center;">
+          <div class="gcr-item-content" style="text-align:center;color:#8fa3b1;font-style:italic;padding:10px 0;">
+            No matching items for "${esc(q)}" — matched by business name or category
+          </div>
+        </div>`);
+    }
+    listInner = rows.join('');
   }
 
   const viewBtn = `<a href="${profileUrl}" class="gcr-search-btn primary">${viewBtnLabel}</a>`;
-
-  const listSection = listLabel || listInner ? `
-    <div class="gcr-item-list" onclick="event.stopPropagation()">
-      ${listLabel ? `<div class="gcr-item-label">${listLabel}</div>` : ''}
-      ${listInner}
-      ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
-    </div>` : '';
 
   return `
     <div class="gcr-item-card" style="cursor:pointer;" onclick="window.location='${profileUrl}'">
@@ -533,91 +565,81 @@ function buildItemCard(entity, items, q) {
         ${location ? `<div class="gcr-item-card-loc">${esc(location)}</div>` : ''}
         ${fullAddr ? `<div class="gcr-item-card-addr">📍 ${esc(fullAddr)}</div>` : ''}
       </div>
-      ${listSection}
+      <div class="gcr-item-list" onclick="event.stopPropagation()">
+        <div class="gcr-item-label">${listLabel}</div>
+        ${listInner}
+        ${moreCount ? `<div style="font-size:12px;color:#8fa3b1;padding:12px 0;font-weight:600;text-align:center;">+${moreCount} more items · <a href="${profileUrl}" style="color:var(--teal);">View Full Menu</a></div>` : ''}
+      </div>
       <div class="gcr-item-card-footer" onclick="event.stopPropagation()">${viewBtn}${dirBtn}${callBtn}</div>
     </div>`;
 }
 
+/* ── Categorize results ── */
+function categorizeResult(entity, q) {
+  const nameLower = (entity.name || '').toLowerCase();
+  const cityLower = (entity.city || '').toLowerCase();
+  const descLower = (entity.description || entity.subtitle || '').toLowerCase();
+  const ql = (q || '').toLowerCase();
+  const isBusinessMatch = nameLower.includes(ql) || cityLower.includes(ql) || descLower.includes(ql);
+  const hasMenuItems = (entity.matched_menu_items || []).length > 0;
+  const hasSpecials  = (entity.matched_specials || []).length > 0;
+  return { isBusinessMatch, hasMenuItems, hasSpecials };
+}
 
-/* ── Render one result as business card ── */
-function renderResult(result, q, tab) {
-  if (!result || !result.entity) return '';
-  const entity = result.entity;
+/* ── Render one result ── */
+function renderResult(entity, q, tab) {
+  const { hasMenuItems, hasSpecials } = categorizeResult(entity, q);
+  const allItems = entity.matched_menu_items || [];
+  const menuItems  = allItems.filter(i => i._type === 'menu');
+  const drinkItems = allItems.filter(i => i._type === 'drink');
+  const hhItems    = allItems.filter(i => i._type === 'happy_hour');
 
-  // Get matched items based on tab
-  let items = [];
-  if (tab === 'menu') {
-    items = result.menuMatches || [];
-  } else if (tab === 'drinks') {
-    items = result.drinksMatches || [];
-  } else if (tab === 'specials') {
-    items = result.specialsMatches || [];
-  } else if (tab === 'all') {
-    // Show all matched items regardless of type
-    items = [...(result.menuMatches || []), ...(result.drinksMatches || []), ...(result.specialsMatches || [])];
+  if (tab === 'businesses') return buildItemCard(entity, [], q);
+
+  if (tab === 'drinks') {
+    if (!drinkItems.length) return '';
+    return buildItemCard(entity, drinkItems, q);
   }
-  // For 'businesses' tab, items stay empty
 
-  return buildItemCard(entity, items, q);
+  if (tab === 'menu') {
+    if (!menuItems.length && !hhItems.length) return '';
+    return buildItemCard(entity, [...menuItems, ...hhItems], q);
+  }
+
+  if (tab === 'specials') {
+    if (!hasSpecials) return '';
+    return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
+  }
+
+  // "all" tab: prefer items if matched, otherwise show business-detail rows
+  if (allItems.length) return buildItemCard(entity, allItems, q);
+  if (hasSpecials) return buildItemCard(entity, entity.matched_specials.map(s => ({ ...s, item_name: s.special_name, _type: 'menu' })), q);
+  return buildItemCard(entity, [], q);
 }
 
-/* ── Build business card (same as listing page) ── */
-function buildBusinessCard(entity) {
-  const slug = entity.slug || entity.subdomain || '';
-  const name = entity.name || 'Business';
-  const subtype = (entity.entity_subtype || entity.type || '').replace(/_/g, ' ');
-  const city = entity.city || '';
-  const state = entity.state || '';
-  const hero = (entity.photos && entity.photos[0] && entity.photos[0].image_url) || entity.hero_image_url || entity.cover_url || FALLBACK_IMG;
-  const rating = entity.rating;
-  const reviews = entity.review_count || 0;
-  const addr = entity.address_line_1 || '';
-  const phone = entity.phone || '';
-  const location = [city, state].filter(Boolean).join(', ');
-  const desc = entity.description || '';
-  const profileUrl = `profile.html?id=${encodeURIComponent(slug)}`;
-
-  const ratingStr = rating ? `⭐ ${Number(rating).toFixed(1)}${reviews ? ` (${reviews})` : ''}` : '';
-  const fullAddr = [addr, city, state].filter(Boolean).join(', ');
-
-  return `
-    <a href="${profileUrl}" style="text-decoration:none;color:inherit;">
-      <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.1);margin-bottom:16px;transition:transform .14s,box-shadow .14s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(0,0,0,.15)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 16px rgba(0,0,0,.1)'">
-        <div style="width:100%;aspect-ratio:1/1;background-image:url('${hero}');background-size:cover;background-position:center;position:relative;background-color:#f0f4f8;">
-          <div style="position:absolute;top:12px;left:12px;background:rgba(11,122,117,.88);color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;">${subtype}</div>
-        </div>
-        <div style="padding:14px 16px;">
-          <div style="font-size:17px;font-weight:800;color:#1a2b3c;">${esc(name)}</div>
-          <div style="font-size:13px;color:#5c6b81;margin-top:2px;">${esc([desc.substring(0, 60), location].filter(Boolean).join(' · '))}</div>
-          ${ratingStr ? `<div style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:14px;font-weight:700;color:#1a2b3c;">${ratingStr}</div>` : ''}
-        </div>
-        <div style="padding:10px 16px 14px;border-top:1px solid #f0f4f8;">
-          <div style="font-size:12px;color:#8fa3b1;margin-bottom:8px;">📍 ${esc(fullAddr)}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <a href="${profileUrl}" style="padding:8px 13px;border-radius:8px;background:#0b7a75;color:#fff;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;box-sizing:border-box;">View Profile</a>
-            ${phone ? `<a href="tel:${phone.replace(/\D/g,'')}" style="padding:8px 13px;border-radius:8px;border:1px solid #d1dbe6;background:#fff;color:#1a2b3c;font-size:12px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;min-height:36px;box-sizing:border-box;">📞 Call</a>` : ''}
-          </div>
-        </div>
-      </div>
-    </a>`;
+/* ── Render visible slice ── */
+function renderResults() {
+  const container  = document.getElementById('resultsContainer');
+  const loadWrap   = document.getElementById('loadMoreWrap');
+  const slice      = filteredResults.slice(0, visibleCount);
+  container.innerHTML = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
+  loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
 }
-
 
 /* ── Apply tab filter ── */
 function applyTab(tab) {
   currentTab = tab;
-  if (tab === 'all') {
+  if (tab === 'all' || tab === 'businesses') {
     filteredResults = allResults;
-  } else if (tab === 'businesses') {
-    filteredResults = allResults.filter(r => r.nameMatch);
   } else if (tab === 'menu') {
-    filteredResults = allResults.filter(r => r.menuMatches && r.menuMatches.length > 0);
+    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu'));
   } else if (tab === 'drinks') {
-    filteredResults = allResults.filter(r => r.drinksMatches && r.drinksMatches.length > 0);
+    filteredResults = allResults.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink'));
   } else if (tab === 'specials') {
-    filteredResults = allResults.filter(r => r.specialsMatches && r.specialsMatches.length > 0);
+    filteredResults = allResults.filter(e => (e.matched_specials||[]).length > 0);
   }
   visibleCount = PAGE_SIZE;
+  // Sync both tab bars
   document.querySelectorAll('[data-tab]').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   renderResults();
 }
@@ -627,12 +649,11 @@ function applyTab(tab) {
 /* ── Update count badges on toggle pills ── */
 function updateCounts(results) {
   const all      = results.length;
-  const business = results.filter(r => r.nameMatch).length;
-  const menu     = results.filter(r => r.menuMatches && r.menuMatches.length > 0).length;
-  const drinks   = results.filter(r => r.drinksMatches && r.drinksMatches.length > 0).length;
-  const specials = results.filter(r => r.specialsMatches && r.specialsMatches.length > 0).length;
+  const menu     = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'menu')).length;
+  const drinks   = results.filter(e => (e.matched_menu_items||[]).some(i => i._type === 'drink')).length;
+  const specials = results.filter(e => (e.matched_specials||[]).length > 0).length;
   document.querySelector('.search-mode-toggle[data-tab="all"]').textContent        = `🔍 All (${all})`;
-  document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${business})`;
+  document.querySelector('.search-mode-toggle[data-tab="businesses"]').textContent = `🏢 Businesses (${all})`;
   document.querySelector('.search-mode-toggle[data-tab="menu"]').textContent       = `🍽️ Food (${menu})`;
   document.querySelector('.search-mode-toggle[data-tab="drinks"]').textContent     = `🍺 Drinks (${drinks})`;
   document.querySelector('.search-mode-toggle[data-tab="specials"]').textContent   = `🏷️ Specials (${specials})`;
@@ -752,78 +773,29 @@ async function doSearch(q) {
   lastQuery = q.trim();
   hideAutocomplete();
 
-  // Hide all sections
   document.getElementById('defaultState').style.display      = 'none';
   document.getElementById('resultsSection').style.display    = 'none';
   document.getElementById('noResults').style.display         = 'none';
   document.getElementById('gcrLoadingOverlay').style.display = '';
 
   try {
-    // 1. Get all entities
-    console.log('Fetching entities from:', `${API}/api/gcr/entities?limit=500`);
-    const entRes = await fetch(`${API}/api/gcr/entities?limit=500`);
-    console.log('Entities response:', entRes.status, entRes.ok);
-    if (!entRes.ok) throw new Error(`Entities failed: ${entRes.status}`);
-    const entData = await entRes.json();
-    const entities = entData.entities || entData.businesses || [];
-    console.log('Found', entities.length, 'entities');
-
-    // 2. Fetch full entity data for each + search locally
-    allResults = [];
-    let searched = 0;
-    for (const baseEnt of entities) {
-      const slug = baseEnt.slug || baseEnt.subdomain || '';
-      if (!slug || !baseEnt.name) continue;
-
-      try {
-        const fullRes = await fetch(`${API}/api/gcr/entity/${encodeURIComponent(slug)}`);
-        if (!fullRes.ok) continue;
-        const fullData = await fullRes.json();
-        const entity = fullData.entity || fullData;
-        searched++;
-
-        // Search for matches in this entity
-        const menuItems = entity.menu?.items || [];
-        const drinksItems = entity.drinks?.items || [];
-        const specialsItems = entity.specials || [];
-
-        if (searched < 3) {
-          console.log(`Entity: ${entity.name}, menu items: ${menuItems.length}, drinks: ${drinksItems.length}, specials: ${specialsItems.length}`);
-          if (menuItems.length > 0) console.log('  Sample menu item:', menuItems[0]);
-        }
-
-        const menuMatches = searchInItems(menuItems, q, 'menu');
-        const drinksMatches = searchInItems(drinksItems, q, 'drink');
-        const specialsMatches = searchInItems(specialsItems, q, 'special');
-        const nameMatch = fuzzyScore(entity.name, q) >= 50 || fuzzyScore(entity.slug, q) >= 50;
-
-        // Only add if at least one match found
-        if (menuMatches.length || drinksMatches.length || specialsMatches.length || nameMatch) {
-          allResults.push({
-            entity,
-            menuMatches,
-            drinksMatches,
-            specialsMatches,
-            nameMatch,
-            matchType: nameMatch ? 'business' : (menuMatches.length ? 'menu' : (drinksMatches.length ? 'drinks' : 'specials')),
-            score: entityScore(entity, q)
-          });
-          console.log('Match found:', entity.name, 'menu:', menuMatches.length, 'drinks:', drinksMatches.length, 'specials:', specialsMatches.length, 'name:', nameMatch);
-        }
-      } catch(e) { console.warn('Error fetching', slug, ':', e.message); }
-    }
-
-    // Sort by relevance score
-    console.log('Searched', searched, 'entities, found', allResults.length, 'matches');
-    allResults.sort((a, b) => b.score - a.score);
+    const res  = await fetch(`${API}/api/gcr/search`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ query: lastQuery }),
+    });
+    const data = await res.json();
+    allResults = data.results || [];
   } catch(err) {
     console.error('Search error:', err);
     allResults = [];
   }
 
+  // Find similar using local fuzzy match
+  similarResults = findSimilar(lastQuery, allResults);
+
   document.getElementById('gcrLoadingOverlay').style.display = 'none';
 
-  if (!allResults.length) {
+  if (!allResults.length && !similarResults.length) {
     document.getElementById('noResults').style.display = '';
     return;
   }
@@ -832,36 +804,33 @@ async function doSearch(q) {
   updateCounts(allResults);
 
   const total = allResults.length;
-  document.getElementById('searchHeading').textContent    = `${total} result${total!==1?'s':''} for "${lastQuery}"`;
-  document.getElementById('searchSubheading').textContent = 'Orange Beach & Gulf Shores · Best matches first';
+  document.getElementById('searchHeading').textContent    = total ? `${total} result${total!==1?'s':''} for "${lastQuery}"` : `No exact results for "${lastQuery}"`;
+  document.getElementById('searchSubheading').textContent = total ? 'Orange Beach & Gulf Shores · Best matches first' : 'Showing similar businesses below';
 
   applyTab('all');
 }
 
-function searchInItems(items, q, itemType = 'menu') {
-  if (!items || !Array.isArray(items)) return [];
-  return items.filter(item => {
-    const name = item.name || item.item_name || item.special_name || '';
-    const desc = item.description || '';
-    if (fuzzyScore(name, q) >= 50 || fuzzyScore(desc, q) >= 40) {
-      item._type = itemType;
-      return true;
-    }
-    return false;
-  });
-}
-
-/* ── Render visible slice ── */
+/* ── Render visible slice + similar ── */
 function renderResults() {
   const container = document.getElementById('resultsContainer');
   const loadWrap  = document.getElementById('loadMoreWrap');
   const slice     = filteredResults.slice(0, visibleCount);
-  container.innerHTML = slice.map(r => renderResult(r, lastQuery, currentTab)).filter(Boolean).join('');
+  let html = slice.map(e => renderResult(e, lastQuery, currentTab)).join('');
+
+  // Similar results section
+  if (similarResults.length && currentTab === 'all') {
+    html += `<div class="similar-section">
+      <div class="similar-label">📍 Similar — you might also like</div>
+      ${similarResults.map(e => buildItemCard(e, [], lastQuery)).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = html;
   loadWrap.style.display = visibleCount < filteredResults.length ? '' : 'none';
 }
 
 /* ── Boot ── */
-function initSearch() {
+document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const searchBtn   = document.getElementById('searchBtn');
 
@@ -899,19 +868,7 @@ function initSearch() {
 
   const params = new URLSearchParams(window.location.search);
   const q = params.get('q');
-  if (q) {
-    searchInput.value = q;
-    document.getElementById('defaultState').style.display = 'none';
-    doSearch(q);
-  }
-}
-
-/* Wait for GCR data to load, then initialize search */
-document.addEventListener('gcr:loaded', initSearch);
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.GCR && window.GCR.loaded) {
-    initSearch();
-  }
+  if (q) { searchInput.value = q; doSearch(q); }
 });
 </script>
 <script src="js/claim-modal.js"></script>
