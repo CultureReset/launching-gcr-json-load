@@ -1480,7 +1480,7 @@
     if (token) {
       var recRow = document.getElementById('recommendationsRow');
       if (recRow) {
-        fetch('https://cybercheck-api-database.vercel.app/api/tourist/recommendations?limit=6', {
+        fetch('https://gcr-api-gules.vercel.app/api/tourist/recommendations?limit=6', {
           headers: { 'Authorization': 'Bearer ' + token }
         })
         .then(r => r.json())
@@ -1670,7 +1670,7 @@ window.submitSignup = function() {
   localStorage.setItem('gcr_loyalty_interests', interests.join(','));
 
   /* register with concierge API — sends SMS with personal chat link */
-  fetch('https://cybercheck-api-database.vercel.app/api/gcr/tourist/register', {
+  fetch('https://gcr-api-gules.vercel.app/api/gcr/tourist/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, phone: '+1' + phone, interests, visitor_type: type, checkin, checkout, sms_consent: true })
@@ -1916,7 +1916,7 @@ document.addEventListener('gcr:loaded', function() {
 <script>
 /* Load admin-configured hero + category card overrides */
 (function() {
-  var API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+  var API = 'https://gcr-api-gules.vercel.app/api/gcr';
 
   function applyHero(hero) {
     if (!hero) return;
@@ -2027,7 +2027,7 @@ document.addEventListener('gcr:loaded', function() {
 
 <script>
   var _btnCfg = null;
-  var GCR_API = 'https://cybercheck-api-database.vercel.app';
+  var GCR_API = 'https://gcr-api-gules.vercel.app';
 
   async function _loadBtnCfg() {
     if (_btnCfg) return _btnCfg;
@@ -2097,7 +2097,7 @@ document.addEventListener('gcr:loaded', function() {
       console.log('[QR] Scanned ID:', qrId);
 
       // Fetch location name from API
-      fetch('https://cybercheck-api-database.vercel.app/api/qr/locations')
+      fetch('https://gcr-api-gules.vercel.app/api/qr/locations')
         .then(res => res.json())
         .then(qrLocations => {
           const locationName = (qrLocations[qrId] && qrLocations[qrId].name) || `Location ${qrId}`;
@@ -2112,7 +2112,7 @@ document.addEventListener('gcr:loaded', function() {
 
           // Log to API
           try {
-            fetch('https://cybercheck-api-database.vercel.app/api/qr/scans', {
+            fetch('https://gcr-api-gules.vercel.app/api/qr/scans', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

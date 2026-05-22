@@ -805,7 +805,7 @@ function loadHHItems(popupId) {
   const popup = document.getElementById(popupId);
   const slug = popup?.dataset?.slug || popupId.replace('hh-items-', '').replace(/_/g, '-');
 
-  fetch(`https://cybercheck-api-database.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
+  fetch(`https://gcr-api-gules.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
     .then(res => res.json())
     .then(data => {
       const hhItems = data.hhItems || [];

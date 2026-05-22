@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const ROOT = __dirname;
-const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+const GCR_API = 'https://gcr-api-gules.vercel.app/api/gcr';
 
 // Auto-discover all .html files in root
 function discoverPages() {

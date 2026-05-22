@@ -143,7 +143,7 @@
 </div>
 <script>
 (async function(){
-  const API='https://cybercheck-api-database.vercel.app/api/gcr';
+  const API='https://gcr-api-gules.vercel.app/api/gcr';
   const slug=new URLSearchParams(location.search).get('id')||window.GCR_SLUG;
   if(!slug){document.body.innerHTML='<p style="padding:40px;color:red">No ?id= in URL</p>';return;}
   let d=null;try{const r=await fetch(`${API}/entity/${encodeURIComponent(slug)}`);if(r.ok)d=await r.json();}catch(e){}

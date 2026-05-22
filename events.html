@@ -412,8 +412,8 @@
       const isNew = ev.id.toString().startsWith('new-');
       const method = isNew ? 'POST' : 'PUT';
       const url = isNew
-        ? 'https://cybercheck-api-database.vercel.app/api/dashboard/events'
-        : 'https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id;
+        ? 'https://gcr-api-gules.vercel.app/api/dashboard/events'
+        : 'https://gcr-api-gules.vercel.app/api/dashboard/events/' + ev.id;
 
       const res = await fetch(url, {
         method: method,
@@ -454,7 +454,7 @@
     if (!confirm('Delete this event? This cannot be undone.')) return;
 
     try {
-      const res = await fetch('https://cybercheck-api-database.vercel.app/api/dashboard/events/' + ev.id, {
+      const res = await fetch('https://gcr-api-gules.vercel.app/api/dashboard/events/' + ev.id, {
         method: 'DELETE',
         credentials: 'include'
       });

@@ -1745,7 +1745,7 @@ window.submitSignup = function() {
   localStorage.setItem('gcr_loyalty_interests', interests.join(','));
 
   /* register with concierge API — sends SMS with personal chat link */
-  fetch('https://cybercheck-api-database.vercel.app/api/gcr/tourist/register', {
+  fetch('https://gcr-api-gules.vercel.app/api/gcr/tourist/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, phone: '+1' + phone, interests, visitor_type: type, checkin, checkout, sms_consent: true })
@@ -1807,7 +1807,7 @@ fetch('https://api.open-meteo.com/v1/forecast?latitude=30.2460&longitude=-87.600
   .catch(() => { document.getElementById('wCond').textContent = 'Weather unavailable'; });
 
 /* ── AI Chat — Direct OpenAI (Chat + Whisper Voice) ── */
-const GCR_CHAT_API = 'https://cybercheck-api-database.vercel.app/api/gcr/chat';
+const GCR_CHAT_API = 'https://gcr-api-gules.vercel.app/api/gcr/chat';
 let aiHistory = [];
 
 /* Chat uses backend API — no client-side AI keys needed */

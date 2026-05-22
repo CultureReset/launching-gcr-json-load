@@ -335,7 +335,7 @@
 
 <script>
 (async function () {
-  const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+  const GCR_API = 'https://gcr-api-gules.vercel.app/api/gcr';
   const slug = new URLSearchParams(location.search).get('id') || window.GCR_SLUG;
   if (!slug) {
     document.body.innerHTML = '<p style="padding:40px;color:red">No business slug in URL (?id=your-slug)</p>';

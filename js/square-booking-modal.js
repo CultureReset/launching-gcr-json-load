@@ -672,7 +672,7 @@
   // CONFIGURATION
   // ============================================
   var CONFIG = {
-    apiBase: window.API_BASE || 'https://cybercheck-api-database.vercel.app',
+    apiBase: window.API_BASE || 'https://gcr-api-gules.vercel.app',
     subdomain: window.SUBDOMAIN || '',
     darkMode: window.DARK_MODE || false
   };

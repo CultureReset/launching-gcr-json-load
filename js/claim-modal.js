@@ -143,7 +143,7 @@
       submitBtn.textContent = 'Sending…';
 
       try {
-        const res = await fetch('https://cybercheck-api-database.vercel.app/api/gcr/claim', {
+        const res = await fetch('https://gcr-api-gules.vercel.app/api/gcr/claim', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),

@@ -26,7 +26,7 @@ const FIREBASE_CONFIG = {
   appId:             '',
 };
 
-if (typeof GCR_API === 'undefined') var GCR_API = 'https://cybercheck-api-database.vercel.app';
+if (typeof GCR_API === 'undefined') var GCR_API = 'https://gcr-api-gules.vercel.app';
 
 // ── Internal state ────────────────────────────────────────────
 let _client   = null;

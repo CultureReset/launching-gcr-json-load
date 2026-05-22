@@ -99,7 +99,7 @@
             sessionStorage.setItem('ts_sess_id', sess);
         }
         
-        const API = window.location.origin.includes('localhost') ? 'http://localhost:3000' : 'https://cybercheck-api-database.vercel.app';
+        const API = window.location.origin.includes('localhost') ? 'http://localhost:3000' : 'https://gcr-api-gules.vercel.app';
         fetch(API + '/api/gcr/track', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

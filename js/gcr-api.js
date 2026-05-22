@@ -4,7 +4,7 @@
    Replaces data.js — same GCR.* interface
    ============================================ */
 
-const GCR_API = 'https://cybercheck-api-database.vercel.app/api/gcr';
+const GCR_API = 'https://gcr-api-gules.vercel.app/api/gcr';
 
 /* ── Cache layer ──────────────────────────────────────────────
    Stale-while-revalidate: pages render from cache instantly,

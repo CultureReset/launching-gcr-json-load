@@ -7,7 +7,7 @@
 
 /* ── Analytics: fires once per page load ── */
 (function gcrAnalytics() {
-  var API = 'https://cybercheck-api-database.vercel.app';
+  var API = 'https://gcr-api-gules.vercel.app';
   var sess = sessionStorage.getItem('gcr_sess_id');
   if (!sess) { sess = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('gcr_sess_id', sess); }
   var qs = new URLSearchParams(location.search);
@@ -78,7 +78,7 @@ window._submitLoyaltySignup = async function(e) {
   errEl.style.display = 'none';
 
   try {
-    const res = await fetch('https://cybercheck-api-database.vercel.app/api/gcr/tourist/register', {
+    const res = await fetch('https://gcr-api-gules.vercel.app/api/gcr/tourist/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: data.name, email: data.email || null, phone: data.phone || null, source: 'loyalty_popup', page: window.location.pathname })

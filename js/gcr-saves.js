@@ -4,7 +4,7 @@
    Add <script src="js/gcr-saves.js"></script> to every GCR page.
    ============================================================ */
 
-if (typeof GCR_API === 'undefined') var GCR_API = 'https://cybercheck-api-database.vercel.app';
+if (typeof GCR_API === 'undefined') var GCR_API = 'https://gcr-api-gules.vercel.app';
 
 window.GCRSaves = (function() {
   let _user = null;
