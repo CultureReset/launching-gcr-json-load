@@ -264,13 +264,30 @@
 
 <script src="js/claim-modal.js"></script>
 <script>
+console.log('=== DEBUG: Page Init ===');
+console.log('window.supabase:', window.supabase);
+console.log('GCRSupabase:', window.GCRSupabase);
+console.log('All window keys with "supabase":', Object.keys(window).filter(k => k.toLowerCase().includes('supabase')));
+
 (async () => {
-  const restaurants = await GCRSupabase.fetchAllBusinesses();
-  if (restaurants && restaurants.length > 0) {
-    window.GCR = window.GCR || {};
-    window.GCR.businesses = restaurants;
-    window.GCR.loaded = true;
-    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: restaurants } }));
+  try {
+    console.log('=== Starting async init ===');
+    console.log('GCRSupabase exists?', !!window.GCRSupabase);
+    console.log('GCRSupabase.fetchAllBusinesses exists?', !!window.GCRSupabase?.fetchAllBusinesses);
+
+    const restaurants = await window.GCRSupabase.fetchAllBusinesses();
+    console.log('✓ Fetched restaurants:', restaurants.length);
+
+    if (restaurants && restaurants.length > 0) {
+      window.GCR = window.GCR || {};
+      window.GCR.businesses = restaurants;
+      window.GCR.loaded = true;
+      document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: restaurants } }));
+      console.log('✓ Event dispatched');
+    }
+  } catch (err) {
+    console.error('❌ ERROR:', err.message, err);
+    console.error('Full error:', err);
   }
 })();
 </script>
