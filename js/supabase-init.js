@@ -150,6 +150,7 @@ async function updateBusiness(slug, updates) {
 
 // Export functions
 window.GCRSupabase = {
+  getClient: initSupabase,
   initSupabase,
   fetchAllBusinesses,
   fetchBusinessProfile,

@@ -800,46 +800,70 @@ function toggleHHItems(popupId) {
   }
 }
 
-function loadHHItems(popupId) {
+async function loadHHItems(popupId) {
   const itemsContainer = document.getElementById(popupId + '-items');
   const popup = document.getElementById(popupId);
   const slug = popup?.dataset?.slug || popupId.replace('hh-items-', '').replace(/_/g, '-');
 
-  fetch(`https://gar-front-end-data.vercel.app/api/gcr/entity/${encodeURIComponent(slug)}`)
-    .then(res => res.json())
-    .then(data => {
-      const hhItems = data.hhItems || [];
-      const hhSections = data.hhSections || [];
-      const entity = data.entity || {};
-      const hhDesc = entity.hh_description || '';
+  try {
+    const supabase = await GCRSupabase.getClient();
+    if (!supabase) throw new Error('Supabase client not initialized');
 
-      if (hhItems.length === 0) {
-        itemsContainer.innerHTML = hhDesc
-          ? `<div style="color:#92400e;line-height:1.6;">${esc(hhDesc)}</div>`
-          : '<div style="color:#92400e;">No items listed yet</div>';
-        return;
-      }
+    const { data: entities, error: entityErr } = await supabase
+      .from('entity')
+      .select('id, hh_description')
+      .eq('slug', slug)
+      .limit(1);
 
-      let html = '';
-      if (hhSections.length) {
-        hhSections.forEach(sec => {
-          const secItems = hhItems.filter(i => i.happy_hour_section_id === sec.id);
-          if (!secItems.length) return;
-          html += `<div style="font-weight:800;color:#92400e;font-size:14px;margin:14px 0 6px;">${esc(sec.section_name)}</div>`;
-          html += secItems.map(item => hhItemRow(item)).join('');
-        });
-        const unsectioned = hhItems.filter(i => !i.happy_hour_section_id);
-        html += unsectioned.map(item => hhItemRow(item)).join('');
-      } else {
-        html = hhItems.map(item => hhItemRow(item)).join('');
-      }
+    if (entityErr || !entities?.length) {
+      itemsContainer.innerHTML = '<div style="color:#92400e;">Business not found</div>';
+      return;
+    }
 
-      itemsContainer.innerHTML = html || '<div style="color:#92400e;">No items listed yet</div>';
-    })
-    .catch(err => {
-      console.error('HH items load error:', err);
-      itemsContainer.innerHTML = '<div style="color:#92400e;">Error loading items</div>';
-    });
+    const entityId = entities[0].id;
+    const hhDesc = entities[0].hh_description || '';
+
+    const { data: hhItems, error: itemsErr } = await supabase
+      .from('entity_happy_hours')
+      .select('*')
+      .eq('entity_id', entityId)
+      .order('happy_hour_section_id, sort_order');
+
+    const { data: hhSections, error: sectionsErr } = await supabase
+      .from('entity_sections')
+      .select('*')
+      .eq('entity_id', entityId)
+      .order('sort_order');
+
+    const items = hhItems || [];
+    const sections = hhSections || [];
+
+    if (items.length === 0) {
+      itemsContainer.innerHTML = hhDesc
+        ? `<div style="color:#92400e;line-height:1.6;">${esc(hhDesc)}</div>`
+        : '<div style="color:#92400e;">No items listed yet</div>';
+      return;
+    }
+
+    let html = '';
+    if (sections.length) {
+      sections.forEach(sec => {
+        const secItems = items.filter(i => i.happy_hour_section_id === sec.id);
+        if (!secItems.length) return;
+        html += `<div style="font-weight:800;color:#92400e;font-size:14px;margin:14px 0 6px;">${esc(sec.section_name)}</div>`;
+        html += secItems.map(item => hhItemRow(item)).join('');
+      });
+      const unsectioned = items.filter(i => !i.happy_hour_section_id);
+      html += unsectioned.map(item => hhItemRow(item)).join('');
+    } else {
+      html = items.map(item => hhItemRow(item)).join('');
+    }
+
+    itemsContainer.innerHTML = html || '<div style="color:#92400e;">No items listed yet</div>';
+  } catch (err) {
+    console.error('HH items load error:', err);
+    itemsContainer.innerHTML = '<div style="color:#92400e;">Error loading items</div>';
+  }
 }
 
 function hhItemRow(item) {
