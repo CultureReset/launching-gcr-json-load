@@ -1399,7 +1399,55 @@
 
 <script src="js/shared-identity.js"></script>
 <script src="js/supabase-init.js"></script>
-<script src="js/gcr-api.js?v=6"></script>
+<script>
+(async () => {
+  const client = await GCRSupabase.initSupabase();
+  const { data: allBusinesses, error } = await client
+    .from('entity')
+    .select('*')
+    .eq('is_active', true);
+
+  const { data: allEvents } = await client
+    .from('entity_events')
+    .select('*')
+    .eq('is_active', true)
+    .order('event_date');
+
+  const { data: allSpecials } = await client
+    .from('entity_specials')
+    .select('*')
+    .eq('is_active', true);
+
+  if (!error && allBusinesses) {
+    window.GCR = window.GCR || {
+      businesses: allBusinesses || [],
+      events: allEvents || [],
+      specials: allSpecials || [],
+      loaded: true,
+      getByCategory: function(cat) {
+        return (this.businesses || []).filter(b => {
+          const subtype = (b.entity_subtype || b.type || '').toLowerCase().replace(/-/g, '_');
+          return subtype === cat.replace(/-/g, '_');
+        });
+      },
+      getHappyHours: function() {
+        return (this.businesses || []).filter(b => b.hh_days);
+      },
+      getUpcomingEvents: function() {
+        const today = new Date().toISOString().split('T')[0];
+        return (this.events || []).filter(e => e.event_date >= today);
+      },
+      getSpecials: function() {
+        return this.specials || [];
+      },
+      getFeatured: function() {
+        return (this.businesses || []).filter(b => b.is_featured);
+      }
+    };
+    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: allBusinesses, events: allEvents, specials: allSpecials } }));
+  }
+})();
+</script>
 <script src="js/app.js"></script>
 <script src="js/gcr-saves.js"></script>
 <script>

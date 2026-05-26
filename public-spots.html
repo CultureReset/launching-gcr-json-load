@@ -327,10 +327,27 @@
     </div>
   </footer>
 
-  <script src="js/gcr-api.js?v=6"></script>
+  <script src="js/supabase-init.js"></script>
   <script src="js/app.js"></script>
   <script src="js/gcr-auth.js"></script><script src="js/gcr-saves.js"></script><script src="js/gcr-listings.js?v=5"></script>
 <script src="js/claim-modal.js"></script>
+<script>
+(async () => {
+  const client = await GCRSupabase.initSupabase();
+  const { data: spots, error } = await client
+    .from('entity')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+
+  if (!error && spots) {
+    window.GCR = window.GCR || {};
+    window.GCR.businesses = spots;
+    window.GCR.loaded = true;
+    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: spots } }));
+  }
+})();
+</script>
 <script src="js/gcr-config.js" data-category="public-spots"></script>
 </body>
 </html>

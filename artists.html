@@ -229,9 +229,26 @@
     </div>
   </div></footer>
 
-  <script src="js/gcr-api.js?v=5"></script>
+  <script src="js/supabase-init.js"></script>
   <script src="js/app.js"></script>
 <script src="js/claim-modal.js"></script>
+<script>
+(async () => {
+  const client = await GCRSupabase.initSupabase();
+  const { data: artists, error } = await client
+    .from('entity')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+
+  if (!error && artists) {
+    window.GCR = window.GCR || {};
+    window.GCR.businesses = artists;
+    window.GCR.loaded = true;
+    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: artists } }));
+  }
+})();
+</script>
 <script src="js/gcr-config.js" data-category="artists"></script>
 </body>
 </html>
