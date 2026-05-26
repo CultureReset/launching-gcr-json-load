@@ -373,7 +373,7 @@ const API = 'https://gcr-api-gules.vercel.app';
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
 const PAGE_SIZE = 20;
 
-let allResults = [];
+let allResults = window.allResults || [];
 let similarResults = [];
 let filteredResults = [];
 let currentTab = 'all';
