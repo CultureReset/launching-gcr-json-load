@@ -501,32 +501,32 @@
     const { biz, city } = getVenueParts(ev);
     const hero  = fallbackImg(ev);
     const etype = (ev.event_type || '').replace(/_/g,' ') || 'Event';
-    const time  = ev.start_time ? fmt12(ev.start_time) : '';
+    const startTime  = ev.start_time ? fmt12(ev.start_time) : '';
+    const endTime = ev.end_time ? fmt12(ev.end_time) : '';
+    const timeRange = startTime && endTime ? `${startTime} - ${endTime}` : (startTime || '');
     const desc  = (ev.description || '').slice(0, 120);
     const profileUrl = slug ? `profile.html?id=${encodeURIComponent(slug)}` : '';
     const isMusic = (ev.event_type||'').includes('music') || (ev.event_type||'').includes('live') || (ev.event_type||'').includes('mic') || (ev.artist_name||'').length > 0;
+
+    // VERTICAL LAYOUT: Image on top, content below
     return `
-      <div class="event-card" style="margin-bottom:12px;">
-        <div class="event-image" style="background-image:url('${hero}')">
-          <div class="image-badge">${esc(etype||'Event')}</div>
+      <div class="event-card" style="display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;background:var(--card);border:1px solid var(--line);margin-bottom:14px;">
+        <div class="event-image" style="width:100%;height:200px;background-image:url('${hero}');background-size:cover;background-position:center;position:relative;">
+          <div class="image-badge" style="position:absolute;left:14px;bottom:14px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.94);color:#21485d;font-weight:800;font-size:13px;">${esc(etype||'Event')}</div>
         </div>
         <div style="padding:16px 18px;">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-            <div>
-              ${isMusic?`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);margin-bottom:4px;">🎸 Live Music</div>`:''}
-              <div style="font-size:${isMusic?'26':'22'}px;font-weight:900;color:#12263a;letter-spacing:-.02em;">${esc(name)}</div>
-              <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-top:4px;">📍 ${esc(biz)}${city?' · '+esc(city):''}</div>
-            </div>
-            ${time?`<div class="timepill" style="margin-top:0;">🕐 ${time}</div>`:''}
-          </div>
-          ${desc?`<div style="margin-top:8px;color:#50677a;font-size:13px;line-height:1.5;">${esc(desc)}</div>`:''}
-          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          ${isMusic?`<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);margin-bottom:4px;">🎸 Live Music</div>`:''}
+          <div style="font-size:22px;font-weight:900;color:#12263a;letter-spacing:-.02em;margin-bottom:4px;">${esc(name)}</div>
+          <div style="font-size:14px;color:#0f7c90;font-weight:700;margin-bottom:8px;">📍 ${esc(biz)}${city?' · '+esc(city):''}</div>
+          ${timeRange?`<div style="font-size:14px;color:#0f7c90;font-weight:700;margin-bottom:8px;">🕐 ${timeRange}</div>`:''}
+          ${desc?`<div style="margin-bottom:12px;color:#50677a;font-size:13px;line-height:1.5;">${esc(desc)}</div>`:''}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
             ${(ev.recurring||(ev.day_of_week||'').trim())?'<span style="background:#eef2ff;color:var(--purple);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Recurring</span>':''}
             ${ev.cover_charge?'<span style="background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;">Cover Charge</span>':''}
-            <div style="margin-left:auto;display:flex;gap:6px;">
-              <button onclick="openEventEditor(${idx})" style="background:#f59e0b;color:#fff;padding:8px 14px;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">✏️ Edit</button>
-              ${profileUrl?`<a href="${profileUrl}" style="background:var(--brand);color:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:800;text-decoration:none;">View Venue →</a>`:''}
-            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            ${profileUrl?`<a href="${profileUrl}" style="flex:1;background:var(--brand);color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:800;text-decoration:none;text-align:center;">View Details →</a>`:''}
+          </div>
           </div>
         </div>
       </div>`;
@@ -913,6 +913,32 @@
   if (window.GCR && GCR.loaded) { init(); }
   else { document.addEventListener('gcr:loaded', init); }
   </script>
+<script src="js/supabase-init.js"></script>
+<script>
+// Load events from Supabase before rendering
+(async function() {
+  if (!window.GCRSupabase) {
+    console.warn('Supabase not loaded, using fallback');
+    return;
+  }
+  try {
+    const client = await GCRSupabase.initSupabase();
+    const { data: events, error } = await client
+      .from('entity_events')
+      .select('*')
+      .eq('is_active', true)
+      .order('event_date', { ascending: true });
+
+    if (!error && events && events.length > 0) {
+      window.GCR = window.GCR || {};
+      window.GCR.events = events;
+      console.log(`✓ Loaded ${events.length} events from Supabase`);
+    }
+  } catch(e) {
+    console.error('Error loading events:', e);
+  }
+})();
+</script>
 <script src="js/claim-modal.js"></script>
 <script src="js/gcr-config.js" data-category="events"></script>
 </body>
