@@ -265,7 +265,7 @@
 <script src="js/claim-modal.js"></script>
 <script>
 (async () => {
-  const restaurants = await GCRSupabase.fetchAllBusinesses(20, 0);
+  const restaurants = await GCRSupabase.fetchAllBusinesses();
   if (restaurants && restaurants.length > 0) {
     window.GCR = window.GCR || {};
     window.GCR.businesses = restaurants;
