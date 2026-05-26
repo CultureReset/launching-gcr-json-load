@@ -1469,7 +1469,9 @@ function getEntitiesForCategory(businesses, category) {
     const catMatch = raw === category || SUBTYPE_TO_CATEGORY[raw] === category || SUBTYPE_TO_CATEGORY[norm] === category;
     const secTypes = (b.secondary_types || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
     const secMatch = secTypes.some(s => s === category || s.replace(/_/g, '-') === category || s.replace(/-/g, '_') === category.replace(/-/g, '_'));
-    if (!catMatch && !secMatch) return false;
+    // Also check entity_type if subtype doesn't match
+    const entityTypeMatch = (b.entity_type || '').toLowerCase().replace(/-/g, '_') === category.replace(/-/g, '_');
+    if (!catMatch && !secMatch && !entityTypeMatch) return false;
 
     const hasTags  = (b.tags || []).length > 0;
     const hasImage = !!(b.hero_image_url || b.cover_url || (b.photos && b.photos.length > 0));
