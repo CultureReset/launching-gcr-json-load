@@ -11,17 +11,24 @@ let supabase = null;
 async function initSupabase() {
   if (supabase) return supabase;
 
-  // Load Supabase library if not already loaded
+  // Wait for Supabase library to be available (loaded via HTML <script async>)
   if (!window.supabase) {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    document.head.appendChild(script);
-
     return new Promise((resolve) => {
-      script.onload = () => {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        resolve(supabase);
+      let attempts = 0;
+      const checkSupabase = () => {
+        if (window.supabase) {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log('✓ Supabase client created');
+          resolve(supabase);
+        } else if (attempts < 100) {
+          attempts++;
+          setTimeout(checkSupabase, 50);
+        } else {
+          console.error('❌ Supabase library failed to load');
+          resolve(null);
+        }
       };
+      checkSupabase();
     });
   }
 
