@@ -35,17 +35,19 @@ async function initSupabase() {
 async function fetchAllBusinesses() {
   const client = await initSupabase();
 
+  // Try with relations first
   const { data, error } = await client
     .from('entity')
-    .select('id,slug,name,entity_subtype,city,state,phone,address_line_1,rating,review_count,hero_image_url,cover_url,description,subtitle,hh_days,hh_start,hh_end,hh_description,is_featured,is_active,photos:entity_photos(image_url),tags:entity_tags(tag)')
+    .select('*')
     .eq('is_active', true)
     .order('name');
 
   if (error) {
-    console.error('Error fetching businesses:', error);
+    console.error('❌ Error fetching businesses:', error.message, error);
     return [];
   }
 
+  console.log('✓ Fetched', data ? data.length : 0, 'businesses from Supabase');
   return data || [];
 }
 
