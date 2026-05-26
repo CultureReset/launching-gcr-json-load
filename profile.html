@@ -333,29 +333,34 @@
 
 </div>
 
+<script src="js/supabase-init.js"></script>
 <script>
 (async function () {
-  const GCR_API = 'https://gcr-api-gules.vercel.app/api/gcr';
   const slug = new URLSearchParams(location.search).get('id') || window.GCR_SLUG;
   if (!slug) {
     document.body.innerHTML = '<p style="padding:40px;color:red">No business slug in URL (?id=your-slug)</p>';
     return;
   }
 
-  // ── Fetch from new entity API + community photos in parallel ──
+  // ── Fetch directly from Supabase ──
   let entityData = null;
   let communityPhotos = [];
   try {
-    const [entRes, commRes] = await Promise.all([
-      fetch(`${GCR_API}/entity/${encodeURIComponent(slug)}`).catch(() => null),
-      fetch(`${GCR_API}/community-photos/${encodeURIComponent(slug)}`).catch(() => null),
-    ]);
-    if (entRes && entRes.ok) entityData = await entRes.json();
-    if (commRes && commRes.ok) {
-      const commData = await commRes.json();
-      communityPhotos = Array.isArray(commData) ? commData : (commData.photos || []);
+    const profile = await GCRSupabase.fetchBusinessProfile(slug);
+    if (profile) {
+      entityData = {
+        entity: profile.entity,
+        sections: profile.sections,
+        photos: profile.photos,
+        events: profile.events,
+        specials: profile.specials,
+        tags: profile.tags
+      };
+      communityPhotos = profile.photos || [];
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Error fetching from Supabase:', e);
+  }
 
   if (!entityData || !entityData.entity) {
     document.body.innerHTML = `<p style="padding:40px;color:red">Could not load: ${slug}</p>`;
