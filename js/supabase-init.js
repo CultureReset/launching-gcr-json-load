@@ -92,12 +92,20 @@ async function fetchBusinessProfile(slug) {
     .select('*')
     .eq('entity_id', entity.id);
 
-  // Get menu sections and items
+  // Get happy hours
+  const { data: happyHours } = await client
+    .from('entity_happy_hours')
+    .select('*')
+    .eq('entity_id', entity.id);
+
+  // Get menu sections with items, bullets, and groups
   const { data: sections } = await client
     .from('entity_sections')
     .select(`
       *,
-      section_items(*)
+      section_items(*),
+      section_bullets(*),
+      section_groups(*)
     `)
     .eq('entity_id', entity.id);
 
@@ -107,6 +115,7 @@ async function fetchBusinessProfile(slug) {
     events: events || [],
     specials: specials || [],
     tags: tags || [],
+    happyHours: happyHours || [],
     sections: sections || []
   };
 }
