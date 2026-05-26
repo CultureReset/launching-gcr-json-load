@@ -32,7 +32,7 @@ async function initSupabase() {
 // ============================================
 // Fetch businesses with smart pagination
 // ============================================
-async function fetchAllBusinesses(limit = 10, offset = 0) {
+async function fetchAllBusinesses(limit = 20, offset = 0) {
   const client = await initSupabase();
 
   const { data, error } = await client
