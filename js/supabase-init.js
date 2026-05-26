@@ -6,10 +6,10 @@ const SUPABASE_URL = 'https://xbptmkpbiqzvxptjkfoi.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6ImFub24iLCJraWQiOiJ2MWkzOGFjdTk0ZTEzMDMxIn0.eyJpc3MiOiJodHRwczovL3N1cGFiYXNlLmNvIiwic3ViIjoiYW5vbiIsImlhdCI6MTcwNTMyNTE3OCwiZXhwIjoyNDA5NTI1MTc4LCJhdWQiOiJhdXRoZW50aWNhdGVkIiwicm9sZSI6ImFub24iLCJodHRwczovL2hhc3VyYS5pby9qd3QvY2xhaW1zIjp7fX0.VPbIAGRiH2b2v1KOLuaCxBOvEHw-hINHfy5_Rppd-N8';
 
 // Create Supabase client
-let supabase = null;
+let _gcrSupabaseClient = null;
 
 async function initSupabase() {
-  if (supabase) return supabase;
+  if (_gcrSupabaseClient) return _gcrSupabaseClient;
 
   // Wait for Supabase library to be available (loaded via HTML <script async>)
   if (!window.supabase) {
@@ -17,9 +17,9 @@ async function initSupabase() {
       let attempts = 0;
       const checkSupabase = () => {
         if (window.supabase) {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          _gcrSupabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           console.log('✓ Supabase client created');
-          resolve(supabase);
+          resolve(_gcrSupabaseClient);
         } else if (attempts < 100) {
           attempts++;
           setTimeout(checkSupabase, 50);
@@ -32,8 +32,8 @@ async function initSupabase() {
     });
   }
 
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return supabase;
+  _gcrSupabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _gcrSupabaseClient;
 }
 
 // ============================================
