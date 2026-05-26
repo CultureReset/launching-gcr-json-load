@@ -7,7 +7,7 @@
   var categoryId = script ? script.dataset.category : null;
   if (!categoryId) return;
 
-  var API = 'https://gcr-api-gules.vercel.app/api/gcr';
+  var API = 'https://gar-front-end-data.vercel.app/api/gcr';
 
   function applyPageConfig(cfg) {
     if (!cfg) return;

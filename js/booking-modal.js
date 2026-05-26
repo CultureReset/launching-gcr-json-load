@@ -155,7 +155,7 @@
     funnelRef: Math.random().toString(36).slice(2) + Date.now().toString(36)
   };
 
-  var _TRACK_API = 'https://gcr-api-gules.vercel.app';
+  var _TRACK_API = 'https://gar-front-end-data.vercel.app';
   var _stepNames = { 1: 'date_selected', 2: 'boat_time_selected', 3: 'extras_viewed', 4: 'checkout_opened' };
   function _trackFunnel(step, stepName, meta) {
     var sess = sessionStorage.getItem('gcr_sess_id') || _bookingState.funnelRef;
@@ -271,7 +271,7 @@
 
   // Load booking data from API
   function loadBookingData() {
-    var API = 'https://gcr-api-gules.vercel.app/api/site-data?subdomain=' + _bookingState.slug;
+    var API = 'https://gar-front-end-data.vercel.app/api/site-data?subdomain=' + _bookingState.slug;
     fetch(API)
       .then(r => r.json())
       .then(data => {

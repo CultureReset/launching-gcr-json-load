@@ -672,7 +672,7 @@
   // CONFIGURATION
   // ============================================
   var CONFIG = {
-    apiBase: window.API_BASE || 'https://gcr-api-gules.vercel.app',
+    apiBase: window.API_BASE || 'https://gar-front-end-data.vercel.app',
     subdomain: window.SUBDOMAIN || '',
     darkMode: window.DARK_MODE || false
   };

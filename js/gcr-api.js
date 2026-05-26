@@ -1,10 +1,10 @@
 /* ============================================
    GCR — Gulf Coast Radar
-   gcr-api.js — Live data from Supabase via API
+   gcr-api.js — Data from JSON-backed API
    Replaces data.js — same GCR.* interface
    ============================================ */
 
-const GCR_API = 'https://gcr-api-gules.vercel.app/api/gcr';
+const GCR_API = 'https://gar-front-end-data.vercel.app/api/gcr';
 
 /* ── Cache layer ──────────────────────────────────────────────
    Stale-while-revalidate: pages render from cache instantly,
