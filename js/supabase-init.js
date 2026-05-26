@@ -30,17 +30,17 @@ async function initSupabase() {
 }
 
 // ============================================
-// Fetch all businesses from Supabase
+// Fetch businesses with smart pagination
 // ============================================
-async function fetchAllBusinesses(limit = 100, offset = 0) {
+async function fetchAllBusinesses(limit = 10, offset = 0) {
   const client = await initSupabase();
 
   const { data, error } = await client
     .from('entity')
-    .select('*')
+    .select('id,slug,name,entity_subtype,city,state,phone,address_line_1,rating,review_count,hero_image_url,cover_url,description,subtitle,hh_days,hh_start,hh_end,hh_description,is_featured,is_active,photos:entity_photos(image_url),tags:entity_tags(tag)')
     .eq('is_active', true)
-    .range(offset, offset + limit - 1)
-    .order('name');
+    .order('name')
+    .range(offset, offset + limit - 1);
 
   if (error) {
     console.error('Error fetching businesses:', error);
@@ -138,6 +138,7 @@ async function updateBusiness(slug, updates) {
 
   return true;
 }
+
 
 // Export functions
 window.GCRSupabase = {

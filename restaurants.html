@@ -264,14 +264,8 @@
 <script src="js/claim-modal.js"></script>
 <script>
 (async () => {
-  const client = await GCRSupabase.initSupabase();
-  const { data: restaurants, error } = await client
-    .from('entity')
-    .select('*')
-    .eq('is_active', true)
-    .order('name');
-
-  if (!error && restaurants) {
+  const restaurants = await GCRSupabase.fetchAllBusinesses(10, 0);
+  if (restaurants && restaurants.length > 0) {
     window.GCR = window.GCR || {};
     window.GCR.businesses = restaurants;
     window.GCR.loaded = true;
