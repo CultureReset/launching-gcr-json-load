@@ -337,8 +337,37 @@
   </div>
 </div></footer>
 
-<script src="js/gcr-api.js"></script>
+<script src="js/supabase-init.js"></script>
 <script src="js/app.js"></script>
+<script>
+(async () => {
+  const client = await GCRSupabase.initSupabase();
+  const { data: businesses } = await client
+    .from('entity')
+    .select('*')
+    .eq('is_active', true);
+
+  window.GCR = window.GCR || {
+    businesses: businesses || [],
+    loaded: true,
+    search: async (query) => {
+      // Simple fuzzy search on local data
+      return (this.businesses || []).filter(b => {
+        const q = (query || '').toLowerCase();
+        return (b.name || '').toLowerCase().includes(q) ||
+               (b.entity_subtype || '').toLowerCase().includes(q) ||
+               (b.city || '').toLowerCase().includes(q);
+      }).slice(0, 50);
+    },
+    loadProfile: async (slug) => {
+      // Just return the full entity from local data
+      return (this.businesses || []).find(b => b.slug === slug) || {};
+    }
+  };
+  window.allResults = businesses || [];
+  document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses } }));
+})();
+</script>
 <script>
 const API = 'https://gcr-api-gules.vercel.app';
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=80';
