@@ -334,18 +334,12 @@
 <script src="js/claim-modal.js"></script>
 <script>
 (async () => {
-  const client = await GCRSupabase.initSupabase();
-  const { data: spots, error } = await client
-    .from('entity')
-    .select('*')
-    .eq('is_active', true)
-    .order('name');
-
-  if (!error && spots) {
+  const businesses = await GCRSupabase.fetchAllBusinesses();
+  if (businesses && businesses.length > 0) {
     window.GCR = window.GCR || {};
-    window.GCR.businesses = spots;
+    window.GCR.businesses = businesses;
     window.GCR.loaded = true;
-    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: spots } }));
+    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: businesses } }));
   }
 })();
 </script>

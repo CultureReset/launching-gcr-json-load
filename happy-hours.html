@@ -14,19 +14,12 @@
 <script src="js/claim-modal.js"></script>
 <script>
 (async () => {
-  const client = await GCRSupabase.initSupabase();
-  const { data: happyHours, error } = await client
-    .from('entity')
-    .select('*')
-    .not('hh_days', 'is', null)
-    .eq('is_active', true)
-    .order('name');
-
-  if (!error && happyHours) {
+  const businesses = await GCRSupabase.fetchAllBusinesses();
+  if (businesses && businesses.length > 0) {
     window.GCR = window.GCR || {};
-    window.GCR.happyHours = happyHours;
+    window.GCR.businesses = businesses;
     window.GCR.loaded = true;
-    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: happyHours } }));
+    document.dispatchEvent(new CustomEvent('gcr:loaded', { detail: { businesses: businesses } }));
   }
 })();
 </script>

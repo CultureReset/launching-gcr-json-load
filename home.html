@@ -1401,11 +1401,9 @@
 <script src="js/supabase-init.js"></script>
 <script>
 (async () => {
+  const allBusinesses = await GCRSupabase.fetchAllBusinesses();
   const client = await GCRSupabase.initSupabase();
-  const { data: allBusinesses, error } = await client
-    .from('entity')
-    .select('*')
-    .eq('is_active', true);
+  const error = null;
 
   const { data: allEvents } = await client
     .from('entity_events')

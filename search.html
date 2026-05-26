@@ -341,11 +341,7 @@
 <script src="js/app.js"></script>
 <script>
 (async () => {
-  const client = await GCRSupabase.initSupabase();
-  const { data: businesses } = await client
-    .from('entity')
-    .select('*')
-    .eq('is_active', true);
+  const businesses = await GCRSupabase.fetchAllBusinesses();
 
   window.GCR = window.GCR || {
     businesses: businesses || [],
