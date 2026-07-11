@@ -334,3 +334,26 @@ RETURNS TABLE(slug text, similarity real) AS $$
   ORDER BY similarity DESC
   LIMIT match_limit;
 $$ LANGUAGE sql STABLE;
+
+-- 020: Condo photo-gap backfill from user's "restored 63-record" master condo
+-- JSON (2026-07-11). Cross-checked all ~35 not-yet-verified names from this
+-- file against entity_photos, diffing each resort's real image_urls against
+-- what's already stored (not just a count check) to avoid inserting
+-- duplicates. 12 resorts had a genuine, verified gap: the file listed
+-- meaningfully more real photo URLs than the DB had. Inserted only the new
+-- URLs (existing liquidlifevacationrentals.icnd-cdn.com CDN pass-through
+-- URLs, same pattern already used by this platform's other entity_photos
+-- rows -- not re-hosted), with sort_order starting at 100 to sit after each
+-- resort's existing photos rather than colliding with them. 204 rows total:
+-- gulf-shores-plantation (+43), island-royale (+12), island-shores (+14),
+-- lost-key (+12), marlin-key (+3), ocean-house (+8), palacio (+17),
+-- perdido-skye (+12), phoenix-gulf-towers-ii (+51), phoenix-on-the-bay-i (+7),
+-- plantation-palms (+14), regency-isle (+11). Verified post-insert via a
+-- per-slug COUNT that each number lands exactly.
+--
+-- Every other name checked from this file (Harbour Place, Palm Beach,
+-- Pelican Pointe, Gulf Shores Surf and Racquet, etc.) already matched the DB
+-- on both photo count and amenity text -- nothing else to add. INSERT
+-- statement itself lives in this session's local scratch file
+-- (/tmp/photo_insert.sql) since it's 204 literal rows; recorded here as the
+-- audit-trail entry for what was applied directly via Supabase execute_sql.
