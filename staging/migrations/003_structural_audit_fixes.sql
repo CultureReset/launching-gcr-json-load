@@ -829,3 +829,61 @@ ALTER TABLE entity_sections ADD COLUMN IF NOT EXISTS image_url text;
 ALTER TABLE entity_sections ADD COLUMN IF NOT EXISTS image_path text;
 ALTER TABLE entity_section_items ADD COLUMN IF NOT EXISTS image_url text;
 ALTER TABLE entity_section_items ADD COLUMN IF NOT EXISTS image_path text;
+
+-- 031: Brett/Robinson full extract (user-uploaded xlsx, 2026-07-11) — Phoenix
+-- East enrichment. The extract's property-detail sheets are all specifically
+-- for Phoenix East (phoenix-east), which had a real gap: 0 FAQs, no check-in/
+-- out times, no bedroom range. Filled from the extract:
+--   * 12 FAQs (entity_faqs). The source had 15 but 3 were dropped as junk
+--     per the extract's OWN quality_flag column: one "accessibility" FAQ
+--     flagged Malformed/duplicated, a literal duplicate grocery FAQ, and an
+--     FAQ about a DIFFERENT property (Phoenix on the Bay) that had leaked onto
+--     the Phoenix East page. The check-in FAQ answer was rewritten with the
+--     real seasonal times from the extract's Checkin_Times sheet rather than
+--     the vague "times vary" source text.
+--   * check_in_time 15:00 / check_out_time 11:00 (standard; peak season 16:00/
+--     10:00 is noted in the check-in FAQ), bedrooms_min 1, bedrooms_max 3,
+--     sleeps_max 10 — all previously null.
+--   * 3 net-new amenity tags (In-Unit Washer & Dryer, Free Wi-Fi, Private
+--     Balcony) — guest-decision amenities not already among its 26 tags.
+-- Not imported (already well-covered or not a clean entity fit): the extract's
+-- 42 Phoenix images (entity already has 63 photos), most of its 49 amenities
+-- (26 already present, heavy overlap), and the area-content sheets
+-- (General_FAQs = Brett/Robinson company FAQs, Dining/Attractions/Weather/
+-- Seasons/Events = area guide) which overlap existing businesses or aren't a
+-- clean per-entity fit.
+INSERT INTO entity_faqs (entity_slug, question, answer, sort_order) VALUES
+('phoenix-east', 'Where is Phoenix East located?', '27100 Perdido Beach Blvd in eastern Orange Beach, near Alabama Point and Perdido Pass.', 0),
+('phoenix-east', 'What amenities are offered?', 'Indoor and outdoor pools, kiddie and splash features, hot tubs, sauna, fitness room, sports courts, grills, a gazebo, direct beach access, elevators, Wi-Fi and in-unit conveniences.', 1),
+('phoenix-east', 'What unit types are available?', 'One-, two-, and three-bedroom Gulf-front condominiums, approximately 1,950-2,550 square feet.', 2),
+('phoenix-east', 'What attractions are nearby?', 'The Wharf, Adventure Island, Gulf State Park, Perdido Key, marinas, dolphin cruises, fishing charters, watersports and nearby restaurants.', 3),
+('phoenix-east', 'What are check-in and check-out times?', 'Check-in is generally 3:00 PM and check-out 11:00 AM, shifting to 4:00 PM check-in and 10:00 AM check-out during peak season (early March through August). Confirm your dates when booking.', 4),
+('phoenix-east', 'Do all units have Gulf views?', 'Units are Gulf-front with Gulf-facing views and private balconies; confirm the specific unit''s view when booking.', 5),
+('phoenix-east', 'Is there direct beach access?', 'Yes - the property is beachfront with direct beach access.', 6),
+('phoenix-east', 'Are grocery stores nearby?', 'Yes - Publix, Walmart and Winn-Dixie are all nearby.', 7),
+('phoenix-east', 'Is Phoenix East good for family vacations?', 'Yes - it offers family-friendly amenities and units that sleep up to 10 guests.', 8),
+('phoenix-east', 'Do units include a washer and dryer?', 'Yes - units include an in-unit washer and dryer.', 9),
+('phoenix-east', 'Is Wi-Fi included?', 'Yes - complimentary Wi-Fi is included.', 10),
+('phoenix-east', 'Why book Phoenix East?', 'A beachfront location with Gulf views, spacious 1-3 bedroom units, extensive resort amenities, and close proximity to dining and attractions.', 11);
+UPDATE entity SET check_in_time='15:00', check_out_time='11:00', bedrooms_min=1, bedrooms_max=3, sleeps_max=10 WHERE slug='phoenix-east';
+INSERT INTO entity_tags (entity_slug, tag_name, tag_category)
+SELECT 'phoenix-east', v, 'amenity' FROM (VALUES ('In-Unit Washer & Dryer'),('Free Wi-Fi'),('Private Balcony')) AS t(v)
+WHERE NOT EXISTS (SELECT 1 FROM entity_tags x WHERE x.entity_slug='phoenix-east' AND lower(x.tag_name)=lower(t.v));
+
+-- 032: Post-audit UX build-out, batch 2 (app-repo commits; no DB impact,
+-- logged here for the trail). All in gcr-unified:
+--   * Every card/listing/section surface now flows as a single centered
+--     column of large cards at any screen size (per product direction):
+--     the 5 listing pages, the Deals grid, the hub/marina child directory,
+--     and the per-section offering cards on business profiles. Photo
+--     galleries and the compact amenity checklist stay grids.
+--   * Business profiles: de-duplicated offerings-vs-pricing (suppress the
+--     flat pricing_items list when rich entity_sections already show the
+--     priced items), Yelp-style section order (About moved up, Location
+--     last), reviews now show the Google aggregate rating instead of an
+--     empty widget contradicting the header, empty Team/Blog/Policies
+--     sections collapsed, short lead description at the top.
+--   * Events + Artists paginated (Load More, 24/page) instead of
+--     100,000px+ scrolls; Landing weather widget no longer prints a "..."
+--     placeholder; raw Google-type slugs filtered off cards and header
+--     tags; near-duplicate filter chips deduped.
