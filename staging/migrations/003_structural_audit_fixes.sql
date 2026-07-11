@@ -285,3 +285,34 @@ ALTER TABLE business_availability ADD COLUMN IF NOT EXISTS visible_on_profile bo
 -- text. Only one (the-wharf-store) had an actual real summary.
 UPDATE entity SET description = 'Coastal inspired apparel and exclusive Wharf-branded merchandise.'
 WHERE slug='the-wharf-store' AND description IS NULL;
+
+-- 018: Condo/resort data audit (2026-07-11), per user request to focus on
+-- condos, merge/backfill, never delete.
+--   * Cross-checked all 17 records in the user's "Liquid Life" JSON upload
+--     against the DB, verifying not just counts but exact tag text (e.g.
+--     Beachcomber's single amenity tag is literally "Beach Access (Across
+--     the Street)", Grand Pointe's 7 tags match verbatim). Every one of the
+--     17 was already imported, verbatim, in an earlier pass. Nothing to add.
+--   * The user's other upload (24 Phoenix-family + Caribe/Plantation/
+--     Windemere/Lagoon/Colonnades/Seaside/Surfside/Turquoise/Dunes/San
+--     Carlos condo JSON files) is low quality: 0 real FAQs across all 24
+--     files, and several "about" fields are pure page-chrome/footer text
+--     ("Job Opportunities / Office Locations / Contact / Owners Portal /
+--     Facebook Link ... © Brett-Robinson. All Rights Reserved"). Not
+--     imported as new content.
+--   * BUT checking that same junk text against the live DB surfaced a real,
+--     previously-undetected bug: 6 entities already had that exact same
+--     nav/footer chrome sitting in their live `description` field from an
+--     earlier scrape -- caribe-resort, phoenix-all-suites-hotel,
+--     summerchase-orange-beach, seaside-beach-racquet,
+--     windemere-orange-beach, plantation-dunes. Cleared to NULL (no real
+--     replacement description available from either upload) rather than
+--     leave scraper chrome live on a business's real page.
+UPDATE entity SET description = NULL
+WHERE slug IN ('caribe-resort','phoenix-all-suites-hotel','summerchase-orange-beach','seaside-beach-racquet','windemere-orange-beach','plantation-dunes');
+
+--   * Fixed a UTF-8 mojibake encoding bug in san-carlos's description
+--     ("thereï¿½s" -> "there's") -- isolated to this one row, checked
+--     platform-wide for the same corruption pattern, no other matches.
+UPDATE entity SET description = replace(description, 'ï¿½', E'’')
+WHERE slug='san-carlos';
