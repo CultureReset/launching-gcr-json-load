@@ -222,3 +222,34 @@ UPDATE entity SET entity_type='activity', entity_subtype='sailing_charter'
 -- it could not reliably answer "who has X" questions or find a business
 -- outside that slice. The new tool queries `entity`/`entity_tags` live and
 -- returns each match's parent hub (marina, complex, tour operator, etc.).
+
+-- 014: Availability tracking foundation. business_availability already existed
+-- (0 rows -- unused scaffolding, along with entity_availability/availability/
+-- availability_blocks, which are equally empty and left untouched) and
+-- already had exactly the columns this needed (source_platform,
+-- last_minute_deal/last_minute_price/original_price, last_updated) -- reused
+-- it rather than adding a 5th availability table.
+ALTER TABLE business_availability ADD COLUMN IF NOT EXISTS visible_on_profile boolean NOT NULL DEFAULT true;
+-- Admin GET/PUT endpoints added in gcr-api-clean/routes/admin.js; public
+-- read wired into gcr.js's /entities listing + buildFullEntity; setting low
+-- spots or a last-minute price auto-syncs a row into the already-live
+-- gcr_deals table (deal_type='last_minute', source='availability_sync') so
+-- it shows on /deals with no extra work -- gcr_deals and its /deals page
+-- +/api/deals/* endpoints were themselves already fully built but sitting on
+-- 0 rows, same pattern as everything else found empty-but-scaffolded this
+-- session (rag-index, the other 3 availability tables).
+
+-- 015: Two verified bugs found during a full-codebase re-read, fixed in
+-- gcr-api-clean/routes/tourist.js:
+--   a) The AI chat's static top-200 context select was missing `id`, so its
+--      entity_id -> slug map was always empty and pricing_items/
+--      whats_included could never attach to any business in the prompt
+--      (everything keyed directly by entity_slug was unaffected).
+--   b) GET /api/tourist/recommendations queried tourist_profiles on a
+--      tourist_id column that doesn't exist (real column is user_id),
+--      so seen_slugs/interests always came back null.
+-- Also fixed in gcr-unified/src/components/GCRCard.jsx: the save button
+-- passed only the bare entity to onSave, so AppContext's business.category
+-- (written into tourist_saves/tourist_swipe_events) was always null --
+-- entity has no category column, and the page-level category prop that
+-- GCRCard receives was never merged in before the save.
