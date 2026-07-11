@@ -734,3 +734,68 @@ AND NOT EXISTS (SELECT 1 FROM entity_photos x WHERE x.entity_slug='docs-seafood-
 -- duplicate), and POST /api/gcr/search all filter .eq('is_active', true).
 UPDATE entity SET is_active = false
 WHERE slug IN ('the-hangout-gulf-shores', 'the-hangout-restaurant', 'agave-mexican-restaurant', 'doc-s-seafood-shack-and-oyster-bar');
+
+-- 029: Full platform visual/UX/data-completeness audit (2026-07-11), per user
+-- request to screenshot and review every page. This sandbox has no network
+-- egress to the live site or Supabase's own HTTP endpoint (confirmed via the
+-- proxy's own status log -- policy-level 403s), so real pages were rendered
+-- locally by the actual gcr-unified frontend code against a local Playwright
+-- harness that serves real DB rows (pulled via SQL, shaped to match each
+-- endpoint's real response contract) in place of the blocked network calls.
+-- 19 page templates x 2 viewports = 38 screenshots; 9 logged-in-only pages
+-- (Setup/Home/MyList/Building/Itinerary/Profile/Saves/Groups/Swipe) got a
+-- code-level review instead, since no test login was available.
+--
+-- Two confirmed, verified bugs were fixed live in gcr-unified (see that
+-- repo's own commit history for the diffs):
+--   * CategoryPage.jsx's .listings-stack (powers 8 nav categories --
+--     restaurants, things-to-do, nightlife, shopping, happy-hours,
+--     public-spots, wellness, marinas) was a flex-column single-file stack
+--     with no grid at all, unlike the matching RentalListings/
+--     ServiceListings pattern -- a 27-result page rendered as a ~31,000px
+--     single-column scroll on desktop. Fixed to the same 3/2/1-column
+--     responsive grid used elsewhere. Verified before/after via screenshot:
+--     6,436px after the fix.
+--   * RestaurantMenu.jsx rendered a literal "$0.00" badge on every menu item
+--     whose price was never captured (common for deep-crawled menus --
+--     confirmed real for The Hangout's full 37-item menu) -- the backend
+--     already defaults a missing price to 0, but the frontend displayed
+--     that 0 as a real price instead of omitting the badge. Fixed to only
+--     show a price when it's > 0.
+--
+-- Real, verified findings NOT yet fixed (full detail + screenshots in the
+-- audit report artifact shared with the user this session):
+--   * Site-wide: business pages showing a real Google rating/review count
+--     in the header (e.g. Fort Morgan "4.7, 5624 reviews") while the
+--     Reviews section directly below renders all-zero stars and "no
+--     reviews yet" -- entity.rating/review_count are cached Google
+--     aggregates, but actual review text only exists in entity_reviews for
+--     a small slice of businesses platform-wide. Highest-impact open item.
+--   * Artist listings (/artists): several hundred real records, zero
+--     pagination or filter chips -- a single 400+-card unbroken scroll.
+--   * Events page: 115 real events for a single day with no render cap --
+--     100,000+px page height.
+--   * Hub/marina template (HubTemplate.jsx, e.g. Zeke's Landing's 53 real
+--     children): correctly renders once fed, but wastes most of the
+--     desktop viewport (narrow centered column, huge empty gutters) and has
+--     no filter/sort control for large child directories -- matches the
+--     already-open #15/#16 punch-list items.
+--   * MyList.jsx and Saves.jsx are two separate, fully-built, independent
+--     implementations of the same "saved places" feature, reachable via
+--     different nav paths (bottom-nav -> /saves, Profile/Swipe -> /list) --
+--     needs a canonical-page decision.
+--   * Landing.jsx's weather widget prints literal "..." placeholder text
+--     when the API has nothing, instead of hiding the segment.
+--   * Rental cards (/staying) show bed count but no nightly price or
+--     bathroom count -- thin for a booking-intent page.
+--   * Tag-chip de-duplication gap (e.g. "American"/"American Food"/
+--     "American Restaurant" as 3 separate chips) and raw Google category
+--     slugs (point_of_interest, wheelchairAccessibleParking) still leaking
+--     into card "MORE" rows on mobile, where they also hard-clip instead of
+--     wrapping.
+--   * The Hangout's own menu has a real data-quality duplicate: "burgers"
+--     and "Burgers/Sandwiches" are two separate sections, with "Lifeguard
+--     Burger" in one and "The Lifeguard" in the other.
+--   * Deals page (/deals) empty state was checked and is fine as-is --
+--     gcr_deals has zero active rows platform-wide (real, not a bug), and
+--     the empty state itself reads as intentional, not broken.
