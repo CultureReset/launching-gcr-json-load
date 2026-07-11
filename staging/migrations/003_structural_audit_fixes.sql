@@ -591,3 +591,72 @@ WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='the-hangout' 
 -- there (or a follow-up session with production access) -- and soon, since
 -- Instagram's signed CDN links typically expire within hours to a few days,
 -- so these 8 specific URLs may already be dead by the time this runs.
+
+-- 025: Root-cause fix for the duplicate-entity-row problem (021-023 were
+-- symptom fixes for 3 specific groups; this is the actual mechanism).
+-- Investigated why: every write path that creates a new `entity` row
+-- (deep-crawl extraction, CSV import, self-serve dashboard signup,
+-- menu-editor signup) only checked for an existing business by exact
+-- name/slug string match before inserting. Any naming variation across
+-- sources ("The Hangout" vs "The Hangout Gulf Shores" vs "The Hangout
+-- Restaurant"; "Doc's Seafood Shack & Oyster Bar" vs "... and Oyster Bar")
+-- defeated that check and silently created a fresh duplicate row instead of
+-- updating the real one -- exactly the mechanism behind the 3 groups fixed
+-- in 023.
+--
+-- Added find_existing_entity(p_phone, p_google_place_id) -- matches only on
+-- identifiers safe to auto-act on (exact Google Place ID or exact phone
+-- number, normalized to digits). Deliberately does NOT auto-merge on fuzzy
+-- name similarity alone -- different real businesses can have superficially
+-- similar names ("Action Charter Service" vs "Dottie Jo Charter Service"),
+-- and a wrong auto-merge would silently misattribute data to the wrong live
+-- business page, which is worse than the duplicate it would "fix". A fuzzy
+-- near-miss is only ever logged as an advisory warning for manual review.
+--
+-- Wired into gcr-api-clean:
+--   * routes/gcr/deep-crawl.js -- phone match before minting a new slug.
+--   * routes/admin.js CSV import (import-section-based) -- phone match as a
+--     fallback when the existing name+address check finds nothing.
+--   * routes/platform.js self-serve dashboard signup -- if an unclaimed
+--     existing entity is found by phone, the new owner is attached to that
+--     real profile instead of an empty duplicate being created (also fixes
+--     a real product gap: a legitimate owner signing up used to get a blank
+--     page instead of their already-scraped profile).
+--   * routes/menu-editor.js signup -- this form collects no phone/place id,
+--     so the safest available improvement is blocking an exact-name
+--     collision with a clear 409 error instead of silently minting a "-2"
+--     slug.
+-- Deliberately NOT touched: the 4 one-off historical import scripts
+-- (import-the-wharf.js, import-cobalt.js, import-3-new-venues.js,
+-- import-activity-listings.js) -- each already ran once and isn't part of
+-- any recurring pipeline, so they're not creating new duplicates going
+-- forward; lower priority than the 4 live paths above.
+--
+-- Also hardened the frontend as a safety net: gcr-unified's
+-- CategoryListings.jsx and Landing.jsx's homepage rails had NO name-based
+-- entity dedup at all (CategoryPage.jsx and RentalListings.jsx/
+-- ServiceListings.jsx already did) -- a duplicate business would render as
+-- two separate cards. Applied the same dedup rule everywhere so all listing
+-- surfaces agree on which of a duplicate pair to show.
+CREATE OR REPLACE FUNCTION find_existing_entity(
+  p_phone text DEFAULT NULL,
+  p_google_place_id text DEFAULT NULL
+) RETURNS TABLE(slug text, id uuid, match_type text) AS $$
+DECLARE
+  v_phone_digits text := regexp_replace(coalesce(p_phone,''), '[^0-9]', '', 'g');
+BEGIN
+  IF p_google_place_id IS NOT NULL THEN
+    RETURN QUERY SELECT e.slug, e.id, 'google_place_id'::text
+    FROM entity e WHERE e.google_place_id = p_google_place_id LIMIT 1;
+    IF FOUND THEN RETURN; END IF;
+  END IF;
+
+  IF length(v_phone_digits) >= 7 THEN
+    RETURN QUERY SELECT e.slug, e.id, 'phone'::text
+    FROM entity e
+    WHERE e.phone IS NOT NULL
+      AND regexp_replace(e.phone, '[^0-9]', '', 'g') LIKE '%' || right(v_phone_digits, 10)
+    LIMIT 1;
+  END IF;
+END;
+$$ LANGUAGE plpgsql STABLE;
