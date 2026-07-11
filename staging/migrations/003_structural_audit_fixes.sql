@@ -316,3 +316,21 @@ WHERE slug IN ('caribe-resort','phoenix-all-suites-hotel','summerchase-orange-be
 --     platform-wide for the same corruption pattern, no other matches.
 UPDATE entity SET description = replace(description, 'ï¿½', E'’')
 WHERE slug='san-carlos';
+
+-- 019: Smart search improvements. Enabled pg_trgm and added a fuzzy fallback
+-- function so a near-miss/typo search doesn't just return zero results (see
+-- gcr-api-clean/routes/gcr.js POST /api/gcr/search — falls back to this when
+-- the exact ILIKE pass finds nothing). Also blended distance into relevance
+-- ranking (bounded, doesn't override a real name/feature match) and added an
+-- optional radius filter, both wired up in gcr-unified/src/pages/Search.jsx.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE OR REPLACE FUNCTION fuzzy_entity_search(search_term text, match_limit int DEFAULT 20)
+RETURNS TABLE(slug text, similarity real) AS $$
+  SELECT e.slug, similarity(e.name, search_term) AS similarity
+  FROM entity e
+  WHERE e.is_active = true
+    AND similarity(e.name, search_term) > 0.2
+  ORDER BY similarity DESC
+  LIMIT match_limit;
+$$ LANGUAGE sql STABLE;
