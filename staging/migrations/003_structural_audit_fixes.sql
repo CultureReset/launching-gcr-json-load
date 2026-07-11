@@ -192,3 +192,33 @@ UPDATE entity SET parent_entity_slug='hudson-marina' WHERE slug='pontoon-boat-re
 -- of nested inside `the-wharf`, which already correctly holds all 162
 -- other Wharf businesses (shops, restaurants, the amphitheater, etc.).
 UPDATE entity SET parent_entity_slug='the-wharf' WHERE slug='the-wharf-marina';
+
+-- 012: Same generic-subtype root cause found one level deeper -- dolphin
+-- cruise businesses were scattered across entity_subtype IN
+-- (dolphin_cruise, tour_agency, tourist_attraction, null), which would have
+-- silently broken a "who has dolphin cruises" search/filter. Normalized to
+-- dolphin_cruise using each business's own name as evidence.
+UPDATE entity SET entity_subtype='dolphin_cruise' WHERE slug IN (
+  '29-dolphin-cruise','alabama-dolphin-cruises-southern-rose','bama-breeze-dolphin-cruise',
+  'best-dolphin-cruise-on-perdido-key','cetacean-dolphin-cruises-and-sailing-tours',
+  'cruise-orange-beach-dolphin-cruises','dolphin-sailing-tours-by-cetacean-cruises',
+  'dolphin-cruises-cold-mil-fleet','dolphin-cruises-aboard-cruise-orange-beach',
+  'dolphin-cruises-aboard-dolphin-tales','dolphin-cruises-aboard-the-cold-mil-fleet',
+  'dolphin-cruises-and-island-tours-at-hudson-marina-orange-beach','dolphins-down-under',
+  'orange-beach-private-family-dolphin-tours-boating-safaris',
+  'snorkeling-and-dolphin-tours-orange-beach-island-tours',
+  'sunny-lady-dolphin-cruises-at-the-wharf','surf-s-up-dolphin-cruises',
+  'the-fun-boats-dolphin-cruise','the-fun-boats-dolphin-cruises',
+  'the-fun-boats-dolphin-cruises-and-sea-life-experience','dolphin-and-sunset-cruises'
+) AND is_active=true;
+UPDATE entity SET parent_entity_slug='hudson-marina'
+  WHERE slug='dolphin-cruises-and-island-tours-at-hudson-marina-orange-beach' AND parent_entity_slug IS NULL;
+UPDATE entity SET entity_type='activity', entity_subtype='sailing_charter'
+  WHERE slug='wild-hearts-sailing-adventures';
+
+-- 013: Added a real search_businesses tool to the AI concierge chat
+-- (gcr-api-clean/routes/tourist.js) -- see that repo's commit. The chat's
+-- only data source was a static top-200-by-rating/distance context dump, so
+-- it could not reliably answer "who has X" questions or find a business
+-- outside that slice. The new tool queries `entity`/`entity_tags` live and
+-- returns each match's parent hub (marina, complex, tour operator, etc.).
