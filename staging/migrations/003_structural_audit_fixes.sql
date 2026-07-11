@@ -98,3 +98,21 @@ WHERE ms.section_name ILIKE '%happy hour%'
 UPDATE entity SET hero_image_url = 'https://mkepugvdlktfsossumox.supabase.co/storage/v1/object/public/entity-photos/ice-house-taproom/photo_01.jpg'
 WHERE slug='ice-house-taproom'
   AND hero_image_url = 'https://mkepugvdlktfsossumox.supabase.co/storage/v1/object/public/entity-photos/icehouse-tap-room-gulf-shores/photo_01.jpg';
+
+-- 006: Gulf Coast Luggo "How It Works" content, extracted from the business's
+-- own uploaded page (gulfcoastluggowebsite_2.html), added as a real
+-- entity_sections/entity_section_items block. Renders under this service's
+-- "Offerings" tab (BusinessDetail.jsx isService tab order). Icon (🧳) was
+-- already correctly set from an earlier load, matching the source page's logo mark.
+INSERT INTO entity_sections (entity_slug, section_type, section_name, icon, subtitle, layout, sort_order, is_active)
+VALUES ('gulf-coast-luggo', 'process', 'How It Works', '📋', 'Simple, fast, and built for tourists who want one more stress-free day on the Gulf Coast.', 'steps', 1, true);
+
+INSERT INTO entity_section_items (section_id, entity_slug, item_name, description, icon, sort_order)
+SELECT id, 'gulf-coast-luggo', '1. Schedule', 'Call, text, or book online with your pickup location, drop-off location, and timing.', '📅', 1
+FROM entity_sections WHERE entity_slug='gulf-coast-luggo' AND section_name='How It Works';
+INSERT INTO entity_section_items (section_id, entity_slug, item_name, description, icon, sort_order)
+SELECT id, 'gulf-coast-luggo', '2. We Pick Up', 'We collect your bags from your condo, hotel, rental, or agreed pickup spot.', '🧳', 2
+FROM entity_sections WHERE entity_slug='gulf-coast-luggo' AND section_name='How It Works';
+INSERT INTO entity_section_items (section_id, entity_slug, item_name, description, icon, sort_order)
+SELECT id, 'gulf-coast-luggo', '3. We Deliver', 'We deliver your luggage to the airport, your next stay, or another approved location.', '✈️', 3
+FROM entity_sections WHERE entity_slug='gulf-coast-luggo' AND section_name='How It Works';
