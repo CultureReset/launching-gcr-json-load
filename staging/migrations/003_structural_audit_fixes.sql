@@ -152,3 +152,43 @@ WHERE slug IN (
 -- inside an unrelated marina's directory.
 UPDATE entity SET parent_entity_slug = NULL
 WHERE slug='tradewinds' AND parent_entity_slug='zeke-s-landing-and-marina';
+
+-- 010: Root-cause pass on the generic entity_type/entity_subtype='service'
+-- bucket (114 active rows) -- the same "everything unclassifiable defaults
+-- to generic service" import behavior that produced the kayak-rental bug
+-- (008) also swallowed boat-rental, jet-ski, sailing/cruise, and bike-rental
+-- businesses, and 2 standalone marinas. Reclassified with clear name/tag
+-- evidence (left ambiguous names like "Beach Power Rentals" untouched
+-- rather than guess). Real estate agents, photographers, and wedding
+-- planners in the same bucket were left alone -- their current subtype
+-- already routes them to the correct page (services), this was purely a
+-- routing bug for the water/bike-rental and marina cases.
+UPDATE entity SET entity_type='activity', entity_subtype='jet_ski'
+  WHERE slug IN ('a2z-powersport','alabama-extreme-watersports','wave-jet-ski-rental');
+UPDATE entity SET entity_type='activity', entity_subtype='watersports'
+  WHERE slug IN ('captain-rons-watersports-llc-iWqF_g','ob-watersports','wahoo-watersports');
+UPDATE entity SET entity_type='activity', entity_subtype='boat_rental'
+  WHERE slug IN ('bay-side-boat-rental-llc','beachside-circle-boat-rentals-and-sales','cast-or-cruise-boat-rentals',
+    'gulf-coast-boat-rentals','island-cruizer-boat-rentals','orange-beach-boat-rentals','orange-beach-pontoon-boats',
+    'orange-beach-pontoons','pelican-boat-rentals','pontoon-boat-rentals-hudson-marina','salty-escapes-boat-rental');
+UPDATE entity SET entity_type='activity', entity_subtype='sailing_charter' WHERE slug='key-sailing-iKHhJ0';
+UPDATE entity SET entity_type='activity', entity_subtype='sunset_cruise' WHERE slug IN ('get-it-going-tiki-ride','zeke-s-tiki-queen');
+UPDATE entity SET entity_type='activity', entity_subtype='bike_rental'
+  WHERE slug IN ('beach-bike-rentals','e-bikes-boards','ebike-the-park','gulf-shores-bike-rentals','ike-s-bikes','ike-s-bikes-at-gulf-state-park','paradise-pedal-llc');
+UPDATE entity SET entity_type='activity', entity_subtype='marina'
+  WHERE slug IN ('dolphin-cove-marina-gulf-shores-al','flora-bama-marina-watersports');
+
+-- 011: Re-linked businesses to the marina they actually operate at, evidenced
+-- by their own tags/name (e.g. a2z-powersport's tags literally say "zekes
+-- landing"). Same root cause as 009 -- real affiliations that were simply
+-- never captured as parent_entity_slug during import.
+UPDATE entity SET parent_entity_slug='zeke-s-landing-and-marina' WHERE slug='a2z-powersport';
+UPDATE entity SET parent_entity_slug='bear-point-harbor' WHERE slug='alabama-extreme-watersports';
+UPDATE entity SET parent_entity_slug='happy-harbor-marina-dry-storage' WHERE slug='southern-rose-dolphin-cruises';
+UPDATE entity SET parent_entity_slug='hudson-marina' WHERE slug='pontoon-boat-rentals-hudson-marina';
+-- The Wharf Marina is the real boat-slip facility inside The Wharf complex
+-- (its own 4.6-star/285-review rating -- not a duplicate row) but was
+-- floating as an unrelated top-level "marina" hub with 0 children instead
+-- of nested inside `the-wharf`, which already correctly holds all 162
+-- other Wharf businesses (shops, restaurants, the amphitheater, etc.).
+UPDATE entity SET parent_entity_slug='the-wharf' WHERE slug='the-wharf-marina';
