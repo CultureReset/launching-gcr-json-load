@@ -69,3 +69,25 @@ COMMIT;
 --     must run on the API server.
 --   * 5 menu restaurants flagged in 002 for re-import (concatenated scrape).
 -- ---------------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------------
+-- 004: Happy hour content misfiled in menu_sections/menu_items (found live,
+-- 2026-07-11). 4 restaurants had real "Happy Hour" sections sitting in the
+-- regular menu tables instead of happy_hour_sections/happy_hour_items, making
+-- them invisible on both their own Happy Hour tab and the platform Happy
+-- Hours listing page. Copied (not moved -- originals left in place per the
+-- no-delete directive) into the correct tables.
+-- ---------------------------------------------------------------------------
+INSERT INTO happy_hour_sections (entity_slug, section_name, sort_order, days_of_week, start_time, end_time, available_days, is_active)
+SELECT entity_slug, section_name, sort_order, days_of_week, start_time, end_time, available_days, true
+FROM menu_sections
+WHERE section_name ILIKE '%happy hour%'
+  AND entity_slug IN ('fish-river-grill','hammered-crab','icehouse-taproom','yoho-rum-and-tacos');
+
+INSERT INTO happy_hour_items (section_id, entity_slug, item_name, description, price, image_url, image_path, is_available, sort_order)
+SELECT hhs.id, mi.entity_slug, mi.item_name, mi.description, mi.price, mi.image_url, mi.image_path, mi.is_available, mi.sort_order
+FROM menu_items mi
+JOIN menu_sections ms ON ms.id = mi.section_id
+JOIN happy_hour_sections hhs ON hhs.entity_slug = ms.entity_slug AND hhs.section_name = ms.section_name
+WHERE ms.section_name ILIKE '%happy hour%'
+  AND ms.entity_slug IN ('fish-river-grill','hammered-crab','icehouse-taproom','yoho-rum-and-tacos');
