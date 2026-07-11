@@ -91,3 +91,10 @@ JOIN menu_sections ms ON ms.id = mi.section_id
 JOIN happy_hour_sections hhs ON hhs.entity_slug = ms.entity_slug AND hhs.section_name = ms.section_name
 WHERE ms.section_name ILIKE '%happy hour%'
   AND ms.entity_slug IN ('fish-river-grill','hammered-crab','icehouse-taproom','yoho-rum-and-tacos');
+
+-- 005: ice-house-taproom hero_image_url pointed at a stale pre-rename storage
+-- path (icehouse-tap-room-gulf-shores/...) instead of its real uploaded photo
+-- (ice-house-taproom/photo_01.jpg). Found live via a user screenshot, 2026-07-11.
+UPDATE entity SET hero_image_url = 'https://mkepugvdlktfsossumox.supabase.co/storage/v1/object/public/entity-photos/ice-house-taproom/photo_01.jpg'
+WHERE slug='ice-house-taproom'
+  AND hero_image_url = 'https://mkepugvdlktfsossumox.supabase.co/storage/v1/object/public/entity-photos/icehouse-tap-room-gulf-shores/photo_01.jpg';
