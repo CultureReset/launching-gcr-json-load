@@ -575,3 +575,19 @@ SELECT 'the-hangout', 'highlights', 'Beyond the Menu',
   'Continuous family fun beyond dining: free foam parties every hour, yard games, hair braiding, temporary tattoos, gelato, ring toss, photo ops, and a fire pit. The venue also displays unique collections of antique matchbox cars, PEZ dispensers, vintage lunch boxes, and rubber duckies, plus a One Stop Fun Shop for souvenirs, beachwear, hats, and gifts.',
   10, true
 WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='the-hangout' AND section_name='Beyond the Menu');
+
+-- 024: The 8 photos skipped in 023 for The Hangout Restaurant were Instagram
+-- CDN URLs (scontent-*.cdninstagram.com) -- signed, expiring links, not safe
+-- to store directly in entity_photos. Added a reusable endpoint,
+-- POST /api/admin/gcr/rehost-photos (gcr-api-clean/routes/admin.js, next to
+-- the existing /repair-photos Google-Places healer), that downloads a given
+-- external URL server-side and re-uploads it into our own entity-photos
+-- storage bucket, then writes the entity_photos row against the new
+-- permanent Supabase URL. Could not run it against these specific 8 URLs
+-- from this session -- the sandbox's outbound network policy blocks
+-- cdninstagram.com outright (confirmed via the proxy's own status log: a
+-- policy-level 403 on the CONNECT tunnel, not a transient failure). The live
+-- API server has normal internet egress, so this needs to be triggered from
+-- there (or a follow-up session with production access) -- and soon, since
+-- Instagram's signed CDN links typically expire within hours to a few days,
+-- so these 8 specific URLs may already be dead by the time this runs.
