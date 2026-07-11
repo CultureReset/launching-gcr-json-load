@@ -253,3 +253,19 @@ ALTER TABLE business_availability ADD COLUMN IF NOT EXISTS visible_on_profile bo
 -- (written into tourist_saves/tourist_swipe_events) was always null --
 -- entity has no category column, and the page-level category prop that
 -- GCRCard receives was never merged in before the save.
+
+-- 016: Specials/discounts were structurally restaurant-only (buildFullEntity
+-- only fetched entity_specials inside its isFood conditional), even though
+-- the table is just entity_slug-keyed and a discount applies to any
+-- business (a condo's last-minute rate, a discounted dolphin cruise seat).
+-- Moved to the always-fetched core query set (gcr-api-clean/routes/gcr.js).
+-- Also fixed the shared renderMenuItem (BusinessDetail.jsx) and
+-- RestaurantMenu.jsx's separate specials tab (reads /api/public/menu,
+-- routes/public.js) -- both only knew the menu-item shape (item_name/price)
+-- and rendered entity_specials rows (special_name/discount_type/
+-- discount_value/discount_text/days) blank. Also added the missing
+-- is_active filter to /api/public/menu's specials query for consistency.
+-- Plus two small confirmed bugs: BusinessDetail's fallback Reserve button
+-- always read "Reserve a Table" instead of the already-computed
+-- reserveLabel; the Fish Species tab was missing the ref/id every other
+-- tab-nav section has, so clicking it did nothing.
