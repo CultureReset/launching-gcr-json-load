@@ -799,3 +799,33 @@ WHERE slug IN ('the-hangout-gulf-shores', 'the-hangout-restaurant', 'agave-mexic
 --   * Deals page (/deals) empty state was checked and is fine as-is --
 --     gcr_deals has zero active rows platform-wide (real, not a bug), and
 --     the empty state itself reads as intentional, not broken.
+
+-- 030: Post-audit UX build-out (2026-07-11), implementing the direction
+-- from the visual audit (029). App/API/admin code changes live in their own
+-- repos' commits; the DB change recorded here is the section-image schema.
+--
+-- Per-section photos: added image_url + image_path columns to
+-- entity_sections AND entity_section_items, so any offerings-style section
+-- (Kayak Rentals, Slingshot Rentals, etc.) or individual item can carry an
+-- uploaded banner/thumbnail photo. Wired end-to-end:
+--   * gcr-api-clean: buildFullEntity now selects image_url/image_path for
+--     sections + section items; bulk section-save persists them; two new
+--     PATCH endpoints (/gcr/sections/:id/image, /gcr/section-items/:id/image)
+--     set/clear one section's or item's photo without a full re-save.
+--   * gcr-unified BusinessDetail: renders a section-level banner image (+
+--     section subtitle) and item-level images (item images already rendered).
+--   * cybercheck-login admin.html: each section row in the entity editor's
+--     Sections tab now has a thumbnail + Add/Change/Remove Photo controls
+--     that upload to the entity-media bucket and PATCH the section image.
+-- Other UX changes in the same pass (no DB impact, in the app repo commits):
+--   * All 5 listing pages switched from a multi-column grid to a single
+--     centered 620px-max column of large cards (the "mobile card scaled up"
+--     direction) -- CategoryPage/CategoryListings/RentalListings/
+--     ServiceListings/ArtistListings.
+--   * Business profiles: a trimmed lead description now shows directly under
+--     the header rating (full About stays lower); empty Team/Blog/Policies
+--     sections are gated so they no longer render placeholder blocks.
+ALTER TABLE entity_sections ADD COLUMN IF NOT EXISTS image_url text;
+ALTER TABLE entity_sections ADD COLUMN IF NOT EXISTS image_path text;
+ALTER TABLE entity_section_items ADD COLUMN IF NOT EXISTS image_url text;
+ALTER TABLE entity_section_items ADD COLUMN IF NOT EXISTS image_path text;
