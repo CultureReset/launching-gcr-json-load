@@ -433,3 +433,56 @@ SELECT 'coyote-beach-sports', 'highlights', 'Our Story',
   'Born on Dauphin Island. Built for the Gulf Coast. Coyote Beach Sports began in 2013 and grew from scooter and moped rentals into a Gulf Shores outfitter for Slingshots, e-bikes, beach bikes, paddleboards, surfboards, kayaks, and beach gear. "Chase the sun, cruise the coast, and make the beach day more memorable."',
   5, true
 WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='coyote-beach-sports' AND section_name='Our Story');
+
+-- 022: User uploaded 5 new "Gulf Shores deep crawl" packs (batch1: 17 restaurant
+-- profiles, batch3: 15 restaurant/charter profiles, batch4: repeat of the
+-- already-imported Wharf batch, plus two shallow directory packs). Explicit
+-- instruction: check for existing businesses first -- do NOT create duplicate
+-- entity rows; only add data to businesses already in the system.
+--
+-- Cross-checked all 32 batch1+batch3 business names against `entity` by exact
+-- phone-digit match first, then trigram name similarity as fallback. Result:
+-- ALL 32 already exist in the DB (zero net-new businesses). This check itself
+-- surfaced 2 pre-existing duplicate-row groups worth flagging for the still-
+-- open duplicate-consolidation task (not touched here, no deletes):
+--   * Agave Bar & Grill / Agave Mexican Restaurant -- same phone (251) 948-0550.
+--   * The Hangout / The Hangout Gulf Shores / The Hangout Restaurant -- same
+--     phone (251) 948-3030, three rows.
+-- (Doc's Seafood Shack & Oyster Bar / Doc's Seafood Shack and Oyster Bar also
+-- duplicate each other, same phone (251) 981-6999 -- unrelated business from
+-- the one this batch matched, Doc's Seafood and Steaks.)
+--
+-- Of the 32 confirmed-existing businesses, most already had this exact data
+-- imported in earlier passes (menu item counts matched the source file
+-- count almost exactly, e.g. Fruitful/Doc's Seafood and Steaks). Real,
+-- verified content gaps (target row had 0 rows in the relevant table before
+-- this insert):
+--   * Lucy Buffett's LuLu's -- 0 happy_hour rows despite a real, priced
+--     9-item happy hour menu ($3-$6, drinks/apps) on the source page.
+--   * Nami Sushi, Poke Bowl Sushi Burrito & Boba, New Orleans Original
+--     Snoballs, Perdido Beach Pizza Company, Pub 6, The Hideaway -- 0
+--     menu_items each despite each having real (if price-less, directory-
+--     sourced) menu category data.
+--   * The Hideaway also had a real "10% off with Spectrum Wristband"
+--     discount not captured anywhere -- added to entity_specials.
+--   * New Orleans Original Snoballs' cash/Venmo/Cash-App-only, no-cards
+--     policy -- added as an entity_sections policies note.
+--   * 4 Seasons Outfitters, Action Charter Service, Charter Boat Annie Girl --
+--     0 pricing_items despite real, exact trip prices being available
+--     ($140/person walk-on trip up to $9,270 for Annie Girl's 44-hour
+--     charter). Added as pricing_items, matching the pattern already used
+--     for Coyote Beach Sports.
+--   * Addicted 2 Fishing Charters, Alabama Deep Sea Fishing -- 0 offerings
+--     despite having real (price-less) service descriptions -- added as
+--     offerings, matching A Pair A Dice Charter's existing row shape.
+-- Skipped as not a good fit / too thin to be worth forcing in: Bar 45's 3
+-- items (game room, weekly entertainment, happy-hour-starts-3pm -- already
+-- has 8 amenities + 45 tags covering this) and Perdido Beach Pizza's
+-- "temporarily closed" note (entity.business_status was already correctly
+-- set to CLOSED_TEMPORARILY -- already known, not a gap).
+--
+-- The two shallow directory packs (gulfshores_restaurant_dining_data_pack,
+-- 125 listings; gulfshores_water_activities_data_pack, 176 listings) were
+-- not processed this pass -- directory-card data (name/area/one-line blurb/
+-- category), best used to hunt for businesses genuinely missing from the
+-- platform rather than to enrich existing ones. Left for a follow-up pass.
