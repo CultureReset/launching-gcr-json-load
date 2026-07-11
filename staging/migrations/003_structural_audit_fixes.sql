@@ -116,3 +116,28 @@ FROM entity_sections WHERE entity_slug='gulf-coast-luggo' AND section_name='How 
 INSERT INTO entity_section_items (section_id, entity_slug, item_name, description, icon, sort_order)
 SELECT id, 'gulf-coast-luggo', '3. We Deliver', 'We deliver your luggage to the airport, your next stay, or another approved location.', '✈️', 3
 FROM entity_sections WHERE entity_slug='gulf-coast-luggo' AND section_name='How It Works';
+
+-- 007: Gulf Coast Luggo — real $50 starting price (from its own `offerings` row,
+-- "Standard Pickup+Storage+Delivery") copied into entity.price_from so the
+-- shared GCRCard price line (previously blank because price_from was null)
+-- shows it. Also featured=true so it sorts first on the Services listing page
+-- (see gcr-api-clean commit adding a featured-pinned-first tiebreak to the
+-- default ranking; featured was true for 0 entities platform-wide before this,
+-- so the new tiebreak doesn't reorder any other business's listing page).
+UPDATE entity SET featured = true, price_from = 50 WHERE slug = 'gulf-coast-luggo';
+
+-- 008: Kayak/paddleboard rental businesses miscategorized under the generic
+-- entity_subtype='service' (entity_type='service') bucket, which routes them
+-- to the catch-all Services listing page instead of Things To Do — where
+-- every other kayak-rental business (gulf-shores-kayak-rental,
+-- coastal-kayak-rentals-southern-alabama, etc., entity_type='activity',
+-- entity_subtype='kayak_rental') actually lives. Found live, 2026-07-11:
+-- toggling the "Kayak Rental" filter chip on Things To Do silently excluded
+-- these 9 real businesses because they were never on that page to begin with.
+-- Reclassified to match the existing, correct kayak_rental pattern.
+UPDATE entity SET entity_type='activity', entity_subtype='kayak_rental'
+WHERE slug IN (
+  'perdido-beach-service','dauphin-island-sup-and-kayak-rentals-DfjUyQ','gulf-shores-kayak-rentals',
+  'island-life-kayak-and-paddle-board-rentals','littleheads-kayak-rentals','surfs-up-board-kayak-rentals',
+  'gulfkayakrentals','paddled-by-you-kayak-stand-up-paddle-board-rentals','coyote-beach-sports'
+);
