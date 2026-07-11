@@ -486,3 +486,92 @@ WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='coyote-beach-
 -- not processed this pass -- directory-card data (name/area/one-line blurb/
 -- category), best used to hunt for businesses genuinely missing from the
 -- platform rather than to enrich existing ones. Left for a follow-up pass.
+
+-- 023: Followed up on the 3 duplicate-row groups flagged in 022. Per request,
+-- checked each for real, non-overlapping data before touching anything --
+-- no rows deleted or merged/deactivated, only real content copied onto
+-- whichever row in each group is the actual Google-verified / most-complete
+-- one (has a google_place_id and/or the most real content), since that's the
+-- row a filter/search page actually surfaces.
+--   * Agave Bar & Grill / Agave Mexican Restaurant (same phone): the second
+--     row's description was a literal placeholder ("Mexican restaurant
+--     listing from main directory page 2") with 0 photos/menu/reviews --
+--     nothing there worth keeping EXCEPT 8 real amenities (wheelchair
+--     accessible, kids menu, outdoor pet-friendly dining, takeout, group
+--     friendly, etc.) that the canonical row (agave-bar-grill, has a
+--     google_place_id, 26 photos, 5 reviews) didn't have. Copied those 8
+--     amenities over.
+--   * Doc's Seafood Shack & Oyster Bar / Doc's Seafood Shack and Oyster Bar
+--     (same phone): docs-seafood-shack-and-oyster-bar (no hyphen) is the
+--     real one (google_place_id, 38 menu items, 62 tags, 5 reviews); the
+--     hyphenated duplicate is thin on structured data but had two real facts
+--     missing from the canonical row's copy -- the tagline "The Best Fried
+--     Shrimp In The Entire Civilized World!" (added as subtitle) and the
+--     Fox News "Top 10 Seafood Shacks in America" accolade (appended to
+--     description).
+--   * The Hangout / The Hangout Gulf Shores / The Hangout Restaurant (same
+--     phone, 3 rows) -- the messiest of the three. "the-hangout" is the only
+--     one with a google_place_id and real Google data (4.6 rating, 31,728
+--     reviews), but it had a ONE-LINE description, no subtitle, 0 menu
+--     items, and its hero_image_url was flat-out wrong -- pointed at a
+--     different business's photo folder ("gone-coastal-gulf-shores"), a
+--     real display bug independent of the duplicate-row issue. Meanwhile
+--     "the-hangout-gulf-shores" (a batch1 deep-crawl import target, no
+--     google_place_id) had the real, detailed official-site description,
+--     subtitle ("Where 59 ends and the fun begins"), all 37 real menu items,
+--     and a correctly-pathed hero photo; "the-hangout-restaurant" had yet a
+--     third unique description (the antique matchbox car / PEZ dispenser /
+--     rubber duckies / One Stop Fun Shop details -- real, not fabricated,
+--     just never consolidated) but its 8 photos are Instagram CDN URLs,
+--     which expire and were not copied over for that reason.
+--     Fixed the canonical "the-hangout" row: adopted the-hangout-gulf-
+--     shores's description/subtitle/hero photo, copied over its 37 menu
+--     items (7 sections) and 2 stable photos, and added the-hangout-
+--     restaurant's unique amenity content as a new "Beyond the Menu"
+--     entity_sections entry rather than losing it.
+-- The underlying duplicate ROWS still exist (no deletes) -- this only makes
+-- sure the one row actually surfaced by search/category pages has all the
+-- real data instead of a thin stub. Full consolidation (deciding whether to
+-- deactivate the leftover duplicate rows) is still the separate, larger,
+-- not-yet-approved task (#15 on the open punch list).
+INSERT INTO entity_amenities (entity_slug, amenity, category)
+SELECT 'agave-bar-grill', a.amenity, a.category
+FROM entity_amenities a WHERE a.entity_slug='agave-mexican-restaurant'
+AND NOT EXISTS (SELECT 1 FROM entity_amenities x WHERE x.entity_slug='agave-bar-grill' AND x.amenity=a.amenity);
+
+UPDATE entity SET subtitle = 'The Best Fried Shrimp In The Entire Civilized World!'
+WHERE slug='docs-seafood-shack-and-oyster-bar' AND subtitle IS NULL;
+
+UPDATE entity SET description = description || ' Voted "Top 10" Seafood Shacks in America by Fox News.'
+WHERE slug='docs-seafood-shack-and-oyster-bar' AND description NOT ILIKE '%Top 10%';
+
+UPDATE entity SET
+  description = 'The Hangout is the ultimate beachfront destination for family-friendly fun, live entertainment, and unforgettable beachside dining. Located in Gulf Shores, Alabama, we offer direct beach access, free live music, hourly foam parties, and a vibrant party atmosphere. Our menu features Gulf Coast-inspired cuisine including famous seafood boils, the Lifeguard Burger, crispy calamari, and handcrafted cocktails. We are proudly pet-friendly and designed for guests of all ages, from kids to grandparents, locals to visitors, and four-legged friends. With prime beachfront location, open-air dining spaces, ample seating, and convenient parking for team buses, The Hangout is perfect for large groups, sports teams, family gatherings, and private events.',
+  subtitle = 'Where 59 ends and the fun begins',
+  hero_image_url = 'https://mkepugvdlktfsossumox.supabase.co/storage/v1/object/public/entity-photos/the-hangout-gulf-shores/photo_01.jpg'
+WHERE slug='the-hangout';
+
+INSERT INTO entity_photos (entity_slug, url, sort_order)
+SELECT 'the-hangout', p.url, 100 + row_number() OVER ()
+FROM entity_photos p WHERE p.entity_slug='the-hangout-gulf-shores'
+AND NOT EXISTS (SELECT 1 FROM entity_photos x WHERE x.entity_slug='the-hangout' AND x.url=p.url);
+
+INSERT INTO menu_sections (entity_slug, section_name, sort_order, is_active)
+SELECT 'the-hangout', v.section_name, v.sort_order, true FROM (VALUES
+  ('appetizers',1),('Gulf Coast Favorites',2),('entrees',3),('Burgers/Sandwiches',4),('burgers',5),('Drinks',6)
+) AS v(section_name, sort_order)
+WHERE NOT EXISTS (SELECT 1 FROM menu_sections ms WHERE ms.entity_slug='the-hangout' AND ms.section_name=v.section_name);
+
+INSERT INTO menu_items (entity_slug, section_id, item_name, description, sort_order)
+SELECT 'the-hangout', ts.id, src.item_name, src.description, src.sort_order
+FROM menu_items src
+JOIN menu_sections ss ON ss.id = src.section_id AND ss.entity_slug='the-hangout-gulf-shores'
+JOIN menu_sections ts ON ts.entity_slug='the-hangout' AND ts.section_name = ss.section_name
+WHERE src.entity_slug='the-hangout-gulf-shores'
+AND NOT EXISTS (SELECT 1 FROM menu_items mi WHERE mi.entity_slug='the-hangout' AND mi.item_name=src.item_name);
+
+INSERT INTO entity_sections (entity_slug, section_type, section_name, subtitle, sort_order, is_active)
+SELECT 'the-hangout', 'highlights', 'Beyond the Menu',
+  'Continuous family fun beyond dining: free foam parties every hour, yard games, hair braiding, temporary tattoos, gelato, ring toss, photo ops, and a fire pit. The venue also displays unique collections of antique matchbox cars, PEZ dispensers, vintage lunch boxes, and rubber duckies, plus a One Stop Fun Shop for souvenirs, beachwear, hats, and gifts.',
+  10, true
+WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='the-hangout' AND section_name='Beyond the Menu');
