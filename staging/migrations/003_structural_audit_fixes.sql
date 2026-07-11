@@ -269,3 +269,19 @@ ALTER TABLE business_availability ADD COLUMN IF NOT EXISTS visible_on_profile bo
 -- always read "Reserve a Table" instead of the already-computed
 -- reserveLabel; the Fish Species tab was missing the ref/id every other
 -- tab-nav section has, so clicking it did nothing.
+
+-- 017: User-supplied "Wharf enriched business pages" data audit (2026-07-11).
+-- Cross-checked all ~150 named businesses/pages against the existing
+-- the-wharf hub children. Verdict: this data was already substantially
+-- imported in an earlier pass -- e.g. Alabama Sweet Tea Company's upload
+-- listed exactly 16 menu items, and the DB already has exactly 16; Ginny
+-- Lane (110), Villaggio Grille (92), Tee Off (67) etc. already have menu
+-- data at or above what's in this upload. Only checked, real gap: 13
+-- Wharf children had no description. Of those, 12 only had generic
+-- placeholder boilerplate in the upload ("X is listed by The Wharf under Y.
+-- Create this as an individual platform page...") -- literally an
+-- instruction to a downstream import process, not real business copy --
+-- and were left alone rather than importing that as if it were marketing
+-- text. Only one (the-wharf-store) had an actual real summary.
+UPDATE entity SET description = 'Coastal inspired apparel and exclusive Wharf-branded merchandise.'
+WHERE slug='the-wharf-store' AND description IS NULL;
