@@ -660,3 +660,43 @@ BEGIN
   END IF;
 END;
 $$ LANGUAGE plpgsql STABLE;
+
+-- 026: User asked to double-check for real data under the-hangout-gulf-shores
+-- / the-hangout-restaurant before any deactivation, since 023's merge only
+-- checked menu_items/photos/hours/tags/reviews/sections/amenities by name --
+-- not a systematic sweep. Ran a full scan across all 116 tables in this DB
+-- that have an entity_slug column. Found two real gaps 023 missed:
+--   * entity_events: 20 real live-music events (band name, date, start
+--     time) sitting on the-hangout-restaurant, completely absent from the
+--     canonical the-hangout row. Copied over (deduped by event_name + date).
+--   * entity_tags: 18 net-new curated tags (Beach Activities, Casual
+--     Dining, Family Fun, Group Dining, Live Music, Outdoor Activities, Pet
+--     Friendly, Waterfront Dining, Bars, Beach Restaurants, Entertainment,
+--     Family Dining, Nightlife, etc.) across both duplicate rows that
+--     the-hangout didn't have at all -- it only had raw Google-type tags,
+--     no curated category tags. Copied over (excluding raw google_type/
+--     google_primary_type rows already present, deduped by tag_name).
+-- Re-scanned after the copy: everything else on the two duplicate rows is
+-- either already covered on the-hangout (entity_hours: 7 rows already of
+-- its own) or genuinely inert (entity_modules: generic feature-toggle
+-- config, enabled=true with no custom settings, not user-facing content).
+-- The only thing still not carried over is the-hangout-restaurant's 8
+-- Instagram-hosted photos -- already a known, separately-tracked issue (024,
+-- the rehost-photos endpoint) rather than something lost by this pass.
+INSERT INTO entity_events (entity_slug, entity_name, event_name, description, event_date, start_time, end_time, day_of_week, recurring, artist_id, artist_name, cover_charge, is_active, image_url, image_path, event_type)
+SELECT 'the-hangout', 'The Hangout', event_name, description, event_date, start_time, end_time, day_of_week, recurring, artist_id, artist_name, cover_charge, is_active, image_url, image_path, event_type
+FROM entity_events src
+WHERE src.entity_slug='the-hangout-restaurant'
+AND NOT EXISTS (
+  SELECT 1 FROM entity_events x
+  WHERE x.entity_slug='the-hangout' AND x.event_name=src.event_name
+    AND (x.event_date IS NOT DISTINCT FROM src.event_date)
+);
+
+INSERT INTO entity_tags (entity_slug, tag_name, tag_category)
+SELECT 'the-hangout', a.tag_name, a.tag_category
+FROM entity_tags a
+WHERE a.entity_slug IN ('the-hangout-gulf-shores','the-hangout-restaurant')
+  AND a.tag_category NOT IN ('google_type','google_primary_type')
+  AND NOT EXISTS (SELECT 1 FROM entity_tags x WHERE x.entity_slug='the-hangout' AND x.tag_name=a.tag_name)
+GROUP BY a.tag_name, a.tag_category;
