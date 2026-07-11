@@ -700,3 +700,37 @@ WHERE a.entity_slug IN ('the-hangout-gulf-shores','the-hangout-restaurant')
   AND a.tag_category NOT IN ('google_type','google_primary_type')
   AND NOT EXISTS (SELECT 1 FROM entity_tags x WHERE x.entity_slug='the-hangout' AND x.tag_name=a.tag_name)
 GROUP BY a.tag_name, a.tag_category;
+
+-- 027: Before deactivating the Agave/Doc's Seafood duplicate rows (per 026's
+-- pattern for the Hangout group), ran the same full 116-table scan against
+-- agave-mexican-restaurant and doc-s-seafood-shack-and-oyster-bar. Found two
+-- more real gaps 023 missed:
+--   * agave-mexican-restaurant had a real entity_specials row ("Happy Hour"
+--     -- "Full bar with happy hour specials and weekly deals") never copied
+--     to the canonical agave-bar-grill. Copied over.
+--   * doc-s-seafood-shack-and-oyster-bar had 2 photos already properly
+--     re-hosted on our own storage (not a third-party link) that were never
+--     copied to the canonical docs-seafood-shack-and-oyster-bar. Copied over.
+-- Also found on agave-mexican-restaurant: 2 menu_sections ("Street Tacos",
+-- "Tableside Guacamole") with zero menu_items under them -- empty shells
+-- from a partial import, nothing to lose by leaving them behind.
+-- entity_modules on both is the same inert feature-toggle config as 026.
+INSERT INTO entity_specials (entity_slug, special_name, description, discount_type, discount_value, discount_text, days, day_of_week, start_time, end_time, is_active)
+SELECT 'agave-bar-grill', special_name, description, discount_type, discount_value, discount_text, days, day_of_week, start_time, end_time, is_active
+FROM entity_specials src WHERE src.entity_slug='agave-mexican-restaurant'
+AND NOT EXISTS (SELECT 1 FROM entity_specials x WHERE x.entity_slug='agave-bar-grill' AND x.special_name=src.special_name);
+
+INSERT INTO entity_photos (entity_slug, url, sort_order)
+SELECT 'docs-seafood-shack-and-oyster-bar', p.url, 100 + row_number() OVER ()
+FROM entity_photos p WHERE p.entity_slug='doc-s-seafood-shack-and-oyster-bar'
+AND NOT EXISTS (SELECT 1 FROM entity_photos x WHERE x.entity_slug='docs-seafood-shack-and-oyster-bar' AND x.url=p.url);
+
+-- 028: With all real data confirmed migrated (023, 026, 027), deactivated
+-- the 4 duplicate rows per user approval -- is_active=false, NOT deleted,
+-- fully reversible. Verified this actually hides them everywhere, not just
+-- in the database: gcr-api-clean's GET /api/gcr/entities (every listing
+-- page), getEntityBySlug()/buildFullEntity() (individual business pages --
+-- so even a direct link to the old URL now 404s instead of showing a stale
+-- duplicate), and POST /api/gcr/search all filter .eq('is_active', true).
+UPDATE entity SET is_active = false
+WHERE slug IN ('the-hangout-gulf-shores', 'the-hangout-restaurant', 'agave-mexican-restaurant', 'doc-s-seafood-shack-and-oyster-bar');
