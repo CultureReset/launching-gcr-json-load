@@ -141,3 +141,14 @@ WHERE slug IN (
   'island-life-kayak-and-paddle-board-rentals','littleheads-kayak-rentals','surfs-up-board-kayak-rentals',
   'gulfkayakrentals','paddled-by-you-kayak-stand-up-paddle-board-rentals','coyote-beach-sports'
 );
+
+-- 009: Tradewinds (a standalone beachfront condo complex, 24568 Perdido Beach
+-- Blvd) had parent_entity_slug='zeke-s-landing-and-marina' -- a 54-child
+-- fishing-charter/marina hub it has nothing to do with. Found live while
+-- checking whether Zeke's Landing (Things To Do) was showing correct,
+-- fully-broken-down data for each of its real children (49 charter boats +
+-- 3 restaurants + 1 service). Un-linking restores Tradewinds as its own
+-- independent Staying listing instead of being buried, undiscoverable,
+-- inside an unrelated marina's directory.
+UPDATE entity SET parent_entity_slug = NULL
+WHERE slug='tradewinds' AND parent_entity_slug='zeke-s-landing-and-marina';
