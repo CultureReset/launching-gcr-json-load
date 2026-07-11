@@ -357,3 +357,79 @@ $$ LANGUAGE sql STABLE;
 -- statement itself lives in this session's local scratch file
 -- (/tmp/photo_insert.sql) since it's 204 literal rows; recorded here as the
 -- audit-trail entry for what was applied directly via Supabase execute_sql.
+
+-- 021: Coyote Beach Sports (coyote-beach-sports) gap-fill from the user's
+-- own uploaded replica of the business's real site (coyotebeachsportsal.com),
+-- 2026-07-11. The entity already had solid coverage (FAQs, 10 pricing_items,
+-- 5 sections, 5 reviews all matched the source page verbatim) -- these were
+-- the genuine, verified gaps:
+--   * entity_tags only had "Kayaking" as a category tag despite Slingshots
+--     being the business's own stated hero product across 6 rental
+--     categories -- added Slingshot/E-Bike/Beach Bike/Paddleboard & Surfboard/
+--     Beach Gear Rentals as category tags (entity_subtype stays kayak_rental;
+--     CategoryPage.jsx's filter chip is single-subtype-only, so which one
+--     category "wins" the chip is a product call, not something to force here).
+--   * pricing_items was missing "Trikes & Tandem Bikes -- $25/hour", listed
+--     in the source page's rate table alongside the other 6 rates already in the DB.
+--   * entity.known_for / price_from / price_unit / deposit_amount /
+--     deposit_type / waiver_required / waiver_text / cancellation_policy /
+--     refund_policy were all null despite the source page stating them
+--     explicitly ($300 Slingshot deposit + renter's insurance, no-cash-refund
+--     policy, weather-cancellation refund/credit policy).
+--   * entity_photos had only 3 (already re-hosted on Supabase storage);
+--     added 17 more real photo URLs from the business's own site
+--     (coyotebeachsportsal.com/site-photos/...), pass-through hosted like the
+--     condo CDN photos in 020, sort_order 101-117.
+--   * No section captured the founding story ("began in 2013... grew from
+--     scooter and moped rentals...") or its quote -- added as a new
+--     entity_sections row (section_type='highlights', "Our Story").
+INSERT INTO entity_tags (entity_slug, tag_name, tag_category)
+SELECT 'coyote-beach-sports', v, 'category' FROM (VALUES
+  ('Slingshot Rentals'), ('E-Bike Rentals'), ('Beach Bike Rentals'), ('Paddleboard & Surfboard Rentals'), ('Beach Gear Rentals')
+) AS v(v)
+WHERE NOT EXISTS (SELECT 1 FROM entity_tags t WHERE t.entity_slug='coyote-beach-sports' AND t.tag_name=v.v);
+
+INSERT INTO pricing_items (entity_slug, entity_id, item_name, tier_name, description, price, price_from, sort_order)
+SELECT 'coyote-beach-sports', id, 'Trikes & Tandem Bikes', 'Trikes & Tandem Bikes', 'Trikes and tandem bikes for riding together.', 25.00, 25.00, 11
+FROM entity WHERE slug='coyote-beach-sports'
+AND NOT EXISTS (SELECT 1 FROM pricing_items WHERE entity_slug='coyote-beach-sports' AND item_name='Trikes & Tandem Bikes');
+
+UPDATE entity SET
+  known_for = ARRAY['Polaris Slingshot Rentals'],
+  price_from = 15,
+  price_unit = 'per rental',
+  deposit_amount = 300,
+  deposit_type = 'fixed',
+  waiver_required = true,
+  waiver_text = 'Slingshot rentals require a $300 deposit and renter''s insurance.',
+  cancellation_policy = 'No cash refunds; cancellations receive a time credit.',
+  refund_policy = 'Weather cancellations receive a full refund or time credit, minus a processing fee.'
+WHERE slug='coyote-beach-sports';
+
+INSERT INTO entity_photos (entity_slug, url, sort_order)
+SELECT 'coyote-beach-sports', v, 100 + row_number() OVER () FROM (VALUES
+  ('https://www.coyotebeachsportsal.com/site-photos/endshop.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/surfboard-sign.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshots-lineup.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/ebikes-row.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/beach-bikes.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/kayak.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/surf.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/gear.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/hero-slingshot.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshot-orange.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshot-blue.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshot-neon.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/coyote-art.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshot-close.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/ebikes-fleet.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/slingshot-front.jpg'),
+  ('https://www.coyotebeachsportsal.com/site-photos/fleet-overview.jpg')
+) AS v(v)
+WHERE NOT EXISTS (SELECT 1 FROM entity_photos p WHERE p.entity_slug='coyote-beach-sports' AND p.url=v.v);
+
+INSERT INTO entity_sections (entity_slug, section_type, section_name, subtitle, sort_order, is_active)
+SELECT 'coyote-beach-sports', 'highlights', 'Our Story',
+  'Born on Dauphin Island. Built for the Gulf Coast. Coyote Beach Sports began in 2013 and grew from scooter and moped rentals into a Gulf Shores outfitter for Slingshots, e-bikes, beach bikes, paddleboards, surfboards, kayaks, and beach gear. "Chase the sun, cruise the coast, and make the beach day more memorable."',
+  5, true
+WHERE NOT EXISTS (SELECT 1 FROM entity_sections WHERE entity_slug='coyote-beach-sports' AND section_name='Our Story');
